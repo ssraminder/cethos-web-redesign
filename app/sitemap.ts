@@ -22,6 +22,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'business',
     'software',
     'multimedia',
+    'canadian',
+    'interpretation',
   ].map((slug) => ({
     url: `${baseUrl}/services/${slug}`,
     lastModified: currentDate,
