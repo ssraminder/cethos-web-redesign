@@ -83,7 +83,7 @@ export const servicesData: Record<string, ServiceData> = {
     ],
     industries: ['Pharmaceutical', 'Biotechnology', 'Medical Devices', 'CROs', 'Healthcare'],
     benefits: [
-      'ISO 17100 and ISO 9001 certified processes',
+      'ISO 17100 and ISO 9001 compliant processes',
       'Medical professionals as translators',
       'Regulatory expertise across global markets',
       'Terminology management and style guides',

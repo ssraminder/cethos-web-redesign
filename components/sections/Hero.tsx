@@ -183,7 +183,7 @@ export function Hero() {
               className="flex items-center gap-2 text-sm text-[#717182]"
             >
               <Shield className="w-4 h-4 text-[#0891B2]" strokeWidth={1.5} />
-              <span>ISO 17100 & ISO 9001 Certified • Trusted by 500+ Global Enterprises</span>
+              <span>ISO 17100 & ISO 9001 Compliant • Trusted by 500+ Global Enterprises</span>
             </motion.div>
           </div>
 

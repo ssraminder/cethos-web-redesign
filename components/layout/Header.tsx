@@ -70,12 +70,13 @@ export function Header() {
       >
         <div className="max-w-[1440px] mx-auto px-8">
           <nav className="flex items-center justify-between h-20">
-            {/* Logo - Figma matched */}
-            <Link href="/" className="flex items-center gap-1">
-              <span className="text-2xl font-bold text-[#0C2340] tracking-tight">
-                CETHOS
-              </span>
-              <div className="w-1.5 h-1.5 bg-[#0891B2] rounded-full"></div>
+            {/* Logo */}
+            <Link href="/" className="flex items-center">
+              <img
+                src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/light_bg_logo_cethos.svg"
+                alt="Cethos Solutions Inc."
+                className="h-10"
+              />
             </Link>
 
             {/* Desktop Navigation */}

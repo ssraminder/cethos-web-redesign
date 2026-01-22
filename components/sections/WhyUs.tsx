@@ -7,10 +7,10 @@ import { ShieldCheckIcon, ClockIcon, UsersIcon, CheckIcon } from '@/components/i
 const features = [
   {
     title: 'Quality Assurance',
-    description: 'ISO 17100 and ISO 9001 certified processes ensure every translation meets the highest standards. Our multi-step QA process includes translation, editing, and proofreading.',
+    description: 'ISO 17100 and ISO 9001 compliant processes ensure every translation meets the highest standards. Our multi-step QA process includes translation, editing, and proofreading.',
     icon: ShieldCheckIcon,
     highlights: [
-      'ISO 17100 & ISO 9001 Certified',
+      'ISO 17100 & ISO 9001 Compliant',
       'Native-speaking linguists only',
       'Subject matter experts',
       'Multi-step review process',

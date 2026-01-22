@@ -1,5 +1,73 @@
 'use client'
 
+export function OrganizationJsonLd() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Cethos Solutions Inc.',
+    url: 'https://cethos.com',
+    logo: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/light_bg_logo_cethos.svg',
+    description: 'Professional translation services in 200+ languages. Life sciences, certified, business, software localization, and multimedia translation with precision and speed.',
+    foundingDate: '2015',
+    numberOfEmployees: {
+      '@type': 'QuantitativeValue',
+      value: 18,
+    },
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '421 7 Avenue SW, Floor 30',
+      addressLocality: 'Calgary',
+      addressRegion: 'AB',
+      postalCode: 'T2P 4K9',
+      addressCountry: 'CA',
+    },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+1-587-600-0786',
+      contactType: 'customer service',
+      email: 'info@cethos.com',
+      availableLanguage: ['English', 'French', 'Spanish', 'German', 'Chinese', 'Japanese', 'Arabic'],
+    },
+    sameAs: [
+      'https://linkedin.com/company/cethos',
+      'https://twitter.com/cethos',
+    ],
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  )
+}
+
+export function WebSiteJsonLd() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Cethos',
+    url: 'https://cethos.com',
+    description: 'Professional translation services in 200+ languages with precision and speed.',
+    publisher: {
+      '@type': 'Organization',
+      name: 'Cethos Solutions Inc.',
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://cethos.com/search?q={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  )
+}
+
 interface FAQItem {
   question: string
   answer: string
@@ -46,7 +114,7 @@ export function ServiceJsonLd({ name, description, url }: ServiceJsonLdProps) {
     url,
     provider: {
       '@type': 'Organization',
-      name: 'Cethos Translation Services',
+      name: 'Cethos Solutions Inc.',
       url: 'https://cethos.com',
     },
   }
@@ -80,7 +148,7 @@ export function ArticleJsonLd({ title, description, date, author, url }: Article
     },
     publisher: {
       '@type': 'Organization',
-      name: 'Cethos Translation Services',
+      name: 'Cethos Solutions Inc.',
       url: 'https://cethos.com',
     },
     mainEntityOfPage: {

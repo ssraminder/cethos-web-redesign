@@ -5,7 +5,7 @@ import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Pharmaceutical Translation Services | Clinical & Regulatory',
-  description: 'FDA, EMA & PMDA compliant pharmaceutical translation. Clinical trials, IFUs, SPCs, PILs, regulatory submissions. ISO 17100 certified. 50+ pharma clients worldwide.',
+  description: 'FDA, EMA & PMDA compliant pharmaceutical translation. Clinical trials, IFUs, SPCs, PILs, regulatory submissions. ISO 17100 Compliant. 50+ pharma clients worldwide.',
   keywords: ['pharmaceutical translation', 'clinical trial translation', 'FDA translation', 'regulatory translation', 'medical translation', 'pharma localization'],
   alternates: {
     canonical: 'https://cethos.com/industries/pharmaceutical',
@@ -59,7 +59,7 @@ const faqs = [
   },
   {
     question: 'Are your translations FDA and EMA compliant?',
-    answer: 'Yes, all our pharmaceutical translations comply with FDA, EMA, PMDA, NMPA, and other regulatory requirements. We follow ICH guidelines and maintain ISO 17100 and ISO 9001 certifications. Our linguists are trained in regulatory requirements specific to each market.',
+    answer: 'Yes, all our pharmaceutical translations comply with FDA, EMA, PMDA, NMPA, and other regulatory requirements. We follow ICH guidelines and are ISO 17100 and ISO 9001 compliant. Our linguists are trained in regulatory requirements specific to each market.',
   },
   {
     question: 'Do you have experience with clinical trial translations?',

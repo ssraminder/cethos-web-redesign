@@ -10,14 +10,14 @@ const stats = [
     label: 'Languages',
   },
   {
-    value: 10000,
+    value: 5000,
     suffix: '+',
-    label: 'Projects Completed',
+    label: 'Specialists',
   },
   {
     value: 99.7,
     suffix: '%',
-    label: 'Accuracy Rate',
+    label: 'Accuracy',
   },
   {
     value: 24,
