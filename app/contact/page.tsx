@@ -78,18 +78,15 @@ export default function ContactPage() {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden bg-hero-mesh">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-teal-500/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-teal-600/15 rounded-full blur-[80px]" />
-
-        <Container className="relative z-10">
+      {/* Hero Section - Light background with dark text */}
+      <section className="pt-20 bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
+        <div className="max-w-[1200px] mx-auto px-8 py-24">
           <div className="max-w-3xl mx-auto text-center">
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
+              className="text-[40px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
             >
               Contact Us
             </motion.h1>
@@ -97,16 +94,16 @@ export default function ContactPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-xl text-white/80"
+              className="text-xl text-[#4B5563] leading-relaxed"
             >
               Have a question or ready to start your project? We&apos;re here to help.
             </motion.p>
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* Contact Info Cards */}
-      <section className="py-12 -mt-16 relative z-20">
+      <section className="py-12 bg-white">
         <Container>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {contactInfo.map((info, index) => (

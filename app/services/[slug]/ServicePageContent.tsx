@@ -2,24 +2,25 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Container, Button, Card, SectionHeading } from '@/components/ui'
 import {
-  CheckIcon,
-  MoleculeIcon,
-  DocumentCheckIcon,
-  BuildingIcon,
-  CodeIcon,
-  PlayIcon,
-} from '@/components/icons'
+  FlaskConical,
+  FileCheck,
+  Building2,
+  Code2,
+  Play,
+  Check,
+  ArrowRight,
+} from 'lucide-react'
 import { CTA } from '@/components/sections'
+import type { LucideIcon } from 'lucide-react'
 import type { ServiceData, IconName } from '@/lib/services-data'
 
-const iconMap: Record<IconName, React.ComponentType<{ size?: number; className?: string }>> = {
-  molecule: MoleculeIcon,
-  'document-check': DocumentCheckIcon,
-  building: BuildingIcon,
-  code: CodeIcon,
-  play: PlayIcon,
+const iconMap: Record<IconName, LucideIcon> = {
+  molecule: FlaskConical,
+  'document-check': FileCheck,
+  building: Building2,
+  code: Code2,
+  play: Play,
 }
 
 interface Props {
@@ -31,26 +32,22 @@ export function ServicePageContent({ service }: Props) {
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden bg-hero-mesh">
-        {/* Background decorations */}
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-teal-500/20 rounded-full blur-[100px]" />
-        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-teal-600/15 rounded-full blur-[80px]" />
-
-        <Container className="relative z-10">
-          <div className="max-w-4xl">
+      {/* Hero Section - Light background with dark text */}
+      <section className="pt-20 bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
+        <div className="max-w-[1200px] mx-auto px-8 py-24">
+          <div className="max-w-[800px]">
             {/* Breadcrumb */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex items-center gap-2 text-white/60 text-sm mb-6"
+              className="flex items-center gap-2 text-sm text-[#717182] mb-6"
             >
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
+              <Link href="/" className="hover:text-[#0891B2] transition-colors">Home</Link>
               <span>/</span>
-              <Link href="/services" className="hover:text-white transition-colors">Services</Link>
+              <Link href="/services" className="hover:text-[#0891B2] transition-colors">Services</Link>
               <span>/</span>
-              <span className="text-white">{service.shortTitle}</span>
+              <span className="text-[#0C2340]">{service.shortTitle}</span>
             </motion.div>
 
             {/* Icon */}
@@ -58,57 +55,67 @@ export function ServicePageContent({ service }: Props) {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 text-teal-400 mb-8"
+              className="w-16 h-16 mb-6"
             >
-              <Icon size={40} />
+              <Icon className="w-16 h-16 text-[#0891B2]" strokeWidth={1.5} />
             </motion.div>
 
-            {/* Title */}
+            {/* Title - DARK TEXT */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
+              className="text-[40px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
             >
               {service.title}
             </motion.h1>
 
-            {/* Description */}
+            {/* Description - DARK GRAY TEXT */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-xl text-white/80 mb-8 max-w-2xl"
+              className="text-xl text-[#4B5563] leading-relaxed mb-8 max-w-[600px]"
             >
               {service.longDescription}
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* CTA Button */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               className="flex flex-wrap gap-4"
             >
-              <Button href="/get-quote" size="lg" showArrow>
+              <Link
+                href="/get-quote"
+                className="px-6 py-4 bg-[#0891B2] text-white rounded-lg hover:bg-[#06B6D4] transition-colors text-base font-semibold flex items-center gap-2"
+              >
                 Get a Quote
-              </Button>
-              <Button href="/contact" variant="outline" size="lg">
+                <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
+              </Link>
+              <Link
+                href="/contact"
+                className="px-6 py-4 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg hover:bg-[#F8FAFC] transition-colors text-base font-semibold"
+              >
                 Contact Us
-              </Button>
+              </Link>
             </motion.div>
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* Features Section */}
-      <section className="section-padding">
-        <Container>
-          <SectionHeading
-            title="What We Offer"
-            subtitle="Comprehensive solutions tailored to your specific needs and industry requirements."
-            className="mb-16"
-          />
+      <section className="py-24 bg-white">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-[32px] md:text-[40px] font-bold text-[#0C2340] mb-4">
+              What We Offer
+            </h2>
+            <p className="text-xl text-[#4B5563] max-w-2xl mx-auto">
+              Comprehensive solutions tailored to your specific needs and industry requirements.
+            </p>
+          </div>
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -125,24 +132,27 @@ export function ServicePageContent({ service }: Props) {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card hover className="h-full">
-                  <h3 className="text-lg font-semibold text-navy mb-3">{feature.title}</h3>
-                  <p className="text-slate-600">{feature.description}</p>
-                </Card>
+                <div className="bg-white rounded-lg p-8 border border-[#E5E7EB] shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 h-full">
+                  <h3 className="text-lg font-semibold text-[#0C2340] mb-3">{feature.title}</h3>
+                  <p className="text-[#4B5563]">{feature.description}</p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
-        </Container>
+        </div>
       </section>
 
       {/* Process Section */}
-      <section className="section-padding bg-slate-50">
-        <Container>
-          <SectionHeading
-            title="Our Process"
-            subtitle="A proven methodology that ensures quality, accuracy, and on-time delivery."
-            className="mb-16"
-          />
+      <section className="py-24 bg-[#F8FAFC]">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-[32px] md:text-[40px] font-bold text-[#0C2340] mb-4">
+              Our Process
+            </h2>
+            <p className="text-xl text-[#4B5563] max-w-2xl mx-auto">
+              A proven methodology that ensures quality, accuracy, and on-time delivery.
+            </p>
+          </div>
 
           <div className="max-w-4xl mx-auto">
             {service.process.map((step, index) => (
@@ -156,28 +166,28 @@ export function ServicePageContent({ service }: Props) {
               >
                 {/* Timeline line */}
                 {index < service.process.length - 1 && (
-                  <div className="absolute left-6 top-14 bottom-0 w-px bg-teal-200" />
+                  <div className="absolute left-6 top-14 bottom-0 w-px bg-[#0891B2]/30" />
                 )}
 
                 {/* Step number */}
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-lg">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#0891B2] text-white flex items-center justify-center font-bold text-lg">
                   {step.step}
                 </div>
 
                 {/* Content */}
                 <div className="flex-grow pt-2">
-                  <h3 className="text-xl font-semibold text-navy mb-2">{step.title}</h3>
-                  <p className="text-slate-600">{step.description}</p>
+                  <h3 className="text-xl font-semibold text-[#0C2340] mb-2">{step.title}</h3>
+                  <p className="text-[#4B5563]">{step.description}</p>
                 </div>
               </motion.div>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="section-padding">
-        <Container>
+      <section className="py-24 bg-white">
+        <div className="max-w-[1200px] mx-auto px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
@@ -185,15 +195,19 @@ export function ServicePageContent({ service }: Props) {
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
-              <h2 className="text-heading-xl md:text-display text-navy mb-6">
+              <h2 className="text-[32px] md:text-[40px] font-bold text-[#0C2340] mb-6">
                 Why Choose Us for {service.shortTitle}
               </h2>
-              <p className="text-lg text-slate-600 mb-8">
+              <p className="text-lg text-[#4B5563] mb-8">
                 We combine industry expertise, advanced technology, and rigorous quality processes to deliver exceptional results for your {service.shortTitle.toLowerCase()} translation needs.
               </p>
-              <Button href="/get-quote" showArrow>
+              <Link
+                href="/get-quote"
+                className="px-6 py-4 bg-[#0891B2] text-white rounded-lg hover:bg-[#06B6D4] transition-colors text-base font-semibold inline-flex items-center gap-2"
+              >
                 Start Your Project
-              </Button>
+                <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
+              </Link>
             </motion.div>
 
             <motion.div
@@ -202,7 +216,7 @@ export function ServicePageContent({ service }: Props) {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <Card variant="outline" padding="lg">
+              <div className="bg-white rounded-lg p-8 border border-[#E5E7EB] shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
                 <ul className="space-y-4">
                   {service.benefits.map((benefit, index) => (
                     <motion.li
@@ -213,38 +227,38 @@ export function ServicePageContent({ service }: Props) {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       className="flex items-start gap-3"
                     >
-                      <div className="w-6 h-6 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <CheckIcon size={14} className="text-teal-600" />
+                      <div className="w-6 h-6 rounded-full bg-[#E0F2FE] flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-4 h-4 text-[#0891B2]" strokeWidth={2} />
                       </div>
-                      <span className="text-slate-700">{benefit}</span>
+                      <span className="text-[#4B5563]">{benefit}</span>
                     </motion.li>
                   ))}
                 </ul>
-              </Card>
+              </div>
             </motion.div>
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* Industries Section */}
-      <section className="py-16 bg-slate-50">
-        <Container>
+      <section className="py-16 bg-[#F8FAFC]">
+        <div className="max-w-[1200px] mx-auto px-8">
           <div className="text-center mb-10">
-            <h3 className="text-xl font-semibold text-navy mb-2">Industries We Serve</h3>
-            <p className="text-slate-600">Specialized expertise for your sector</p>
+            <h3 className="text-xl font-semibold text-[#0C2340] mb-2">Industries We Serve</h3>
+            <p className="text-[#4B5563]">Specialized expertise for your sector</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-3">
             {service.industries.map((industry) => (
               <span
                 key={industry}
-                className="px-4 py-2 bg-white rounded-full text-navy font-medium border border-slate-200"
+                className="px-4 py-2 bg-white rounded-full text-[#0C2340] font-medium border border-[#E5E7EB]"
               >
                 {industry}
               </span>
             ))}
           </div>
-        </Container>
+        </div>
       </section>
 
       {/* CTA Section */}
