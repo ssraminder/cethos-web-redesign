@@ -19,7 +19,21 @@ const navigation = [
       { name: 'Multimedia Translation', href: '/services/multimedia' },
     ],
   },
-  { name: 'Industries', href: '/industries' },
+  {
+    name: 'Industries',
+    href: '/industries',
+    children: [
+      { name: 'Pharmaceutical', href: '/industries/pharmaceutical' },
+      { name: 'Legal', href: '/industries/legal' },
+      { name: 'Technology', href: '/industries/technology' },
+      { name: 'Finance', href: '/industries/finance' },
+      { name: 'Gaming', href: '/industries/gaming' },
+      { name: 'E-commerce', href: '/industries/ecommerce' },
+      { name: 'Manufacturing', href: '/industries/manufacturing' },
+      { name: 'Healthcare', href: '/industries/healthcare' },
+    ],
+  },
+  { name: 'Blog', href: '/blog' },
   { name: 'About', href: '/about' },
   { name: 'Contact', href: '/contact' },
 ]

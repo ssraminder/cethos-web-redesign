@@ -4,8 +4,8 @@ import { Mail, Phone, MapPin, Linkedin, Twitter } from 'lucide-react'
 const footerLinks = {
   company: [
     { name: 'About Us', href: '/about' },
+    { name: 'Blog', href: '/blog' },
     { name: 'Careers', href: '/careers' },
-    { name: 'News', href: '/news' },
     { name: 'Contact', href: '/contact' },
   ],
   services: [
@@ -20,7 +20,10 @@ const footerLinks = {
     { name: 'Legal', href: '/industries/legal' },
     { name: 'Technology', href: '/industries/technology' },
     { name: 'Finance', href: '/industries/finance' },
+    { name: 'Gaming', href: '/industries/gaming' },
     { name: 'E-commerce', href: '/industries/ecommerce' },
+    { name: 'Manufacturing', href: '/industries/manufacturing' },
+    { name: 'Healthcare', href: '/industries/healthcare' },
   ],
   legal: [
     { name: 'Privacy Policy', href: '/privacy' },
