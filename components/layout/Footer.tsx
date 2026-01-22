@@ -42,11 +42,12 @@ export function Footer() {
             {/* Brand */}
             <div className="lg:col-span-2">
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-1 mb-6">
-                <span className="text-2xl font-bold text-white tracking-tight">
-                  CETHOS
-                </span>
-                <div className="w-1.5 h-1.5 bg-[#0891B2] rounded-full"></div>
+              <Link href="/" className="flex items-center mb-6">
+                <img
+                  src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/dark_bg_logo_cethos.svg"
+                  alt="Cethos Solutions Inc."
+                  className="h-10"
+                />
               </Link>
 
               <p className="text-white/70 mb-6 max-w-sm">
@@ -58,13 +59,13 @@ export function Footer() {
                   <Mail className="w-5 h-5" strokeWidth={1.5} />
                   <span>info@cethos.com</span>
                 </a>
-                <a href="tel:+1-800-555-0199" className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
+                <a href="tel:+1-587-600-0786" className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
                   <Phone className="w-5 h-5" strokeWidth={1.5} />
-                  <span>+1 (800) 555-0199</span>
+                  <span>587-600-0786</span>
                 </a>
                 <div className="flex items-center gap-3 text-white/70">
                   <MapPin className="w-5 h-5" strokeWidth={1.5} />
-                  <span>New York, NY • London, UK • Tokyo, JP</span>
+                  <span>Calgary, Canada (HQ) • Dubai, UAE • Patiala, India</span>
                 </div>
               </div>
             </div>
@@ -119,7 +120,7 @@ export function Footer() {
         <div className="max-w-[1200px] mx-auto px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-white/60 text-sm">
-              &copy; {new Date().getFullYear()} Cethos Translation Services. All rights reserved.
+              &copy; {new Date().getFullYear()} Cethos Solutions Inc. All rights reserved.
             </p>
 
             <div className="flex items-center gap-6">

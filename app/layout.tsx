@@ -1,6 +1,12 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Header, Footer } from '@/components/layout'
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
 import './globals.css'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export const metadata: Metadata = {
   title: {
@@ -9,9 +15,15 @@ export const metadata: Metadata = {
   },
   description: 'Expert translation services in 200+ languages. Life sciences, certified, business, software localization, and multimedia translation with precision and speed.',
   keywords: ['translation services', 'localization', 'language services', 'certified translation', 'life sciences translation', 'software localization'],
-  authors: [{ name: 'Cethos' }],
-  creator: 'Cethos Translation Services',
+  authors: [{ name: 'Cethos Solutions Inc.' }],
+  creator: 'Cethos Solutions Inc.',
   metadataBase: new URL('https://cethos.com'),
+  icons: {
+    icon: [
+      { url: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/favicon_cethos.svg', type: 'image/svg+xml' },
+    ],
+    apple: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/favicon_cethos.svg',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -24,7 +36,7 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Cethos Translation Services',
+        alt: 'Cethos Solutions Inc.',
       },
     ],
   },
@@ -47,6 +59,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <OrganizationJsonLd />
+        <WebSiteJsonLd />
+      </head>
       <body className="font-sans antialiased">
         <Header />
         <main>{children}</main>
