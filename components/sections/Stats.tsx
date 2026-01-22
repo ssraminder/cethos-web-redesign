@@ -2,33 +2,27 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Container } from '@/components/ui'
-import { LanguagesIcon, ChartIcon, AwardIcon, HeadphonesIcon } from '@/components/icons'
 
 const stats = [
   {
     value: 200,
     suffix: '+',
     label: 'Languages',
-    icon: LanguagesIcon,
   },
   {
     value: 10000,
     suffix: '+',
     label: 'Projects Completed',
-    icon: ChartIcon,
   },
   {
     value: 99.7,
     suffix: '%',
     label: 'Accuracy Rate',
-    icon: AwardIcon,
   },
   {
     value: 24,
     suffix: '/7',
     label: 'Support',
-    icon: HeadphonesIcon,
   },
 ]
 
@@ -71,21 +65,14 @@ function CountUp({ value, suffix, duration = 2 }: { value: number; suffix: strin
 
 export function Stats() {
   return (
-    <section className="relative py-20 overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy-600 to-navy" />
-
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-[100px]" />
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-teal-600/10 rounded-full blur-[80px]" />
-
-      <Container className="relative z-10">
+    <section className="bg-[#0C2340] py-16">
+      <div className="max-w-[1200px] mx-auto px-8">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12"
+          className="grid grid-cols-2 lg:grid-cols-4"
         >
           {stats.map((stat, index) => (
             <motion.div
@@ -94,19 +81,18 @@ export function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="text-center"
+              className={`text-center py-6 px-4 ${
+                index < stats.length - 1 ? 'lg:border-r lg:border-white/20' : ''
+              }`}
             >
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white/10 text-teal-400 mb-4">
-                <stat.icon size={28} />
-              </div>
               <div className="text-4xl md:text-5xl font-bold text-white mb-2">
                 <CountUp value={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="text-white/70">{stat.label}</div>
+              <div className="text-sm text-white/80">{stat.label}</div>
             </motion.div>
           ))}
         </motion.div>
-      </Container>
+      </div>
     </section>
   )
 }
