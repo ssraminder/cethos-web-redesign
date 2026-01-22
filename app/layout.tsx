@@ -1,23 +1,28 @@
 import type { Metadata, Viewport } from 'next'
 import { Header, Footer } from '@/components/layout'
-import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
+import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
 import './globals.css'
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#0C2340',
 }
 
 export const metadata: Metadata = {
   title: {
-    default: 'Cethos | Professional Translation Services',
+    default: 'Cethos Solutions Inc. | Professional Translation Services',
     template: '%s | Cethos',
   },
-  description: 'Expert translation services in 200+ languages. Life sciences, certified, business, software localization, and multimedia translation with precision and speed.',
-  keywords: ['translation services', 'localization', 'language services', 'certified translation', 'life sciences translation', 'software localization'],
+  description: 'Expert translation services in 200+ languages. Specializing in life sciences, linguistic validation, clinical trials, and certified translations. ISO compliant, Calgary-based with global reach.',
+  keywords: ['translation services', 'localization', 'language services', 'certified translation', 'life sciences translation', 'linguistic validation', 'clinical trial translation', 'software localization'],
   authors: [{ name: 'Cethos Solutions Inc.' }],
   creator: 'Cethos Solutions Inc.',
   metadataBase: new URL('https://cethos.com'),
+  alternates: {
+    canonical: 'https://cethos.com',
+  },
   icons: {
     icon: [
       { url: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_favicon_cethosAsset%202.svg', type: 'image/svg+xml' },
@@ -28,12 +33,12 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://cethos.com',
-    siteName: 'Cethos',
-    title: 'Cethos | Professional Translation Services',
-    description: 'Expert translation services in 200+ languages with precision and speed.',
+    siteName: 'Cethos Solutions Inc.',
+    title: 'Cethos Solutions Inc. | Professional Translation Services',
+    description: 'Expert translation services in 200+ languages. Life sciences, linguistic validation, clinical trials, certified translations.',
     images: [
       {
-        url: '/og-image.png',
+        url: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg',
         width: 1200,
         height: 630,
         alt: 'Cethos Solutions Inc.',
@@ -42,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Cethos | Professional Translation Services',
-    description: 'Expert translation services in 200+ languages with precision and speed.',
-    images: ['/og-image.png'],
+    title: 'Cethos Solutions Inc. | Professional Translation Services',
+    description: 'Expert translation services in 200+ languages. Life sciences, linguistic validation, clinical trials, certified translations.',
+    images: ['https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg'],
   },
   robots: {
     index: true,
@@ -62,6 +67,7 @@ export default function RootLayout({
       <head>
         <OrganizationJsonLd />
         <WebSiteJsonLd />
+        <LocalBusinessJsonLd />
       </head>
       <body className="font-sans antialiased">
         <Header />

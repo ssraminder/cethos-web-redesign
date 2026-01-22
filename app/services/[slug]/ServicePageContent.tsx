@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { CTA } from '@/components/sections'
+import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import type { LucideIcon } from 'lucide-react'
 import type { ServiceData, IconName } from '@/lib/services-data'
 
@@ -30,8 +31,15 @@ interface Props {
 export function ServicePageContent({ service }: Props) {
   const Icon = iconMap[service.iconName]
 
+  const breadcrumbItems = [
+    { name: 'Services', url: '/services' },
+    { name: service.shortTitle, url: `/services/${service.slug}` },
+  ]
+
   return (
     <>
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+
       {/* Hero Section - Light background with dark text */}
       <section className="pt-20 bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
         <div className="max-w-[1200px] mx-auto px-8 py-24">
@@ -41,13 +49,9 @@ export function ServicePageContent({ service }: Props) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex items-center gap-2 text-sm text-[#717182] mb-6"
+              className="mb-6"
             >
-              <Link href="/" className="hover:text-[#0891B2] transition-colors">Home</Link>
-              <span>/</span>
-              <Link href="/services" className="hover:text-[#0891B2] transition-colors">Services</Link>
-              <span>/</span>
-              <span className="text-[#0C2340]">{service.shortTitle}</span>
+              <Breadcrumbs items={breadcrumbItems} />
             </motion.div>
 
             {/* Icon */}

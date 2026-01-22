@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { FileText, Shield, Clock, Users, CheckCircle, ArrowRight } from 'lucide-react'
 import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
+import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 export const metadata: Metadata = {
   title: 'Pharmaceutical Translation Services | Clinical & Regulatory',
@@ -75,6 +76,11 @@ const faqs = [
   },
 ]
 
+const breadcrumbItems = [
+  { name: 'Industries', url: '/industries' },
+  { name: 'Pharmaceutical', url: '/industries/pharmaceutical' },
+]
+
 export default function PharmaceuticalPage() {
   return (
     <>
@@ -84,10 +90,12 @@ export default function PharmaceuticalPage() {
         url="https://cethos.com/industries/pharmaceutical"
       />
       <FAQJsonLd faqs={faqs} />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
 
       {/* Hero Section */}
       <section className="pt-20 bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
         <div className="max-w-[1200px] mx-auto px-8 py-24">
+          <Breadcrumbs items={breadcrumbItems} className="mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="text-sm font-semibold text-[#0891B2] uppercase tracking-widest mb-4">
