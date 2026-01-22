@@ -20,9 +20,9 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://cethos.com'),
   icons: {
     icon: [
-      { url: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/favicon_cethos.svg', type: 'image/svg+xml' },
+      { url: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_favicon_cethosAsset%202.svg', type: 'image/svg+xml' },
     ],
-    apple: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/favicon_cethos.svg',
+    apple: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_favicon_cethosAsset%202.svg',
   },
   openGraph: {
     type: 'website',

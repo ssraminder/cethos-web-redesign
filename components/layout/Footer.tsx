@@ -4,25 +4,22 @@ import { Mail, Phone, MapPin, Linkedin, Twitter } from 'lucide-react'
 const footerLinks = {
   company: [
     { name: 'About Us', href: '/about' },
-    { name: 'Blog', href: '/blog' },
     { name: 'Careers', href: '/careers' },
+    { name: 'News', href: '/blog' },
     { name: 'Contact', href: '/contact' },
   ],
   services: [
-    { name: 'Life Sciences Translation', href: '/services/lifesciences' },
+    { name: 'Life Sciences', href: '/services/lifesciences' },
     { name: 'Certified Translation', href: '/services/certified' },
-    { name: 'Business Translation', href: '/services/business' },
-    { name: 'Software Localization', href: '/services/software' },
-    { name: 'Multimedia Translation', href: '/services/multimedia' },
+    { name: 'Business', href: '/services/business' },
+    { name: 'Software', href: '/services/software' },
+    { name: 'Multimedia', href: '/services/multimedia' },
   ],
   industries: [
     { name: 'Pharmaceutical', href: '/industries/pharmaceutical' },
     { name: 'Legal', href: '/industries/legal' },
     { name: 'Technology', href: '/industries/technology' },
     { name: 'Finance', href: '/industries/finance' },
-    { name: 'Gaming', href: '/industries/gaming' },
-    { name: 'E-commerce', href: '/industries/ecommerce' },
-    { name: 'Manufacturing', href: '/industries/manufacturing' },
     { name: 'Healthcare', href: '/industries/healthcare' },
   ],
   legal: [
@@ -44,7 +41,7 @@ export function Footer() {
               {/* Logo */}
               <Link href="/" className="flex items-center mb-6">
                 <img
-                  src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/dark_bg_logo_cethos.svg"
+                  src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_dark_bg_cethosAsset%202.svg"
                   alt="Cethos Solutions Inc."
                   className="h-10"
                 />
@@ -120,7 +117,7 @@ export function Footer() {
         <div className="max-w-[1200px] mx-auto px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-white/60 text-sm">
-              &copy; {new Date().getFullYear()} Cethos Solutions Inc. All rights reserved.
+              &copy; 2026 Cethos Solutions Inc. All rights reserved.
             </p>
 
             <div className="flex items-center gap-6">
