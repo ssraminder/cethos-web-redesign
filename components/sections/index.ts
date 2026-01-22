@@ -1,0 +1,7 @@
+export { Hero } from './Hero'
+export { Services } from './Services'
+export { Stats } from './Stats'
+export { Industries } from './Industries'
+export { WhyUs } from './WhyUs'
+export { ClientLogos } from './ClientLogos'
+export { CTA } from './CTA'

@@ -1,1 +1,0 @@
-# cethos-web-redesign
