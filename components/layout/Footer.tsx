@@ -41,7 +41,7 @@ export function Footer() {
               {/* Logo */}
               <Link href="/" className="flex items-center mb-6">
                 <img
-                  src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/dark_bg_logo_cethos.svg"
+                  src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_dark_bg_cethosAsset%202.svg"
                   alt="Cethos Solutions Inc."
                   className="h-10"
                 />

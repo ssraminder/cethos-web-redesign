@@ -6,7 +6,7 @@ export function OrganizationJsonLd() {
     '@type': 'Organization',
     name: 'Cethos Solutions Inc.',
     url: 'https://cethos.com',
-    logo: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/light_bg_logo_cethos.svg',
+    logo: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg',
     description: 'Professional translation services in 200+ languages. Life sciences, certified, business, software localization, and multimedia translation with precision and speed.',
     foundingDate: '2015',
     numberOfEmployees: {

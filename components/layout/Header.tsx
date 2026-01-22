@@ -73,7 +73,7 @@ export function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center">
               <img
-                src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/light_bg_logo_cethos.svg"
+                src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg"
                 alt="Cethos Solutions Inc."
                 className="h-10"
               />
