@@ -73,7 +73,11 @@ function LocationCard({ location }: { location: Location }) {
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <div className="bg-slate-50 px-6 py-4 border-b border-gray-200">
         <h3 className="text-xl font-semibold text-[#0C2340] flex items-center gap-2">
-          <span className="text-2xl">{location.flag}</span>
+          <img
+            src={location.flagUrl}
+            alt={location.flagAlt}
+            className="w-6 h-4 object-cover rounded-sm"
+          />
           {location.title}
           {location.type === 'headquarters' && (
             <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">
@@ -107,7 +111,11 @@ function AccordionItem({
         aria-expanded={isOpen}
       >
         <h3 className="text-lg font-semibold text-[#0C2340] flex items-center gap-2">
-          <span className="text-xl">{location.flag}</span>
+          <img
+            src={location.flagUrl}
+            alt={location.flagAlt}
+            className="w-6 h-4 object-cover rounded-sm"
+          />
           {location.title}
           {location.type === 'headquarters' && (
             <span className="text-xs bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-medium">
