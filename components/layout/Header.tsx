@@ -75,7 +75,7 @@ export function Header() {
               <img
                 src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg"
                 alt="Cethos Solutions Inc."
-                className="h-10"
+                className="h-8 w-auto md:h-9 lg:h-10"
               />
             </Link>
 
