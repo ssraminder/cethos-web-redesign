@@ -592,7 +592,7 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
                   />
                   <div className="text-center">
                     <div className="font-semibold text-[#0C2340]">Rush Service</div>
-                    <div className="text-sm text-slate-600">24 Hours (+$25)</div>
+                    <div className="text-sm text-slate-600">(24 Hours)</div>
                   </div>
                 </label>
                 <label
@@ -612,7 +612,6 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
                   />
                   <div className="text-center">
                     <div className="font-semibold text-[#0C2340]">Same-Day</div>
-                    <div className="text-sm text-slate-600">+$50</div>
                   </div>
                 </label>
               </div>
