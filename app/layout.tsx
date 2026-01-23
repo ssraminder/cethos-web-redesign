@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Header, Footer } from '@/components/layout'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
+import { GoogleTagManager } from '@/components/GoogleTagManager'
 import './globals.css'
 
 export const viewport: Viewport = {
@@ -70,6 +71,7 @@ export default function RootLayout({
         <LocalBusinessJsonLd />
       </head>
       <body className="font-sans antialiased">
+        <GoogleTagManager />
         <Header />
         <main>{children}</main>
         <Footer />
