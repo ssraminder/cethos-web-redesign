@@ -256,7 +256,8 @@ export default function ClinicianReviewPage() {
             <div className="mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
               <LifeSciencesQuoteForm
                 variant="clinician-review"
-                hideServiceSelector
+                hideServiceSelector={true}
+                formLocation="clinician-review"
               />
             </div>
           </div>
