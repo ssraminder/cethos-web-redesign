@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ClinicianReviewForm } from '@/components/forms/ClinicianReviewForm'
+import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
 
 export const metadata: Metadata = {
   title: 'Clinician Review Services | Medical Expert Translation Review | Cethos',
@@ -254,7 +254,10 @@ export default function ClinicianReviewPage() {
               <p className="text-lg text-gray-600 mt-4">Get a customized quote within 24 hours. Our team will match the right clinician reviewer to your project.</p>
             </div>
             <div className="mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <ClinicianReviewForm />
+              <LifeSciencesQuoteForm
+                variant="clinician-review"
+                hideServiceSelector
+              />
             </div>
           </div>
         </div>
