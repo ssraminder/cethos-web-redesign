@@ -1,7 +1,8 @@
 export interface Location {
   id: string
   title: string
-  flag: string
+  flagUrl: string
+  flagAlt: string
   type: 'headquarters' | 'office' | 'service'
   address?: string[]
   phone?: string
@@ -16,7 +17,8 @@ export const locations: Record<string, Location> = {
   calgary: {
     id: 'calgary',
     title: 'Calgary, Canada',
-    flag: '\u{1F1E8}\u{1F1E6}',
+    flagUrl: 'https://flagcdn.com/w40/ca.png',
+    flagAlt: 'Canada',
     type: 'headquarters',
     address: [
       '421 7 Avenue SW, Floor 30',
@@ -31,7 +33,8 @@ export const locations: Record<string, Location> = {
   edmonton: {
     id: 'edmonton',
     title: 'Edmonton, Canada',
-    flag: '\u{1F1E8}\u{1F1E6}',
+    flagUrl: 'https://flagcdn.com/w40/ca.png',
+    flagAlt: 'Canada',
     type: 'service',
     phone: '(587) 600-0786',
     email: 'info@cethos.com',
@@ -41,7 +44,8 @@ export const locations: Record<string, Location> = {
   toronto: {
     id: 'toronto',
     title: 'Toronto, Canada',
-    flag: '\u{1F1E8}\u{1F1E6}',
+    flagUrl: 'https://flagcdn.com/w40/ca.png',
+    flagAlt: 'Canada',
     type: 'service',
     phone: '(587) 600-0786',
     email: 'info@cethos.com',
@@ -50,7 +54,8 @@ export const locations: Record<string, Location> = {
   uae: {
     id: 'uae',
     title: 'Dubai, United Arab Emirates',
-    flag: '\u{1F1E6}\u{1F1EA}',
+    flagUrl: 'https://flagcdn.com/w40/ae.png',
+    flagAlt: 'United Arab Emirates',
     type: 'office',
     address: [
       'Building A1, Dubai Digital Park',
@@ -64,7 +69,8 @@ export const locations: Record<string, Location> = {
   india: {
     id: 'india',
     title: 'Patiala, India',
-    flag: '\u{1F1EE}\u{1F1F3}',
+    flagUrl: 'https://flagcdn.com/w40/in.png',
+    flagAlt: 'India',
     type: 'office',
     address: [
       '158/3, Dharampura Bazaar',
