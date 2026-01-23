@@ -4,11 +4,25 @@ import { NextResponse } from 'next/server'
 import { lifeSciencesQuoteSchema } from '@/lib/validations/life-sciences-quote'
 
 export async function POST(req: Request) {
+  console.log('[API Quote] Request received at:', new Date().toISOString())
+
   try {
+    // Log environment check
+    console.log('[API Quote] Env check:', {
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseKey: !!process.env.SUPABASE_SERVICE_KEY,
+      hasBrevoKey: !!process.env.BREVO_API_KEY,
+      hasResendKey: !!process.env.RESEND_API_KEY,
+    })
+
     const supabase = createServerSupabaseClient()
+    console.log('[API Quote] Supabase client created')
+
     const resend = new Resend(process.env.RESEND_API_KEY)
+    console.log('[API Quote] Resend client created')
 
     const formData = await req.formData()
+    console.log('[API Quote] FormData keys:', [...formData.keys()])
 
     // Parse form data
     const rawData = {
@@ -29,10 +43,19 @@ export async function POST(req: Request) {
       projectDescription: formData.get('projectDescription') as string,
     }
 
+    console.log('[API Quote] Raw data parsed:', {
+      fullName: rawData.fullName,
+      email: rawData.email,
+      serviceType: rawData.serviceType,
+      targetLanguagesCount: rawData.targetLanguages?.length,
+    })
+
     // Validate data with Zod
     const validationResult = lifeSciencesQuoteSchema.safeParse(rawData)
+    console.log('[API Quote] Validation result:', validationResult.success)
 
     if (!validationResult.success) {
+      console.log('[API Quote] Validation errors:', validationResult.error.flatten().fieldErrors)
       const errors = validationResult.error.flatten().fieldErrors
       return NextResponse.json(
         { error: 'Validation failed', details: errors },
@@ -67,6 +90,7 @@ export async function POST(req: Request) {
     // Upload files to Supabase Storage
     const files = formData.getAll('files') as File[]
     const fileUrls: string[] = []
+    console.log('[API Quote] Files to upload:', files.length)
 
     for (const file of files) {
       if (file.size > 0) {
@@ -93,6 +117,7 @@ export async function POST(req: Request) {
     }
 
     // Save to database
+    console.log('[API Quote] Saving to database...')
     const { data: quote, error: dbError } = await supabase
       .from('cethosweb_quote_submissions')
       .insert({
@@ -103,9 +128,12 @@ export async function POST(req: Request) {
       .single()
 
     if (dbError) {
-      console.error('Database error:', dbError)
-      throw new Error('Failed to save quote submission')
+      console.error('[API Quote] Database error:', dbError)
+      console.error('[API Quote] Database error code:', dbError.code)
+      console.error('[API Quote] Database error details:', dbError.details)
+      throw new Error(`Failed to save quote submission: ${dbError.message}`)
     }
+    console.log('[API Quote] Quote saved with ID:', quote?.id)
 
     // Save file references
     if (quote && fileUrls.length > 0) {
@@ -177,6 +205,7 @@ export async function POST(req: Request) {
 
     // Send email notification
     const emailRecipients = process.env.QUOTE_EMAIL_RECIPIENTS?.split(',') || ['info@cethos.com']
+    console.log('[API Quote] Sending email to:', emailRecipients)
 
     try {
       await resend.emails.send({
@@ -245,16 +274,27 @@ export async function POST(req: Request) {
           </html>
         `,
       })
-    } catch (emailError) {
-      console.error('Email send error:', emailError)
+      console.log('[API Quote] Email sent successfully')
+    } catch (emailError: unknown) {
+      const emailErr = emailError as Error
+      console.error('[API Quote] Email send error:', emailErr.message)
+      console.error('[API Quote] Email error stack:', emailErr.stack)
       // Don't fail the request if email fails - the quote was saved
     }
 
+    console.log('[API Quote] Success! Returning response')
     return NextResponse.json({ success: true, id: quote.id })
-  } catch (error) {
-    console.error('Quote submission error:', error)
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('[API Quote] ERROR:', err.message)
+    console.error('[API Quote] Stack:', err.stack)
     return NextResponse.json(
-      { error: 'Failed to submit quote request. Please try again.' },
+      {
+        success: false,
+        error: 'Failed to submit quote request. Please try again.',
+        message: err.message,
+        timestamp: new Date().toISOString(),
+      },
       { status: 500 }
     )
   }
