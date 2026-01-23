@@ -51,7 +51,7 @@ export default function ClinicianReviewPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
 
       {/* Breadcrumb */}
-      <nav className="bg-gray-50 py-3 border-b" aria-label="Breadcrumb">
+      <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
         <div className="container mx-auto px-4">
           <ol className="flex items-center space-x-2 text-sm">
             <li><Link href="/" className="text-gray-500 hover:text-[#0891B2]">Home</Link></li>
