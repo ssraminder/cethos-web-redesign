@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import GetQuotePageContent from './GetQuotePageContent'
+import LifeSciencesQuotePageContent from './LifeSciencesQuotePageContent'
 
 export const metadata: Metadata = {
   title: 'Get a Free Quote | Cethos Solutions Inc.',
@@ -17,6 +18,17 @@ export const metadata: Metadata = {
   },
 }
 
-export default function GetQuotePage() {
+interface GetQuotePageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function GetQuotePage({ searchParams }: GetQuotePageProps) {
+  const params = await searchParams
+  const service = params.service
+
+  if (service === 'life-sciences') {
+    return <LifeSciencesQuotePageContent />
+  }
+
   return <GetQuotePageContent />
 }
