@@ -72,6 +72,14 @@ export default function AboutPageContent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-2xl font-semibold text-[#0891B2] mb-4"
+            >
+              Global Communication. Local Precision.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               className="text-xl text-[#4B5563] leading-relaxed"
             >
               Calgary-based language services company specializing in linguistic validation, clinical translation, and comprehensive language solutions for the life sciences industry.
