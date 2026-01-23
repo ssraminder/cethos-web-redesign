@@ -31,6 +31,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'monthly',
   }))
 
+  // Certified translation landing pages
+  const certifiedLandingPages: MetadataRoute.Sitemap = [
+    'immigration-translation-services',
+    'birth-certificate-translation',
+    'marriage-certificate-translation',
+    'academic-transcript-translation',
+    'pr-citizenship-translation',
+    'edmonton-translation-agency',
+  ].map((slug) => ({
+    url: `${baseUrl}/services/certified/${slug}`,
+    lastModified: currentDate,
+    priority: 0.85,
+    changeFrequency: 'monthly',
+  }))
+
   // Industry pages
   const industryPages: MetadataRoute.Sitemap = [
     'pharmaceutical',
@@ -67,6 +82,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...staticPages,
     ...servicePages,
+    ...certifiedLandingPages,
     ...industryPages,
     ...blogPages,
     ...categoryPages,
