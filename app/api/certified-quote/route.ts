@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase'
-import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
+
+const Brevo = require('@getbrevo/brevo')
 
 export async function POST(req: Request) {
   console.log('[API Certified Quote] Request received at:', new Date().toISOString())
@@ -10,14 +11,11 @@ export async function POST(req: Request) {
     console.log('[API Certified Quote] Env check:', {
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
       hasSupabaseKey: !!process.env.SUPABASE_SERVICE_KEY,
-      hasResendKey: !!process.env.RESEND_API_KEY,
+      hasBrevoKey: !!process.env.BREVO_API_KEY,
     })
 
     const supabase = createServerSupabaseClient()
     console.log('[API Certified Quote] Supabase client created')
-
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    console.log('[API Certified Quote] Resend client created')
 
     const formData = await req.formData()
     console.log('[API Certified Quote] FormData keys:', Array.from(formData.keys()))
@@ -179,77 +177,83 @@ export async function POST(req: Request) {
       'other': 'Other',
     }
 
-    // Send email notification
+    // Send email notification using Brevo
     const emailRecipients = process.env.QUOTE_EMAIL_RECIPIENTS?.split(',') || ['info@cethos.com']
     console.log('[API Certified Quote] Sending email to:', emailRecipients)
 
     try {
-      await resend.emails.send({
-        from: 'Cethos Quotes <quotes@cethos.com>',
-        to: emailRecipients,
-        replyTo: rawData.email,
-        subject: `New Certified Translation Quote - ${documentTypeLabels[rawData.documentType] || rawData.documentType}`,
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>New Quote Request</title>
-          </head>
-          <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #0C2340 0%, #1a3a5c 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: #fff; margin: 0; font-size: 24px;">New Certified Translation Quote</h1>
-              <p style="color: #94a3b8; margin: 10px 0 0 0; font-size: 14px;">From: ${rawData.formLocation || 'Website'}</p>
+      const apiInstance = new Brevo.TransactionalEmailsApi()
+      apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Quote Request</title>
+        </head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #0C2340 0%, #1a3a5c 100%); padding: 30px; border-radius: 12px 12px 0 0;">
+            <h1 style="color: #fff; margin: 0; font-size: 24px;">New Certified Translation Quote</h1>
+            <p style="color: #94a3b8; margin: 10px 0 0 0; font-size: 14px;">From: ${rawData.formLocation || 'Website'}</p>
+          </div>
+
+          <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+            ${rawData.serviceSpeed === 'same-day' ? `
+            <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #92400e; font-weight: bold;">RUSH ORDER - Same-Day Service Requested</p>
+            </div>
+            ` : ''}
+
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Contact Information</h2>
+              <p style="margin: 8px 0;"><strong>Name:</strong> ${rawData.fullName}</p>
+              <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${rawData.email}" style="color: #0891B2;">${rawData.email}</a></p>
+              <p style="margin: 8px 0;"><strong>Phone:</strong> <a href="tel:${rawData.phone}" style="color: #0891B2;">${rawData.phone}</a></p>
             </div>
 
-            <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-              ${rawData.serviceSpeed === 'same-day' ? `
-              <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #92400e; font-weight: bold;">RUSH ORDER - Same-Day Service Requested</p>
-              </div>
-              ` : ''}
-
-              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Contact Information</h2>
-                <p style="margin: 8px 0;"><strong>Name:</strong> ${rawData.fullName}</p>
-                <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${rawData.email}" style="color: #0891B2;">${rawData.email}</a></p>
-                <p style="margin: 8px 0;"><strong>Phone:</strong> <a href="tel:${rawData.phone}" style="color: #0891B2;">${rawData.phone}</a></p>
-              </div>
-
-              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Document Details</h2>
-                <p style="margin: 8px 0;"><strong>Document Type:</strong> ${documentTypeLabels[rawData.documentType] || rawData.documentType}</p>
-                <p style="margin: 8px 0;"><strong>Source Language:</strong> ${rawData.languageOfDocument}</p>
-                <p style="margin: 8px 0;"><strong>Target Language:</strong> English</p>
-                <p style="margin: 8px 0;"><strong>Number of Pages:</strong> ${rawData.numberOfPages}</p>
-                <p style="margin: 8px 0;"><strong>Purpose:</strong> ${purposeLabels[rawData.purpose] || rawData.purpose}</p>
-                <p style="margin: 8px 0;"><strong>Service Speed:</strong> ${rawData.serviceSpeed === 'same-day' ? 'Same-Day Rush (+$25)' : 'Standard (2-3 business days)'}</p>
-              </div>
-
-              ${rawData.additionalNotes ? `
-              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Additional Notes</h2>
-                <p style="margin: 0; white-space: pre-wrap;">${rawData.additionalNotes}</p>
-              </div>
-              ` : ''}
-
-              ${fileUrls.length > 0 ? `
-              <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #0C2340;"><strong>📎 ${fileUrls.length} file(s) attached</strong></p>
-                <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Files have been uploaded to the storage bucket.</p>
-              </div>
-              ` : ''}
-
-              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6b7280; font-size: 14px; margin: 0;">Quote ID: ${quote.id}</p>
-                <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Submitted: ${new Date().toLocaleString('en-US', { timeZone: 'America/Edmonton' })}</p>
-              </div>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Document Details</h2>
+              <p style="margin: 8px 0;"><strong>Document Type:</strong> ${documentTypeLabels[rawData.documentType] || rawData.documentType}</p>
+              <p style="margin: 8px 0;"><strong>Source Language:</strong> ${rawData.languageOfDocument}</p>
+              <p style="margin: 8px 0;"><strong>Target Language:</strong> English</p>
+              <p style="margin: 8px 0;"><strong>Number of Pages:</strong> ${rawData.numberOfPages}</p>
+              <p style="margin: 8px 0;"><strong>Purpose:</strong> ${purposeLabels[rawData.purpose] || rawData.purpose}</p>
+              <p style="margin: 8px 0;"><strong>Service Speed:</strong> ${rawData.serviceSpeed === 'same-day' ? 'Same-Day Rush (+$25)' : 'Standard (2-3 business days)'}</p>
             </div>
-          </body>
-          </html>
-        `,
-      })
+
+            ${rawData.additionalNotes ? `
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Additional Notes</h2>
+              <p style="margin: 0; white-space: pre-wrap;">${rawData.additionalNotes}</p>
+            </div>
+            ` : ''}
+
+            ${fileUrls.length > 0 ? `
+            <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #0C2340;"><strong>📎 ${fileUrls.length} file(s) attached</strong></p>
+              <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Files have been uploaded to the storage bucket.</p>
+            </div>
+            ` : ''}
+
+            <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+              <p style="color: #6b7280; font-size: 14px; margin: 0;">Quote ID: ${quote.id}</p>
+              <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Submitted: ${new Date().toLocaleString('en-US', { timeZone: 'America/Edmonton' })}</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+
+      const sendSmtpEmail = new Brevo.SendSmtpEmail()
+      sendSmtpEmail.subject = `New Certified Translation Quote - ${documentTypeLabels[rawData.documentType] || rawData.documentType}`
+      sendSmtpEmail.htmlContent = htmlContent
+      sendSmtpEmail.sender = { name: 'Cethos Website', email: 'noreply@cethos.com' }
+      sendSmtpEmail.to = emailRecipients.map((email: string) => ({ email: email.trim() }))
+      sendSmtpEmail.replyTo = { email: rawData.email }
+
+      await apiInstance.sendTransacEmail(sendSmtpEmail)
       console.log('[API Certified Quote] Email sent successfully')
     } catch (emailError: unknown) {
       const emailErr = emailError as Error
