@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { CognitiveDebriefingForm } from '@/components/forms/CognitiveDebriefingForm'
+import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
 
 export const metadata: Metadata = {
   title: 'Cognitive Debriefing Services | ISPOR-Compliant Patient Interviews | Cethos',
@@ -247,7 +247,10 @@ export default function CognitiveDebriefingPage() {
               <p className="text-lg text-gray-600 mt-4">Get a customized quote within 24 hours. Our team will assess your requirements and provide a detailed proposal.</p>
             </div>
             <div className="mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <CognitiveDebriefingForm />
+              <LifeSciencesQuoteForm
+                variant="cognitive-debriefing"
+                hideServiceSelector
+              />
             </div>
           </div>
         </div>

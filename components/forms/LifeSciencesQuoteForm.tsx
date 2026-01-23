@@ -9,7 +9,7 @@ import {
   GlobeNetworkIcon,
   ClockIcon,
 } from '@/components/icons'
-import { Upload, X, FileText, AlertCircle } from 'lucide-react'
+import { Upload, X, FileText, AlertCircle, ChevronDown, User, Briefcase, Globe, FileUp } from 'lucide-react'
 import {
   serviceTypes,
   therapeuticAreas,
@@ -21,6 +21,24 @@ import {
   lifeSciencesQuoteSchema,
   type LifeSciencesQuoteFormData,
 } from '@/lib/validations/life-sciences-quote'
+
+// Service-specific configuration
+export type ServiceVariant =
+  | 'general'
+  | 'cognitive-debriefing'
+  | 'clinician-review'
+  | 'linguistic-validation'
+
+interface LifeSciencesQuoteFormProps {
+  /** Pre-selected service type */
+  defaultServiceType?: string
+  /** Service variant for customized fields */
+  variant?: ServiceVariant
+  /** Custom title for the form */
+  title?: string
+  /** Hide service type selector (when service is pre-determined) */
+  hideServiceSelector?: boolean
+}
 
 interface Locale {
   id: number
@@ -34,11 +52,13 @@ interface FormErrors {
   [key: string]: string | undefined
 }
 
-const steps = [
-  { id: 1, title: 'Contact' },
-  { id: 2, title: 'Service Details' },
-  { id: 3, title: 'Languages & Files' },
-]
+// Accordion section type
+interface AccordionSection {
+  id: string
+  title: string
+  icon: React.ReactNode
+  isComplete: boolean
+}
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_FILE_TYPES = [
@@ -52,8 +72,75 @@ const ALLOWED_FILE_TYPES = [
   'text/plain',
 ]
 
-export default function LifeSciencesQuoteForm() {
-  const [currentStep, setCurrentStep] = useState(1)
+// Cognitive Debriefing specific options
+const TARGET_POPULATIONS = [
+  { value: 'general', label: 'General Adult' },
+  { value: 'pediatric', label: 'Pediatric' },
+  { value: 'geriatric', label: 'Geriatric' },
+  { value: 'rare-disease', label: 'Rare Disease' },
+  { value: 'cognitive-impairment', label: 'Cognitive Impairment' },
+]
+
+const INTERVIEW_FORMATS = [
+  { value: 'video', label: 'Video Call' },
+  { value: 'phone', label: 'Telephone' },
+  { value: 'in-person', label: 'In-Person' },
+  { value: 'hybrid', label: 'Hybrid' },
+]
+
+// Clinician Review specific options
+const DOCUMENT_TYPES = [
+  { value: 'pro', label: 'PRO Instrument' },
+  { value: 'clinro', label: 'ClinRO Instrument' },
+  { value: 'protocol', label: 'Clinical Protocol' },
+  { value: 'icf', label: 'Informed Consent Form (ICF)' },
+  { value: 'labeling', label: 'Product Labeling (SmPC/PIL)' },
+  { value: 'safety', label: 'Safety Documentation' },
+  { value: 'patient-materials', label: 'Patient Education Materials' },
+  { value: 'ifu', label: 'Medical Device IFU' },
+  { value: 'other', label: 'Other' },
+]
+
+const REVIEWER_TYPES = [
+  { value: 'physician', label: 'Physician (MD/DO)' },
+  { value: 'pharmd', label: 'PharmD' },
+  { value: 'nurse', label: 'Specialist Nurse' },
+  { value: 'specialist', label: 'Subject Matter Specialist' },
+  { value: 'any', label: 'Any Qualified Clinician' },
+]
+
+const TURNAROUNDS = [
+  { value: 'urgent', label: 'Urgent (48-72 hours)' },
+  { value: 'standard', label: 'Standard (5-7 business days)' },
+  { value: 'flexible', label: 'Flexible' },
+]
+
+// Extended therapeutic areas for clinician review
+const CLINICIAN_THERAPEUTIC_AREAS = [
+  { value: 'oncology', label: 'Oncology & Hematology' },
+  { value: 'cns', label: 'CNS/Neurology' },
+  { value: 'cardiology', label: 'Cardiology' },
+  { value: 'respiratory', label: 'Respiratory' },
+  { value: 'immunology', label: 'Immunology' },
+  { value: 'rare-disease', label: 'Rare Disease' },
+  { value: 'dermatology', label: 'Dermatology' },
+  { value: 'gastroenterology', label: 'Gastroenterology' },
+  { value: 'endocrinology', label: 'Endocrinology & Diabetes' },
+  { value: 'psychiatry', label: 'Psychiatry' },
+  { value: 'ophthalmology', label: 'Ophthalmology' },
+  { value: 'nephrology', label: 'Nephrology' },
+  { value: 'rheumatology', label: 'Rheumatology' },
+  { value: 'infectious-disease', label: 'Infectious Disease' },
+  { value: 'other', label: 'Other' },
+]
+
+export default function LifeSciencesQuoteForm({
+  defaultServiceType,
+  variant = 'general',
+  title,
+  hideServiceSelector = false,
+}: LifeSciencesQuoteFormProps) {
+  const [openSection, setOpenSection] = useState<string>('contact')
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -63,13 +150,37 @@ export default function LifeSciencesQuoteForm() {
   const [isDragging, setIsDragging] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
 
-  const [formData, setFormData] = useState<LifeSciencesQuoteFormData>({
+  // Determine actual service type based on variant
+  const getDefaultServiceType = () => {
+    if (defaultServiceType) return defaultServiceType
+    switch (variant) {
+      case 'cognitive-debriefing':
+        return 'cognitive-debriefing'
+      case 'clinician-review':
+        return 'clinician-review'
+      case 'linguistic-validation':
+        return 'linguistic-validation'
+      default:
+        return 'linguistic-validation'
+    }
+  }
+
+  const [formData, setFormData] = useState<LifeSciencesQuoteFormData & {
+    // Extended fields for specific variants
+    targetPopulation?: string
+    participantsPerLanguage?: number
+    interviewFormat?: string
+    documentType?: string
+    reviewerType?: string
+    specialtyRequired?: string
+    turnaround?: string
+  }>({
     fullName: '',
     email: '',
     phone: '',
     companyName: '',
     jobTitle: '',
-    serviceType: 'linguistic-validation',
+    serviceType: getDefaultServiceType() as LifeSciencesQuoteFormData['serviceType'],
     therapeuticArea: '',
     studyPhase: '',
     instrumentType: '',
@@ -79,19 +190,36 @@ export default function LifeSciencesQuoteForm() {
     timeline: 'standard',
     regulatoryPathway: '',
     projectDescription: '',
+    // Variant-specific fields
+    targetPopulation: '',
+    participantsPerLanguage: 5,
+    interviewFormat: '',
+    documentType: '',
+    reviewerType: '',
+    specialtyRequired: '',
+    turnaround: 'standard',
   })
 
-  // Fetch locales on mount
+  // Fetch locales on mount with debug logging
   useEffect(() => {
     const fetchLocales = async () => {
+      console.log('[LifeSciencesQuoteForm] Starting locale fetch...')
       try {
         const response = await fetch('/api/locales')
+        console.log('[LifeSciencesQuoteForm] Locale API response status:', response.status)
         const data = await response.json()
+        console.log('[LifeSciencesQuoteForm] Locale API response data:', {
+          hasLocales: !!data.locales,
+          count: data.locales?.length || 0,
+          source: data.source || 'unknown',
+          sample: data.locales?.slice(0, 3) || []
+        })
         if (data.locales) {
           setLocales(data.locales)
+          console.log('[LifeSciencesQuoteForm] Locales set successfully, count:', data.locales.length)
         }
       } catch (error) {
-        console.error('Error fetching locales:', error)
+        console.error('[LifeSciencesQuoteForm] Error fetching locales:', error)
       } finally {
         setLocalesLoading(false)
       }
@@ -101,31 +229,119 @@ export default function LifeSciencesQuoteForm() {
 
   const updateFormData = (field: string, value: string | string[] | number | undefined) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
-    // Clear error when field is updated
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }))
     }
   }
 
-  const validateStep = (step: number): boolean => {
+  // Check if a section is complete
+  const isSectionComplete = (sectionId: string): boolean => {
+    switch (sectionId) {
+      case 'contact':
+        return !!(
+          formData.fullName &&
+          formData.email &&
+          formData.phone &&
+          formData.companyName
+        )
+      case 'service':
+        if (variant === 'cognitive-debriefing') {
+          return !!(
+            formData.instrumentType &&
+            formData.targetPopulation &&
+            formData.interviewFormat
+          )
+        }
+        if (variant === 'clinician-review') {
+          return !!(
+            formData.documentType &&
+            formData.reviewerType &&
+            (formData.turnaround || formData.timeline)
+          )
+        }
+        return !!(formData.serviceType && formData.timeline)
+      case 'languages':
+        return !!(formData.sourceLanguage && formData.targetLanguages.length > 0)
+      case 'project':
+        return !!(formData.projectDescription && formData.projectDescription.length >= 10)
+      default:
+        return false
+    }
+  }
+
+  // Get section status
+  const getSections = (): AccordionSection[] => {
+    return [
+      {
+        id: 'contact',
+        title: 'Contact Information',
+        icon: <User className="w-5 h-5" />,
+        isComplete: isSectionComplete('contact'),
+      },
+      {
+        id: 'service',
+        title: variant === 'cognitive-debriefing'
+          ? 'Study Details'
+          : variant === 'clinician-review'
+          ? 'Review Requirements'
+          : 'Service Details',
+        icon: <Briefcase className="w-5 h-5" />,
+        isComplete: isSectionComplete('service'),
+      },
+      {
+        id: 'languages',
+        title: 'Languages',
+        icon: <Globe className="w-5 h-5" />,
+        isComplete: isSectionComplete('languages'),
+      },
+      {
+        id: 'project',
+        title: 'Project Details & Files',
+        icon: <FileUp className="w-5 h-5" />,
+        isComplete: isSectionComplete('project'),
+      },
+    ]
+  }
+
+  const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (step === 1) {
-      if (!formData.fullName || formData.fullName.length < 2) {
-        newErrors.fullName = 'Full name is required'
-      }
-      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        newErrors.email = 'Valid email is required'
-      }
-      if (!formData.phone || formData.phone.length < 7) {
-        newErrors.phone = 'Phone number is required'
-      }
-      if (!formData.companyName || formData.companyName.length < 2) {
-        newErrors.companyName = 'Company name is required'
-      }
+    // Contact validation
+    if (!formData.fullName || formData.fullName.length < 2) {
+      newErrors.fullName = 'Full name is required'
+    }
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Valid email is required'
+    }
+    if (!formData.phone || formData.phone.length < 7) {
+      newErrors.phone = 'Phone number is required'
+    }
+    if (!formData.companyName || formData.companyName.length < 2) {
+      newErrors.companyName = 'Company name is required'
     }
 
-    if (step === 2) {
+    // Service validation based on variant
+    if (variant === 'cognitive-debriefing') {
+      if (!formData.instrumentType) {
+        newErrors.instrumentType = 'Please select an instrument type'
+      }
+      if (!formData.targetPopulation) {
+        newErrors.targetPopulation = 'Please select a target population'
+      }
+      if (!formData.interviewFormat) {
+        newErrors.interviewFormat = 'Please select an interview format'
+      }
+    } else if (variant === 'clinician-review') {
+      if (!formData.documentType) {
+        newErrors.documentType = 'Please select a document type'
+      }
+      if (!formData.reviewerType) {
+        newErrors.reviewerType = 'Please select a reviewer type'
+      }
+      if (!formData.turnaround && !formData.timeline) {
+        newErrors.turnaround = 'Please select a turnaround time'
+      }
+    } else {
       if (!formData.serviceType) {
         newErrors.serviceType = 'Please select a service type'
       }
@@ -134,51 +350,46 @@ export default function LifeSciencesQuoteForm() {
       }
     }
 
-    if (step === 3) {
-      if (!formData.sourceLanguage) {
-        newErrors.sourceLanguage = 'Please select a source language'
-      }
-      if (formData.targetLanguages.length === 0) {
-        newErrors.targetLanguages = 'Please select at least one target language'
-      }
-      if (!formData.projectDescription || formData.projectDescription.length < 10) {
-        newErrors.projectDescription = 'Please provide a project description (at least 10 characters)'
-      }
+    // Languages validation
+    if (!formData.sourceLanguage) {
+      newErrors.sourceLanguage = 'Please select a source language'
+    }
+    if (formData.targetLanguages.length === 0) {
+      newErrors.targetLanguages = 'Please select at least one target language'
+    }
+
+    // Project validation
+    if (!formData.projectDescription || formData.projectDescription.length < 10) {
+      newErrors.projectDescription = 'Please provide a project description (at least 10 characters)'
     }
 
     setErrors(newErrors)
+
+    // Open the first section with an error
+    if (Object.keys(newErrors).length > 0) {
+      const errorFields = Object.keys(newErrors)
+      const contactFields = ['fullName', 'email', 'phone', 'companyName', 'jobTitle']
+      const serviceFields = ['serviceType', 'timeline', 'instrumentType', 'targetPopulation', 'interviewFormat', 'documentType', 'reviewerType', 'turnaround']
+      const languageFields = ['sourceLanguage', 'targetLanguages']
+
+      if (errorFields.some(f => contactFields.includes(f))) {
+        setOpenSection('contact')
+      } else if (errorFields.some(f => serviceFields.includes(f))) {
+        setOpenSection('service')
+      } else if (errorFields.some(f => languageFields.includes(f))) {
+        setOpenSection('languages')
+      } else {
+        setOpenSection('project')
+      }
+    }
+
     return Object.keys(newErrors).length === 0
-  }
-
-  const handleNext = () => {
-    if (validateStep(currentStep) && currentStep < 3) {
-      setCurrentStep(currentStep + 1)
-    }
-  }
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
-    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateStep(currentStep)) {
-      return
-    }
-
-    // Final validation with Zod
-    const result = lifeSciencesQuoteSchema.safeParse(formData)
-    if (!result.success) {
-      const fieldErrors: FormErrors = {}
-      result.error.issues.forEach((issue) => {
-        if (issue.path[0]) {
-          fieldErrors[issue.path[0] as string] = issue.message
-        }
-      })
-      setErrors(fieldErrors)
+    if (!validateForm()) {
       return
     }
 
@@ -196,6 +407,13 @@ export default function LifeSciencesQuoteForm() {
           submitData.append(key, String(value))
         }
       })
+
+      // Ensure correct service type is set for variants
+      if (variant === 'cognitive-debriefing') {
+        submitData.set('serviceType', 'cognitive-debriefing')
+      } else if (variant === 'clinician-review') {
+        submitData.set('serviceType', 'clinician-review')
+      }
 
       // Add files
       files.forEach((file) => {
@@ -238,20 +456,20 @@ export default function LifeSciencesQuoteForm() {
     if (!selectedFiles) return
 
     const newFiles: File[] = []
-    const errors: string[] = []
+    const fileErrors: string[] = []
 
     Array.from(selectedFiles).forEach((file) => {
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name} exceeds 10MB limit`)
+        fileErrors.push(`${file.name} exceeds 10MB limit`)
       } else if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        errors.push(`${file.name} has an unsupported file type`)
+        fileErrors.push(`${file.name} has an unsupported file type`)
       } else {
         newFiles.push(file)
       }
     })
 
-    if (errors.length > 0) {
-      setSubmitError(errors.join('. '))
+    if (fileErrors.length > 0) {
+      setSubmitError(fileErrors.join('. '))
       setTimeout(() => setSubmitError(null), 5000)
     }
 
@@ -298,6 +516,51 @@ export default function LifeSciencesQuoteForm() {
     label: l.label,
   }))
 
+  const sections = getSections()
+
+  // Accordion Section Component
+  const AccordionItem = ({ section, children }: { section: AccordionSection; children: React.ReactNode }) => {
+    const isOpen = openSection === section.id
+
+    return (
+      <div className="border border-slate-200 rounded-xl overflow-hidden mb-4">
+        <button
+          type="button"
+          onClick={() => setOpenSection(isOpen ? '' : section.id)}
+          className={`w-full px-6 py-4 flex items-center justify-between transition-colors ${
+            isOpen ? 'bg-slate-50' : 'bg-white hover:bg-slate-50'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${section.isComplete ? 'bg-teal-100 text-teal-600' : 'bg-slate-100 text-slate-500'}`}>
+              {section.isComplete ? <CheckIcon size={20} /> : section.icon}
+            </div>
+            <span className="font-semibold text-navy">{section.title}</span>
+            {section.isComplete && (
+              <span className="text-xs text-teal-600 bg-teal-50 px-2 py-1 rounded-full">Complete</span>
+            )}
+          </div>
+          <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="p-6 border-t border-slate-100 bg-white">
+                {children}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    )
+  }
+
   return (
     <>
       {isSubmitted ? (
@@ -312,7 +575,7 @@ export default function LifeSciencesQuoteForm() {
             </div>
             <h2 className="text-2xl font-bold text-navy mb-4">Quote Request Submitted!</h2>
             <p className="text-slate-600 mb-8 max-w-md mx-auto">
-              Thank you for your interest in our life sciences services. Our team will review your
+              Thank you for your interest in our {variant === 'cognitive-debriefing' ? 'cognitive debriefing' : variant === 'clinician-review' ? 'clinician review' : 'life sciences'} services. Our team will review your
               project and send you a detailed quote within 2 hours during business hours.
             </p>
 
@@ -338,43 +601,22 @@ export default function LifeSciencesQuoteForm() {
         </motion.div>
       ) : (
         <Card padding="none" className="overflow-hidden">
-          {/* Progress Steps */}
-          <div className="px-8 py-6 bg-slate-50 border-b border-slate-100">
-            <div className="flex items-center justify-between max-w-md mx-auto">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex items-center">
-                  <div className="flex flex-col items-center">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
-                        currentStep >= step.id
-                          ? 'bg-teal-600 text-white'
-                          : 'bg-slate-200 text-slate-500'
-                      }`}
-                    >
-                      {currentStep > step.id ? <CheckIcon size={20} /> : step.id}
-                    </div>
-                    <span
-                      className={`mt-2 text-sm ${
-                        currentStep >= step.id ? 'text-teal-600 font-medium' : 'text-slate-500'
-                      }`}
-                    >
-                      {step.title}
-                    </span>
-                  </div>
-                  {index < steps.length - 1 && (
-                    <div
-                      className={`w-16 sm:w-24 h-1 mx-2 rounded ${
-                        currentStep > step.id ? 'bg-teal-600' : 'bg-slate-200'
-                      }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
+          {/* Header */}
+          <div className="px-8 py-6 bg-gradient-to-r from-[#0C2340] to-[#1a3a5c]">
+            <h2 className="text-xl font-bold text-white">
+              {title || (variant === 'cognitive-debriefing'
+                ? 'Request Cognitive Debriefing Quote'
+                : variant === 'clinician-review'
+                ? 'Request Clinician Review Quote'
+                : 'Request a Quote')}
+            </h2>
+            <p className="text-slate-300 text-sm mt-1">
+              Complete each section below. All fields marked with * are required.
+            </p>
           </div>
 
           {/* Form Content */}
-          <form onSubmit={handleSubmit} className="p-8" aria-label="Life sciences quote request form">
+          <form onSubmit={handleSubmit} className="p-6" aria-label="Life sciences quote request form">
             {submitError && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -386,354 +628,505 @@ export default function LifeSciencesQuoteForm() {
               </motion.div>
             )}
 
-            <AnimatePresence mode="wait">
-              {/* Step 1: Contact Information */}
-              {currentStep === 1 && (
-                <motion.div
-                  key="step1"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h2 className="text-xl font-semibold text-navy mb-1">Contact Information</h2>
-                    <p className="text-slate-600">Tell us how to reach you.</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input
-                      label="Full Name"
-                      placeholder="John Smith"
-                      value={formData.fullName}
-                      onChange={(e) => updateFormData('fullName', e.target.value)}
-                      error={errors.fullName}
-                      required
-                    />
-                    <Input
-                      label="Email Address"
-                      type="email"
-                      placeholder="john@company.com"
-                      value={formData.email}
-                      onChange={(e) => updateFormData('email', e.target.value)}
-                      error={errors.email}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input
-                      label="Phone Number"
-                      type="tel"
-                      placeholder="+1 (555) 000-0000"
-                      value={formData.phone}
-                      onChange={(e) => updateFormData('phone', e.target.value)}
-                      error={errors.phone}
-                      required
-                    />
-                    <Input
-                      label="Company Name"
-                      placeholder="Your Company"
-                      value={formData.companyName}
-                      onChange={(e) => updateFormData('companyName', e.target.value)}
-                      error={errors.companyName}
-                      required
-                    />
-                  </div>
-
+            {/* Section 1: Contact Information */}
+            <AccordionItem section={sections[0]}>
+              <div className="space-y-4">
+                <p className="text-slate-600 text-sm mb-4">Tell us how to reach you.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    label="Job Title"
-                    placeholder="Clinical Operations Manager"
-                    value={formData.jobTitle || ''}
-                    onChange={(e) => updateFormData('jobTitle', e.target.value)}
-                    helperText="Optional"
-                  />
-                </motion.div>
-              )}
-
-              {/* Step 2: Service Details */}
-              {currentStep === 2 && (
-                <motion.div
-                  key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h2 className="text-xl font-semibold text-navy mb-1">Service Details</h2>
-                    <p className="text-slate-600">Tell us about your project requirements.</p>
-                  </div>
-
-                  <Select
-                    label="Service Type"
-                    options={serviceTypes.map((s) => ({ value: s.value, label: s.label }))}
-                    value={formData.serviceType}
-                    onChange={(e) => updateFormData('serviceType', e.target.value)}
-                    error={errors.serviceType}
+                    label="Full Name"
+                    placeholder="John Smith"
+                    value={formData.fullName}
+                    onChange={(e) => updateFormData('fullName', e.target.value)}
+                    error={errors.fullName}
                     required
                   />
+                  <Input
+                    label="Email Address"
+                    type="email"
+                    placeholder="john@company.com"
+                    value={formData.email}
+                    onChange={(e) => updateFormData('email', e.target.value)}
+                    error={errors.email}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input
+                    label="Phone Number"
+                    type="tel"
+                    placeholder="+1 (555) 000-0000"
+                    value={formData.phone}
+                    onChange={(e) => updateFormData('phone', e.target.value)}
+                    error={errors.phone}
+                    required
+                  />
+                  <Input
+                    label="Company Name"
+                    placeholder="Your Company"
+                    value={formData.companyName}
+                    onChange={(e) => updateFormData('companyName', e.target.value)}
+                    error={errors.companyName}
+                    required
+                  />
+                </div>
+                <Input
+                  label="Job Title"
+                  placeholder="Clinical Operations Manager"
+                  value={formData.jobTitle || ''}
+                  onChange={(e) => updateFormData('jobTitle', e.target.value)}
+                  helperText="Optional"
+                />
+                <div className="flex justify-end mt-4">
+                  <Button
+                    type="button"
+                    onClick={() => setOpenSection('service')}
+                    disabled={!isSectionComplete('contact')}
+                    showArrow
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            </AccordionItem>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Select
-                      label="Therapeutic Area"
-                      options={therapeuticAreas.map((t) => ({ value: t.value, label: t.label }))}
-                      value={formData.therapeuticArea || ''}
-                      onChange={(e) => updateFormData('therapeuticArea', e.target.value)}
-                      helperText="Optional"
-                    />
-                    <Select
-                      label="Study Phase"
-                      options={studyPhases.map((p) => ({ value: p.value, label: p.label }))}
-                      value={formData.studyPhase || ''}
-                      onChange={(e) => updateFormData('studyPhase', e.target.value)}
-                      helperText="Optional"
-                    />
-                  </div>
-
-                  {showInstrumentType && (
-                    <Select
-                      label="Instrument Type"
-                      options={instrumentTypes.map((i) => ({ value: i.value, label: i.label }))}
-                      value={formData.instrumentType || ''}
-                      onChange={(e) => updateFormData('instrumentType', e.target.value)}
-                      helperText="Select the type of clinical outcome assessment or document"
-                    />
-                  )}
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Select
-                      label="Regulatory Pathway"
-                      options={regulatoryPathways.map((r) => ({ value: r.value, label: r.label }))}
-                      value={formData.regulatoryPathway || ''}
-                      onChange={(e) => updateFormData('regulatoryPathway', e.target.value)}
-                      helperText="Optional"
-                    />
-                    <div>
-                      <label className="block text-sm font-medium text-navy mb-3">
-                        Timeline
-                      </label>
-                      <div className="space-y-2">
-                        {timelineOptions.map((option) => (
-                          <label
-                            key={option.value}
-                            className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                              formData.timeline === option.value
-                                ? 'border-teal-500 bg-teal-50'
-                                : 'border-slate-200 hover:border-slate-300'
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="timeline"
-                              value={option.value}
-                              checked={formData.timeline === option.value}
-                              onChange={(e) => updateFormData('timeline', e.target.value)}
-                              className="sr-only"
-                            />
-                            <div
-                              className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
-                                formData.timeline === option.value
-                                  ? 'border-teal-500'
-                                  : 'border-slate-300'
-                              }`}
-                            >
-                              {formData.timeline === option.value && (
-                                <div className="w-2 h-2 rounded-full bg-teal-500" />
-                              )}
-                            </div>
-                            <span className="text-sm text-navy">{option.label}</span>
-                          </label>
-                        ))}
+            {/* Section 2: Service Details */}
+            <AccordionItem section={sections[1]}>
+              <div className="space-y-4">
+                {variant === 'cognitive-debriefing' ? (
+                  // Cognitive Debriefing specific fields
+                  <>
+                    <p className="text-slate-600 text-sm mb-4">Tell us about your cognitive debriefing study.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Select
+                        label="Instrument Type"
+                        options={[
+                          { value: 'pro', label: 'PRO (Patient-Reported Outcome)' },
+                          { value: 'clinro', label: 'ClinRO (Clinician-Reported Outcome)' },
+                          { value: 'obsro', label: 'ObsRO (Observer-Reported Outcome)' },
+                          { value: 'perfo', label: 'PerfO (Performance Outcome)' },
+                          { value: 'other', label: 'Other' },
+                        ]}
+                        value={formData.instrumentType || ''}
+                        onChange={(e) => updateFormData('instrumentType', e.target.value)}
+                        error={errors.instrumentType}
+                        required
+                      />
+                      <Select
+                        label="Target Population"
+                        options={TARGET_POPULATIONS}
+                        value={formData.targetPopulation || ''}
+                        onChange={(e) => updateFormData('targetPopulation', e.target.value)}
+                        error={errors.targetPopulation}
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Select
+                        label="Therapeutic Area"
+                        options={therapeuticAreas.map((t) => ({ value: t.value, label: t.label }))}
+                        value={formData.therapeuticArea || ''}
+                        onChange={(e) => updateFormData('therapeuticArea', e.target.value)}
+                        helperText="Optional"
+                      />
+                      <Select
+                        label="Interview Format"
+                        options={INTERVIEW_FORMATS}
+                        value={formData.interviewFormat || ''}
+                        onChange={(e) => updateFormData('interviewFormat', e.target.value)}
+                        error={errors.interviewFormat}
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-navy mb-1">
+                          Participants per Language
+                        </label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={15}
+                          value={formData.participantsPerLanguage || 5}
+                          onChange={(e) => updateFormData('participantsPerLanguage', parseInt(e.target.value) || 5)}
+                          className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">ISPOR recommends 5-8 participants per language</p>
                       </div>
-                      {errors.timeline && (
-                        <p className="mt-1.5 text-sm text-red-500">{errors.timeline}</p>
+                      <Select
+                        label="Study Phase"
+                        options={studyPhases.map((p) => ({ value: p.value, label: p.label }))}
+                        value={formData.studyPhase || ''}
+                        onChange={(e) => updateFormData('studyPhase', e.target.value)}
+                        helperText="Optional"
+                      />
+                    </div>
+                    <Select
+                      label="Timeline"
+                      options={[
+                        { value: 'urgent', label: 'Urgent (1-2 weeks)' },
+                        { value: 'standard', label: 'Standard (3-4 weeks)' },
+                        { value: 'flexible', label: 'Flexible' },
+                      ]}
+                      value={formData.timeline || ''}
+                      onChange={(e) => updateFormData('timeline', e.target.value)}
+                      error={errors.timeline}
+                      required
+                    />
+                  </>
+                ) : variant === 'clinician-review' ? (
+                  // Clinician Review specific fields
+                  <>
+                    <p className="text-slate-600 text-sm mb-4">Tell us about your clinical review requirements.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Select
+                        label="Document Type"
+                        options={DOCUMENT_TYPES}
+                        value={formData.documentType || ''}
+                        onChange={(e) => updateFormData('documentType', e.target.value)}
+                        error={errors.documentType}
+                        required
+                      />
+                      <Select
+                        label="Reviewer Type"
+                        options={REVIEWER_TYPES}
+                        value={formData.reviewerType || ''}
+                        onChange={(e) => updateFormData('reviewerType', e.target.value)}
+                        error={errors.reviewerType}
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Select
+                        label="Therapeutic Area"
+                        options={CLINICIAN_THERAPEUTIC_AREAS}
+                        value={formData.therapeuticArea || ''}
+                        onChange={(e) => updateFormData('therapeuticArea', e.target.value)}
+                        helperText="Optional"
+                      />
+                      {formData.reviewerType === 'specialist' && (
+                        <Input
+                          label="Required Specialty"
+                          placeholder="e.g., Oncologist, Cardiologist"
+                          value={formData.specialtyRequired || ''}
+                          onChange={(e) => updateFormData('specialtyRequired', e.target.value)}
+                        />
                       )}
                     </div>
-                  </div>
-
-                  <Input
-                    label="Estimated Word Count"
-                    type="number"
-                    placeholder="e.g., 5000"
-                    value={formData.wordCount || ''}
-                    onChange={(e) =>
-                      updateFormData('wordCount', e.target.value ? parseInt(e.target.value) : undefined)
-                    }
-                    helperText="Approximate number of words (optional)"
-                  />
-                </motion.div>
-              )}
-
-              {/* Step 3: Languages & Files */}
-              {currentStep === 3 && (
-                <motion.div
-                  key="step3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-6"
-                >
-                  <div>
-                    <h2 className="text-xl font-semibold text-navy mb-1">Languages & Files</h2>
-                    <p className="text-slate-600">Select your languages and upload any reference files.</p>
-                  </div>
-
-                  {/* Source Language */}
-                  <div>
-                    <Select
-                      label="Source Language"
-                      options={sourceLocaleOptions}
-                      value={formData.sourceLanguage}
-                      onChange={(e) => updateFormData('sourceLanguage', e.target.value)}
-                      error={errors.sourceLanguage}
-                      required
-                      disabled={localesLoading}
-                    />
-                    {localesLoading && (
-                      <p className="mt-1 text-sm text-slate-500">Loading languages...</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Input
+                        label="Word Count (approx)"
+                        type="number"
+                        placeholder="e.g., 5000"
+                        value={formData.wordCount || ''}
+                        onChange={(e) =>
+                          updateFormData('wordCount', e.target.value ? parseInt(e.target.value) : undefined)
+                        }
+                        helperText="Optional"
+                      />
+                      <Select
+                        label="Turnaround"
+                        options={TURNAROUNDS}
+                        value={formData.turnaround || formData.timeline || ''}
+                        onChange={(e) => {
+                          updateFormData('turnaround', e.target.value)
+                          updateFormData('timeline', e.target.value)
+                        }}
+                        error={errors.turnaround}
+                        required
+                      />
+                    </div>
+                  </>
+                ) : (
+                  // General/default service fields
+                  <>
+                    <p className="text-slate-600 text-sm mb-4">Tell us about your project requirements.</p>
+                    {!hideServiceSelector && (
+                      <Select
+                        label="Service Type"
+                        options={serviceTypes.map((s) => ({ value: s.value, label: s.label }))}
+                        value={formData.serviceType}
+                        onChange={(e) => updateFormData('serviceType', e.target.value)}
+                        error={errors.serviceType}
+                        required
+                      />
                     )}
-                  </div>
-
-                  {/* Target Languages */}
-                  <div>
-                    <label className="block text-sm font-medium text-navy mb-3">
-                      Target Languages <span className="text-red-500">*</span>
-                    </label>
-                    {localesLoading ? (
-                      <p className="text-sm text-slate-500">Loading languages...</p>
-                    ) : (
-                      <>
-                        <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-lg p-3">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {locales.map((locale) => (
-                              <button
-                                key={locale.id}
-                                type="button"
-                                onClick={() => toggleTargetLanguage(locale.value)}
-                                className={`px-3 py-2 rounded-lg text-sm font-medium text-left transition-colors ${
-                                  formData.targetLanguages.includes(locale.value)
-                                    ? 'bg-teal-600 text-white'
-                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Select
+                        label="Therapeutic Area"
+                        options={therapeuticAreas.map((t) => ({ value: t.value, label: t.label }))}
+                        value={formData.therapeuticArea || ''}
+                        onChange={(e) => updateFormData('therapeuticArea', e.target.value)}
+                        helperText="Optional"
+                      />
+                      <Select
+                        label="Study Phase"
+                        options={studyPhases.map((p) => ({ value: p.value, label: p.label }))}
+                        value={formData.studyPhase || ''}
+                        onChange={(e) => updateFormData('studyPhase', e.target.value)}
+                        helperText="Optional"
+                      />
+                    </div>
+                    {showInstrumentType && (
+                      <Select
+                        label="Instrument Type"
+                        options={instrumentTypes.map((i) => ({ value: i.value, label: i.label }))}
+                        value={formData.instrumentType || ''}
+                        onChange={(e) => updateFormData('instrumentType', e.target.value)}
+                        helperText="Select the type of clinical outcome assessment or document"
+                      />
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Select
+                        label="Regulatory Pathway"
+                        options={regulatoryPathways.map((r) => ({ value: r.value, label: r.label }))}
+                        value={formData.regulatoryPathway || ''}
+                        onChange={(e) => updateFormData('regulatoryPathway', e.target.value)}
+                        helperText="Optional"
+                      />
+                      <div>
+                        <label className="block text-sm font-medium text-navy mb-3">
+                          Timeline <span className="text-red-500">*</span>
+                        </label>
+                        <div className="space-y-2">
+                          {timelineOptions.map((option) => (
+                            <label
+                              key={option.value}
+                              className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                                formData.timeline === option.value
+                                  ? 'border-teal-500 bg-teal-50'
+                                  : 'border-slate-200 hover:border-slate-300'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="timeline"
+                                value={option.value}
+                                checked={formData.timeline === option.value}
+                                onChange={(e) => updateFormData('timeline', e.target.value)}
+                                className="sr-only"
+                              />
+                              <div
+                                className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
+                                  formData.timeline === option.value
+                                    ? 'border-teal-500'
+                                    : 'border-slate-300'
                                 }`}
                               >
-                                {locale.label}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                        {formData.targetLanguages.length > 0 && (
-                          <p className="mt-2 text-sm text-teal-600">
-                            {formData.targetLanguages.length} language(s) selected
-                          </p>
-                        )}
-                        {errors.targetLanguages && (
-                          <p className="mt-1.5 text-sm text-red-500">{errors.targetLanguages}</p>
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  {/* File Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-navy mb-2">
-                      Upload Files (Optional)
-                    </label>
-                    <div
-                      onDragEnter={handleDragIn}
-                      onDragLeave={handleDragOut}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
-                      className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                        isDragging
-                          ? 'border-teal-500 bg-teal-50'
-                          : 'border-slate-300 hover:border-teal-400'
-                      }`}
-                    >
-                      <input
-                        type="file"
-                        id="file-upload"
-                        multiple
-                        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
-                        onChange={(e) => handleFileSelect(e.target.files)}
-                        className="hidden"
-                      />
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-                        <p className="text-slate-600 mb-1">
-                          Drag and drop files here, or{' '}
-                          <span className="text-teal-600 font-medium">browse</span>
-                        </p>
-                        <p className="text-sm text-slate-400">
-                          PDF, Word, Excel, Images (max 10MB each)
-                        </p>
-                      </label>
-                    </div>
-
-                    {/* File List */}
-                    {files.length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        {files.map((file, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                          >
-                            <div className="flex items-center gap-3">
-                              <FileText className="w-5 h-5 text-slate-500" />
-                              <div>
-                                <p className="text-sm font-medium text-navy">{file.name}</p>
-                                <p className="text-xs text-slate-500">
-                                  {(file.size / 1024 / 1024).toFixed(2)} MB
-                                </p>
+                                {formData.timeline === option.value && (
+                                  <div className="w-2 h-2 rounded-full bg-teal-500" />
+                                )}
                               </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeFile(index)}
-                              className="p-1 hover:bg-slate-200 rounded transition-colors"
-                            >
-                              <X className="w-4 h-4 text-slate-500" />
-                            </button>
-                          </div>
-                        ))}
+                              <span className="text-sm text-navy">{option.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                        {errors.timeline && (
+                          <p className="mt-1.5 text-sm text-red-500">{errors.timeline}</p>
+                        )}
                       </div>
-                    )}
+                    </div>
+                    <Input
+                      label="Estimated Word Count"
+                      type="number"
+                      placeholder="e.g., 5000"
+                      value={formData.wordCount || ''}
+                      onChange={(e) =>
+                        updateFormData('wordCount', e.target.value ? parseInt(e.target.value) : undefined)
+                      }
+                      helperText="Approximate number of words (optional)"
+                    />
+                  </>
+                )}
+                <div className="flex justify-end mt-4">
+                  <Button
+                    type="button"
+                    onClick={() => setOpenSection('languages')}
+                    disabled={!isSectionComplete('service')}
+                    showArrow
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            </AccordionItem>
+
+            {/* Section 3: Languages */}
+            <AccordionItem section={sections[2]}>
+              <div className="space-y-4">
+                <p className="text-slate-600 text-sm mb-4">Select your source and target languages.</p>
+
+                {/* Source Language */}
+                <div>
+                  <Select
+                    label="Source Language"
+                    options={sourceLocaleOptions}
+                    value={formData.sourceLanguage}
+                    onChange={(e) => updateFormData('sourceLanguage', e.target.value)}
+                    error={errors.sourceLanguage}
+                    required
+                    disabled={localesLoading}
+                  />
+                  {localesLoading && (
+                    <p className="mt-1 text-sm text-slate-500">Loading languages...</p>
+                  )}
+                </div>
+
+                {/* Target Languages */}
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-3">
+                    Target Languages <span className="text-red-500">*</span>
+                  </label>
+                  {localesLoading ? (
+                    <p className="text-sm text-slate-500">Loading languages...</p>
+                  ) : (
+                    <>
+                      <div className="max-h-64 overflow-y-auto border border-slate-200 rounded-lg p-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {locales.map((locale) => (
+                            <button
+                              key={locale.id}
+                              type="button"
+                              onClick={() => toggleTargetLanguage(locale.value)}
+                              className={`px-3 py-2 rounded-lg text-sm font-medium text-left transition-colors ${
+                                formData.targetLanguages.includes(locale.value)
+                                  ? 'bg-teal-600 text-white'
+                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              }`}
+                            >
+                              {locale.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {formData.targetLanguages.length > 0 && (
+                        <p className="mt-2 text-sm text-teal-600">
+                          {formData.targetLanguages.length} language(s) selected
+                        </p>
+                      )}
+                      {errors.targetLanguages && (
+                        <p className="mt-1.5 text-sm text-red-500">{errors.targetLanguages}</p>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className="flex justify-end mt-4">
+                  <Button
+                    type="button"
+                    onClick={() => setOpenSection('project')}
+                    disabled={!isSectionComplete('languages')}
+                    showArrow
+                  >
+                    Continue
+                  </Button>
+                </div>
+              </div>
+            </AccordionItem>
+
+            {/* Section 4: Project Details & Files */}
+            <AccordionItem section={sections[3]}>
+              <div className="space-y-6">
+                <p className="text-slate-600 text-sm mb-4">Describe your project and upload any relevant files.</p>
+
+                {/* Project Description */}
+                <Textarea
+                  label="Project Description"
+                  placeholder={
+                    variant === 'cognitive-debriefing'
+                      ? "Describe your study, the instrument being validated, patient population, and any special requirements..."
+                      : variant === 'clinician-review'
+                      ? "Describe the documents requiring clinical review, specific terminology concerns, and reviewer qualifications needed..."
+                      : "Please describe your project, including any specific requirements, deadlines, or regulatory considerations..."
+                  }
+                  value={formData.projectDescription}
+                  onChange={(e) => updateFormData('projectDescription', e.target.value)}
+                  error={errors.projectDescription}
+                  required
+                />
+
+                {/* File Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-navy mb-2">
+                    Upload Files (Optional)
+                  </label>
+                  <div
+                    onDragEnter={handleDragIn}
+                    onDragLeave={handleDragOut}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      isDragging
+                        ? 'border-teal-500 bg-teal-50'
+                        : 'border-slate-300 hover:border-teal-400'
+                    }`}
+                  >
+                    <input
+                      type="file"
+                      id="file-upload"
+                      multiple
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt"
+                      onChange={(e) => handleFileSelect(e.target.files)}
+                      className="hidden"
+                    />
+                    <label htmlFor="file-upload" className="cursor-pointer">
+                      <Upload className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+                      <p className="text-slate-600 mb-1">
+                        Drag and drop files here, or{' '}
+                        <span className="text-teal-600 font-medium">browse</span>
+                      </p>
+                      <p className="text-sm text-slate-400">
+                        PDF, Word, Excel, Images (max 10MB each)
+                      </p>
+                    </label>
                   </div>
 
-                  {/* Project Description */}
-                  <Textarea
-                    label="Project Description"
-                    placeholder="Please describe your project, including any specific requirements, deadlines, or regulatory considerations..."
-                    value={formData.projectDescription}
-                    onChange={(e) => updateFormData('projectDescription', e.target.value)}
-                    error={errors.projectDescription}
-                    required
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  {/* File List */}
+                  {files.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {files.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-slate-500" />
+                            <div>
+                              <p className="text-sm font-medium text-navy">{file.name}</p>
+                              <p className="text-xs text-slate-500">
+                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            className="p-1 hover:bg-slate-200 rounded transition-colors"
+                          >
+                            <X className="w-4 h-4 text-slate-500" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </AccordionItem>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
-              {currentStep > 1 ? (
-                <Button type="button" variant="secondary" onClick={handleBack}>
-                  Back
-                </Button>
-              ) : (
-                <div />
-              )}
-
-              {currentStep < 3 ? (
-                <Button type="button" onClick={handleNext} showArrow>
-                  Continue
-                </Button>
-              ) : (
-                <Button type="submit" isLoading={isLoading}>
-                  Submit Quote Request
-                </Button>
+            {/* Submit Button */}
+            <div className="mt-6 pt-6 border-t border-slate-100">
+              <Button
+                type="submit"
+                isLoading={isLoading}
+                className="w-full sm:w-auto"
+                disabled={!sections.every(s => s.isComplete)}
+              >
+                Submit Quote Request
+              </Button>
+              {!sections.every(s => s.isComplete) && (
+                <p className="mt-2 text-sm text-slate-500">
+                  Please complete all sections to submit your request.
+                </p>
               )}
             </div>
           </form>
