@@ -48,7 +48,7 @@ interface FormData {
   purpose: string
   // Step 3 - Upload
   files: File[]
-  serviceSpeed: 'standard' | 'same-day'
+  serviceSpeed: 'standard' | 'rush' | 'same-day'
   additionalNotes: string
 }
 
@@ -76,7 +76,7 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
     additionalNotes: '',
   })
 
-  const updateFormData = (field: keyof FormData, value: string | number | File[] | 'standard' | 'same-day') => {
+  const updateFormData = (field: keyof FormData, value: string | number | File[] | 'standard' | 'rush' | 'same-day') => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }))
@@ -554,9 +554,9 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
               <label className="block text-sm font-medium text-[#0C2340] mb-2">
                 Service Speed <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 <label
-                  className={`flex-1 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                     formData.serviceSpeed === 'standard'
                       ? 'border-[#0891B2] bg-[#E0F2FE]'
                       : 'border-slate-300 hover:border-slate-400'
@@ -567,7 +567,7 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
                     name="serviceSpeed"
                     value="standard"
                     checked={formData.serviceSpeed === 'standard'}
-                    onChange={(e) => updateFormData('serviceSpeed', e.target.value as 'standard' | 'same-day')}
+                    onChange={(e) => updateFormData('serviceSpeed', e.target.value as 'standard' | 'rush' | 'same-day')}
                     className="sr-only"
                   />
                   <div className="text-center">
@@ -576,7 +576,27 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
                   </div>
                 </label>
                 <label
-                  className={`flex-1 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                    formData.serviceSpeed === 'rush'
+                      ? 'border-[#0891B2] bg-[#E0F2FE]'
+                      : 'border-slate-300 hover:border-slate-400'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="serviceSpeed"
+                    value="rush"
+                    checked={formData.serviceSpeed === 'rush'}
+                    onChange={(e) => updateFormData('serviceSpeed', e.target.value as 'standard' | 'rush' | 'same-day')}
+                    className="sr-only"
+                  />
+                  <div className="text-center">
+                    <div className="font-semibold text-[#0C2340]">Rush Service</div>
+                    <div className="text-sm text-slate-600">24 Hours (+$25)</div>
+                  </div>
+                </label>
+                <label
+                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                     formData.serviceSpeed === 'same-day'
                       ? 'border-[#0891B2] bg-[#E0F2FE]'
                       : 'border-slate-300 hover:border-slate-400'
@@ -587,12 +607,12 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
                     name="serviceSpeed"
                     value="same-day"
                     checked={formData.serviceSpeed === 'same-day'}
-                    onChange={(e) => updateFormData('serviceSpeed', e.target.value as 'standard' | 'same-day')}
+                    onChange={(e) => updateFormData('serviceSpeed', e.target.value as 'standard' | 'rush' | 'same-day')}
                     className="sr-only"
                   />
                   <div className="text-center">
-                    <div className="font-semibold text-[#0C2340]">Same-Day Rush</div>
-                    <div className="text-sm text-slate-600">+$25</div>
+                    <div className="font-semibold text-[#0C2340]">Same-Day</div>
+                    <div className="text-sm text-slate-600">+$50</div>
                   </div>
                 </label>
               </div>
