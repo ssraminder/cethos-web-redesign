@@ -212,8 +212,8 @@ export default function LifeSciencesPageContent() {
           <div className="flex flex-wrap justify-center gap-3">
             {[
               { name: 'Linguistic Validation', href: '#linguistic-validation' },
-              { name: 'Cognitive Debriefing', href: '#cognitive-debriefing' },
-              { name: 'Clinician Review', href: '#clinician-review' },
+              { name: 'Cognitive Debriefing', href: '/services/lifesciences/cognitive-debriefing' },
+              { name: 'Clinician Review', href: '/services/lifesciences/clinician-review' },
               { name: 'Clinical Trials', href: '#clinical-trials' },
               { name: 'Regulatory Affairs', href: '#regulatory-affairs' },
               { name: 'Pharmacovigilance', href: '#pharmacovigilance' },
@@ -229,20 +229,6 @@ export default function LifeSciencesPageContent() {
                 {item.name}
               </a>
             ))}
-            <Link
-              href="/services/lifesciences/cognitive-debriefing"
-              className="flex items-center gap-2 px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg text-sm font-medium transition-colors border border-teal-200"
-            >
-              Cognitive Debriefing
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/services/lifesciences/clinician-review"
-              className="flex items-center gap-2 px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-lg text-sm font-medium transition-colors border border-teal-200"
-            >
-              Clinician Review
-              <ArrowRight className="w-4 h-4" />
-            </Link>
           </div>
         </Container>
       </section>
