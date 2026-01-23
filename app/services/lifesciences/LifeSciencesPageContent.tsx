@@ -211,23 +211,33 @@ export default function LifeSciencesPageContent() {
         <Container>
           <div className="flex flex-wrap justify-center gap-3">
             {[
-              { name: 'Linguistic Validation', href: '#linguistic-validation' },
+              { name: 'Linguistic Validation', href: '/services/lifesciences/linguistic-validation' },
               { name: 'Cognitive Debriefing', href: '/services/lifesciences/cognitive-debriefing' },
               { name: 'Clinician Review', href: '/services/lifesciences/clinician-review' },
-              { name: 'Clinical Trials', href: '#clinical-trials' },
-              { name: 'Regulatory Affairs', href: '#regulatory-affairs' },
-              { name: 'Pharmacovigilance', href: '#pharmacovigilance' },
-              { name: 'eCOA Migration', href: '#ecoa' },
-              { name: 'Medical Devices', href: '#medical-devices' },
+              { name: 'Clinical Trials', href: '/services/lifesciences/clinical-trials' },
+              { name: 'Regulatory Affairs', href: '/services/lifesciences/regulatory-affairs' },
+              { name: 'Pharmacovigilance', href: '/services/lifesciences/pharmacovigilance' },
+              { name: 'eCOA Migration', href: '/services/lifesciences/ecoa-migration' },
+              { name: 'Medical Devices', href: '/services/lifesciences/medical-devices' },
               { name: 'Get a Quote', href: '#quote-form' },
             ].map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="px-4 py-2 bg-slate-100 hover:bg-teal-100 text-slate-700 hover:text-teal-700 rounded-lg text-sm font-medium transition-colors"
-              >
-                {item.name}
-              </a>
+              item.href.startsWith('#') ? (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className="px-4 py-2 bg-slate-100 hover:bg-teal-100 text-slate-700 hover:text-teal-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  {item.name}
+                </a>
+              ) : (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="px-4 py-2 bg-slate-100 hover:bg-teal-100 text-slate-700 hover:text-teal-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  {item.name}
+                </Link>
+              )
             ))}
           </div>
         </Container>
@@ -305,6 +315,20 @@ export default function LifeSciencesPageContent() {
               </div>
               <p className="mt-4 text-sm text-slate-500">And many more specialized therapeutic areas</p>
             </div>
+          </div>
+
+          {/* Link to dedicated Linguistic Validation page */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/services/lifesciences/linguistic-validation"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="mt-3 text-sm text-slate-500">
+              Learn more about our linguistic validation services and request a customized quote
+            </p>
           </div>
         </Container>
       </section>
@@ -517,6 +541,20 @@ export default function LifeSciencesPageContent() {
               </ul>
             </Card>
           </div>
+
+          {/* Link to dedicated Clinical Trials page */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/services/lifesciences/clinical-trials"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="mt-3 text-sm text-slate-500">
+              Learn more about our clinical trial documentation services and request a customized quote
+            </p>
+          </div>
         </Container>
       </section>
 
@@ -577,6 +615,20 @@ export default function LifeSciencesPageContent() {
               ))}
             </div>
           </div>
+
+          {/* Link to dedicated Regulatory Affairs page */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/services/lifesciences/regulatory-affairs"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="mt-3 text-sm text-slate-500">
+              Learn more about our regulatory affairs services and request a customized quote
+            </p>
+          </div>
         </Container>
       </section>
 
@@ -626,6 +678,20 @@ export default function LifeSciencesPageContent() {
               </ul>
             </Card>
           </div>
+
+          {/* Link to dedicated Pharmacovigilance page */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/services/lifesciences/pharmacovigilance"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="mt-3 text-sm text-slate-500">
+              Learn more about our pharmacovigilance services and request a customized quote
+            </p>
+          </div>
         </Container>
       </section>
 
@@ -657,6 +723,20 @@ export default function LifeSciencesPageContent() {
                 <p className="text-sm text-slate-600">{service.description}</p>
               </Card>
             ))}
+          </div>
+
+          {/* Link to dedicated eCOA Migration page */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/services/lifesciences/ecoa-migration"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="mt-3 text-sm text-slate-500">
+              Learn more about our eCOA migration services and request a customized quote
+            </p>
           </div>
         </Container>
       </section>
@@ -707,6 +787,20 @@ export default function LifeSciencesPageContent() {
                 <li>Clinical evaluation reports</li>
               </ul>
             </Card>
+          </div>
+
+          {/* Link to dedicated Medical Devices page */}
+          <div className="mt-12 text-center">
+            <Link
+              href="/services/lifesciences/medical-devices"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <p className="mt-3 text-sm text-slate-500">
+              Learn more about our medical device translation services and request a customized quote
+            </p>
           </div>
         </Container>
       </section>
