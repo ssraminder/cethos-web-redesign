@@ -47,8 +47,11 @@ export function Footer() {
                 />
               </Link>
 
-              <p className="text-white/70 mb-6 max-w-sm">
-                Professional translation services in 200+ languages. Precision, quality, and speed for global businesses.
+              <p className="text-white/80 font-medium mb-2">
+                Global Communication. Local Precision.
+              </p>
+              <p className="text-white/60 mb-6 max-w-sm text-sm">
+                Professional translation services in 200+ languages for life sciences, business, and certified documents.
               </p>
 
               <div className="space-y-3">
