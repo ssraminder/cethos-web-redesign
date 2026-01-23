@@ -1,7 +1,8 @@
 import { createServerSupabaseClient } from '@/lib/supabase'
-import { Resend } from 'resend'
 import { NextResponse } from 'next/server'
 import { lifeSciencesQuoteSchema } from '@/lib/validations/life-sciences-quote'
+
+const Brevo = require('@getbrevo/brevo')
 
 export async function POST(req: Request) {
   console.log('[API Quote] Request received at:', new Date().toISOString())
@@ -12,14 +13,10 @@ export async function POST(req: Request) {
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
       hasSupabaseKey: !!process.env.SUPABASE_SERVICE_KEY,
       hasBrevoKey: !!process.env.BREVO_API_KEY,
-      hasResendKey: !!process.env.RESEND_API_KEY,
     })
 
     const supabase = createServerSupabaseClient()
     console.log('[API Quote] Supabase client created')
-
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    console.log('[API Quote] Resend client created')
 
     const formData = await req.formData()
     console.log('[API Quote] FormData keys:', Array.from(formData.keys()))
@@ -203,77 +200,83 @@ export async function POST(req: Request) {
       'flexible': 'Flexible (2+ weeks)',
     }
 
-    // Send email notification
+    // Send email notification using Brevo
     const emailRecipients = process.env.QUOTE_EMAIL_RECIPIENTS?.split(',') || ['info@cethos.com']
     console.log('[API Quote] Sending email to:', emailRecipients)
 
     try {
-      await resend.emails.send({
-        from: 'Cethos Quotes <quotes@cethos.com>',
-        to: emailRecipients,
-        replyTo: validatedData.email,
-        subject: `New Life Sciences Quote - ${validatedData.companyName}`,
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>New Quote Request</title>
-          </head>
-          <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #0C2340 0%, #1a3a5c 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-              <h1 style="color: #fff; margin: 0; font-size: 24px;">New Life Sciences Quote Request</h1>
+      const apiInstance = new Brevo.TransactionalEmailsApi()
+      apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>New Quote Request</title>
+        </head>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #0C2340 0%, #1a3a5c 100%); padding: 30px; border-radius: 12px 12px 0 0;">
+            <h1 style="color: #fff; margin: 0; font-size: 24px;">New Life Sciences Quote Request</h1>
+          </div>
+
+          <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Contact Information</h2>
+              <p style="margin: 8px 0;"><strong>Name:</strong> ${validatedData.fullName}</p>
+              <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${validatedData.email}" style="color: #0891B2;">${validatedData.email}</a></p>
+              <p style="margin: 8px 0;"><strong>Phone:</strong> ${validatedData.phone}</p>
+              <p style="margin: 8px 0;"><strong>Company:</strong> ${validatedData.companyName}</p>
+              ${validatedData.jobTitle ? `<p style="margin: 8px 0;"><strong>Job Title:</strong> ${validatedData.jobTitle}</p>` : ''}
             </div>
 
-            <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Contact Information</h2>
-                <p style="margin: 8px 0;"><strong>Name:</strong> ${validatedData.fullName}</p>
-                <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${validatedData.email}" style="color: #0891B2;">${validatedData.email}</a></p>
-                <p style="margin: 8px 0;"><strong>Phone:</strong> ${validatedData.phone}</p>
-                <p style="margin: 8px 0;"><strong>Company:</strong> ${validatedData.companyName}</p>
-                ${validatedData.jobTitle ? `<p style="margin: 8px 0;"><strong>Job Title:</strong> ${validatedData.jobTitle}</p>` : ''}
-              </div>
-
-              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Service Details</h2>
-                <p style="margin: 8px 0;"><strong>Service Type:</strong> ${serviceLabels[validatedData.serviceType] || validatedData.serviceType}</p>
-                ${validatedData.therapeuticArea ? `<p style="margin: 8px 0;"><strong>Therapeutic Area:</strong> ${therapeuticLabels[validatedData.therapeuticArea] || validatedData.therapeuticArea}</p>` : ''}
-                ${validatedData.studyPhase ? `<p style="margin: 8px 0;"><strong>Study Phase:</strong> ${phaseLabels[validatedData.studyPhase] || validatedData.studyPhase}</p>` : ''}
-                ${validatedData.instrumentType ? `<p style="margin: 8px 0;"><strong>Instrument Type:</strong> ${validatedData.instrumentType.toUpperCase()}</p>` : ''}
-                ${validatedData.regulatoryPathway ? `<p style="margin: 8px 0;"><strong>Regulatory Pathway:</strong> ${regulatoryLabels[validatedData.regulatoryPathway] || validatedData.regulatoryPathway}</p>` : ''}
-              </div>
-
-              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Language & Scope</h2>
-                <p style="margin: 8px 0;"><strong>Source Language:</strong> ${validatedData.sourceLanguage}</p>
-                <p style="margin: 8px 0;"><strong>Target Languages:</strong> ${validatedData.targetLanguages.join(', ')}</p>
-                <p style="margin: 8px 0;"><strong>Word Count:</strong> ${validatedData.wordCount || 'TBD'}</p>
-                <p style="margin: 8px 0;"><strong>Timeline:</strong> ${timelineLabels[validatedData.timeline] || validatedData.timeline}</p>
-              </div>
-
-              <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Project Description</h2>
-                <p style="margin: 0; white-space: pre-wrap;">${validatedData.projectDescription}</p>
-              </div>
-
-              ${fileUrls.length > 0 ? `
-              <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin: 0; color: #0C2340;"><strong>📎 ${fileUrls.length} file(s) attached</strong></p>
-                <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Files have been uploaded to the storage bucket.</p>
-              </div>
-              ` : ''}
-
-              <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                <p style="color: #6b7280; font-size: 14px; margin: 0;">Quote ID: ${quote.id}</p>
-                <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Submitted: ${new Date().toLocaleString('en-US', { timeZone: 'America/Edmonton' })}</p>
-              </div>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Service Details</h2>
+              <p style="margin: 8px 0;"><strong>Service Type:</strong> ${serviceLabels[validatedData.serviceType] || validatedData.serviceType}</p>
+              ${validatedData.therapeuticArea ? `<p style="margin: 8px 0;"><strong>Therapeutic Area:</strong> ${therapeuticLabels[validatedData.therapeuticArea] || validatedData.therapeuticArea}</p>` : ''}
+              ${validatedData.studyPhase ? `<p style="margin: 8px 0;"><strong>Study Phase:</strong> ${phaseLabels[validatedData.studyPhase] || validatedData.studyPhase}</p>` : ''}
+              ${validatedData.instrumentType ? `<p style="margin: 8px 0;"><strong>Instrument Type:</strong> ${validatedData.instrumentType.toUpperCase()}</p>` : ''}
+              ${validatedData.regulatoryPathway ? `<p style="margin: 8px 0;"><strong>Regulatory Pathway:</strong> ${regulatoryLabels[validatedData.regulatoryPathway] || validatedData.regulatoryPathway}</p>` : ''}
             </div>
-          </body>
-          </html>
-        `,
-      })
+
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Language & Scope</h2>
+              <p style="margin: 8px 0;"><strong>Source Language:</strong> ${validatedData.sourceLanguage}</p>
+              <p style="margin: 8px 0;"><strong>Target Languages:</strong> ${validatedData.targetLanguages.join(', ')}</p>
+              <p style="margin: 8px 0;"><strong>Word Count:</strong> ${validatedData.wordCount || 'TBD'}</p>
+              <p style="margin: 8px 0;"><strong>Timeline:</strong> ${timelineLabels[validatedData.timeline] || validatedData.timeline}</p>
+            </div>
+
+            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Project Description</h2>
+              <p style="margin: 0; white-space: pre-wrap;">${validatedData.projectDescription}</p>
+            </div>
+
+            ${fileUrls.length > 0 ? `
+            <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #0C2340;"><strong>📎 ${fileUrls.length} file(s) attached</strong></p>
+              <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Files have been uploaded to the storage bucket.</p>
+            </div>
+            ` : ''}
+
+            <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+              <p style="color: #6b7280; font-size: 14px; margin: 0;">Quote ID: ${quote.id}</p>
+              <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Submitted: ${new Date().toLocaleString('en-US', { timeZone: 'America/Edmonton' })}</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+
+      const sendSmtpEmail = new Brevo.SendSmtpEmail()
+      sendSmtpEmail.subject = `New Life Sciences Quote - ${validatedData.companyName}`
+      sendSmtpEmail.htmlContent = htmlContent
+      sendSmtpEmail.sender = { name: 'Cethos Website', email: 'noreply@cethos.com' }
+      sendSmtpEmail.to = emailRecipients.map((email: string) => ({ email: email.trim() }))
+      sendSmtpEmail.replyTo = { email: validatedData.email }
+
+      await apiInstance.sendTransacEmail(sendSmtpEmail)
       console.log('[API Quote] Email sent successfully')
     } catch (emailError: unknown) {
       const emailErr = emailError as Error
