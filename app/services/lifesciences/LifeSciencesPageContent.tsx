@@ -25,6 +25,7 @@ import {
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { CTA } from '@/components/sections'
 import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
+import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 const linguisticValidationSteps = [
   { step: 1, title: 'Forward Translation', description: 'Two independent native-speaking translators produce separate translations' },
@@ -122,6 +123,11 @@ const faqs = [
   },
 ]
 
+const breadcrumbItems = [
+  { name: 'Services', url: '/services' },
+  { name: 'Life Sciences', url: '/services/lifesciences' },
+]
+
 export default function LifeSciencesPageContent() {
   return (
     <>
@@ -131,10 +137,12 @@ export default function LifeSciencesPageContent() {
         url="https://cethos.com/services/lifesciences"
       />
       <FAQJsonLd faqs={faqs} />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
 
       {/* Hero Section */}
       <section className="pt-20 bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
         <div className="max-w-[1200px] mx-auto px-8 py-24">
+          <Breadcrumbs items={breadcrumbItems} className="mb-6" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <div className="text-sm font-semibold text-[#0891B2] uppercase tracking-widest mb-4">

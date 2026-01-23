@@ -216,7 +216,7 @@ export default function GetQuotePageContent() {
               </div>
 
               {/* Form Content */}
-              <form onSubmit={handleSubmit} className="p-8">
+              <form onSubmit={handleSubmit} className="p-8" aria-label="Quote request form">
                 <AnimatePresence mode="wait">
                   {/* Step 1: Project Details */}
                   {currentStep === 1 && (
@@ -294,12 +294,13 @@ export default function GetQuotePageContent() {
                         <label className="block text-sm font-medium text-navy mb-3">
                           Target Languages (select all that apply)
                         </label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2" role="group" aria-label="Target language selection">
                           {targetLanguages.map((lang) => (
                             <button
                               key={lang.value}
                               type="button"
                               onClick={() => toggleTargetLanguage(lang.value)}
+                              aria-pressed={formData.targetLanguages.includes(lang.value)}
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                                 formData.targetLanguages.includes(lang.value)
                                   ? 'bg-teal-600 text-white'
