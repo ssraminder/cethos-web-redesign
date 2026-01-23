@@ -369,22 +369,13 @@ export default function LifeSciencesPageContent() {
 
           {/* Link to dedicated Cognitive Debriefing page */}
           <div className="mt-12 text-center">
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                href="/services/lifesciences/cognitive-debriefing#quote-form"
-                className="inline-flex items-center gap-2 bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-              >
-                Get a Cognitive Debriefing Quote
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                href="/services/lifesciences/cognitive-debriefing"
-                className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
-              >
-                Learn More
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
+            <Link
+              href="/services/lifesciences/cognitive-debriefing"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
             <p className="mt-3 text-sm text-slate-500">
               Learn more about our cognitive debriefing services and request a customized quote
             </p>
@@ -435,22 +426,13 @@ export default function LifeSciencesPageContent() {
 
           {/* Link to dedicated Clinician Review page */}
           <div className="mt-12 text-center">
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                href="/services/lifesciences/clinician-review#quote-form"
-                className="inline-flex items-center gap-2 bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold px-6 py-3 rounded-lg transition-colors"
-              >
-                Get a Clinician Review Quote
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link
-                href="/services/lifesciences/clinician-review"
-                className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
-              >
-                Learn More
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
+            <Link
+              href="/services/lifesciences/clinician-review"
+              className="inline-flex items-center gap-2 bg-white border-2 border-[#0C2340] text-[#0C2340] hover:bg-slate-50 font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Learn More
+              <ArrowRight className="w-5 h-5" />
+            </Link>
             <p className="mt-3 text-sm text-slate-500">
               Learn more about our clinician review services and request a customized quote
             </p>
