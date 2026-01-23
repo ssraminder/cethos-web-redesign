@@ -106,15 +106,9 @@ export default function BirthCertificateContent() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-wrap gap-4 mb-6"
               >
-                <Link
-                  href="#quote-form"
-                  className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
-                >
-                  Get a Free Quote <ArrowRight className="w-5 h-5" />
-                </Link>
                 <a
                   href="tel:5876000786"
-                  className="px-6 py-4 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-[#F8FAFC] transition-colors flex items-center gap-2"
+                  className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
                 >
                   <Phone className="w-5 h-5" /> (587) 600-0786
                 </a>
@@ -280,15 +274,9 @@ export default function BirthCertificateContent() {
               Starting at $65. Same-day service available.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                href="#quote-form"
-                className="px-8 py-4 bg-white text-[#0891B2] rounded-lg font-semibold hover:bg-slate-100 transition-colors"
-              >
-                Get a Free Quote
-              </Link>
               <a
                 href="tel:5876000786"
-                className="px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg font-semibold hover:bg-white/10 transition-colors flex items-center gap-2"
+                className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
               >
                 <Phone className="w-5 h-5" /> (587) 600-0786
               </a>
