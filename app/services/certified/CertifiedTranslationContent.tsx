@@ -64,6 +64,20 @@ const specializedServices = [
     href: '/services/certified/edmonton-translation-agency',
     price: 'Free email delivery',
   },
+  {
+    icon: FileText,
+    title: 'Police Clearance Translation',
+    description: 'RCMP, FBI, and international police certificates for immigration.',
+    href: '/services/certified/police-clearance-translation',
+    price: 'Starting at $65',
+  },
+  {
+    icon: Scale,
+    title: 'Divorce Certificate Translation',
+    description: 'Divorce decrees and separation agreements for IRCC.',
+    href: '/services/certified/divorce-certificate-translation',
+    price: 'Starting at $65',
+  },
 ]
 
 const features = [
