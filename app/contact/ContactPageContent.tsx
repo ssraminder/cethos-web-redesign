@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Container, Card, Button, Input, Textarea, Select } from '@/components/ui'
 import { MailIcon, PhoneIcon, MapPinIcon, ClockIcon, CheckIcon } from '@/components/icons'
+import { ContactLocations } from '@/components/ContactLocations'
 
 const contactInfo = [
   {
@@ -29,27 +30,6 @@ const contactInfo = [
     value: '24/7 Support Available',
     link: null,
     icon: ClockIcon,
-  },
-]
-
-const offices = [
-  {
-    city: 'Calgary',
-    country: 'Canada (Headquarters)',
-    address: '421 7 Avenue SW, Floor 30\nCalgary, AB T2P 4K9',
-    phone: '587-600-0786',
-  },
-  {
-    city: 'Dubai',
-    country: 'United Arab Emirates',
-    address: 'Building A1, Dubai Digital Park\nDubai Silicon Oasis',
-    phone: '587-600-0786',
-  },
-  {
-    city: 'Patiala',
-    country: 'India',
-    address: '158/3, Dharampura Bazaar\nPatiala 147001, Punjab',
-    phone: '587-600-0786',
   },
 ]
 
@@ -214,43 +194,12 @@ export default function ContactPageContent() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <h2 className="text-heading-xl text-navy mb-2">Our Offices</h2>
+              <h2 className="text-heading-xl text-navy mb-2">Our Locations</h2>
               <p className="text-slate-600 mb-8">
-                Visit us at one of our global locations.
+                Connect with us at the location nearest to you.
               </p>
 
-              <div className="space-y-6">
-                {offices.map((office) => (
-                  <Card key={office.city} variant="outline" className="hover:border-teal-200 transition-colors">
-                    <div className="flex gap-4">
-                      <div className="icon-container flex-shrink-0">
-                        <MapPinIcon size={20} />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-navy">
-                          {office.city}, {office.country}
-                        </h3>
-                        <p className="text-slate-600 text-sm whitespace-pre-line mt-1">
-                          {office.address}
-                        </p>
-                        <a href={`tel:${office.phone}`} className="text-teal-600 text-sm mt-2 inline-block hover:underline">
-                          {office.phone}
-                        </a>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Map placeholder */}
-              <div className="mt-8 aspect-video rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                <div className="text-center p-8">
-                  <MapPinIcon size={48} className="mx-auto text-slate-400 mb-4" />
-                  <p className="text-slate-400 text-sm">
-                    [Interactive Map Placeholder]
-                  </p>
-                </div>
-              </div>
+              <ContactLocations />
             </motion.div>
           </div>
         </Container>
