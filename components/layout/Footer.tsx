@@ -39,7 +39,7 @@ export function Footer() {
             {/* Brand */}
             <div className="lg:col-span-2">
               {/* Logo */}
-              <Link href="/" className="flex items-center mb-6">
+              <Link href="/" className="flex items-center mb-2">
                 <img
                   src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_dark_bg_cethosAsset%202.svg"
                   alt="Cethos Solutions Inc."
@@ -47,8 +47,12 @@ export function Footer() {
                 />
               </Link>
 
+              <p className="text-white/90 font-medium mb-4">
+                Global Communication. Local Precision.
+              </p>
+
               <p className="text-white/70 mb-6 max-w-sm">
-                Professional translation services in 200+ languages. Precision, quality, and speed for global businesses.
+                Professional translation services in 200+ languages for global businesses.
               </p>
 
               <div className="space-y-3">
