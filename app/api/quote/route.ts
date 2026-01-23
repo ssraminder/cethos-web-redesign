@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     console.log('[API Quote] Resend client created')
 
     const formData = await req.formData()
-    console.log('[API Quote] FormData keys:', [...formData.keys()])
+    console.log('[API Quote] FormData keys:', Array.from(formData.keys()))
 
     // Parse form data
     const rawData = {
