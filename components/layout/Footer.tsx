@@ -43,7 +43,7 @@ export function Footer() {
                 <img
                   src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_dark_bg_cethosAsset%202.svg"
                   alt="Cethos"
-                  className="w-[140px] md:w-[160px] lg:w-[180px] h-auto"
+                  className="w-[180px] md:w-[180px] lg:w-[180px] h-auto"
                 />
               </Link>
 
