@@ -746,7 +746,11 @@ export default function LifeSciencesPageContent() {
               Tell us about your project and receive a detailed quote within 2 hours during business hours.
             </p>
           </div>
-          <LifeSciencesQuoteForm />
+          <LifeSciencesQuoteForm
+            variant="general"
+            hideServiceSelector={false}
+            formLocation="lifesciences-main"
+          />
         </Container>
       </section>
 

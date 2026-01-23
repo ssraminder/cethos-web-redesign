@@ -249,7 +249,8 @@ export default function CognitiveDebriefingPage() {
             <div className="mt-10 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
               <LifeSciencesQuoteForm
                 variant="cognitive-debriefing"
-                hideServiceSelector
+                hideServiceSelector={true}
+                formLocation="cognitive-debriefing"
               />
             </div>
           </div>
