@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { CTA } from '@/components/sections'
+import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
 import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
@@ -155,9 +156,9 @@ export default function LifeSciencesPageContent() {
                 From linguistic validation of patient-reported outcomes to regulatory submissions and pharmacovigilance—comprehensive language solutions for the pharmaceutical, biotechnology, and medical device industries.
               </p>
               <div className="flex items-center gap-4 mb-8">
-                <Link href="/get-quote" className="px-6 py-4 bg-[#0891B2] text-white rounded-lg hover:bg-[#06B6D4] transition-colors text-base font-semibold flex items-center gap-2">
+                <a href="#quote-form" className="px-6 py-4 bg-[#0891B2] text-white rounded-lg hover:bg-[#06B6D4] transition-colors text-base font-semibold flex items-center gap-2">
                   Get a Quote <ArrowRight className="w-5 h-5" />
-                </Link>
+                </a>
                 <Link href="/contact" className="px-6 py-4 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg hover:bg-[#F8FAFC] transition-colors text-base font-semibold">
                   Contact Us
                 </Link>
@@ -218,6 +219,7 @@ export default function LifeSciencesPageContent() {
               { name: 'Pharmacovigilance', href: '#pharmacovigilance' },
               { name: 'eCOA Migration', href: '#ecoa' },
               { name: 'Medical Devices', href: '#medical-devices' },
+              { name: 'Get a Quote', href: '#quote-form' },
             ].map((item) => (
               <a
                 key={item.name}
@@ -678,6 +680,24 @@ export default function LifeSciencesPageContent() {
               </ul>
             </Card>
           </div>
+        </Container>
+      </section>
+
+      {/* Quote Request Form Section */}
+      <section id="quote-form" className="section-padding bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
+        <Container size="md">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <div className="w-16 h-16 rounded-2xl bg-teal-100 flex items-center justify-center mx-auto mb-6">
+              <FileText className="w-8 h-8 text-teal-600" />
+            </div>
+            <h2 className="text-[40px] font-bold text-[#0C2340] mb-4">
+              Request a Quote
+            </h2>
+            <p className="text-lg text-[#4B5563]">
+              Tell us about your project and receive a detailed quote within 2 hours during business hours.
+            </p>
+          </div>
+          <LifeSciencesQuoteForm />
         </Container>
       </section>
 
