@@ -19,7 +19,8 @@ import {
 import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
-import { TrustBar, StickyMobileCTA, LandingQuoteForm, LandingLocalBusinessJsonLd } from '@/components/landing'
+import { TrustBar, StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
+import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
 
 const whyChooseUs = [
   {
@@ -204,7 +205,7 @@ export default function ImmigrationTranslationContent() {
             >
               <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
               <p className="text-slate-600 mb-6">Upload your document and we&apos;ll respond within 2 hours.</p>
-              <LandingQuoteForm />
+              <CertifiedQuoteForm formLocation="immigration-translation-services" />
             </motion.div>
           </div>
         </div>
