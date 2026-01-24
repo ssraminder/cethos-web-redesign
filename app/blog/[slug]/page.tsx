@@ -25,12 +25,12 @@ export async function generateMetadata({
 
   return {
     title: `${post.title} | Cethos Blog`,
-    description: post.excerpt,
+    description: post.excerpt ?? undefined,
     openGraph: {
       title: post.title,
-      description: post.excerpt,
+      description: post.excerpt ?? undefined,
       type: 'article',
-      publishedTime: post.published_at,
+      publishedTime: post.published_at ?? undefined,
       authors: [post.author?.name || 'Cethos Team'],
       images: post.featured_image ? [{ url: post.featured_image }] : [],
     },
