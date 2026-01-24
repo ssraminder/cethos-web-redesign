@@ -28,7 +28,10 @@ export async function POST(req: Request) {
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
       documentType: formData.get('documentType') as string,
-      languageOfDocument: formData.get('languageOfDocument') as string,
+      sourceLanguage: formData.get('sourceLanguage') as string,
+      targetLanguage: formData.get('targetLanguage') as string,
+      sourceLanguageLabel: formData.get('sourceLanguageLabel') as string || '',
+      targetLanguageLabel: formData.get('targetLanguageLabel') as string || '',
       numberOfPages: parseInt(formData.get('numberOfPages') as string) || 1,
       purpose: formData.get('purpose') as string,
       serviceSpeed: formData.get('serviceSpeed') as string || 'standard',
@@ -70,14 +73,16 @@ export async function POST(req: Request) {
       phone: rawData.phone,
       company_name: null, // Not collected in certified form
       job_title: null,
-      source_language: rawData.languageOfDocument,
-      target_languages: ['English'], // Certified translations are to English
+      source_language: rawData.sourceLanguageLabel || rawData.sourceLanguage,
+      target_languages: [rawData.targetLanguageLabel || rawData.targetLanguage],
       word_count: null,
       deadline: rawData.serviceSpeed === 'same-day' ? 'urgent' : 'standard',
       additional_notes: rawData.additionalNotes,
       service_data: {
         formLocation: rawData.formLocation,
         documentType: rawData.documentType,
+        sourceLanguageCode: rawData.sourceLanguage,
+        targetLanguageCode: rawData.targetLanguage,
         numberOfPages: rawData.numberOfPages,
         purpose: rawData.purpose,
         serviceSpeed: rawData.serviceSpeed,
@@ -216,11 +221,11 @@ export async function POST(req: Request) {
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
               <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Document Details</h2>
               <p style="margin: 8px 0;"><strong>Document Type:</strong> ${documentTypeLabels[rawData.documentType] || rawData.documentType}</p>
-              <p style="margin: 8px 0;"><strong>Source Language:</strong> ${rawData.languageOfDocument}</p>
-              <p style="margin: 8px 0;"><strong>Target Language:</strong> English</p>
+              <p style="margin: 8px 0;"><strong>Source Language:</strong> ${rawData.sourceLanguageLabel || rawData.sourceLanguage}</p>
+              <p style="margin: 8px 0;"><strong>Target Language:</strong> ${rawData.targetLanguageLabel || rawData.targetLanguage}</p>
               <p style="margin: 8px 0;"><strong>Number of Pages:</strong> ${rawData.numberOfPages}</p>
               <p style="margin: 8px 0;"><strong>Purpose:</strong> ${purposeLabels[rawData.purpose] || rawData.purpose}</p>
-              <p style="margin: 8px 0;"><strong>Service Speed:</strong> ${rawData.serviceSpeed === 'same-day' ? 'Same-Day Rush (+$25)' : 'Standard (2-3 business days)'}</p>
+              <p style="margin: 8px 0;"><strong>Service Speed:</strong> ${rawData.serviceSpeed === 'same-day' ? 'Same-Day Rush (+$25)' : rawData.serviceSpeed === 'rush' ? 'Rush (24 Hours)' : 'Standard (2-3 business days)'}</p>
             </div>
 
             ${rawData.additionalNotes ? `

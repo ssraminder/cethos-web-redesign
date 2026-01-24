@@ -1,35 +1,19 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, CheckCircle, AlertCircle, ArrowLeft, ArrowRight, X, FileText } from 'lucide-react'
 
-const documentTypes = [
-  { value: 'birth-certificate', label: 'Birth Certificate' },
-  { value: 'marriage-certificate', label: 'Marriage Certificate' },
-  { value: 'divorce-certificate', label: 'Divorce Certificate' },
-  { value: 'diploma-degree', label: 'Diploma or Degree' },
-  { value: 'academic-transcript', label: 'Academic Transcript' },
-  { value: 'police-clearance', label: 'Police Clearance' },
-  { value: 'employment-letter', label: 'Employment Letter' },
-  { value: 'bank-statement', label: 'Bank Statement' },
-  { value: 'passport', label: 'Passport' },
-  { value: 'drivers-license', label: "Driver's License" },
-  { value: 'other', label: 'Other' },
-]
+interface DropdownOption {
+  id: string
+  value: string
+  label: string
+}
 
-const purposes = [
-  { value: 'pr-application', label: 'PR Application' },
-  { value: 'citizenship', label: 'Citizenship' },
-  { value: 'spousal-sponsorship', label: 'Spousal Sponsorship' },
-  { value: 'express-entry', label: 'Express Entry' },
-  { value: 'wes-iqas', label: 'WES/IQAS Evaluation' },
-  { value: 'study-permit', label: 'Study Permit' },
-  { value: 'work-permit', label: 'Work Permit' },
-  { value: 'legal-court', label: 'Legal / Court' },
-  { value: 'personal', label: 'Personal Use' },
-  { value: 'other', label: 'Other' },
-]
+interface LocaleOption extends DropdownOption {
+  languageName: string
+  countryName: string
+}
 
 interface CertifiedQuoteFormProps {
   defaultDocumentType?: string
@@ -43,7 +27,8 @@ interface FormData {
   phone: string
   // Step 2 - Document
   documentType: string
-  languageOfDocument: string
+  sourceLanguage: string
+  targetLanguage: string
   numberOfPages: number
   purpose: string
   // Step 3 - Upload
@@ -63,18 +48,82 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
   const [isDragging, setIsDragging] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Dropdown data state
+  const [locales, setLocales] = useState<LocaleOption[]>([])
+  const [documentTypes, setDocumentTypes] = useState<DropdownOption[]>([])
+  const [intendedUses, setIntendedUses] = useState<DropdownOption[]>([])
+  const [isLoadingDropdowns, setIsLoadingDropdowns] = useState(true)
+
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     email: '',
     phone: '',
     documentType: defaultDocumentType || '',
-    languageOfDocument: '',
+    sourceLanguage: '',
+    targetLanguage: '',
     numberOfPages: 1,
     purpose: '',
     files: [],
     serviceSpeed: 'standard',
     additionalNotes: '',
   })
+
+  // Fetch dropdown data on mount
+  useEffect(() => {
+    async function fetchDropdownData() {
+      setIsLoadingDropdowns(true)
+      try {
+        const [localesRes, docTypesRes, intendedUsesRes] = await Promise.all([
+          fetch('/api/locales'),
+          fetch('/api/document-types'),
+          fetch('/api/intended-uses'),
+        ])
+
+        const [localesData, docTypesData, intendedUsesData] = await Promise.all([
+          localesRes.json(),
+          docTypesRes.json(),
+          intendedUsesRes.json(),
+        ])
+
+        if (localesData.locales) {
+          setLocales(localesData.locales)
+        }
+        if (docTypesData.documentTypes) {
+          setDocumentTypes(docTypesData.documentTypes)
+        }
+        if (intendedUsesData.intendedUses) {
+          setIntendedUses(intendedUsesData.intendedUses)
+        }
+      } catch (error) {
+        console.error('Error fetching dropdown data:', error)
+      } finally {
+        setIsLoadingDropdowns(false)
+      }
+    }
+
+    fetchDropdownData()
+  }, [])
+
+  // Auto-set target language to English if source is not English
+  const handleSourceLanguageChange = (value: string) => {
+    setFormData(prev => {
+      const selectedLocale = locales.find(l => l.value === value)
+      const isEnglish = selectedLocale?.languageName?.toLowerCase() === 'english'
+
+      // Find an English locale for auto-setting target
+      const englishLocale = locales.find(l => l.languageName?.toLowerCase() === 'english')
+
+      return {
+        ...prev,
+        sourceLanguage: value,
+        // Auto-set target to English if source is not English
+        targetLanguage: !isEnglish && englishLocale ? englishLocale.value : prev.targetLanguage,
+      }
+    })
+    if (errors.sourceLanguage) {
+      setErrors(prev => ({ ...prev, sourceLanguage: '' }))
+    }
+  }
 
   const updateFormData = (field: keyof FormData, value: string | number | File[] | 'standard' | 'rush' | 'same-day') => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -102,8 +151,11 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
       if (!formData.documentType) {
         newErrors.documentType = 'Please select a document type'
       }
-      if (!formData.languageOfDocument.trim()) {
-        newErrors.languageOfDocument = 'Please enter the language of your document'
+      if (!formData.sourceLanguage) {
+        newErrors.sourceLanguage = 'Please select the source language'
+      }
+      if (!formData.targetLanguage) {
+        newErrors.targetLanguage = 'Please select the target language'
       }
       if (formData.numberOfPages < 1) {
         newErrors.numberOfPages = 'Number of pages must be at least 1'
@@ -212,11 +264,18 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
       submitData.append('email', formData.email)
       submitData.append('phone', formData.phone)
       submitData.append('documentType', formData.documentType)
-      submitData.append('languageOfDocument', formData.languageOfDocument)
+      submitData.append('sourceLanguage', formData.sourceLanguage)
+      submitData.append('targetLanguage', formData.targetLanguage)
       submitData.append('numberOfPages', String(formData.numberOfPages))
       submitData.append('purpose', formData.purpose)
       submitData.append('serviceSpeed', formData.serviceSpeed)
       submitData.append('additionalNotes', formData.additionalNotes)
+
+      // Also send the display labels for email
+      const sourceLocale = locales.find(l => l.value === formData.sourceLanguage)
+      const targetLocale = locales.find(l => l.value === formData.targetLanguage)
+      submitData.append('sourceLanguageLabel', sourceLocale?.label || formData.sourceLanguage)
+      submitData.append('targetLanguageLabel', targetLocale?.label || formData.targetLanguage)
 
       // Add files
       formData.files.forEach((file) => {
@@ -399,11 +458,12 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
                 id="documentType"
                 value={formData.documentType}
                 onChange={(e) => updateFormData('documentType', e.target.value)}
+                disabled={isLoadingDropdowns}
                 className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent bg-white ${
                   errors.documentType ? 'border-red-500' : 'border-slate-300'
-                }`}
+                } ${isLoadingDropdowns ? 'opacity-50 cursor-wait' : ''}`}
               >
-                <option value="">Select document type</option>
+                <option value="">{isLoadingDropdowns ? 'Loading...' : 'Select document type'}</option>
                 {documentTypes.map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
@@ -413,23 +473,52 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
               {errors.documentType && <p className="text-red-500 text-sm mt-1">{errors.documentType}</p>}
             </div>
 
-            <div>
-              <label htmlFor="languageOfDocument" className="block text-sm font-medium text-[#0C2340] mb-1">
-                Language of Document <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="languageOfDocument"
-                value={formData.languageOfDocument}
-                onChange={(e) => updateFormData('languageOfDocument', e.target.value)}
-                className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent ${
-                  errors.languageOfDocument ? 'border-red-500' : 'border-slate-300'
-                }`}
-                placeholder="e.g., Punjabi, Mandarin, Arabic"
-              />
-              {errors.languageOfDocument && (
-                <p className="text-red-500 text-sm mt-1">{errors.languageOfDocument}</p>
-              )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="sourceLanguage" className="block text-sm font-medium text-[#0C2340] mb-1">
+                  Source Language <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="sourceLanguage"
+                  value={formData.sourceLanguage}
+                  onChange={(e) => handleSourceLanguageChange(e.target.value)}
+                  disabled={isLoadingDropdowns}
+                  className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent bg-white ${
+                    errors.sourceLanguage ? 'border-red-500' : 'border-slate-300'
+                  } ${isLoadingDropdowns ? 'opacity-50 cursor-wait' : ''}`}
+                >
+                  <option value="">{isLoadingDropdowns ? 'Loading...' : 'Select source language'}</option>
+                  {locales.map((locale) => (
+                    <option key={locale.value} value={locale.value}>
+                      {locale.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.sourceLanguage && <p className="text-red-500 text-sm mt-1">{errors.sourceLanguage}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="targetLanguage" className="block text-sm font-medium text-[#0C2340] mb-1">
+                  Target Language <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="targetLanguage"
+                  value={formData.targetLanguage}
+                  onChange={(e) => updateFormData('targetLanguage', e.target.value)}
+                  disabled={isLoadingDropdowns}
+                  className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent bg-white ${
+                    errors.targetLanguage ? 'border-red-500' : 'border-slate-300'
+                  } ${isLoadingDropdowns ? 'opacity-50 cursor-wait' : ''}`}
+                >
+                  <option value="">{isLoadingDropdowns ? 'Loading...' : 'Select target language'}</option>
+                  {locales.map((locale) => (
+                    <option key={locale.value} value={locale.value}>
+                      {locale.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.targetLanguage && <p className="text-red-500 text-sm mt-1">{errors.targetLanguage}</p>}
+              </div>
             </div>
 
             <div>
@@ -457,12 +546,13 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
                 id="purpose"
                 value={formData.purpose}
                 onChange={(e) => updateFormData('purpose', e.target.value)}
+                disabled={isLoadingDropdowns}
                 className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent bg-white ${
                   errors.purpose ? 'border-red-500' : 'border-slate-300'
-                }`}
+                } ${isLoadingDropdowns ? 'opacity-50 cursor-wait' : ''}`}
               >
-                <option value="">Select purpose</option>
-                {purposes.map((p) => (
+                <option value="">{isLoadingDropdowns ? 'Loading...' : 'Select purpose'}</option>
+                {intendedUses.map((p) => (
                   <option key={p.value} value={p.value}>
                     {p.label}
                   </option>
