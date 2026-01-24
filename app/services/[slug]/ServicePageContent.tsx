@@ -24,11 +24,28 @@ const iconMap: Record<IconName, LucideIcon> = {
   play: Play,
 }
 
+// CTA content mapping by service type
+const ctaContent: Record<string, { headline: string; subtext: string }> = {
+  business: {
+    headline: "Ready to Expand Globally?",
+    subtext: "Professional translations for your business documents."
+  },
+  software: {
+    headline: "Ready to Go Global?",
+    subtext: "Get a free quote for your translation project. Our team is ready to help you reach new markets with precision and speed."
+  },
+  multimedia: {
+    headline: "Ready to Go Global?",
+    subtext: "Get a free quote for your translation project. Our team is ready to help you reach new markets with precision and speed."
+  }
+}
+
 interface Props {
   service: ServiceData
 }
 
 export function ServicePageContent({ service }: Props) {
+  const cta = ctaContent[service.slug] || {}
   const Icon = iconMap[service.iconName]
 
   const breadcrumbItems = [
@@ -266,7 +283,7 @@ export function ServicePageContent({ service }: Props) {
       </section>
 
       {/* CTA Section */}
-      <CTA />
+      <CTA headline={cta.headline} subtext={cta.subtext} />
     </>
   )
 }

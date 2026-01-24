@@ -408,7 +408,10 @@ export default function CertifiedTranslationContent() {
         </Container>
       </section>
 
-      <CTA />
+      <CTA
+        headline="Get Your Documents Translated Today"
+        subtext="IRCC-accepted translations. Same-day service available."
+      />
     </>
   )
 }

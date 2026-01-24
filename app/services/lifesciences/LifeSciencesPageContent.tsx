@@ -846,7 +846,10 @@ export default function LifeSciencesPageContent() {
         </Container>
       </section>
 
-      <CTA />
+      <CTA
+        headline="Start Your Clinical Translation Project"
+        subtext="Get a detailed quote within 2 hours. ISO 17100 compliant."
+      />
     </>
   )
 }
