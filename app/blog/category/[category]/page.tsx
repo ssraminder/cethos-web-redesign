@@ -1,101 +1,99 @@
-import { Metadata } from 'next'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { Calendar, Clock, ArrowRight, ArrowLeft } from 'lucide-react'
-import {
-  getPostsByCategory,
-  getAllCategorySlugs,
-  getCategories,
-  formatPostDate,
-} from '@/lib/blog-db'
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { getPostsByCategory, getAllCategorySlugs, getCategories } from '@/lib/blog-db';
 
-// Revalidate every hour
-export const revalidate = 3600
+export const revalidate = 3600;
 
-// Generate static params for all categories
+type Props = {
+  params: Promise<{ category: string }>;
+};
+
 export async function generateStaticParams() {
-  const slugs = await getAllCategorySlugs()
-  return slugs.map((category) => ({ category }))
+  const slugs = await getAllCategorySlugs();
+  return slugs.map((category) => ({ category }));
 }
 
-// Generate metadata
-export async function generateMetadata({
-  params,
-}: {
-  params: { category: string }
-}): Promise<Metadata> {
-  const { category } = await getPostsByCategory(params.category, 1, 0)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { category: categorySlug } = await params;
+  const { category } = await getPostsByCategory(categorySlug);
 
   if (!category) {
     return {
       title: 'Category Not Found | Cethos Blog',
-    }
+    };
   }
 
   return {
     title: `${category.name} | Cethos Blog`,
-    description: category.description || `Articles about ${category.name}`,
-    alternates: {
-      canonical: `https://cethos.com/blog/category/${category.slug}`,
+    description: category.description || `Articles about ${category.name} from Cethos Solutions Inc.`,
+    openGraph: {
+      title: `${category.name} | Cethos Blog`,
+      description: category.description || `Articles about ${category.name}`,
+      url: `https://cethos.com/blog/category/${category.slug}`,
     },
-  }
+  };
 }
 
-export default async function CategoryPage({
-  params,
-}: {
-  params: { category: string }
-}) {
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+export default async function CategoryPage({ params }: Props) {
+  const { category: categorySlug } = await params;
   const [{ posts, category }, allCategories] = await Promise.all([
-    getPostsByCategory(params.category, 12, 0),
+    getPostsByCategory(categorySlug, 12, 0),
     getCategories(),
-  ])
+  ]);
 
   if (!category) {
-    notFound()
+    notFound();
   }
 
   return (
-    <>
-      {/* Hero */}
-      <section className="pt-20 bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
-        <div className="max-w-[1200px] mx-auto px-8 py-16">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-sm text-[#0891B2] font-medium mb-6 hover:underline"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            All Posts
-          </Link>
-          <h1 className="text-[48px] font-bold text-[#0C2340] mb-4">
-            {category.name}
-          </h1>
-          {category.description && (
-            <p className="text-xl text-[#4B5563] max-w-[600px]">
-              {category.description}
-            </p>
-          )}
+    <main className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="bg-[#0C2340] text-white py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="text-sm text-gray-400 mb-4">
+            <Link href="/" className="hover:text-white">Home</Link>
+            <span className="mx-2">/</span>
+            <Link href="/blog" className="hover:text-white">Blog</Link>
+            <span className="mx-2">/</span>
+            <span className="text-white">{category.name}</span>
+          </nav>
+          <div className="max-w-3xl">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">{category.name}</h1>
+            {category.description && (
+              <p className="text-xl text-gray-300">{category.description}</p>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Categories Nav */}
-      <section className="bg-white border-b border-[#E5E7EB]">
-        <div className="max-w-[1200px] mx-auto px-8 py-4">
-          <div className="flex items-center gap-4 overflow-x-auto">
+      {/* Categories */}
+      <section className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-wrap gap-3">
             <Link
               href="/blog"
-              className="px-4 py-2 text-sm font-medium text-[#4B5563] hover:text-[#0891B2] hover:bg-[#F8FAFC] rounded-full whitespace-nowrap transition-colors"
+              className="px-4 py-2 rounded-full bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors"
             >
               All Posts
             </Link>
             {allCategories.map((cat) => (
               <Link
-                key={cat.slug}
+                key={cat.id}
                 href={`/blog/category/${cat.slug}`}
-                className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   cat.slug === category.slug
-                    ? 'text-[#0891B2] bg-[#E0F2FE]'
-                    : 'text-[#4B5563] hover:text-[#0891B2] hover:bg-[#F8FAFC]'
+                    ? 'bg-[#0891B2] text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {cat.name}
@@ -106,68 +104,47 @@ export default async function CategoryPage({
       </section>
 
       {/* Posts Grid */}
-      <section className="bg-white py-16">
-        <div className="max-w-[1200px] mx-auto px-8">
+      <section className="py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {posts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-[#4B5563]">No posts found in this category.</p>
-              <Link
-                href="/blog"
-                className="inline-flex items-center gap-2 text-[#0891B2] font-medium mt-4 hover:underline"
-              >
-                <ArrowLeft className="w-4 h-4" />
+              <p className="text-gray-500 text-lg">No posts in this category yet.</p>
+              <Link href="/blog" className="mt-4 inline-block text-[#0891B2] hover:underline">
                 View all posts
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {posts.map((post) => (
                 <article
                   key={post.id}
-                  className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden hover:shadow-lg transition-shadow group"
+                  className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  {post.featured_image ? (
-                    <div className="aspect-[16/9] bg-[#F8FAFC] overflow-hidden">
-                      <img
-                        src={post.featured_image}
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  ) : (
-                    <div className="aspect-[16/9] bg-gradient-to-br from-[#E0F2FE] to-[#0891B2]/20 flex items-center justify-center">
-                      <span className="text-4xl">📝</span>
-                    </div>
-                  )}
-
-                  <div className="p-6">
-                    <h2 className="text-xl font-bold text-[#0C2340] mb-3 group-hover:text-[#0891B2] transition-colors">
-                      <Link href={`/blog/${post.slug}`}>{post.title}</Link>
-                    </h2>
-
-                    <p className="text-[#4B5563] text-sm mb-4 line-clamp-2">
-                      {post.description}
-                    </p>
-
-                    <div className="flex items-center gap-4 text-xs text-[#6B7280]">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {formatPostDate(post.published_at)}
-                      </span>
-                      {post.read_time && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          {post.read_time}
-                        </span>
-                      )}
-                    </div>
-
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="inline-flex items-center gap-1 text-sm font-medium text-[#0891B2] mt-4 hover:underline"
-                    >
-                      Read More <ArrowRight className="w-4 h-4" />
+                  {post.featured_image && (
+                    <Link href={`/blog/${post.slug}`}>
+                      <div className="relative h-48 bg-gray-100">
+                        <Image
+                          src={post.featured_image}
+                          alt={post.featured_image_alt || post.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
                     </Link>
+                  )}
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold text-gray-900">
+                      <Link href={`/blog/${post.slug}`} className="hover:text-[#0891B2]">
+                        {post.title}
+                      </Link>
+                    </h2>
+                    {post.excerpt && (
+                      <p className="mt-3 text-gray-600 line-clamp-3">{post.excerpt}</p>
+                    )}
+                    <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+                      <span>{post.published_at && formatDate(post.published_at)}</span>
+                      <span>{post.read_time} min read</span>
+                    </div>
                   </div>
                 </article>
               ))}
@@ -175,6 +152,6 @@ export default async function CategoryPage({
           )}
         </div>
       </section>
-    </>
-  )
+    </main>
+  );
 }

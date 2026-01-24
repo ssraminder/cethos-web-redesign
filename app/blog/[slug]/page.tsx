@@ -1,288 +1,235 @@
-import { Metadata } from 'next'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { Calendar, Clock, User, ArrowLeft, ArrowRight } from 'lucide-react'
-import {
-  getPostBySlug,
-  getAllPostSlugs,
-  getRelatedPosts,
-  getCategories,
-  formatPostDate,
-} from '@/lib/blog-db'
+import { Metadata } from 'next';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { getPostBySlug, getAllPostSlugs, getRelatedPosts, BlogPost } from '@/lib/blog-db';
 
-// Revalidate every hour
-export const revalidate = 3600
+export const revalidate = 3600;
 
-// Generate static params for all published posts
+type Props = {
+  params: Promise<{ slug: string }>;
+};
+
 export async function generateStaticParams() {
-  const slugs = await getAllPostSlugs()
-  return slugs.map((slug) => ({ slug }))
+  const slugs = await getAllPostSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
-// Generate metadata for each post
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string }
-}): Promise<Metadata> {
-  const post = await getPostBySlug(params.slug)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
 
   if (!post) {
     return {
       title: 'Post Not Found | Cethos Blog',
-    }
+    };
   }
 
   return {
     title: post.meta_title || `${post.title} | Cethos Blog`,
-    description: post.meta_description || post.description,
-    authors: post.author ? [{ name: post.author.name }] : undefined,
+    description: post.meta_description || post.excerpt || '',
     openGraph: {
-      title: post.title,
-      description: post.description || undefined,
+      title: post.meta_title || post.title,
+      description: post.meta_description || post.excerpt || '',
+      url: `https://cethos.com/blog/${post.slug}`,
       type: 'article',
       publishedTime: post.published_at || undefined,
-      authors: post.author ? [post.author.name] : undefined,
-      images: post.featured_image ? [post.featured_image] : undefined,
+      images: post.featured_image ? [post.featured_image] : [],
     },
-    alternates: {
-      canonical: post.canonical_url || `https://cethos.com/blog/${post.slug}`,
-    },
-  }
+  };
 }
 
-export default async function BlogPostPage({
-  params,
-}: {
-  params: { slug: string }
-}) {
-  const [post, categories] = await Promise.all([
-    getPostBySlug(params.slug),
-    getCategories(),
-  ])
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
-  const relatedPosts = await getRelatedPosts(post.id, post.category_id, 3)
+  const relatedPosts = await getRelatedPosts(post.id, post.category_id, 3);
 
   return (
-    <>
-      {/* Article JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Article',
-            headline: post.title,
-            description: post.description,
-            datePublished: post.published_at,
-            author: post.author
-              ? {
-                  '@type': 'Person',
-                  name: post.author.name,
-                }
-              : undefined,
-            publisher: {
-              '@type': 'Organization',
-              name: 'Cethos Solutions Inc.',
-              logo: {
-                '@type': 'ImageObject',
-                url: 'https://cethos.com/logo.svg',
-              },
-            },
-            image: post.featured_image,
-          }),
-        }}
-      />
-
-      <article className="pt-20">
-        {/* Header */}
-        <header className="bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE] py-16">
-          <div className="max-w-[800px] mx-auto px-8">
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-2 text-sm text-[#0891B2] font-medium mb-6 hover:underline"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Blog
-            </Link>
-
+    <main className="min-h-screen bg-white">
+      {/* Breadcrumb */}
+      <div className="bg-gray-50 border-b">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="flex text-sm text-gray-500">
+            <Link href="/" className="hover:text-[#0891B2]">Home</Link>
+            <span className="mx-2">/</span>
+            <Link href="/blog" className="hover:text-[#0891B2]">Blog</Link>
             {post.category && (
-              <Link
-                href={`/blog/category/${post.category.slug}`}
-                className="text-sm font-semibold text-[#0891B2] uppercase tracking-wider mb-4 block hover:underline"
-              >
-                {post.category.name}
-              </Link>
+              <>
+                <span className="mx-2">/</span>
+                <Link href={`/blog/category/${post.category.slug}`} className="hover:text-[#0891B2]">
+                  {post.category.name}
+                </Link>
+              </>
             )}
+          </nav>
+        </div>
+      </div>
 
-            <h1 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-6">
-              {post.title}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
-              {post.author && (
-                <span className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  {post.author.name}
-                </span>
-              )}
-              <span className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                {formatPostDate(post.published_at)}
-              </span>
-              {post.read_time && (
-                <span className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  {post.read_time}
-                </span>
-              )}
-            </div>
+      {/* Article */}
+      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header */}
+        <header className="mb-8">
+          {post.category && (
+            <Link
+              href={`/blog/category/${post.category.slug}`}
+              className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-[#0891B2]/10 text-[#0891B2] mb-4"
+            >
+              {post.category.name}
+            </Link>
+          )}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            {post.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-4 text-gray-600">
+            {post.author && (
+              <div className="flex items-center gap-2">
+                {post.author.avatar_url && (
+                  <Image
+                    src={post.author.avatar_url}
+                    alt={post.author.name}
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
+                )}
+                <div>
+                  <p className="font-medium text-gray-900">{post.author.name}</p>
+                  {post.author.title && (
+                    <p className="text-sm">{post.author.title}</p>
+                  )}
+                </div>
+              </div>
+            )}
+            <span>•</span>
+            <time>{post.published_at && formatDate(post.published_at)}</time>
+            <span>•</span>
+            <span>{post.read_time} min read</span>
           </div>
         </header>
 
         {/* Featured Image */}
         {post.featured_image && (
-          <div className="max-w-[1000px] mx-auto px-8 -mt-8">
-            <img
+          <div className="relative aspect-video mb-8 rounded-xl overflow-hidden">
+            <Image
               src={post.featured_image}
-              alt={post.title}
-              className="w-full rounded-xl shadow-lg"
+              alt={post.featured_image_alt || post.title}
+              fill
+              className="object-cover"
+              priority
             />
           </div>
         )}
 
         {/* Content */}
-        <div className="max-w-[800px] mx-auto px-8 py-12">
-          <div
-            className="prose prose-lg max-w-none prose-headings:text-[#0C2340] prose-a:text-[#0891B2]"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
-          />
+        <div
+          className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-[#0891B2] prose-a:no-underline hover:prose-a:underline"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
-          {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-[#E5E7EB]">
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-3 py-1 bg-[#F8FAFC] text-[#4B5563] text-sm rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="mt-8 pt-8 border-t">
+            <div className="flex flex-wrap gap-2">
+              {post.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
-          )}
-
-          {/* Author Bio */}
-          {post.author && (
-            <div className="mt-12 p-6 bg-[#F8FAFC] rounded-xl">
-              <div className="flex items-start gap-4">
-                {post.author.avatar_url && (
-                  <img
-                    src={post.author.avatar_url}
-                    alt={post.author.name}
-                    className="w-16 h-16 rounded-full"
-                  />
-                )}
-                <div>
-                  <div className="font-semibold text-[#0C2340]">
-                    {post.author.name}
-                  </div>
-                  {post.author.title && (
-                    <div className="text-sm text-[#4B5563]">
-                      {post.author.title}
-                    </div>
-                  )}
-                  {post.author.bio && (
-                    <p className="text-sm text-[#4B5563] mt-2">
-                      {post.author.bio}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Related Posts */}
-        {relatedPosts.length > 0 && (
-          <section className="bg-[#F8FAFC] py-16">
-            <div className="max-w-[1200px] mx-auto px-8">
-              <h2 className="text-2xl font-bold text-[#0C2340] mb-8">
-                Related Articles
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {relatedPosts.map((relatedPost) => (
-                  <Link
-                    key={relatedPost.id}
-                    href={`/blog/${relatedPost.slug}`}
-                    className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
-                  >
-                    <h3 className="font-semibold text-[#0C2340] mb-2 hover:text-[#0891B2]">
-                      {relatedPost.title}
-                    </h3>
-                    <p className="text-sm text-[#4B5563] line-clamp-2">
-                      {relatedPost.description}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
+          </div>
         )}
 
-        {/* CTA */}
-        <section className="bg-[#0C2340] py-16">
-          <div className="max-w-[600px] mx-auto px-8 text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Need Translation Services?
-            </h3>
-            <p className="text-white/70 mb-6">
-              Get a free quote from our team of expert linguists.
-            </p>
-            <Link
-              href="/get-quote"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#0891B2] text-white rounded-lg hover:bg-[#06B6D4] transition-colors font-semibold"
-            >
-              Get a Free Quote <ArrowRight className="w-5 h-5" />
-            </Link>
+        {/* Author Bio */}
+        {post.author && post.author.bio && (
+          <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+            <div className="flex items-start gap-4">
+              {post.author.avatar_url && (
+                <Image
+                  src={post.author.avatar_url}
+                  alt={post.author.name}
+                  width={64}
+                  height={64}
+                  className="rounded-full"
+                />
+              )}
+              <div>
+                <p className="font-semibold text-gray-900">{post.author.name}</p>
+                {post.author.title && (
+                  <p className="text-sm text-gray-600 mb-2">{post.author.title}</p>
+                )}
+                <p className="text-gray-600">{post.author.bio}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </article>
+
+      {/* Related Posts */}
+      {relatedPosts.length > 0 && (
+        <section className="bg-gray-50 py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-8">Related Articles</h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              {relatedPosts.map((relatedPost) => (
+                <article key={relatedPost.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                  {relatedPost.featured_image && (
+                    <Link href={`/blog/${relatedPost.slug}`}>
+                      <div className="relative h-40 bg-gray-100">
+                        <Image
+                          src={relatedPost.featured_image}
+                          alt={relatedPost.featured_image_alt || relatedPost.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </Link>
+                  )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900">
+                      <Link href={`/blog/${relatedPost.slug}`} className="hover:text-[#0891B2]">
+                        {relatedPost.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500">{relatedPost.read_time} min read</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
-      </article>
-    </>
-  )
-}
+      )}
 
-// Simple markdown to HTML converter (or use a library like marked/remark)
-function renderMarkdown(content: string | null): string {
-  if (!content) return ''
-
-  return content
-    // Headers
-    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-    // Bold
-    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
-    // Italic
-    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>')
-    // Lists
-    .replace(/^\- (.*$)/gim, '<li>$1</li>')
-    .replace(/^(\d+)\. (.*$)/gim, '<li>$2</li>')
-    // Paragraphs
-    .replace(/\n\n/gim, '</p><p>')
-    .replace(/^(.+)$/gim, '<p>$1</p>')
-    // Clean up
-    .replace(/<p><\/p>/g, '')
-    .replace(/<p>(<h[1-6]>)/g, '$1')
-    .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
-    .replace(/<p>(<li>)/g, '$1')
-    .replace(/(<\/li>)<\/p>/g, '$1')
+      {/* CTA Section */}
+      <section className="bg-[#0C2340] text-white py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-4">Need Professional Translation Services?</h2>
+          <p className="text-xl text-gray-300 mb-8">
+            Get expert translation for your documents, clinical trials, or business content.
+          </p>
+          <Link
+            href="/get-quote"
+            className="inline-block px-8 py-4 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors"
+          >
+            Get a Free Quote
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
 }
