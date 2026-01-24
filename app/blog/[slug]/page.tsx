@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getPostBySlug, getAllPostSlugs, getRelatedPosts, BlogPost } from '@/lib/blog-db';
+import ReactMarkdown from 'react-markdown';
+import { getPostBySlug, getAllPostSlugs, getRelatedPosts } from '@/lib/blog-db';
 
 export const revalidate = 3600;
 
@@ -134,10 +135,9 @@ export default async function BlogPostPage({ params }: Props) {
         )}
 
         {/* Content */}
-        <div
-          className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-[#0891B2] prose-a:no-underline hover:prose-a:underline"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-[#0891B2] prose-a:no-underline hover:prose-a:underline">
+          <ReactMarkdown>{post.content}</ReactMarkdown>
+        </div>
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
