@@ -276,27 +276,6 @@ const breadcrumbItems = [
 export default function CertifiedTranslationContent() {
   return (
     <>
-      {/* ===================================================================== */}
-      {/* DIAGNOSTIC MARKER (TEMP) */}
-      {/* ===================================================================== */}
-      <div
-        style={{
-          position: 'fixed',
-          top: 8,
-          left: 8,
-          zIndex: 999999,
-          background: 'rgba(255,0,0,0.9)',
-          color: '#fff',
-          padding: '6px 10px',
-          borderRadius: 6,
-          fontSize: 12,
-          fontWeight: 700,
-          pointerEvents: 'none',
-        }}
-      >
-        DEPLOY CHECK: certified v1
-      </div>
-
       {/* Structured Data */}
       <ServiceJsonLd
         name="Certified Translation Services Calgary"
