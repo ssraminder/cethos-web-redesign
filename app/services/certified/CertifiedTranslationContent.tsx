@@ -246,6 +246,9 @@ export default function CertifiedTranslationContent() {
       {/* ===================================================================== */}
       {/* HERO SECTION */}
       {/* ===================================================================== */}
+      <div style={{ position: 'fixed', bottom: 8, right: 8, fontSize: 12, opacity: 0.6 }}>
+  DEPLOY CHECK: certified v1
+</div>
       <section className="pt-20 bg-gradient-to-br from-white via-[#F8FAFC] to-[#E0F2FE]">
         <div className="max-w-[1200px] mx-auto px-8 py-20">
           <Breadcrumbs items={breadcrumbItems} className="mb-6" />
