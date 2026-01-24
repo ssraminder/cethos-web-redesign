@@ -25,6 +25,7 @@ import {
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
+import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
 
 // =============================================================================
 // DATA
@@ -356,21 +357,20 @@ export default function CertifiedTranslationContent() {
               </motion.div>
             </div>
 
-            {/* Right Column - Visual */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex justify-center"
-            >
-              <div className="w-full max-w-[420px] h-[420px] bg-gradient-to-br from-[#E0F2FE] via-white to-[#0891B2]/20 rounded-2xl flex items-center justify-center shadow-lg border border-slate-100">
-                <div className="text-center">
-                  <FileText className="w-24 h-24 text-[#0891B2] mx-auto mb-4" strokeWidth={1} />
-                  <div className="text-2xl font-bold text-[#0C2340] mb-2">Certified & Notarized</div>
-                  <div className="text-slate-600">Ready for IRCC submission</div>
-                </div>
-              </div>
-            </motion.div>
+           {/* Quote Form */}
+<motion.div
+  id="quote-form"
+  initial={{ opacity: 0, x: 20 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.5, delay: 0.2 }}
+  className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
+>
+  <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
+  <p className="text-slate-600 mb-6">Upload your document for an instant quote.</p>
+  <CertifiedQuoteForm
+    formLocation="certified-translation-main"
+  />
+</motion.div>
           </div>
         </div>
       </section>
