@@ -204,7 +204,7 @@ export default async function BlogPostPage({
                     {children}
                   </ol>
                 ),
-                li: ({ children, ordered, index }) => (
+                li: ({ children }) => (
                   <li className="flex items-start gap-3 text-gray-700">
                     <span className="flex-shrink-0 w-5 h-5 mt-0.5 rounded-full bg-[#0891B2] text-white text-xs font-medium flex items-center justify-center">
                       ✓
