@@ -4,6 +4,10 @@ import { lifeSciencesQuoteSchema } from '@/lib/validations/life-sciences-quote'
 
 const Brevo = require('@getbrevo/brevo')
 
+// Route segment config - increase body size limit for file uploads
+export const maxDuration = 60 // Allow up to 60 seconds for file uploads
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: Request) {
   console.log('[API Quote] Request received at:', new Date().toISOString())
 
@@ -15,11 +19,31 @@ export async function POST(req: Request) {
       hasBrevoKey: !!process.env.BREVO_API_KEY,
     })
 
-    const supabase = createServerSupabaseClient()
-    console.log('[API Quote] Supabase client created')
+    // Validate Supabase connection early
+    let supabase
+    try {
+      supabase = createServerSupabaseClient()
+      console.log('[API Quote] Supabase client created')
+    } catch (supabaseError) {
+      console.error('[API Quote] Supabase init error:', supabaseError)
+      return NextResponse.json(
+        { error: 'Server configuration error. Please try again later.' },
+        { status: 500 }
+      )
+    }
 
-    const formData = await req.formData()
-    console.log('[API Quote] FormData keys:', Array.from(formData.keys()))
+    // Parse formData with error handling
+    let formData
+    try {
+      formData = await req.formData()
+      console.log('[API Quote] FormData keys:', Array.from(formData.keys()))
+    } catch (parseError) {
+      console.error('[API Quote] FormData parse error:', parseError)
+      return NextResponse.json(
+        { error: 'Failed to parse form data. Please ensure files are under 10MB.' },
+        { status: 400 }
+      )
+    }
 
     // Parse form data
     const rawData = {
