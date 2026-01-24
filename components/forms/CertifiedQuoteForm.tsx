@@ -305,9 +305,9 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
   }
 
   const steps = [
-    { num: 1, label: 'Contact' },
-    { num: 2, label: 'Document' },
-    { num: 3, label: 'Upload' },
+    { label: 'Contact Info' },
+    { label: 'Document Details' },
+    { label: 'Upload & Review' },
   ]
 
   if (isSuccess) {
@@ -335,32 +335,47 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Step Indicator */}
-      <div className="flex items-center justify-between mb-8">
-        {steps.map((s, i) => (
-          <div key={s.num} className="flex items-center">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
-                step >= s.num ? 'bg-[#0891B2] text-white' : 'bg-gray-200 text-gray-500'
-              }`}
-            >
-              {step > s.num ? <CheckCircle className="w-5 h-5" /> : s.num}
-            </div>
-            <span
-              className={`ml-2 text-sm font-medium hidden sm:inline ${
-                step >= s.num ? 'text-[#0C2340]' : 'text-gray-400'
-              }`}
-            >
-              {s.label}
-            </span>
-            {i < steps.length - 1 && (
+      <div className="mb-8">
+        {/* Mobile: Simplified dots + step name */}
+        <div className="sm:hidden flex flex-col items-center">
+          <div className="flex items-center gap-2 mb-2">
+            {steps.map((_, index) => (
               <div
-                className={`w-8 sm:w-12 h-px mx-2 sm:mx-4 transition-colors ${
-                  step > s.num ? 'bg-[#0891B2]' : 'bg-gray-300'
+                key={index}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  step > index + 1
+                    ? 'bg-[#0891B2]' // completed
+                    : step === index + 1
+                    ? 'bg-[#0891B2]' // current
+                    : 'bg-slate-300' // upcoming
                 }`}
               />
-            )}
+            ))}
           </div>
-        ))}
+          <div className="text-center">
+            <div className="font-semibold text-[#0C2340]">{steps[step - 1].label}</div>
+            <div className="text-sm text-slate-500">Step {step} of {steps.length}</div>
+          </div>
+        </div>
+
+        {/* Desktop: Full step indicator with labels */}
+        <div className="hidden sm:flex items-center justify-between">
+          {steps.map((s, index) => (
+            <div key={index} className="flex flex-col items-center flex-1">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold
+                ${step > index + 1
+                  ? 'bg-[#0891B2] text-white' // completed
+                  : step === index + 1
+                  ? 'bg-[#0891B2] text-white' // current
+                  : 'bg-slate-200 text-slate-500' // upcoming
+                }`}
+              >
+                {index + 1}
+              </div>
+              <span className="text-xs text-slate-600 mt-2 text-center">{s.label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Error Message */}
