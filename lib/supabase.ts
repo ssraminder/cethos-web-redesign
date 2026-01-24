@@ -30,6 +30,29 @@ export interface Locale {
   language_name: string
   country_name: string
   locale_code: string
+  language_code: string
+  native_display_name: string | null
+  is_common: boolean
+  is_active: boolean
+}
+
+export interface DocumentType {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  is_active: boolean
+  sort_order: number | null
+}
+
+export interface IntendedUse {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  typical_complexity: string | null
+  is_active: boolean
+  sort_order: number | null
 }
 
 export interface QuoteSubmission {
