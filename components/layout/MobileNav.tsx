@@ -123,13 +123,15 @@ export function MobileNav({ isOpen, onClose, navigation }: MobileNavProps) {
 
               {/* CTA */}
               <div className="p-4 border-t border-slate-100">
-                <Link
-                  href="/get-quote"
+                <a
+                  href="https://portal.cethos.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   onClick={onClose}
                   className="block w-full px-6 py-3 text-center bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors"
                 >
-                  Get a Quote
-                </Link>
+                  Login
+                </a>
               </div>
             </div>
           </motion.div>
