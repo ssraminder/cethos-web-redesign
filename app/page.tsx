@@ -10,7 +10,6 @@ export default function HomePage() {
       <Industries />
       <WhyUs />
       <TrustedByLogos
-        featuredOnly={true}
         title="Trusted by Leading Global Companies"
         subtitle="Join 500+ enterprises who rely on Cethos for precision translation"
       />
