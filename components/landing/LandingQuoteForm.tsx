@@ -104,6 +104,7 @@ export function LandingQuoteForm() {
             value={formData.fullName}
             onChange={handleChange}
             required
+            suppressHydrationWarning
             className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
             placeholder="Your full name"
           />
@@ -119,6 +120,7 @@ export function LandingQuoteForm() {
             value={formData.email}
             onChange={handleChange}
             required
+            suppressHydrationWarning
             className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
             placeholder="your@email.com"
           />
@@ -136,6 +138,7 @@ export function LandingQuoteForm() {
           value={formData.phone}
           onChange={handleChange}
           required
+          suppressHydrationWarning
           className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
           placeholder="(587) 123-4567"
         />
@@ -172,6 +175,7 @@ export function LandingQuoteForm() {
             value={formData.languageOfDocument}
             onChange={handleChange}
             required
+            suppressHydrationWarning
             className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
             placeholder="e.g., Punjabi, Mandarin, Arabic"
           />
@@ -191,6 +195,7 @@ export function LandingQuoteForm() {
             onChange={handleChange}
             required
             min="1"
+            suppressHydrationWarning
             className="w-full px-4 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
           />
         </div>
@@ -227,6 +232,7 @@ export function LandingQuoteForm() {
             onChange={handleFileChange}
             className="hidden"
             required
+            suppressHydrationWarning
           />
           <label htmlFor="document" className="cursor-pointer">
             <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
@@ -260,6 +266,7 @@ export function LandingQuoteForm() {
               checked={formData.rushService === 'standard'}
               onChange={handleChange}
               className="sr-only"
+              suppressHydrationWarning
             />
             <div className="text-center">
               <div className="font-semibold text-[#0C2340]">Standard</div>
@@ -278,6 +285,7 @@ export function LandingQuoteForm() {
               checked={formData.rushService === 'same-day'}
               onChange={handleChange}
               className="sr-only"
+              suppressHydrationWarning
             />
             <div className="text-center">
               <div className="font-semibold text-[#0C2340]">Same-Day Rush</div>
