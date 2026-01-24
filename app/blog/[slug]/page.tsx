@@ -1,50 +1,101 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { blogPosts, categories, getRelatedPosts } from '@/lib/blog'
-import { ArticleJsonLd } from '@/components/JsonLd'
 import { Calendar, Clock, User, ArrowLeft, ArrowRight } from 'lucide-react'
+import {
+  getPostBySlug,
+  getAllPostSlugs,
+  getRelatedPosts,
+  getCategories,
+  formatPostDate,
+} from '@/lib/blog-db'
 
+// Revalidate every hour
+export const revalidate = 3600
+
+// Generate static params for all published posts
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({ slug: post.slug }))
+  const slugs = await getAllPostSlugs()
+  return slugs.map((slug) => ({ slug }))
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = blogPosts.find((p) => p.slug === params.slug)
-  if (!post) return {}
+// Generate metadata for each post
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const post = await getPostBySlug(params.slug)
+
+  if (!post) {
+    return {
+      title: 'Post Not Found | Cethos Blog',
+    }
+  }
 
   return {
-    title: post.title,
-    description: post.description,
-    authors: [{ name: post.author }],
+    title: post.meta_title || `${post.title} | Cethos Blog`,
+    description: post.meta_description || post.description,
+    authors: post.author ? [{ name: post.author.name }] : undefined,
     openGraph: {
       title: post.title,
-      description: post.description,
+      description: post.description || undefined,
       type: 'article',
-      publishedTime: post.date,
-      authors: [post.author],
+      publishedTime: post.published_at || undefined,
+      authors: post.author ? [post.author.name] : undefined,
+      images: post.featured_image ? [post.featured_image] : undefined,
     },
     alternates: {
-      canonical: `https://cethos.com/blog/${post.slug}`,
+      canonical: post.canonical_url || `https://cethos.com/blog/${post.slug}`,
     },
   }
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = blogPosts.find((p) => p.slug === params.slug)
-  if (!post) notFound()
+export default async function BlogPostPage({
+  params,
+}: {
+  params: { slug: string }
+}) {
+  const [post, categories] = await Promise.all([
+    getPostBySlug(params.slug),
+    getCategories(),
+  ])
 
-  const category = categories.find((c) => c.slug === post.category)
-  const relatedPosts = getRelatedPosts(post.slug, 3)
+  if (!post) {
+    notFound()
+  }
+
+  const relatedPosts = await getRelatedPosts(post.id, post.category_id, 3)
 
   return (
     <>
-      <ArticleJsonLd
-        title={post.title}
-        description={post.description}
-        date={post.date}
-        author={post.author}
-        url={`https://cethos.com/blog/${post.slug}`}
+      {/* Article JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: post.title,
+            description: post.description,
+            datePublished: post.published_at,
+            author: post.author
+              ? {
+                  '@type': 'Person',
+                  name: post.author.name,
+                }
+              : undefined,
+            publisher: {
+              '@type': 'Organization',
+              name: 'Cethos Solutions Inc.',
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://cethos.com/logo.svg',
+              },
+            },
+            image: post.featured_image,
+          }),
+        }}
       />
 
       <article className="pt-20">
@@ -59,117 +110,103 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               Back to Blog
             </Link>
 
-            <div className="text-sm font-semibold text-[#0891B2] uppercase tracking-wider mb-4">
-              {category?.name}
-            </div>
+            {post.category && (
+              <Link
+                href={`/blog/category/${post.category.slug}`}
+                className="text-sm font-semibold text-[#0891B2] uppercase tracking-wider mb-4 block hover:underline"
+              >
+                {post.category.name}
+              </Link>
+            )}
 
-            <h1 className="text-[40px] font-bold text-[#0C2340] leading-tight mb-6">
+            <h1 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-6">
               {post.title}
             </h1>
 
-            <div className="flex items-center gap-6 text-sm text-[#4B5563]">
-              <span className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                {post.author}
-              </span>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
+              {post.author && (
+                <span className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  {post.author.name}
+                </span>
+              )}
               <span className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                {new Date(post.date).toLocaleDateString('en-US', {
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                })}
+                {formatPostDate(post.published_at)}
               </span>
-              <span className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                {post.readTime}
-              </span>
+              {post.read_time && (
+                <span className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  {post.read_time}
+                </span>
+              )}
             </div>
           </div>
         </header>
 
-        {/* Content */}
-        <div className="max-w-[800px] mx-auto px-8 py-16">
-          <div className="prose prose-lg max-w-none">
-            <p className="text-lg text-[#4B5563] leading-relaxed">
-              {post.description}
-            </p>
-
-            <p className="text-[#4B5563] leading-relaxed mt-6">
-              In the global marketplace, effective communication across languages is no longer
-              optional—it&apos;s essential. Organizations that invest in quality translation services
-              gain a significant competitive advantage by reaching new markets, building trust
-              with international customers, and ensuring compliance with local regulations.
-            </p>
-
-            <h2 className="text-2xl font-bold text-[#0C2340] mt-8 mb-4">
-              Key Takeaways
-            </h2>
-
-            <ul className="space-y-2 text-[#4B5563]">
-              <li>Quality translation goes beyond word-for-word conversion</li>
-              <li>Cultural context is crucial for effective communication</li>
-              <li>Industry-specific expertise ensures accuracy and compliance</li>
-              <li>Technology enhances efficiency while human expertise ensures quality</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold text-[#0C2340] mt-8 mb-4">
-              Best Practices
-            </h2>
-
-            <p className="text-[#4B5563] leading-relaxed">
-              When working with translation services, consider these best practices to ensure
-              the best possible outcomes for your projects:
-            </p>
-
-            <ol className="space-y-2 text-[#4B5563] list-decimal list-inside mt-4">
-              <li>Provide context and reference materials to translators</li>
-              <li>Establish glossaries for consistent terminology</li>
-              <li>Plan for text expansion in target languages</li>
-              <li>Include review cycles in your project timeline</li>
-              <li>Maintain open communication with your translation partner</li>
-            </ol>
-
-            <h2 className="text-2xl font-bold text-[#0C2340] mt-8 mb-4">
-              Conclusion
-            </h2>
-
-            <p className="text-[#4B5563] leading-relaxed">
-              By following these guidelines and partnering with experienced translation professionals,
-              you can ensure your message resonates effectively across all your target markets.
-            </p>
+        {/* Featured Image */}
+        {post.featured_image && (
+          <div className="max-w-[1000px] mx-auto px-8 -mt-8">
+            <img
+              src={post.featured_image}
+              alt={post.title}
+              className="w-full rounded-xl shadow-lg"
+            />
           </div>
+        )}
+
+        {/* Content */}
+        <div className="max-w-[800px] mx-auto px-8 py-12">
+          <div
+            className="prose prose-lg max-w-none prose-headings:text-[#0C2340] prose-a:text-[#0891B2]"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(post.content) }}
+          />
 
           {/* Tags */}
-          <div className="mt-12 pt-8 border-t border-[#E5E7EB]">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium text-[#4B5563]">Tags:</span>
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 text-sm bg-[#F8FAFC] text-[#4B5563] rounded-full"
-                >
-                  {tag}
-                </span>
-              ))}
+          {post.tags && post.tags.length > 0 && (
+            <div className="mt-12 pt-8 border-t border-[#E5E7EB]">
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-3 py-1 bg-[#F8FAFC] text-[#4B5563] text-sm rounded-full"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* CTA */}
-          <div className="mt-12 p-8 bg-[#F8FAFC] rounded-lg text-center">
-            <h3 className="text-xl font-semibold text-[#0C2340] mb-3">
-              Need Professional Translation Services?
-            </h3>
-            <p className="text-[#4B5563] mb-6">
-              Get a free quote from our team of expert linguists.
-            </p>
-            <Link
-              href="/get-quote"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#0891B2] text-white rounded-lg hover:bg-[#06B6D4] transition-colors font-semibold"
-            >
-              Get a Free Quote <ArrowRight className="w-5 h-5" />
-            </Link>
-          </div>
+          {/* Author Bio */}
+          {post.author && (
+            <div className="mt-12 p-6 bg-[#F8FAFC] rounded-xl">
+              <div className="flex items-start gap-4">
+                {post.author.avatar_url && (
+                  <img
+                    src={post.author.avatar_url}
+                    alt={post.author.name}
+                    className="w-16 h-16 rounded-full"
+                  />
+                )}
+                <div>
+                  <div className="font-semibold text-[#0C2340]">
+                    {post.author.name}
+                  </div>
+                  {post.author.title && (
+                    <div className="text-sm text-[#4B5563]">
+                      {post.author.title}
+                    </div>
+                  )}
+                  {post.author.bio && (
+                    <p className="text-sm text-[#4B5563] mt-2">
+                      {post.author.bio}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Related Posts */}
@@ -179,30 +216,73 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <h2 className="text-2xl font-bold text-[#0C2340] mb-8">
                 Related Articles
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {relatedPosts.map((relatedPost) => (
-                  <article
-                    key={relatedPost.slug}
-                    className="bg-white rounded-lg border border-[#E5E7EB] overflow-hidden hover:shadow-lg transition-shadow"
+                  <Link
+                    key={relatedPost.id}
+                    href={`/blog/${relatedPost.slug}`}
+                    className="bg-white rounded-xl p-6 hover:shadow-md transition-shadow"
                   >
-                    <div className="h-32 bg-gradient-to-br from-[#E0F2FE] to-[#0891B2]/20"></div>
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold text-[#0C2340] mb-2 line-clamp-2">
-                        <Link href={`/blog/${relatedPost.slug}`} className="hover:text-[#0891B2] transition-colors">
-                          {relatedPost.title}
-                        </Link>
-                      </h3>
-                      <p className="text-sm text-[#4B5563] line-clamp-2">
-                        {relatedPost.description}
-                      </p>
-                    </div>
-                  </article>
+                    <h3 className="font-semibold text-[#0C2340] mb-2 hover:text-[#0891B2]">
+                      {relatedPost.title}
+                    </h3>
+                    <p className="text-sm text-[#4B5563] line-clamp-2">
+                      {relatedPost.description}
+                    </p>
+                  </Link>
                 ))}
               </div>
             </div>
           </section>
         )}
+
+        {/* CTA */}
+        <section className="bg-[#0C2340] py-16">
+          <div className="max-w-[600px] mx-auto px-8 text-center">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Need Translation Services?
+            </h3>
+            <p className="text-white/70 mb-6">
+              Get a free quote from our team of expert linguists.
+            </p>
+            <Link
+              href="/get-quote"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#0891B2] text-white rounded-lg hover:bg-[#06B6D4] transition-colors font-semibold"
+            >
+              Get a Free Quote <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </section>
       </article>
     </>
   )
+}
+
+// Simple markdown to HTML converter (or use a library like marked/remark)
+function renderMarkdown(content: string | null): string {
+  if (!content) return ''
+
+  return content
+    // Headers
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    // Bold
+    .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+    // Italic
+    .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+    // Links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>')
+    // Lists
+    .replace(/^\- (.*$)/gim, '<li>$1</li>')
+    .replace(/^(\d+)\. (.*$)/gim, '<li>$2</li>')
+    // Paragraphs
+    .replace(/\n\n/gim, '</p><p>')
+    .replace(/^(.+)$/gim, '<p>$1</p>')
+    // Clean up
+    .replace(/<p><\/p>/g, '')
+    .replace(/<p>(<h[1-6]>)/g, '$1')
+    .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
+    .replace(/<p>(<li>)/g, '$1')
+    .replace(/(<\/li>)<\/p>/g, '$1')
 }
