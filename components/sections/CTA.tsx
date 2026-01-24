@@ -4,7 +4,15 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
-export function CTA() {
+interface CTAProps {
+  headline?: string
+  subtext?: string
+}
+
+export function CTA({
+  headline = "Ready to Go Global?",
+  subtext = "Get a free quote for your translation project. Our team is ready to help you reach new markets with precision and speed."
+}: CTAProps) {
   return (
     <section className="relative py-24 overflow-hidden bg-gradient-to-r from-[#0C2340] via-[#1A365D] to-[#0891B2]">
       <div className="max-w-[1200px] mx-auto px-8">
@@ -16,11 +24,11 @@ export function CTA() {
           className="max-w-3xl mx-auto text-center"
         >
           <h2 className="text-3xl md:text-4xl lg:text-[40px] font-bold text-white mb-6">
-            Ready to Go Global?
+            {headline}
           </h2>
 
           <p className="text-lg md:text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-            Get a free quote for your translation project. Our team is ready to help you reach new markets with precision and speed.
+            {subtext}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
