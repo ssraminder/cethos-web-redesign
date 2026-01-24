@@ -14,7 +14,9 @@ import {
   CreditCard,
   GraduationCap,
   Briefcase,
-  Heart
+  Heart,
+  Star,
+  BadgeCheck
 } from 'lucide-react'
 import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
@@ -147,12 +149,12 @@ export default function ImmigrationTranslationContent() {
           <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div>
+            <div className="max-w-xl">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
+                className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
                 IRCC Immigration Translation Services
               </motion.h1>
@@ -161,31 +163,83 @@ export default function ImmigrationTranslationContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-xl text-[#4B5563] leading-relaxed mb-6"
+                className="text-lg text-[#4B5563] leading-relaxed mb-4"
               >
                 Certified translations accepted by Immigration, Refugees and Citizenship Canada. Birth certificates, marriage documents, academic credentials, and more—translated and notarized same-day in downtown Calgary.
               </motion.p>
 
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="text-lg text-[#4B5563] leading-relaxed mb-6"
+              >
+                Government of Alberta approved translator. All documents include certification and are ready for submission.
+              </motion.p>
+
+              {/* Price Badge */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-wrap gap-4 mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0891B2]/10 rounded-full mb-6"
+              >
+                <span className="text-[#0891B2] font-bold text-lg">From $65</span>
+                <span className="text-slate-600">per document</span>
+              </motion.div>
+
+              {/* CTAs */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                className="flex flex-wrap gap-3 mb-8"
               >
                 <a
                   href="tel:5876000786"
-                  className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
+                  className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
                 >
                   <Phone className="w-5 h-5" /> (587) 600-0786
                 </a>
+                <a
+                  href="mailto:info@cethos.com"
+                  className="px-6 py-3 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-slate-50 transition-colors"
+                >
+                  Email Us
+                </a>
               </motion.div>
 
+              {/* Trust Badges - 2 rows */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
+                className="space-y-3"
               >
-                <TrustBar />
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
+                  <span className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-[#0891B2]" />
+                    100% IRCC Accepted
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <BadgeCheck className="w-5 h-5 text-[#0891B2]" />
+                    Gov&apos;t of Alberta Approved
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#0891B2]" />
+                    Same-Day Available
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
+                  <span className="flex items-center gap-2">
+                    <Award className="w-5 h-5 text-[#0891B2]" />
+                    Notarization Included
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    139 Five-Star Reviews
+                  </span>
+                </div>
               </motion.div>
             </div>
 
@@ -380,21 +434,30 @@ export default function ImmigrationTranslationContent() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 bg-[#0891B2]">
+      <section className="py-16 bg-gradient-to-r from-[#0C2340] to-[#164e63]">
         <Container>
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Ready to Get Started?</h2>
-            <p className="text-white/90 mb-8 max-w-xl mx-auto">
-              Get your IRCC-certified translation today. Same-day service available.
+            <h2 className="text-3xl font-bold text-white mb-4">Get Your Immigration Documents Translated Today</h2>
+            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+              IRCC-accepted certified translations from $65. Same-day service available. Government of Alberta approved.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="tel:5876000786"
-                className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
+                className="px-8 py-4 bg-white text-[#0C2340] rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2"
               >
                 <Phone className="w-5 h-5" /> (587) 600-0786
               </a>
+              <a
+                href="mailto:info@cethos.com"
+                className="px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
+              >
+                Email for Quote
+              </a>
             </div>
+            <p className="text-white/60 text-sm mt-6">
+              From $65 • Same-day service • Government of Alberta approved
+            </p>
           </div>
         </Container>
       </section>
