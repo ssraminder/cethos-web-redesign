@@ -115,6 +115,9 @@ export default async (request: Request, context: NetlifyContext) => {
   })
 }
 
-export const config = {
-  path: "/contact"
+import type { Config } from "@netlify/edge-functions"
+
+export const config: Config = {
+  path: "/*",
+  excludedPath: ["/api/*", "/_next/*", "/favicon.ico", "*.svg", "*.png", "*.jpg", "*.css", "*.js"]
 }
