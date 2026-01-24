@@ -79,7 +79,7 @@ export default async function BlogPostPage({
       <article className="min-h-screen bg-white">
         {/* Hero Section */}
         <header className="bg-gradient-to-br from-[#0C2340] to-[#1a3a5c] text-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
@@ -122,7 +122,7 @@ export default async function BlogPostPage({
             <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm">
               {post.author && (
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#0891B2] flex items-center justify-center text-white font-medium text-sm">
+                  <div className="w-12 h-12 rounded-full bg-[#0891B2] flex items-center justify-center text-white font-bold text-xs">
                     {post.author.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <span className="font-medium text-white">{post.author.name}</span>
@@ -148,7 +148,7 @@ export default async function BlogPostPage({
 
         {/* Featured Image */}
         {post.featured_image && (
-          <div className="relative -mt-4 mb-8">
+          <div className="relative mt-8 mb-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="relative aspect-[2/1] rounded-xl overflow-hidden shadow-xl">
                 <Image
