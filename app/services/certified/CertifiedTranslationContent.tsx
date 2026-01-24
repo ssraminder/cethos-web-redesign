@@ -250,7 +250,7 @@ export default function CertifiedTranslationContent() {
         <div className="max-w-[1200px] mx-auto px-8 py-20">
           <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left Column */}
             <div className="max-w-xl">
               <motion.div
