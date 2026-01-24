@@ -49,6 +49,22 @@ export interface BlogPost {
   updated_at: string
 }
 
+// Simplified type for sitemap
+export interface SitemapPost {
+  slug: string
+  updated_at: string
+}
+
+// Simplified type for related posts
+export interface RelatedPost {
+  id: string
+  slug: string
+  title: string
+  description: string | null
+  featured_image: string | null
+  published_at: string | null
+}
+
 // Helper function to format dates
 export function formatPostDate(dateString: string | null): string {
   if (!dateString) return ''
@@ -92,7 +108,7 @@ export async function getPublishedPosts(
 }
 
 // Get all published posts (for sitemap)
-export async function getAllPublishedPosts(): Promise<BlogPost[]> {
+export async function getAllPublishedPosts(): Promise<SitemapPost[]> {
   const supabase = getSupabaseClient()
 
   const { data: posts, error } = await supabase
@@ -236,7 +252,7 @@ export async function getRelatedPosts(
   currentPostId: string,
   categoryId: string | null,
   limit: number = 3
-): Promise<BlogPost[]> {
+): Promise<RelatedPost[]> {
   if (!categoryId) return []
 
   const supabase = getSupabaseClient()
