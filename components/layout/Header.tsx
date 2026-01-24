@@ -139,12 +139,14 @@ export function Header() {
 
             {/* CTA Button - Header style */}
             <div className="hidden md:block">
-              <Link
-                href="/get-quote"
+              <a
+                href="https://portal.cethos.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-medium hover:bg-[#06B6D4] transition-colors"
               >
-                Get a Quote
-              </Link>
+                Login
+              </a>
             </div>
 
             {/* Mobile Menu Button */}
