@@ -83,11 +83,11 @@ export default async function BlogPostPage({
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
               <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span>/</span>
+              <span className="text-gray-500">/</span>
               <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
               {post.category && (
                 <>
-                  <span>/</span>
+                  <span className="text-gray-500">/</span>
                   <Link
                     href={`/blog/category/${post.category.slug}`}
                     className="hover:text-white transition-colors"
@@ -109,12 +109,12 @@ export default async function BlogPostPage({
             )}
 
             {/* Title */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-4">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-4 text-white">
               {post.title}
             </h1>
 
             {/* Excerpt */}
-            <p className="text-lg text-gray-300 leading-relaxed mb-6 max-w-3xl">
+            <p className="text-lg text-gray-200 leading-relaxed mb-6 max-w-3xl">
               {post.excerpt}
             </p>
 

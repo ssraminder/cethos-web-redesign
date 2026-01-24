@@ -37,10 +37,10 @@ export default async function BlogPage() {
       <section className="bg-[#0C2340] text-white py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white">
               Translation Insights & Resources
             </h1>
-            <p className="text-xl text-gray-300">
+            <p className="text-xl text-gray-200">
               Expert perspectives on translation, localization, and global communication
               from the Cethos team.
             </p>
