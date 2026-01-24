@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Mail, Phone, MapPin, Linkedin, Twitter } from 'lucide-react'
+import { Mail, Phone, Linkedin, Twitter } from 'lucide-react'
+import { FooterLocation } from './FooterLocation'
 
 const footerLinks = {
   company: [
@@ -63,10 +64,7 @@ export function Footer() {
                   <Phone className="w-5 h-5" strokeWidth={1.5} />
                   <span>587-600-0786</span>
                 </a>
-                <div className="flex items-center gap-3 text-white/70">
-                  <MapPin className="w-5 h-5" strokeWidth={1.5} />
-                  <span>Calgary, Canada (HQ) • Dubai, UAE • Patiala, India</span>
-                </div>
+                <FooterLocation />
               </div>
             </div>
 
