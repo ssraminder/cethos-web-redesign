@@ -2,11 +2,12 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Phone, CheckCircle, Package, Star, Shield, Users } from 'lucide-react'
+import { ArrowRight, Phone, CheckCircle, Package, Star, Shield, Users, Clock, Award, BadgeCheck } from 'lucide-react'
 import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
-import { TrustBar, StickyMobileCTA, LandingQuoteForm, LandingLocalBusinessJsonLd } from '@/components/landing'
+import { TrustBar, StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
+import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
 
 const packages = [
   {
@@ -97,12 +98,12 @@ export default function PRCitizenshipContent() {
           <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div>
+            <div className="max-w-xl">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
+                className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
                 PR & Citizenship Translation Packages
               </motion.h1>
@@ -111,37 +112,83 @@ export default function PRCitizenshipContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-xl text-[#4B5563] leading-relaxed mb-6"
+                className="text-lg text-[#4B5563] leading-relaxed mb-4"
               >
                 Complete document translation for permanent residence and citizenship applications. Birth certificates, marriage documents, academic credentials, police clearances—all translated and certified.
               </motion.p>
 
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="text-lg text-[#4B5563] leading-relaxed mb-6"
+              >
+                Save up to 20% with bundled packages. All documents include commissioner certification and are IRCC-ready.
+              </motion.p>
+
+              {/* Price Badge */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-wrap gap-4 mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0891B2]/10 rounded-full mb-6"
               >
-                <Link
-                  href="#quote-form"
-                  className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
-                >
-                  Get a Free Quote <ArrowRight className="w-5 h-5" />
-                </Link>
+                <span className="text-[#0891B2] font-bold text-lg">From $120</span>
+                <span className="text-slate-600">per package</span>
+              </motion.div>
+
+              {/* CTAs */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+                className="flex flex-wrap gap-3 mb-8"
+              >
                 <a
                   href="tel:5876000786"
-                  className="px-6 py-4 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-[#F8FAFC] transition-colors flex items-center gap-2"
+                  className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
                 >
                   <Phone className="w-5 h-5" /> (587) 600-0786
                 </a>
+                <a
+                  href="mailto:info@cethos.com"
+                  className="px-6 py-3 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-slate-50 transition-colors"
+                >
+                  Email Us
+                </a>
               </motion.div>
 
+              {/* Trust Badges - 2 rows */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
+                className="space-y-3"
               >
-                <TrustBar items={['Complete Packages', 'Bundle Pricing', 'All Documents Under One Roof', '100% IRCC Acceptance']} />
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
+                  <span className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-[#0891B2]" />
+                    100% IRCC Accepted
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <BadgeCheck className="w-5 h-5 text-[#0891B2]" />
+                    Gov&apos;t of Alberta Approved
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#0891B2]" />
+                    Same-Day Available
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
+                  <span className="flex items-center gap-2">
+                    <Award className="w-5 h-5 text-[#0891B2]" />
+                    Notarization Included
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
+                    139 Five-Star Reviews
+                  </span>
+                </div>
               </motion.div>
             </div>
 
@@ -154,7 +201,7 @@ export default function PRCitizenshipContent() {
             >
               <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Custom Quote</h2>
               <p className="text-slate-600 mb-6">Tell us about your documents for package pricing.</p>
-              <LandingQuoteForm />
+              <CertifiedQuoteForm formLocation="pr-citizenship-translation" />
             </motion.div>
           </div>
         </div>
@@ -301,19 +348,30 @@ export default function PRCitizenshipContent() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 bg-[#0891B2]">
+      <section className="py-16 bg-gradient-to-r from-[#0C2340] to-[#164e63]">
         <Container>
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Ready to Start Your Immigration Journey?</h2>
-            <p className="text-white/90 mb-8">Get all your documents translated with our complete packages.</p>
+            <h2 className="text-3xl font-bold text-white mb-4">Start Your PR or Citizenship Application Today</h2>
+            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+              Complete document packages from $120. All translations IRCC-accepted with notarization included.
+            </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link href="#quote-form" className="px-8 py-4 bg-white text-[#0891B2] rounded-lg font-semibold hover:bg-slate-100 transition-colors">
-                Get a Custom Quote
-              </Link>
-              <a href="tel:5876000786" className="px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg font-semibold hover:bg-white/10 transition-colors flex items-center gap-2">
+              <a
+                href="tel:5876000786"
+                className="px-8 py-4 bg-white text-[#0C2340] rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2"
+              >
                 <Phone className="w-5 h-5" /> (587) 600-0786
               </a>
+              <a
+                href="mailto:info@cethos.com"
+                className="px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
+              >
+                Email for Quote
+              </a>
             </div>
+            <p className="text-white/60 text-sm mt-6">
+              From $120 • Same-day service • Government of Alberta approved
+            </p>
           </div>
         </Container>
       </section>

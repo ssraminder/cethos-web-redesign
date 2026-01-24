@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Phone, CheckCircle, Shield, Clock, Award, FileText, Globe, Star, BadgeCheck } from 'lucide-react'
+import { Phone, CheckCircle, Shield, Clock, Award, FileText, Globe } from 'lucide-react'
 import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
@@ -26,14 +26,14 @@ const topLanguages = [
 ]
 
 const pricingTable = [
-  { service: 'Birth Certificate Translation', price: 'Starting at $65' },
+  { service: 'Police Clearance Translation', price: 'Starting at $65' },
   { service: 'Commissioner Certification', price: 'Included' },
   { service: 'Same-Day Rush', price: '+$25' },
   { service: 'Courier Delivery (Calgary)', price: '+$15' },
 ]
 
 const howItWorks = [
-  { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your birth certificate and upload it through our secure form.' },
+  { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your police clearance certificate and upload it through our secure form.' },
   { step: 2, title: 'Get Your Quote', description: 'Receive an exact quote within 2 hours. No hidden fees, no surprises.' },
   { step: 3, title: 'We Translate', description: 'Our IRCC-certified translator completes your translation with 100% accuracy.' },
   { step: 4, title: 'Receive Your Translation', description: 'Pick up in downtown Calgary or receive via email/courier.' },
@@ -41,34 +41,34 @@ const howItWorks = [
 
 const faqs = [
   {
-    question: 'Why does IRCC require certified birth certificate translation?',
-    answer: 'IRCC requires certified translation to verify the authenticity and accuracy of foreign documents. Birth certificates prove identity, date of birth, and parentage—all critical information for immigration applications. Our certified translations include a signed statement attesting to accuracy.',
+    question: 'What types of police clearance documents do you translate?',
+    answer: 'We translate all types of police clearance documents including RCMP criminal record checks, FBI background checks, national police certificates from any country, and state/provincial police clearances. All translations are certified for IRCC acceptance.',
   },
   {
-    question: 'What should I bring for birth certificate translation?',
-    answer: 'You just need a clear copy of your birth certificate—a photo or scan is fine. You don\'t need to bring the original document. If your certificate is faded or damaged, we can still translate it in most cases.',
+    question: 'Why does IRCC require police clearance certificate translation?',
+    answer: 'IRCC requires certified translations of police clearance certificates to verify that applicants have no criminal history that would make them inadmissible to Canada. This is a mandatory requirement for most immigration applications including PR, citizenship, and work permits.',
   },
   {
-    question: 'How much does birth certificate translation cost?',
-    answer: 'Birth certificate translation starts at $65, which includes the certified translation and commissioner certification. Same-day rush service is available for an additional $25.',
+    question: 'How much does police clearance translation cost?',
+    answer: 'Police clearance certificate translation starts at $65, which includes the certified translation and commissioner certification. Same-day rush service is available for an additional $25.',
   },
   {
-    question: 'Can you translate birth certificates in languages that don\'t use the Latin alphabet?',
-    answer: 'Yes, we translate birth certificates from any language, including those using Cyrillic, Arabic, Chinese, Korean, Hindi, and all other scripts. Our translators are native speakers with expertise in these languages.',
+    question: 'Do I need to translate police clearances from every country I lived in?',
+    answer: 'Generally, IRCC requires police clearance certificates from every country where you lived for 6 months or more since turning 18. Each certificate in a foreign language needs certified translation.',
   },
   {
-    question: 'What if my birth certificate is old or has handwritten text?',
-    answer: 'We regularly translate historical and handwritten documents. Our translators are experienced with various document formats and scripts. If any text is illegible, we\'ll note it in the translation.',
+    question: 'What if my police clearance has stamps or seals in a different language?',
+    answer: 'We translate all text on the document including stamps, seals, and annotations. Our translators are experienced with police documents from around the world and understand the various formats used by different countries.',
   },
 ]
 
 const breadcrumbItems = [
   { name: 'Services', url: '/services' },
   { name: 'Certified Translation', url: '/services/certified' },
-  { name: 'Birth Certificate Translation', url: '/services/certified/birth-certificate-translation' },
+  { name: 'Police Clearance Translation', url: '/services/certified/police-clearance-translation' },
 ]
 
-export default function BirthCertificateContent() {
+export default function PoliceClearanceContent() {
   return (
     <>
       <LandingLocalBusinessJsonLd areaServed={['Calgary', 'Edmonton', 'Alberta', 'Canada']} />
@@ -81,97 +81,45 @@ export default function BirthCertificateContent() {
           <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div className="max-w-xl">
+            <div>
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
+                className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
               >
-                Birth Certificate Translation Calgary
+                Police Clearance Translation Calgary
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="text-lg text-[#4B5563] leading-relaxed mb-4"
+                className="text-xl text-[#4B5563] leading-relaxed mb-6"
               >
-                IRCC-certified birth certificate translations for PR, citizenship, and spousal sponsorship. Same-day service available with on-site notarization.
+                IRCC-certified translations for RCMP, FBI, and international police clearance certificates. Same-day service available with on-site notarization.
               </motion.p>
 
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.15 }}
-                className="text-lg text-[#4B5563] leading-relaxed mb-6"
-              >
-                Accepted by IRCC, WES, IQAS, and all Canadian immigration authorities. Government of Alberta approved translator.
-              </motion.p>
-
-              {/* Price Badge */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0891B2]/10 rounded-full mb-6"
-              >
-                <span className="text-[#0891B2] font-bold text-lg">From $65</span>
-                <span className="text-slate-600">per document</span>
-              </motion.div>
-
-              {/* CTAs */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.25 }}
-                className="flex flex-wrap gap-3 mb-8"
+                className="flex flex-wrap gap-4 mb-6"
               >
                 <a
                   href="tel:5876000786"
-                  className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
+                  className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
                 >
                   <Phone className="w-5 h-5" /> (587) 600-0786
                 </a>
-                <a
-                  href="mailto:info@cethos.com"
-                  className="px-6 py-3 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-slate-50 transition-colors"
-                >
-                  Email Us
-                </a>
               </motion.div>
 
-              {/* Trust Badges - 2 rows */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
-                className="space-y-3"
               >
-                <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
-                  <span className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-[#0891B2]" />
-                    100% IRCC Accepted
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <BadgeCheck className="w-5 h-5 text-[#0891B2]" />
-                    Gov&apos;t of Alberta Approved
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-[#0891B2]" />
-                    Same-Day Available
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
-                  <span className="flex items-center gap-2">
-                    <Award className="w-5 h-5 text-[#0891B2]" />
-                    Notarization Included
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                    139 Five-Star Reviews
-                  </span>
-                </div>
+                <TrustBar items={['Starting at $65', 'Same-Day Available', '100% IRCC Acceptance Guarantee', 'Translation + Notary Same Visit']} />
               </motion.div>
             </div>
 
@@ -184,10 +132,10 @@ export default function BirthCertificateContent() {
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
               <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
-              <p className="text-slate-600 mb-6">Upload your birth certificate for a quick quote.</p>
+              <p className="text-slate-600 mb-6">Upload your police clearance certificate for a quick quote.</p>
               <CertifiedQuoteForm
-                defaultDocumentType="birth-certificate"
-                formLocation="birth-certificate-translation"
+                defaultDocumentType="police-clearance"
+                formLocation="police-clearance-translation"
               />
             </motion.div>
           </div>
@@ -198,16 +146,16 @@ export default function BirthCertificateContent() {
       <section className="py-16 bg-white">
         <Container>
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why IRCC Requires Certified Translation</h2>
+            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why IRCC Requires Police Clearance Translation</h2>
             <p className="text-slate-600">
-              Immigration, Refugees and Citizenship Canada requires all foreign-language documents to be translated by a certified translator. This ensures the accuracy and authenticity of your personal information for immigration processing.
+              Immigration, Refugees and Citizenship Canada requires certified translation of all foreign-language police clearance documents. This ensures officers can verify your criminal background for immigration eligibility.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <Card className="p-6 text-center">
               <Shield className="w-10 h-10 text-teal-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-[#0C2340] mb-2">Identity Verification</h3>
-              <p className="text-sm text-slate-600">Birth certificates verify your identity, date of birth, and place of birth.</p>
+              <h3 className="font-semibold text-[#0C2340] mb-2">Admissibility Check</h3>
+              <p className="text-sm text-slate-600">Police clearances verify you have no criminal history affecting your eligibility.</p>
             </Card>
             <Card className="p-6 text-center">
               <FileText className="w-10 h-10 text-teal-600 mx-auto mb-4" />
@@ -215,9 +163,9 @@ export default function BirthCertificateContent() {
               <p className="text-sm text-slate-600">IRCC only accepts translations with a signed certificate of accuracy.</p>
             </Card>
             <Card className="p-6 text-center">
-              <Award className="w-10 h-10 text-teal-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-[#0C2340] mb-2">Family Relationships</h3>
-              <p className="text-sm text-slate-600">Parent names on birth certificates are crucial for sponsorship applications.</p>
+              <Globe className="w-10 h-10 text-teal-600 mx-auto mb-4" />
+              <h3 className="font-semibold text-[#0C2340] mb-2">All Countries Accepted</h3>
+              <p className="text-sm text-slate-600">We translate police certificates from any country in any language.</p>
             </Card>
           </div>
         </Container>
@@ -318,30 +266,21 @@ export default function BirthCertificateContent() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 bg-gradient-to-r from-[#0C2340] to-[#164e63]">
+      <section className="py-16 bg-[#0891B2]">
         <Container>
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Get Your Birth Certificate Translated Today</h2>
-            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
-              Certified birth certificate translations from $65. Accepted by IRCC, WES, and IQAS.
+            <h2 className="text-3xl font-bold text-white mb-4">Get Your Police Clearance Translated Today</h2>
+            <p className="text-white/90 mb-8 max-w-xl mx-auto">
+              Starting at $65. Same-day service available.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="tel:5876000786"
-                className="px-8 py-4 bg-white text-[#0C2340] rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2"
+                className="px-6 py-4 bg-white text-[#0891B2] rounded-lg font-semibold hover:bg-slate-100 transition-colors flex items-center gap-2"
               >
                 <Phone className="w-5 h-5" /> (587) 600-0786
               </a>
-              <a
-                href="mailto:info@cethos.com"
-                className="px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
-              >
-                Email for Quote
-              </a>
             </div>
-            <p className="text-white/60 text-sm mt-6">
-              From $65 • Same-day service • Government of Alberta approved
-            </p>
           </div>
         </Container>
       </section>
@@ -355,8 +294,8 @@ export default function BirthCertificateContent() {
               Immigration Translation Services
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/services/certified/marriage-certificate-translation" className="text-[#0891B2] hover:underline">
-              Marriage Certificate Translation
+            <Link href="/services/certified/birth-certificate-translation" className="text-[#0891B2] hover:underline">
+              Birth Certificate Translation
             </Link>
             <span className="text-slate-300">•</span>
             <Link href="/services/certified/pr-citizenship-translation" className="text-[#0891B2] hover:underline">
