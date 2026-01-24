@@ -20,11 +20,13 @@ import {
   Star,
   Building,
   Languages,
-  Car
+  Car,
 } from 'lucide-react'
+
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
+import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
 
 // =============================================================================
 // DATA
@@ -34,7 +36,8 @@ const specializedServices = [
   {
     icon: Car,
     title: "Driver's License Translation",
-    description: 'Government of Alberta approved translations for driver\'s licenses, vehicle registrations, and ID documents for Service Alberta and Alberta Registries.',
+    description:
+      "Government of Alberta approved translations for driver's licenses, vehicle registrations, and ID documents for Service Alberta and Alberta Registries.",
     href: '/services/certified/drivers-license-translation',
     price: 'From $65',
     popular: true,
@@ -42,7 +45,8 @@ const specializedServices = [
   {
     icon: Users,
     title: 'Immigration Translation Services',
-    description: 'Complete translation services for IRCC applications including Express Entry, PNP, family sponsorship, and refugee claims.',
+    description:
+      'Complete translation services for IRCC applications including Express Entry, PNP, family sponsorship, and refugee claims.',
     href: '/services/certified/immigration-translation-services',
     price: 'From $65',
     popular: true,
@@ -50,7 +54,8 @@ const specializedServices = [
   {
     icon: FileText,
     title: 'Birth Certificate Translation',
-    description: 'IRCC-certified birth certificate translations for PR, citizenship, sponsorship applications, and WES evaluations.',
+    description:
+      'IRCC-certified birth certificate translations for PR, citizenship, sponsorship applications, and WES evaluations.',
     href: '/services/certified/birth-certificate-translation',
     price: 'From $65',
     popular: false,
@@ -58,7 +63,8 @@ const specializedServices = [
   {
     icon: Heart,
     title: 'Marriage Certificate Translation',
-    description: 'Certified translations for marriage certificates, divorce decrees, and annulment documents for spousal sponsorship.',
+    description:
+      'Certified translations for marriage certificates, divorce decrees, and annulment documents for spousal sponsorship.',
     href: '/services/certified/marriage-certificate-translation',
     price: 'From $65',
     popular: false,
@@ -66,7 +72,8 @@ const specializedServices = [
   {
     icon: GraduationCap,
     title: 'Academic Transcript Translation',
-    description: 'WES, IQAS, and Express Entry certified translations for diplomas, degrees, transcripts, and professional credentials.',
+    description:
+      'WES, IQAS, and Express Entry certified translations for diplomas, degrees, transcripts, and professional credentials.',
     href: '/services/certified/academic-transcript-translation',
     price: 'From $65',
     popular: false,
@@ -74,7 +81,8 @@ const specializedServices = [
   {
     icon: Award,
     title: 'PR & Citizenship Packages',
-    description: 'Complete document packages for permanent residence and citizenship applications. Bundle pricing for multiple documents.',
+    description:
+      'Complete document packages for permanent residence and citizenship applications. Bundle pricing for multiple documents.',
     href: '/services/certified/pr-citizenship-translation',
     price: 'From $120',
     popular: true,
@@ -85,22 +93,26 @@ const features = [
   {
     icon: Shield,
     title: '100% IRCC Acceptance Guarantee',
-    description: 'All translations accepted by Immigration, Refugees and Citizenship Canada. Full refund if rejected.',
+    description:
+      'All translations accepted by Immigration, Refugees and Citizenship Canada. Full refund if rejected.',
   },
   {
     icon: BadgeCheck,
     title: 'Government of Alberta Approved',
-    description: 'Officially approved translator for Government of Alberta and provincial document requirements.',
+    description:
+      'Officially approved translator for Government of Alberta and provincial document requirements.',
   },
   {
     icon: Clock,
     title: 'Same-Day Service Available',
-    description: 'Urgent deadline? Rush and same-day service delivers certified translations within hours.',
+    description:
+      'Urgent deadline? Rush and same-day service delivers certified translations within hours.',
   },
   {
     icon: Award,
     title: 'Notarization Included',
-    description: 'Commissioner of Oaths certification included free with every translation. Additional notarization available.',
+    description:
+      'Commissioner of Oaths certification included free with every translation. Additional notarization available.',
   },
 ]
 
@@ -114,7 +126,7 @@ const documentCategories = [
       'Divorce Decrees',
       'Death Certificates',
       'Name Change Documents',
-      'Adoption Papers'
+      'Adoption Papers',
     ],
   },
   {
@@ -126,7 +138,7 @@ const documentCategories = [
       'Course Descriptions',
       'Professional Certificates',
       'Letters of Recommendation',
-      'Enrollment Letters'
+      'Enrollment Letters',
     ],
   },
   {
@@ -138,7 +150,7 @@ const documentCategories = [
       'Powers of Attorney',
       'Affidavits',
       'Corporate Documents',
-      'Notarized Statements'
+      'Notarized Statements',
     ],
   },
   {
@@ -150,25 +162,48 @@ const documentCategories = [
       'Bank Statements',
       'Reference Letters',
       'Medical Records',
-      'Military Records'
+      'Military Records',
     ],
   },
 ]
 
 const languages = [
-  'Punjabi', 'Hindi', 'Urdu', 'Gujarati', 'Tamil',
-  'Arabic', 'Farsi', 'Dari', 'Pashto',
-  'Mandarin', 'Cantonese', 'Vietnamese', 'Korean', 'Japanese', 'Tagalog',
-  'Spanish', 'Portuguese', 'French', 'Italian', 'German',
-  'Russian', 'Ukrainian', 'Polish', 'Romanian',
-  'Amharic', 'Tigrinya', 'Somali', 'Swahili'
+  'Punjabi',
+  'Hindi',
+  'Urdu',
+  'Gujarati',
+  'Tamil',
+  'Arabic',
+  'Farsi',
+  'Dari',
+  'Pashto',
+  'Mandarin',
+  'Cantonese',
+  'Vietnamese',
+  'Korean',
+  'Japanese',
+  'Tagalog',
+  'Spanish',
+  'Portuguese',
+  'French',
+  'Italian',
+  'German',
+  'Russian',
+  'Ukrainian',
+  'Polish',
+  'Romanian',
+  'Amharic',
+  'Tigrinya',
+  'Somali',
+  'Swahili',
 ]
 
 const processSteps = [
   {
     step: 1,
     title: 'Submit Your Document',
-    description: 'Upload a clear photo or scan via our secure form, email, or bring it to our Calgary office.',
+    description:
+      'Upload a clear photo or scan via our secure form, email, or bring it to our Calgary office.',
   },
   {
     step: 2,
@@ -178,12 +213,14 @@ const processSteps = [
   {
     step: 3,
     title: 'We Translate & Certify',
-    description: 'A certified translator completes your translation with official certification.',
+    description:
+      'A certified translator completes your translation with official certification.',
   },
   {
     step: 4,
     title: 'Pick Up or Delivery',
-    description: 'Collect from our downtown Calgary office or receive by secure email or courier.',
+    description:
+      'Collect from our downtown Calgary office or receive by secure email or courier.',
   },
 ]
 
@@ -197,27 +234,33 @@ const stats = [
 const faqs = [
   {
     question: 'What is a certified translation?',
-    answer: 'A certified translation includes a signed statement from a qualified translator attesting to the accuracy and completeness of the translation. This certification is required by IRCC, courts, WES, IQAS, and government agencies. Our certifications include the translator\'s credentials, signature, date, and official stamp.',
+    answer:
+      "A certified translation includes a signed statement from a qualified translator attesting to the accuracy and completeness of the translation. This certification is required by IRCC, courts, WES, IQAS, and government agencies. Our certifications include the translator's credentials, signature, date, and official stamp.",
   },
   {
     question: 'Are your translations accepted by IRCC?',
-    answer: 'Yes, all our translations are 100% accepted by Immigration, Refugees and Citizenship Canada (IRCC). We provide a full money-back guarantee if IRCC ever rejects our translation for any reason related to translation quality or certification.',
+    answer:
+      'Yes, all our translations are 100% accepted by Immigration, Refugees and Citizenship Canada (IRCC). We provide a full money-back guarantee if IRCC ever rejects our translation for any reason related to translation quality or certification.',
   },
   {
     question: 'How fast can I get a certified translation?',
-    answer: 'Standard service is 2-3 business days. Rush service (24 hours) and same-day service are available for urgent deadlines. Contact us directly for same-day requests to confirm availability.',
+    answer:
+      'Standard service is 2-3 business days. Rush service (24 hours) and same-day service are available for urgent deadlines. Contact us directly for same-day requests to confirm availability.',
   },
   {
     question: 'Do you provide notarization?',
-    answer: 'Yes, Commissioner of Oaths certification (equivalent to notarization for IRCC purposes) is included FREE with every translation. If you need additional notarization by a Notary Public, this service is available for an additional fee.',
+    answer:
+      'Yes, Commissioner of Oaths certification (equivalent to notarization for IRCC purposes) is included FREE with every translation. If you need additional notarization by a Notary Public, this service is available for an additional fee.',
   },
   {
     question: 'What is your pricing?',
-    answer: 'Our certified translations start at $65 per document. Pricing depends on document length, complexity, and language pair. Multi-document packages (like PR or citizenship applications) offer discounted bundle pricing starting at $120. Contact us for an exact quote.',
+    answer:
+      'Our certified translations start at $65 per document. Pricing depends on document length, complexity, and language pair. Multi-document packages (like PR or citizenship applications) offer discounted bundle pricing starting at $120. Contact us for an exact quote.',
   },
   {
     question: 'What languages do you translate?',
-    answer: 'We translate from 95+ languages including Punjabi, Hindi, Urdu, Mandarin, Cantonese, Arabic, Farsi, Spanish, French, Vietnamese, Korean, Japanese, Tagalog, Russian, Ukrainian, and many more. All translators are native speakers with professional certification.',
+    answer:
+      'We translate from 95+ languages including Punjabi, Hindi, Urdu, Mandarin, Cantonese, Arabic, Farsi, Spanish, French, Vietnamese, Korean, Japanese, Tagalog, Russian, Ukrainian, and many more. All translators are native speakers with professional certification.',
   },
 ]
 
@@ -233,6 +276,27 @@ const breadcrumbItems = [
 export default function CertifiedTranslationContent() {
   return (
     <>
+      {/* ===================================================================== */}
+      {/* DIAGNOSTIC MARKER (TEMP) */}
+      {/* ===================================================================== */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 8,
+          left: 8,
+          zIndex: 999999,
+          background: 'rgba(255,0,0,0.9)',
+          color: '#fff',
+          padding: '6px 10px',
+          borderRadius: 6,
+          fontSize: 12,
+          fontWeight: 700,
+          pointerEvents: 'none',
+        }}
+      >
+        DEPLOY CHECK: certified v1
+      </div>
+
       {/* Structured Data */}
       <ServiceJsonLd
         name="Certified Translation Services Calgary"
@@ -249,7 +313,7 @@ export default function CertifiedTranslationContent() {
         <div className="max-w-[1200px] mx-auto px-8 py-20">
           <Breadcrumbs items={breadcrumbItems} className="mb-6" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left Column */}
             <div className="max-w-xl">
               <motion.div
@@ -287,7 +351,8 @@ export default function CertifiedTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.25 }}
                 className="text-lg text-[#4B5563] leading-relaxed mb-6"
               >
-                Government of Alberta approved translator. Notarization included with every translation.
+                Government of Alberta approved translator. Notarization included with every
+                translation.
               </motion.p>
 
               {/* Price Badge */}
@@ -314,6 +379,7 @@ export default function CertifiedTranslationContent() {
                 >
                   <Phone className="w-5 h-5" /> (587) 600-0786
                 </a>
+
                 <a
                   href="mailto:info@cethos.com?subject=Certified Translation Quote"
                   className="px-6 py-3 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
@@ -339,6 +405,7 @@ export default function CertifiedTranslationContent() {
                     Government of Alberta Approved
                   </span>
                 </div>
+
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
                   <span className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-[#0891B2]" />
@@ -356,20 +423,17 @@ export default function CertifiedTranslationContent() {
               </motion.div>
             </div>
 
-            {/* Right Column - Visual */}
+            {/* Quote Form */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              id="quote-form"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex justify-center"
+              className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
-              <div className="w-full max-w-[420px] h-[420px] bg-gradient-to-br from-[#E0F2FE] via-white to-[#0891B2]/20 rounded-2xl flex items-center justify-center shadow-lg border border-slate-100">
-                <div className="text-center">
-                  <FileText className="w-24 h-24 text-[#0891B2] mx-auto mb-4" strokeWidth={1} />
-                  <div className="text-2xl font-bold text-[#0C2340] mb-2">Certified & Notarized</div>
-                  <div className="text-slate-600">Ready for IRCC submission</div>
-                </div>
-              </div>
+              <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
+              <p className="text-slate-600 mb-6">Upload your document for an instant quote.</p>
+              <CertifiedQuoteForm formLocation="certified-translation-main" />
             </motion.div>
           </div>
         </div>
@@ -455,13 +519,17 @@ export default function CertifiedTranslationContent() {
                         Popular
                       </div>
                     )}
+
                     <div className="w-12 h-12 rounded-xl bg-[#0891B2]/10 flex items-center justify-center mb-4 group-hover:bg-[#0891B2] transition-colors">
                       <service.icon className="w-6 h-6 text-[#0891B2] group-hover:text-white transition-colors" />
                     </div>
+
                     <h3 className="font-semibold text-[#0C2340] mb-2 group-hover:text-[#0891B2] transition-colors">
                       {service.title}
                     </h3>
+
                     <p className="text-sm text-slate-600 mb-4">{service.description}</p>
+
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-[#0891B2]">{service.price}</span>
                       <span className="flex items-center gap-1 text-sm text-[#0891B2] font-medium opacity-0 group-hover:opacity-100 transition-opacity">
@@ -503,6 +571,7 @@ export default function CertifiedTranslationContent() {
                     </div>
                     <h3 className="font-semibold text-[#0C2340]">{category.title}</h3>
                   </div>
+
                   <ul className="space-y-2">
                     {category.items.map((item, i) => (
                       <li key={i} className="text-sm text-slate-600 flex items-center gap-2">
@@ -528,6 +597,7 @@ export default function CertifiedTranslationContent() {
             subtitle="95+ languages with native-speaking certified translators. All major South Asian, Middle Eastern, East Asian, and European languages."
             className="mb-12"
           />
+
           <div className="flex flex-wrap justify-center gap-3">
             {languages.map((lang, index) => (
               <motion.span
@@ -555,8 +625,10 @@ export default function CertifiedTranslationContent() {
         <Container>
           <h2 className="text-3xl font-bold text-white text-center mb-4">How It Works</h2>
           <p className="text-white/70 text-center mb-12 max-w-2xl mx-auto">
-            Get your certified translation in 4 simple steps. Most documents completed within 2-3 business days.
+            Get your certified translation in 4 simple steps. Most documents completed within 2-3
+            business days.
           </p>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {processSteps.map((item, index) => (
               <motion.div
@@ -570,9 +642,11 @@ export default function CertifiedTranslationContent() {
                 {index < processSteps.length - 1 && (
                   <div className="hidden md:block absolute top-7 left-[60%] w-[80%] h-0.5 bg-[#0891B2]/30" />
                 )}
+
                 <div className="w-14 h-14 rounded-full bg-[#0891B2] text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold relative z-10">
                   {item.step}
                 </div>
+
                 <h3 className="font-semibold text-white mb-2">{item.title}</h3>
                 <p className="text-white/70 text-sm">{item.description}</p>
               </motion.div>
@@ -591,6 +665,7 @@ export default function CertifiedTranslationContent() {
             subtitle="Common questions about our certified translation services."
             className="mb-12"
           />
+
           <div className="max-w-3xl mx-auto space-y-4">
             {faqs.map((faq, index) => (
               <motion.div
@@ -616,13 +691,12 @@ export default function CertifiedTranslationContent() {
       <section className="py-16 bg-gradient-to-r from-[#0C2340] to-[#164e63]">
         <Container>
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Get Your Documents Translated Today
-            </h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Get Your Documents Translated Today</h2>
             <p className="text-white/80 mb-8 max-w-2xl mx-auto">
-              IRCC-accepted certified translations from $65. Same-day service available.
-              Government of Alberta approved with notarization included.
+              IRCC-accepted certified translations from $65. Same-day service available. Government
+              of Alberta approved with notarization included.
             </p>
+
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href="tel:5876000786"
@@ -630,6 +704,7 @@ export default function CertifiedTranslationContent() {
               >
                 <Phone className="w-5 h-5" /> (587) 600-0786
               </a>
+
               <a
                 href="mailto:info@cethos.com?subject=Certified Translation Quote"
                 className="px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
@@ -637,6 +712,7 @@ export default function CertifiedTranslationContent() {
                 <Mail className="w-5 h-5" /> Email for Quote
               </a>
             </div>
+
             <p className="text-white/60 text-sm mt-6">
               From $65 • Same-day available • Government of Alberta approved • Notarization included
             </p>
