@@ -336,7 +336,7 @@ export default function LifeSciencesPageContent() {
       {/* ===================================================================== */}
       {/* STICKY NAVIGATION TABS */}
       {/* ===================================================================== */}
-      <section className="py-6 bg-slate-50 border-b sticky top-16 z-40">
+      <section className="py-6 bg-slate-50 border-b lg:sticky lg:top-20 z-40">
         <Container>
           <div className="flex flex-wrap justify-center gap-3">
             {services.map((service) => (
