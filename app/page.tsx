@@ -1,4 +1,5 @@
-import { Hero, Services, Stats, Industries, WhyUs, ClientLogos, CTA } from '@/components/sections'
+import { Hero, Services, Stats, Industries, WhyUs, CTA } from '@/components/sections'
+import TrustedByLogos from '@/components/TrustedByLogos'
 
 export default function HomePage() {
   return (
@@ -8,7 +9,11 @@ export default function HomePage() {
       <Stats />
       <Industries />
       <WhyUs />
-      <ClientLogos />
+      <TrustedByLogos
+        featuredOnly={true}
+        title="Trusted by Leading Global Companies"
+        subtitle="Join 500+ enterprises who rely on Cethos for precision translation"
+      />
       <CTA />
     </>
   )
