@@ -70,7 +70,7 @@ export default function RootLayout({
         <WebSiteJsonLd />
         <LocalBusinessJsonLd />
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <GoogleTagManager />
         <Header />
         <main>{children}</main>
