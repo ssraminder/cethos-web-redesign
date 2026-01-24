@@ -14,13 +14,13 @@ import {
   GraduationCap,
   Heart,
   Users,
-  MapPin,
   Scale,
   Globe,
   BadgeCheck,
   Star,
   Building,
-  Languages
+  Languages,
+  Car
 } from 'lucide-react'
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
@@ -31,6 +31,14 @@ import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
 // =============================================================================
 
 const specializedServices = [
+  {
+    icon: Car,
+    title: "Driver's License Translation",
+    description: 'Government of Alberta approved translations for driver\'s licenses, vehicle registrations, and ID documents for Service Alberta and Alberta Registries.',
+    href: '/services/certified/drivers-license-translation',
+    price: 'From $65',
+    popular: true,
+  },
   {
     icon: Users,
     title: 'Immigration Translation Services',
@@ -70,14 +78,6 @@ const specializedServices = [
     href: '/services/certified/pr-citizenship-translation',
     price: 'From $120',
     popular: true,
-  },
-  {
-    icon: MapPin,
-    title: 'Edmonton Translation Services',
-    description: 'IRCC-certified translations delivered to Edmonton and area by secure email or courier. No travel to Calgary required.',
-    href: '/services/certified/edmonton-translation-agency',
-    price: 'From $65',
-    popular: false,
   },
 ]
 
