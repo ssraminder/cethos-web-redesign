@@ -336,15 +336,15 @@ export default function LifeSciencesPageContent() {
       {/* ===================================================================== */}
       {/* STICKY NAVIGATION TABS */}
       {/* ===================================================================== */}
-      <section className="py-4 bg-slate-50 border-b sticky top-16 z-40">
+      <section className="py-6 bg-slate-50 border-b sticky top-16 z-40">
         <Container>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex flex-wrap justify-center gap-3">
             {services.map((service) => (
               <a
                 key={service.id}
                 href={`#${service.id}`}
                 onClick={() => setActiveTab(service.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeTab === service.id
                     ? 'bg-[#0891B2] text-white'
                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
@@ -355,7 +355,7 @@ export default function LifeSciencesPageContent() {
             ))}
             <a
               href="#quote-form"
-              className="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap bg-[#0C2340] text-white hover:bg-[#1a3a5c] transition-colors"
+              className="px-4 py-2 rounded-full text-sm font-medium bg-[#0C2340] text-white hover:bg-[#1a3a5c] transition-colors"
             >
               Get a Quote
             </a>
