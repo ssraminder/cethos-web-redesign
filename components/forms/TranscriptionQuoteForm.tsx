@@ -23,29 +23,50 @@ const LEGAL_SUBTYPES = [
   { value: 'other-legal', label: 'Other Legal Content' },
 ];
 
+const SOURCE_LANGUAGES = [
+  { value: 'english', label: 'English' },
+  { value: 'spanish', label: 'Spanish' },
+  { value: 'french', label: 'French' },
+  { value: 'mandarin', label: 'Mandarin Chinese' },
+  { value: 'cantonese', label: 'Cantonese Chinese' },
+  { value: 'arabic', label: 'Arabic' },
+  { value: 'portuguese', label: 'Portuguese' },
+  { value: 'german', label: 'German' },
+  { value: 'japanese', label: 'Japanese' },
+  { value: 'korean', label: 'Korean' },
+  { value: 'hindi', label: 'Hindi' },
+  { value: 'punjabi', label: 'Punjabi' },
+  { value: 'italian', label: 'Italian' },
+  { value: 'russian', label: 'Russian' },
+  { value: 'other', label: 'Other (specify in notes)' },
+];
+
 const TURNAROUND_OPTIONS = [
-  { value: 'standard', label: 'Standard (3-5 business days)', price: '$1.50/min' },
-  { value: 'rush', label: 'Rush (24-48 hours)', price: '$2.25/min' },
-  { value: 'same-day', label: 'Same-Day (by end of day)', price: '$3.00/min' },
-  { value: 'overnight', label: 'Overnight (next morning)', price: '$2.75/min' },
+  { value: 'standard', label: 'Standard (3-5 business days)' },
+  { value: 'rush', label: 'Rush (24-48 hours)' },
+  { value: 'same-day', label: 'Same-Day (by end of day)' },
+  { value: 'overnight', label: 'Overnight (next morning)' },
 ];
 
 interface FormData {
-  // Step 1: Service Details
+  // Step 1: Service Type
   serviceType: string;
   legalSubtype: string;
+  sourceLanguage: string;
+
+  // Step 2: Project Details
+  estimatedMinutes: string;
   includeTranslation: boolean;
   targetLanguage: string;
-  turnaround: string;
-  estimatedMinutes: string;
 
-  // Step 2: Contact Information
+  // Step 3: Contact Information
   fullName: string;
   email: string;
   phone: string;
   company: string;
 
-  // Step 3: Files & Notes
+  // Step 4: Turnaround & Files
+  turnaround: string;
   files: FileList | null;
   notes: string;
 }
@@ -59,14 +80,15 @@ export default function TranscriptionQuoteForm() {
   const [formData, setFormData] = useState<FormData>({
     serviceType: '',
     legalSubtype: '',
+    sourceLanguage: '',
+    estimatedMinutes: '',
     includeTranslation: false,
     targetLanguage: '',
-    turnaround: 'standard',
-    estimatedMinutes: '',
     fullName: '',
     email: '',
     phone: '',
     company: '',
+    turnaround: 'standard',
     files: null,
     notes: '',
   });
@@ -85,21 +107,23 @@ export default function TranscriptionQuoteForm() {
   const isStepValid = (step: number): boolean => {
     switch (step) {
       case 1:
-        if (!formData.serviceType || !formData.turnaround) return false;
+        if (!formData.serviceType || !formData.sourceLanguage) return false;
         if (formData.serviceType === 'legal' && !formData.legalSubtype) return false;
-        if (formData.includeTranslation && !formData.targetLanguage) return false;
         return true;
       case 2:
-        return !!(formData.fullName && formData.email && formData.phone);
+        if (formData.includeTranslation && !formData.targetLanguage) return false;
+        return true;
       case 3:
-        return true; // Files and notes are optional
+        return !!(formData.fullName && formData.email && formData.phone);
+      case 4:
+        return !!formData.turnaround;
       default:
         return false;
     }
   };
 
   const nextStep = () => {
-    if (isStepValid(currentStep) && currentStep < 3) {
+    if (isStepValid(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -126,7 +150,7 @@ export default function TranscriptionQuoteForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_type: 'transcription',
-          source_language: 'English',
+          source_language: formData.sourceLanguage,
           target_languages: formData.includeTranslation && formData.targetLanguage
             ? [formData.targetLanguage]
             : [],
@@ -163,14 +187,15 @@ export default function TranscriptionQuoteForm() {
       setFormData({
         serviceType: '',
         legalSubtype: '',
+        sourceLanguage: '',
+        estimatedMinutes: '',
         includeTranslation: false,
         targetLanguage: '',
-        turnaround: 'standard',
-        estimatedMinutes: '',
         fullName: '',
         email: '',
         phone: '',
         company: '',
+        turnaround: 'standard',
         files: null,
         notes: '',
       });
@@ -187,11 +212,11 @@ export default function TranscriptionQuoteForm() {
 
   // Progress indicator
   const ProgressSteps = () => (
-    <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3].map((step) => (
+    <div className="flex items-center justify-center mb-6">
+      {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex items-center">
           <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-colors ${
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
               step === currentStep
                 ? 'bg-[#0891B2] text-white'
                 : step < currentStep
@@ -200,16 +225,16 @@ export default function TranscriptionQuoteForm() {
             }`}
           >
             {step < currentStep ? (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             ) : (
               step
             )}
           </div>
-          {step < 3 && (
+          {step < 4 && (
             <div
-              className={`w-16 md:w-24 h-1 mx-2 rounded ${
+              className={`w-8 md:w-12 h-1 mx-1 rounded ${
                 step < currentStep ? 'bg-green-500' : 'bg-gray-200'
               }`}
             />
@@ -220,7 +245,7 @@ export default function TranscriptionQuoteForm() {
   );
 
   // Step labels
-  const stepLabels = ['Service Details', 'Contact Info', 'Upload & Submit'];
+  const stepLabels = ['Service Type', 'Project Details', 'Contact Info', 'Submit'];
 
   if (submitStatus === 'success') {
     return (
@@ -247,8 +272,8 @@ export default function TranscriptionQuoteForm() {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
       <h3 className="text-2xl font-bold text-[#0C2340] mb-2 text-center">Get a Free Quote</h3>
-      <p className="text-gray-600 text-center mb-6">
-        Step {currentStep} of 3: {stepLabels[currentStep - 1]}
+      <p className="text-gray-600 text-center mb-4 text-sm">
+        Step {currentStep} of 4: {stepLabels[currentStep - 1]}
       </p>
 
       <ProgressSteps />
@@ -260,9 +285,9 @@ export default function TranscriptionQuoteForm() {
       )}
 
       <form onSubmit={handleSubmit}>
-        {/* STEP 1: Service Details */}
+        {/* STEP 1: Service Type */}
         {currentStep === 1 && (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {/* Service Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -303,6 +328,50 @@ export default function TranscriptionQuoteForm() {
               </div>
             )}
 
+            {/* Source Language */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Audio/Video Language <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.sourceLanguage}
+                onChange={(e) => updateFormData('sourceLanguage', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
+                required
+              >
+                <option value="">Select language...</option>
+                {SOURCE_LANGUAGES.map((lang) => (
+                  <option key={lang.value} value={lang.value}>{lang.label}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                What language is your audio/video in?
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Project Details */}
+        {currentStep === 2 && (
+          <div className="space-y-4">
+            {/* Estimated Duration */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Estimated Audio/Video Length (minutes)
+              </label>
+              <input
+                type="number"
+                value={formData.estimatedMinutes}
+                onChange={(e) => updateFormData('estimatedMinutes', e.target.value)}
+                placeholder="e.g., 60"
+                min="1"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Helps us provide an accurate quote
+              </p>
+            </div>
+
             {/* Translation Option */}
             <div className="bg-gray-50 p-4 rounded-lg">
               <label className="flex items-start gap-3 cursor-pointer">
@@ -320,7 +389,7 @@ export default function TranscriptionQuoteForm() {
                       : 'Add Translation Service'}
                   </span>
                   <p className="text-sm text-gray-500 mt-1">
-                    Get your transcription translated to another language (from $3.50/min)
+                    Get your transcription translated to another language
                   </p>
                 </div>
               </label>
@@ -342,49 +411,12 @@ export default function TranscriptionQuoteForm() {
                 />
               </div>
             )}
-
-            {/* Turnaround Time */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Turnaround Time <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.turnaround}
-                onChange={(e) => updateFormData('turnaround', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
-                required
-              >
-                {TURNAROUND_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label} - {option.price}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
         )}
 
-        {/* STEP 2: Contact Information */}
-        {currentStep === 2 && (
-          <div className="space-y-5">
-            {/* Estimated Duration - moved from step 1 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Estimated Audio/Video Length (minutes)
-              </label>
-              <input
-                type="number"
-                value={formData.estimatedMinutes}
-                onChange={(e) => updateFormData('estimatedMinutes', e.target.value)}
-                placeholder="e.g., 60"
-                min="1"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Helps us provide an accurate quote
-              </p>
-            </div>
-
+        {/* STEP 3: Contact Information */}
+        {currentStep === 3 && (
+          <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name <span className="text-red-500">*</span>
@@ -442,14 +474,34 @@ export default function TranscriptionQuoteForm() {
           </div>
         )}
 
-        {/* STEP 3: Upload & Notes */}
-        {currentStep === 3 && (
-          <div className="space-y-5">
+        {/* STEP 4: Turnaround & Submit */}
+        {currentStep === 4 && (
+          <div className="space-y-4">
+            {/* Turnaround Time */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Turnaround Time <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.turnaround}
+                onChange={(e) => updateFormData('turnaround', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891B2] focus:border-transparent"
+                required
+              >
+                {TURNAROUND_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* File Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Audio/Video Files
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#0891B2] transition-colors">
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-[#0891B2] transition-colors">
                 <input
                   type="file"
                   multiple
@@ -459,15 +511,15 @@ export default function TranscriptionQuoteForm() {
                   id="file-upload"
                 />
                 <label htmlFor="file-upload" className="cursor-pointer">
-                  <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
-                  <p className="text-gray-600 font-medium">Click to upload or drag and drop</p>
-                  <p className="text-sm text-gray-500 mt-1">MP3, MP4, WAV, M4A, MOV, AVI (max 500MB each)</p>
+                  <p className="text-gray-600 text-sm font-medium">Click to upload</p>
+                  <p className="text-xs text-gray-500 mt-1">MP3, MP4, WAV, M4A, MOV, AVI</p>
                 </label>
               </div>
               {formData.files && formData.files.length > 0 && (
-                <div className="mt-3 space-y-2">
+                <div className="mt-2 space-y-1">
                   {Array.from(formData.files).map((file, index) => (
                     <div key={index} className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded">
                       <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -478,11 +530,9 @@ export default function TranscriptionQuoteForm() {
                   ))}
                 </div>
               )}
-              <p className="text-sm text-gray-500 mt-2">
-                Or share via Dropbox/Google Drive link in the notes below
-              </p>
             </div>
 
+            {/* Additional Notes */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Additional Notes
@@ -490,39 +540,39 @@ export default function TranscriptionQuoteForm() {
               <textarea
                 value={formData.notes}
                 onChange={(e) => updateFormData('notes', e.target.value)}
-                rows={4}
-                placeholder="Any special requirements, speaker identification needs, timestamps, formatting preferences, file sharing links..."
+                rows={3}
+                placeholder="Special requirements, file sharing links, speaker details..."
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0891B2] focus:border-transparent resize-none"
               />
             </div>
 
             {/* Summary */}
             <div className="bg-[#0C2340]/5 p-4 rounded-lg">
-              <h4 className="font-semibold text-[#0C2340] mb-3">Request Summary</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <h4 className="font-semibold text-[#0C2340] mb-2 text-sm">Request Summary</h4>
+              <div className="grid grid-cols-2 gap-1 text-sm">
                 <span className="text-gray-600">Service:</span>
                 <span className="font-medium">{SERVICE_TYPES.find(s => s.value === formData.serviceType)?.label || '-'}</span>
+
+                <span className="text-gray-600">Language:</span>
+                <span className="font-medium">{SOURCE_LANGUAGES.find(l => l.value === formData.sourceLanguage)?.label || '-'}</span>
 
                 <span className="text-gray-600">Turnaround:</span>
                 <span className="font-medium">{TURNAROUND_OPTIONS.find(t => t.value === formData.turnaround)?.label.split(' (')[0] || '-'}</span>
 
                 <span className="text-gray-600">Translation:</span>
                 <span className="font-medium">{formData.includeTranslation ? `Yes (${formData.targetLanguage})` : 'No'}</span>
-
-                <span className="text-gray-600">Contact:</span>
-                <span className="font-medium">{formData.fullName || '-'}</span>
               </div>
             </div>
           </div>
         )}
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8">
+        <div className="flex justify-between mt-6">
           {currentStep > 1 ? (
             <button
               type="button"
               onClick={prevStep}
-              className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-5 py-2.5 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors text-sm"
             >
               ← Back
             </button>
@@ -530,12 +580,12 @@ export default function TranscriptionQuoteForm() {
             <div></div>
           )}
 
-          {currentStep < 3 ? (
+          {currentStep < 4 ? (
             <button
               type="button"
               onClick={nextStep}
               disabled={!isStepValid(currentStep)}
-              className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
             >
               Continue →
             </button>
@@ -543,18 +593,18 @@ export default function TranscriptionQuoteForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-8 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2.5 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 text-sm"
             >
               {isSubmitting ? (
                 <>
-                  <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                   Submitting...
                 </>
               ) : (
-                'Submit Quote Request'
+                'Submit Request'
               )}
             </button>
           )}
@@ -562,25 +612,25 @@ export default function TranscriptionQuoteForm() {
       </form>
 
       {/* Trust Indicators */}
-      <div className="mt-6 pt-6 border-t border-gray-100">
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+      <div className="mt-5 pt-5 border-t border-gray-100">
+        <div className="flex flex-wrap justify-center gap-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
-            <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3.5 h-3.5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
-            Secure & Confidential
+            Secure
           </span>
           <span className="flex items-center gap-1">
-            <svg className="w-4 h-4 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3.5 h-3.5 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
             </svg>
-            Response within 2 hours
+            Response in 2hrs
           </span>
           <span className="flex items-center gap-1">
-            <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-3.5 h-3.5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </svg>
-            139 Five-Star Reviews
+            139 Reviews
           </span>
         </div>
       </div>
