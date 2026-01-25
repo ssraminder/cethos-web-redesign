@@ -338,33 +338,35 @@ export default function TranscriptionPageContent() {
             {/* Left Column - Content */}
             <div className="text-white">
               {/* Badge */}
-              <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-6">
-                <svg className="w-4 h-4 mr-2 text-[#06B6D4]" fill="currentColor" viewBox="0 0 20 20">
+              <div className="inline-flex items-center px-3 py-1 bg-[#0891B2] text-white text-sm font-medium rounded-full mb-4">
+                <svg className="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 Legal Transcription Specialists
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
-                Professional Transcription Services
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                Professional<br />
+                Transcription<br />
+                Services
               </h1>
-              <p className="text-xl text-gray-200 mb-8 leading-relaxed">
+              <p className="text-lg text-gray-200 mb-8 leading-relaxed max-w-xl">
                 99%+ accuracy transcription for legal, medical, business, and academic needs.
                 Court-certified transcripts from human transcriptionists—not AI. Available in 200+ languages.
               </p>
 
-              {/* Key Benefits */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+              {/* Trust Badges - 2x3 Grid */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
                   '99%+ Accuracy',
                   'Court-Certified',
                   '24-Hour Rush',
+                  '200+ Languages',
                   'HIPAA Compliant',
                   'ISO 17100',
-                  '200+ Languages',
                 ].map((benefit, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-[#06B6D4] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                     <span className="text-sm">{benefit}</span>
@@ -372,28 +374,36 @@ export default function TranscriptionPageContent() {
                 ))}
               </div>
 
-              {/* Trust Bar */}
-              <div className="flex flex-wrap items-center gap-6 mb-8 text-sm text-gray-300">
-                <span className="flex items-center gap-2">
-                  <span className="font-semibold text-white">25-50%</span> Less Than Court Reporters
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className="font-semibold text-white">50+</span> File Formats
-                </span>
+              {/* Stats Bar */}
+              <div className="flex flex-wrap items-center gap-6 mb-8 py-4 border-t border-b border-white/20">
+                <div>
+                  <span className="text-2xl font-bold text-[#0891B2]">25-50%</span>
+                  <p className="text-xs text-gray-300">Less Than Court Reporters</p>
+                </div>
+                <div>
+                  <span className="text-2xl font-bold text-[#0891B2]">50+</span>
+                  <p className="text-xs text-gray-300">File Formats Accepted</p>
+                </div>
+                <div>
+                  <span className="text-2xl font-bold text-[#0891B2]">1 Hour</span>
+                  <p className="text-xs text-gray-300">Average Quote Time</p>
+                </div>
               </div>
 
               {/* Phone CTA */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <a
                   href="tel:+15876000786"
-                  className="inline-flex items-center gap-2 text-white hover:text-[#06B6D4] transition-colors"
+                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 px-5 py-3 rounded-lg transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  <span className="text-lg font-semibold">(587) 600-0786</span>
+                  <span className="font-semibold">(587) 600-0786</span>
                 </a>
-                <span className="text-gray-400 text-sm">Most quotes delivered within 1 hour</span>
+                <span className="text-sm text-gray-300">
+                  Prefer to talk? Call us now.
+                </span>
               </div>
             </div>
 
