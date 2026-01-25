@@ -74,7 +74,10 @@ export async function POST(req: Request) {
       job_title: body.job_title || null,
       source_language: body.source_language,
       target_languages: body.target_languages || [],
+      word_count: null, // Not applicable for transcription - duration is used instead
+      deadline: additionalInfo.turnaround || 'standard', // Map turnaround to deadline field
       additional_notes: additionalInfo.additional_details || null,
+      file_urls: [], // Files are mentioned in service_data, not uploaded directly
       service_data: {
         transcription_type: additionalInfo.transcription_type,
         legal_sub_type: additionalInfo.legal_sub_type || null,

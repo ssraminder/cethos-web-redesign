@@ -101,9 +101,13 @@ export async function POST(req: Request) {
       email: rawData.email,
       phone: rawData.phone,
       company_name: rawData.companyName || null,
+      job_title: null, // Not collected for interpretation
       source_language: rawData.sourceLanguage,
       target_languages: rawData.targetLanguages,
+      word_count: null, // Not applicable for interpretation
+      deadline: rawData.eventDate || 'flexible', // Use event date as deadline
       additional_notes: rawData.additionalNotes || null,
+      file_urls: [], // No file uploads for interpretation quotes
       service_data: {
         formLocation: rawData.formLocation,
         interpretationType: rawData.interpretationType,
