@@ -8,6 +8,7 @@ import {
   Building2,
   Code2,
   Play,
+  Mic,
   Check,
   ArrowRight,
 } from 'lucide-react'
@@ -22,6 +23,7 @@ const iconMap: Record<IconName, LucideIcon> = {
   building: Building2,
   code: Code2,
   play: Play,
+  microphone: Mic,
 }
 
 // CTA content mapping by service type
