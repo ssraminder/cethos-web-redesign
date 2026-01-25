@@ -279,7 +279,7 @@ export default function CertifiedTranslationContent() {
       {/* Structured Data */}
       <ServiceJsonLd
         name="Certified Translation Services Calgary"
-        description="IRCC-certified translation services for immigration, legal, and academic documents. Government of Alberta approved. 100% acceptance guarantee. From $65."
+        description="Certified translation services for immigration, legal, and academic documents. Government of Alberta approved. 100% acceptance guarantee. From $65."
         url="https://cethos.com/services/certified"
       />
       <FAQJsonLd faqs={faqs} />
