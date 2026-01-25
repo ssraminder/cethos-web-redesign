@@ -15,6 +15,7 @@ const footerLinks = {
     { name: 'Business', href: '/services/business' },
     { name: 'Software', href: '/services/software' },
     { name: 'Multimedia', href: '/services/multimedia' },
+    { name: 'Interpretation', href: '/services/interpretation' },
   ],
   industries: [
     { name: 'Pharmaceutical', href: '/industries/pharmaceutical' },

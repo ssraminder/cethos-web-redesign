@@ -17,6 +17,7 @@ const navigation = [
       { name: 'Business Translation', href: '/services/business' },
       { name: 'Software Localization', href: '/services/software' },
       { name: 'Multimedia Translation', href: '/services/multimedia' },
+      { name: 'Interpretation Services', href: '/services/interpretation' },
     ],
   },
   {
