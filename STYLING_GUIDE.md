@@ -1,6 +1,6 @@
 # Cethos Website Styling Guide
 
-A comprehensive styling guide extracted from the Cethos website (cethosweb.netlify.app) for building pixel-perfect embedded forms and components.
+A comprehensive styling guide extracted from the Cethos website (cethos.com) for building pixel-perfect embedded forms and components.
 
 ---
 
