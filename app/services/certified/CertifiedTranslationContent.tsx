@@ -310,7 +310,7 @@ export default function CertifiedTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-6"
               >
-                IRCC-Certified Translation Services Calgary
+                Certified Translation Services Calgary
               </motion.h1>
 
               <motion.p
