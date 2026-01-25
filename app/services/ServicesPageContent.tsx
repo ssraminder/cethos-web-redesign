@@ -10,6 +10,7 @@ import {
   BuildingIcon,
   CodeIcon,
   PlayIcon,
+  MicrophoneIcon,
 } from '@/components/icons'
 import { CTA } from '@/components/sections'
 import { servicesList, type IconName } from '@/lib/services-data'
@@ -20,6 +21,7 @@ const iconMap: Record<IconName, React.ComponentType<{ size?: number; className?:
   building: BuildingIcon,
   code: CodeIcon,
   play: PlayIcon,
+  microphone: MicrophoneIcon,
 }
 
 export default function ServicesPageContent() {
