@@ -24,6 +24,7 @@ const navigation = [
     href: '/industries',
     children: [
       { name: 'Pharmaceutical', href: '/industries/pharmaceutical' },
+      { name: 'Energy & Mining', href: '/industries/energy-mining' },
       { name: 'Legal', href: '/industries/legal' },
       { name: 'Technology', href: '/industries/technology' },
       { name: 'Finance', href: '/industries/finance' },
