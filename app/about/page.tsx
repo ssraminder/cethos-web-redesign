@@ -2,15 +2,15 @@ import { Metadata } from 'next'
 import AboutPageContent from './AboutPageContent'
 
 export const metadata: Metadata = {
-  title: 'About Us | Cethos Solutions Inc.',
-  description: 'Founded in 2015, Cethos Solutions Inc. is a Calgary-based language services company specializing in linguistic validation, clinical translation, and life sciences. 200+ languages, global reach.',
-  keywords: ['about cethos', 'translation company', 'language services provider', 'linguistic validation', 'clinical translation', 'Calgary translation'],
+  title: 'About Us | Cethos Solutions Inc. - Global Translation Company',
+  description: 'Cethos Solutions Inc. is a Canadian translation company with offices in Calgary, Dubai, and India. 200+ languages, 5,000+ linguists, ISO 17100 compliant. Specializing in life sciences, oil & gas, and certified translation.',
+  keywords: ['translation company', 'about Cethos', 'translation services', 'ISO 17100 translation', 'life sciences translation', 'oil and gas translation', 'global translation company'],
   alternates: {
     canonical: 'https://cethos.com/about',
   },
   openGraph: {
-    title: 'About Us | Cethos Solutions Inc.',
-    description: 'Founded in 2015, Cethos Solutions Inc. is a Calgary-based language services company specializing in linguistic validation, clinical translation, and life sciences.',
+    title: 'About Cethos Solutions Inc. | Global Translation Services',
+    description: 'Canadian translation company with global operations. Offices in Calgary, Dubai, and India. 200+ languages. ISO 17100 compliant.',
     url: 'https://cethos.com/about',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',
