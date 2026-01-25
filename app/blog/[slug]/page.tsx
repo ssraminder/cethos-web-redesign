@@ -78,88 +78,98 @@ export default async function BlogPostPage({
 
       <article className="min-h-screen bg-white">
         {/* Hero Section */}
-        <header className="bg-gradient-to-br from-[#0C2340] to-[#1a3a5c] text-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-            {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 text-sm text-gray-300 mb-6">
-              <Link href="/" className="hover:text-white transition-colors">Home</Link>
-              <span className="text-gray-500">/</span>
-              <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+        <header className="min-h-[400px] bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#0891B2] pt-32 pb-16 flex items-center">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              {/* Breadcrumbs */}
+              <nav className="text-sm text-gray-300 mb-6">
+                <Link href="/" className="hover:text-white transition-colors">
+                  Home
+                </Link>
+                <span className="mx-2">/</span>
+                <Link href="/blog" className="hover:text-white transition-colors">
+                  Blog
+                </Link>
+                <span className="mx-2">/</span>
+                <span className="text-white truncate max-w-[200px] inline-block align-bottom">
+                  {post.title}
+                </span>
+              </nav>
+
+              {/* Category Badge */}
               {post.category && (
-                <>
-                  <span className="text-gray-500">/</span>
+                <div className="mb-4">
                   <Link
                     href={`/blog/category/${post.category.slug}`}
-                    className="hover:text-white transition-colors"
+                    className="inline-block bg-[#0891B2] hover:bg-[#06B6D4] text-white text-sm font-medium px-4 py-1.5 rounded-full transition-colors"
                   >
                     {post.category.name}
                   </Link>
-                </>
-              )}
-            </nav>
-
-            {/* Category Badge */}
-            {post.category && (
-              <Link
-                href={`/blog/category/${post.category.slug}`}
-                className="inline-block px-3 py-1 bg-[#0891B2] text-white text-sm font-medium rounded-full mb-4 hover:bg-[#06B6D4] transition-colors"
-              >
-                {post.category.name}
-              </Link>
-            )}
-
-            {/* Title */}
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-4 text-white">
-              {post.title}
-            </h1>
-
-            {/* Excerpt */}
-            <p className="text-lg text-gray-200 leading-relaxed mb-6 max-w-3xl">
-              {post.excerpt}
-            </p>
-
-            {/* Meta */}
-            <div className="flex flex-wrap items-center gap-4 text-gray-300 text-sm">
-              {post.author && (
-                <div className="flex items-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-[#0891B2] flex items-center justify-center text-white font-bold text-xs">
-                    {post.author.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <span className="font-medium text-white">{post.author.name}</span>
                 </div>
               )}
-              {post.published_at && (
-                <span className="flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {formatDate(post.published_at)}
-                </span>
-              )}
-              <span className="flex items-center gap-1">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {post.read_time} min read
-              </span>
+
+              {/* Title */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                {post.title}
+              </h1>
+
+              {/* Author & Meta */}
+              <div className="flex items-center justify-center gap-4 text-gray-200 flex-wrap">
+                {/* Author Avatar */}
+                {post.author && (
+                  <div className="flex items-center gap-3">
+                    {post.author.avatar_url ? (
+                      <Image
+                        src={post.author.avatar_url}
+                        alt={post.author.name}
+                        width={48}
+                        height={48}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white/20"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-[#0891B2] flex items-center justify-center text-white font-semibold text-lg border-2 border-white/20">
+                        {post.author.name.split(' ').map(n => n[0]).join('')}
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <p className="text-white font-medium">{post.author.name}</p>
+                      {post.author.title && (
+                        <p className="text-gray-300 text-sm">{post.author.title}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Divider */}
+                {post.author && <span className="text-gray-400">•</span>}
+
+                {/* Date & Read Time */}
+                <div className="text-gray-300 text-sm">
+                  {post.published_at && (
+                    <>
+                      <span>{formatDate(post.published_at)}</span>
+                      <span className="mx-2">•</span>
+                    </>
+                  )}
+                  <span>{post.read_time} min read</span>
+                </div>
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Featured Image */}
+        {/* Featured Image - Below Hero */}
         {post.featured_image && (
-          <div className="relative mt-8 mb-8">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="relative aspect-[2/1] rounded-xl overflow-hidden shadow-xl">
-                <Image
-                  src={post.featured_image}
-                  alt={post.featured_image_alt || post.title}
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 1024px"
-                />
-              </div>
+          <div className="container mx-auto px-4 -mt-8 relative z-10">
+            <div className="max-w-4xl mx-auto">
+              <Image
+                src={post.featured_image}
+                alt={post.featured_image_alt || post.title}
+                width={1200}
+                height={630}
+                className="w-full h-auto rounded-xl shadow-2xl"
+                priority
+              />
             </div>
           </div>
         )}
