@@ -345,7 +345,7 @@ export default function TranscriptionPageContent() {
                 Legal Transcription Specialists
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-white">
                 Professional Transcription Services
               </h1>
               <p className="text-xl text-gray-200 mb-8 leading-relaxed">
