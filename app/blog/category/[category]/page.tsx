@@ -58,21 +58,30 @@ export default async function CategoryPage({ params }: Props) {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-[#0C2340] text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="text-sm text-gray-400 mb-4">
-            <Link href="/" className="hover:text-white">Home</Link>
+      <section className="min-h-[320px] bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#0891B2] pt-32 pb-16 flex items-center">
+        <div className="container mx-auto px-4 text-center">
+          {/* Breadcrumbs */}
+          <nav className="text-sm text-gray-300 mb-6">
+            <Link href="/" className="hover:text-white transition-colors">
+              Home
+            </Link>
             <span className="mx-2">/</span>
-            <Link href="/blog" className="hover:text-white">Blog</Link>
+            <Link href="/blog" className="hover:text-white transition-colors">
+              Blog
+            </Link>
             <span className="mx-2">/</span>
             <span className="text-white">{category.name}</span>
           </nav>
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">{category.name}</h1>
-            {category.description && (
-              <p className="text-xl text-gray-300">{category.description}</p>
-            )}
-          </div>
+
+          {/* Title */}
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            {category.name}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-lg text-gray-200 max-w-2xl mx-auto">
+            {category.description || `Browse all articles in ${category.name}`}
+          </p>
         </div>
       </section>
 
