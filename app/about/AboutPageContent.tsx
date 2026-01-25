@@ -890,7 +890,7 @@ export default function AboutPageContent() {
       </section>
 
       {/* Section 12: CTA */}
-      <section className="py-20 bg-[#0C2340]">
+      <section className="bg-gradient-to-br from-[#0C2340] via-[#0F3A5C] to-[#0891B2] py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Work With Us?
