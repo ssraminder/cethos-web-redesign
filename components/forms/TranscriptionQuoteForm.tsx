@@ -524,7 +524,7 @@ export default function TranscriptionQuoteForm() {
               onClick={prevStep}
               className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              &larr; Back
+              ← Back
             </button>
           ) : (
             <div></div>
@@ -537,7 +537,7 @@ export default function TranscriptionQuoteForm() {
               disabled={!isStepValid(currentStep)}
               className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Continue &rarr;
+              Continue →
             </button>
           ) : (
             <button
