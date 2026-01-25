@@ -361,8 +361,13 @@ export default function TranscriptionQuoteForm() {
                 ))}
               </select>
             </div>
+          </div>
+        )}
 
-            {/* Estimated Duration */}
+        {/* STEP 2: Contact Information */}
+        {currentStep === 2 && (
+          <div className="space-y-5">
+            {/* Estimated Duration - moved from step 1 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Estimated Audio/Video Length (minutes)
@@ -379,12 +384,7 @@ export default function TranscriptionQuoteForm() {
                 Helps us provide an accurate quote
               </p>
             </div>
-          </div>
-        )}
 
-        {/* STEP 2: Contact Information */}
-        {currentStep === 2 && (
-          <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name <span className="text-red-500">*</span>
