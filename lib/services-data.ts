@@ -1,4 +1,4 @@
-export type IconName = 'molecule' | 'document-check' | 'building' | 'code' | 'play'
+export type IconName = 'molecule' | 'document-check' | 'building' | 'code' | 'play' | 'microphone'
 
 export interface ServiceData {
   slug: string
@@ -231,6 +231,76 @@ export const servicesData: Record<string, ServiceData> = {
       'Multiple output formats',
       'Accessibility compliance',
       'Volume discounts available',
+    ],
+  },
+  transcription: {
+    slug: 'transcription',
+    title: 'Transcription Services',
+    shortTitle: 'Transcription',
+    description: 'Court-certified transcription for legal, medical, business, and academic content with 99%+ accuracy.',
+    longDescription: 'Our transcription services convert audio and video content into accurate written documents. From legal proceedings to medical dictation, we provide certified transcription with industry-leading accuracy and quick turnaround times.',
+    iconName: 'microphone',
+    features: [
+      {
+        title: 'Legal Transcription',
+        description: 'Court proceedings, depositions, hearings, and legal recordings with certified accuracy.',
+      },
+      {
+        title: 'Medical Transcription',
+        description: 'Patient records, clinical notes, medical reports, and healthcare documentation.',
+      },
+      {
+        title: 'Business Transcription',
+        description: 'Meetings, conferences, interviews, and corporate communications.',
+      },
+      {
+        title: 'Academic Transcription',
+        description: 'Lectures, research interviews, dissertations, and educational content.',
+      },
+      {
+        title: 'Multilingual Transcription',
+        description: 'Transcription services in 200+ languages with native-speaking transcriptionists.',
+      },
+      {
+        title: 'Verbatim & Edited',
+        description: 'Choose between word-for-word verbatim or clean, edited transcripts.',
+      },
+    ],
+    process: [
+      {
+        step: 1,
+        title: 'File Submission',
+        description: 'Upload your audio or video files through our secure portal.',
+      },
+      {
+        step: 2,
+        title: 'Specialist Assignment',
+        description: 'We assign transcriptionists with expertise in your industry.',
+      },
+      {
+        step: 3,
+        title: 'Transcription',
+        description: 'Your content is transcribed with attention to accuracy and detail.',
+      },
+      {
+        step: 4,
+        title: 'Quality Review',
+        description: 'Multi-layer quality checks ensure 99%+ accuracy.',
+      },
+      {
+        step: 5,
+        title: 'Delivery',
+        description: 'Receive your transcripts in your preferred format with certification.',
+      },
+    ],
+    industries: ['Legal', 'Healthcare', 'Finance', 'Education', 'Media'],
+    benefits: [
+      '99%+ accuracy guarantee',
+      'Court-certified transcripts',
+      'HIPAA-compliant processes',
+      'Fast turnaround options',
+      'Multiple output formats',
+      'Secure file handling',
     ],
   },
 }

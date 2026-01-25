@@ -36,6 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/services/business`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/services/software`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/services/multimedia`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/services/transcription`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
 
     // Services - Certified Translation
     { url: `${baseUrl}/services/certified/immigration-translation-services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
