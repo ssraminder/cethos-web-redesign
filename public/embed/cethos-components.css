@@ -1,0 +1,98 @@
+/**
+ * Cethos Components - Base CSS
+ * Version: 1.0.0
+ *
+ * Include this CSS file to prevent layout shift before components load.
+ * This file is optional but recommended for better user experience.
+ *
+ * Usage:
+ * <link rel="stylesheet" href="https://cethos.com/embed/cethos-components.css">
+ */
+
+/* Prevent layout shift before header loads */
+cethos-header:not(:defined) {
+  display: block;
+  height: 72px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+/* Header spacer placeholder */
+cethos-header:not(:defined)::before {
+  content: '';
+  display: block;
+  height: 72px;
+}
+
+/* Prevent layout shift before footer loads */
+cethos-footer:not(:defined) {
+  display: block;
+  min-height: 400px;
+  background: #0C2340;
+}
+
+/* Minimal footer placeholder */
+cethos-footer[minimal]:not(:defined) {
+  min-height: 72px;
+}
+
+/* Loading animation */
+cethos-header:not(:defined)::after,
+cethos-footer:not(:defined)::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 100%
+  );
+  animation: cethos-loading 1.5s ease-in-out infinite;
+}
+
+cethos-header:not(:defined)::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.02) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes cethos-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Dark theme header placeholder */
+cethos-header[theme="dark"]:not(:defined) {
+  background: #0C2340;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure relative positioning for loading animation */
+cethos-header:not(:defined),
+cethos-footer:not(:defined) {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Reset when defined */
+cethos-header:defined,
+cethos-footer:defined {
+  display: block;
+}

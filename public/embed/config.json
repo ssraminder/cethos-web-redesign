@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-26",
+  "baseUrl": "https://cethos.com",
+  "embedUrl": "https://cethos.com/embed",
+  "assets": {
+    "js": "cethos-components.js",
+    "jsMin": "cethos-components.min.js",
+    "css": "cethos-components.css"
+  },
+  "components": {
+    "header": {
+      "tagName": "cethos-header",
+      "attributes": [
+        {
+          "name": "current-site",
+          "type": "string",
+          "description": "Identifier for the current site to highlight in navigation"
+        },
+        {
+          "name": "hide-cta",
+          "type": "boolean",
+          "description": "Hide the 'Get a Quote' call-to-action button"
+        },
+        {
+          "name": "theme",
+          "type": "enum",
+          "values": ["light", "dark"],
+          "default": "light",
+          "description": "Color theme for the header"
+        }
+      ]
+    },
+    "footer": {
+      "tagName": "cethos-footer",
+      "attributes": [
+        {
+          "name": "minimal",
+          "type": "boolean",
+          "description": "Show minimal footer with just copyright and legal links"
+        },
+        {
+          "name": "hide-locations",
+          "type": "boolean",
+          "description": "Hide the locations column in the footer"
+        }
+      ]
+    }
+  },
+  "support": {
+    "email": "dev@cethos.com",
+    "docs": "https://cethos.com/embed/docs"
+  },
+  "cdn": {
+    "primary": "https://cethos.com/embed",
+    "fonts": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+  }
+}
