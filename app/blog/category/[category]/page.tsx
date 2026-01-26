@@ -1,10 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import BlogImage from '@/components/BlogImage';
 import { getPostsByCategory, getAllCategorySlugs, getCategories } from '@/lib/blog-db';
 
-export const revalidate = 3600;
+// Revalidate every 60 seconds for faster post updates
+export const revalidate = 60;
 
 type Props = {
   params: Promise<{ category: string }>;
@@ -129,18 +130,16 @@ export default async function CategoryPage({ params }: Props) {
                   key={post.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  {post.featured_image && (
-                    <Link href={`/blog/${post.slug}`}>
-                      <div className="relative h-48 bg-gray-100">
-                        <Image
-                          src={post.featured_image}
-                          alt={post.featured_image_alt || post.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    </Link>
-                  )}
+                  <Link href={`/blog/${post.slug}`}>
+                    <div className="relative h-48 bg-gray-100">
+                      <BlogImage
+                        src={post.featured_image}
+                        alt={post.featured_image_alt || post.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </Link>
                   <div className="p-6">
                     <h2 className="text-xl font-semibold text-gray-900">
                       <Link href={`/blog/${post.slug}`} className="hover:text-[#0891B2]">
