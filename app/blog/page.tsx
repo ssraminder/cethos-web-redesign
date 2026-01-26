@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
+import BlogImage from '@/components/BlogImage';
 import { getPublishedPosts, getCategories, BlogPost, BlogCategory } from '@/lib/blog-db';
 
 export const metadata: Metadata = {
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Revalidate every hour
-export const revalidate = 3600;
+// Revalidate every 60 seconds for faster post updates
+export const revalidate = 60;
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -96,18 +96,16 @@ export default async function BlogPage() {
                   key={post.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  {post.featured_image && (
-                    <Link href={`/blog/${post.slug}`}>
-                      <div className="relative h-48 bg-gray-100">
-                        <Image
-                          src={post.featured_image}
-                          alt={post.featured_image_alt || post.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    </Link>
-                  )}
+                  <Link href={`/blog/${post.slug}`}>
+                    <div className="relative h-48 bg-gray-100">
+                      <BlogImage
+                        src={post.featured_image}
+                        alt={post.featured_image_alt || post.title}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </Link>
                   <div className="p-6">
                     {post.category && (
                       <Link

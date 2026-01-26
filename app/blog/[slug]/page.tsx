@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import BlogImage from '@/components/BlogImage';
 import { getPostBySlug, getRelatedPosts, getAllPostSlugs, formatDate } from '@/lib/blog-db';
 
-export const revalidate = 3600;
+// Revalidate every 60 seconds for faster post updates
+export const revalidate = 60;
 
 export async function generateStaticParams() {
   const slugs = await getAllPostSlugs();
@@ -159,20 +161,18 @@ export default async function BlogPostPage({
         </header>
 
         {/* Featured Image - Below Hero */}
-        {post.featured_image && (
-          <div className="container mx-auto px-4 -mt-8 relative z-10">
-            <div className="max-w-4xl mx-auto">
-              <Image
-                src={post.featured_image}
-                alt={post.featured_image_alt || post.title}
-                width={1200}
-                height={630}
-                className="w-full h-auto rounded-xl shadow-2xl"
-                priority
-              />
-            </div>
+        <div className="container mx-auto px-4 -mt-8 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <BlogImage
+              src={post.featured_image}
+              alt={post.featured_image_alt || post.title}
+              width={1200}
+              height={630}
+              className="w-full h-auto rounded-xl shadow-2xl"
+              priority
+            />
           </div>
-        )}
+        </div>
 
         {/* Main Content */}
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -344,16 +344,14 @@ export default async function BlogPostPage({
                     href={`/blog/${relatedPost.slug}`}
                     className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
                   >
-                    {relatedPost.featured_image && (
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <Image
-                          src={relatedPost.featured_image}
-                          alt={relatedPost.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
-                    )}
+                    <div className="relative aspect-[16/9] overflow-hidden">
+                      <BlogImage
+                        src={relatedPost.featured_image}
+                        alt={relatedPost.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-[#0C2340] group-hover:text-[#0891B2] transition-colors line-clamp-2 text-sm mb-1">
                         {relatedPost.title}
