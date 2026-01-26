@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Header, Footer } from '@/components/layout'
+import { CethosHeader, CethosFooter } from '@/components/layout'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
 import './globals.css'
@@ -72,9 +72,9 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <GoogleTagManager />
-        <Header />
+        <CethosHeader ctaType="login" />
         <main>{children}</main>
-        <Footer />
+        <CethosFooter />
       </body>
     </html>
   )
