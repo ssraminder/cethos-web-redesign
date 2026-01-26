@@ -5,67 +5,7 @@
  * the Cethos Web Components in a TypeScript/React project.
  */
 
-declare namespace JSX {
-  interface IntrinsicElements {
-    /**
-     * Cethos Header Web Component
-     *
-     * @example
-     * <cethos-header current-site="portal" />
-     * <cethos-header hide-cta theme="dark" />
-     */
-    'cethos-header': React.DetailedHTMLProps<
-      React.HTMLAttributes<HTMLElement> & {
-        /**
-         * Identifier for the current site to highlight in navigation
-         */
-        'current-site'?: string;
-        /**
-         * Hide the "Get a Quote" call-to-action button
-         * Use empty string or "true" to enable
-         */
-        'hide-cta'?: string | boolean;
-        /**
-         * Color theme for the header
-         * @default "light"
-         */
-        theme?: 'light' | 'dark';
-        /**
-         * React ref for the element
-         */
-        ref?: React.Ref<HTMLElement>;
-      },
-      HTMLElement
-    >;
-    /**
-     * Cethos Footer Web Component
-     *
-     * @example
-     * <cethos-footer />
-     * <cethos-footer minimal />
-     * <cethos-footer hide-locations />
-     */
-    'cethos-footer': React.DetailedHTMLProps<
-      React.HTMLAttributes<HTMLElement> & {
-        /**
-         * Show minimal footer with just copyright and legal links
-         * Use empty string or "true" to enable
-         */
-        minimal?: string | boolean;
-        /**
-         * Hide the locations column in the footer
-         * Use empty string or "true" to enable
-         */
-        'hide-locations'?: string | boolean;
-        /**
-         * React ref for the element
-         */
-        ref?: React.Ref<HTMLElement>;
-      },
-      HTMLElement
-    >;
-  }
-}
+import React from 'react';
 
 /**
  * Configuration object for Cethos Components
@@ -128,36 +68,18 @@ interface CethosNavigation {
 }
 
 /**
- * Global window interface extension for Cethos Components
+ * Cethos Components global object interface
  */
-interface Window {
-  /**
-   * Cethos Components global object
-   * Available after the embed script loads
-   */
-  CethosComponents?: {
-    /**
-     * Current version of the embed components
-     */
-    version: string;
-    /**
-     * Configuration object
-     */
-    config: CethosConfig;
-    /**
-     * Navigation structure
-     */
-    navigation: CethosNavigation;
-  };
+interface CethosComponentsGlobal {
+  version: string;
+  config: CethosConfig;
+  navigation: CethosNavigation;
 }
 
 /**
  * Custom element class for cethos-header
  */
 interface CethosHeaderElement extends HTMLElement {
-  /**
-   * Re-render the component
-   */
   render(): void;
 }
 
@@ -165,16 +87,43 @@ interface CethosHeaderElement extends HTMLElement {
  * Custom element class for cethos-footer
  */
 interface CethosFooterElement extends HTMLElement {
-  /**
-   * Re-render the component
-   */
   render(): void;
 }
 
+// Extend the global Window interface
 declare global {
+  interface Window {
+    CethosComponents?: CethosComponentsGlobal;
+  }
+
   interface HTMLElementTagNameMap {
     'cethos-header': CethosHeaderElement;
     'cethos-footer': CethosFooterElement;
+  }
+}
+
+// Extend React's JSX namespace for custom elements
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'cethos-header': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          'current-site'?: string;
+          'hide-cta'?: string | boolean;
+          theme?: 'light' | 'dark';
+          ref?: React.Ref<HTMLElement>;
+        },
+        HTMLElement
+      >;
+      'cethos-footer': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          minimal?: string | boolean;
+          'hide-locations'?: string | boolean;
+          ref?: React.Ref<HTMLElement>;
+        },
+        HTMLElement
+      >;
+    }
   }
 }
 
