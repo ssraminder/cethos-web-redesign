@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import BlogImage from '@/components/BlogImage';
-import { getPublishedPosts, getCategories, BlogPost, BlogCategory } from '@/lib/blog-db';
+import { getPublishedPosts, getCategories } from '@/lib/blog-db';
+import BlogListInfinite from '@/components/blog/BlogListInfinite';
 
 export const metadata: Metadata = {
   title: 'Translation Blog | Industry Insights & Tips | Cethos',
@@ -17,19 +17,15 @@ export const metadata: Metadata = {
 // Revalidate every 60 seconds for faster post updates
 export const revalidate = 60;
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
+const INITIAL_POSTS_LIMIT = 6;
 
 export default async function BlogPage() {
-  const [{ posts }, categories] = await Promise.all([
-    getPublishedPosts(12, 0),
+  const [{ posts, total }, categories] = await Promise.all([
+    getPublishedPosts(INITIAL_POSTS_LIMIT, 0),
     getCategories(),
   ]);
+
+  const hasMore = total > INITIAL_POSTS_LIMIT;
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -90,47 +86,7 @@ export default async function BlogPage() {
               <p className="text-gray-500 text-lg">No posts published yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                <article
-                  key={post.id}
-                  className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-                >
-                  <Link href={`/blog/${post.slug}`}>
-                    <div className="relative h-48 bg-gray-100">
-                      <BlogImage
-                        src={post.featured_image}
-                        alt={post.featured_image_alt || post.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </Link>
-                  <div className="p-6">
-                    {post.category && (
-                      <Link
-                        href={`/blog/category/${post.category.slug}`}
-                        className="text-sm font-medium text-[#0891B2] hover:text-[#06B6D4]"
-                      >
-                        {post.category.name}
-                      </Link>
-                    )}
-                    <h2 className="mt-2 text-xl font-semibold text-gray-900">
-                      <Link href={`/blog/${post.slug}`} className="hover:text-[#0891B2]">
-                        {post.title}
-                      </Link>
-                    </h2>
-                    {post.excerpt && (
-                      <p className="mt-3 text-gray-600 line-clamp-3">{post.excerpt}</p>
-                    )}
-                    <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
-                      <span>{post.published_at && formatDate(post.published_at)}</span>
-                      <span>{post.read_time} min read</span>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <BlogListInfinite initialPosts={posts} initialHasMore={hasMore} />
           )}
         </div>
       </section>
