@@ -1,6 +1,6 @@
 /**
  * Cethos Components - Base CSS
- * Version: 1.0.0
+ * Version: 1.1.0
  *
  * Include this CSS file to prevent layout shift before components load.
  * This file is optional but recommended for better user experience.
@@ -12,7 +12,7 @@
 /* Prevent layout shift before header loads */
 cethos-header:not(:defined) {
   display: block;
-  height: 72px;
+  height: 80px;
   background: #FFFFFF;
   border-bottom: 1px solid #E5E7EB;
   position: fixed;
@@ -26,7 +26,7 @@ cethos-header:not(:defined) {
 cethos-header:not(:defined)::before {
   content: '';
   display: block;
-  height: 72px;
+  height: 80px;
 }
 
 /* Prevent layout shift before footer loads */

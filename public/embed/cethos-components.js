@@ -1,6 +1,6 @@
 /**
  * Cethos Components - Embeddable Header/Footer Web Components
- * Version: 1.0.0
+ * Version: 1.1.0
  *
  * Usage:
  * <script src="https://cethos.com/embed/cethos-components.js"></script>
@@ -13,7 +13,7 @@
 
   // Configuration
   const CONFIG = {
-    version: '1.0.0',
+    version: '1.1.0',
     baseUrl: 'https://cethos.com',
     assets: {
       logoLight: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg',
@@ -36,52 +36,61 @@
     }
   };
 
-  // Navigation Structure
+  // Navigation Structure (matches main site)
   const NAVIGATION = {
     services: [
-      { label: 'Life Sciences', href: '/services/lifesciences', description: 'Clinical trials, regulatory, pharmaceutical' },
+      { label: 'Life Sciences Translation', href: '/services/lifesciences', description: 'Clinical trials, regulatory, pharmaceutical' },
       { label: 'Certified Translation', href: '/services/certified', description: 'Immigration, legal documents' },
-      { label: 'Interpretation', href: '/services/interpretation', description: 'On-site and remote interpretation' },
-      { label: 'Transcription', href: '/services/transcription', description: 'Audio and video transcription' },
-      { label: 'Localization', href: '/services/localization', description: 'Software and website localization' }
+      { label: 'Business Translation', href: '/services/business', description: 'Corporate and commercial documents' },
+      { label: 'Software Localization', href: '/services/software', description: 'Apps, websites, and software' },
+      { label: 'Multimedia Translation', href: '/services/multimedia', description: 'Video, audio, and subtitles' },
+      { label: 'Interpretation Services', href: '/services/interpretation', description: 'On-site and remote interpretation' },
+      { label: 'Transcription Services', href: '/services/transcription', description: 'Audio and video transcription' }
     ],
     industries: [
       { label: 'Pharmaceutical', href: '/industries/pharmaceutical' },
-      { label: 'Medical Devices', href: '/industries/medical-devices' },
-      { label: 'Biotechnology', href: '/industries/biotechnology' },
-      { label: 'Healthcare', href: '/industries/healthcare' },
+      { label: 'Energy & Mining', href: '/industries/energy-mining' },
       { label: 'Legal', href: '/industries/legal' },
-      { label: 'Immigration', href: '/industries/immigration' }
+      { label: 'Technology', href: '/industries/technology' },
+      { label: 'Finance', href: '/industries/finance' },
+      { label: 'Gaming', href: '/industries/gaming' },
+      { label: 'E-commerce', href: '/industries/ecommerce' },
+      { label: 'Manufacturing', href: '/industries/manufacturing' },
+      { label: 'Healthcare', href: '/industries/healthcare' }
     ],
     main: [
-      { label: 'About', href: '/about' },
       { label: 'Blog', href: '/blog' },
+      { label: 'About', href: '/about' },
       { label: 'Contact', href: '/contact' }
     ],
     footer: {
       services: [
-        { label: 'Life Sciences Translation', href: '/services/lifesciences' },
+        { label: 'Life Sciences', href: '/services/lifesciences' },
         { label: 'Certified Translation', href: '/services/certified' },
-        { label: 'Interpretation Services', href: '/services/interpretation' },
-        { label: 'Transcription Services', href: '/services/transcription' },
-        { label: 'Website Localization', href: '/services/localization' }
+        { label: 'Business', href: '/services/business' },
+        { label: 'Software', href: '/services/software' },
+        { label: 'Multimedia', href: '/services/multimedia' },
+        { label: 'Interpretation', href: '/services/interpretation' },
+        { label: 'Transcription', href: '/services/transcription' }
       ],
       company: [
         { label: 'About Us', href: '/about' },
-        { label: 'Blog', href: '/blog' },
         { label: 'Careers', href: '/careers' },
-        { label: 'Contact', href: '/contact' },
-        { label: 'Get Quote', href: '/get-quote' }
+        { label: 'News', href: '/blog' },
+        { label: 'Contact', href: '/contact' }
+      ],
+      industries: [
+        { label: 'Pharmaceutical', href: '/industries/pharmaceutical' },
+        { label: 'Energy & Mining', href: '/industries/energy-mining' },
+        { label: 'Legal', href: '/industries/legal' },
+        { label: 'Technology', href: '/industries/technology' },
+        { label: 'Finance', href: '/industries/finance' },
+        { label: 'Healthcare', href: '/industries/healthcare' }
       ],
       legal: [
         { label: 'Privacy Policy', href: '/privacy' },
         { label: 'Terms of Service', href: '/terms' },
         { label: 'Cookie Policy', href: '/cookies' }
-      ],
-      locations: [
-        { city: 'Calgary', country: 'Canada', type: 'Headquarters' },
-        { city: 'Dubai', country: 'UAE', type: 'Middle East' },
-        { city: 'Patiala', country: 'India', type: 'South Asia' }
       ]
     }
   };
@@ -108,6 +117,7 @@
     mail: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`,
     phone: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`,
     linkedin: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>`,
+    twitter: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>`,
     mapPin: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`
   };
 
@@ -126,7 +136,7 @@
     }
 
     static get observedAttributes() {
-      return ['current-site', 'hide-cta', 'theme'];
+      return ['current-site', 'hide-cta', 'theme', 'cta-type'];
     }
 
     connectedCallback() {
@@ -217,7 +227,15 @@
       const currentSite = this.getAttribute('current-site') || '';
       const hideCta = this.hasAttribute('hide-cta');
       const theme = this.getAttribute('theme') || 'light';
+      const ctaType = this.getAttribute('cta-type') || 'login';
       const isDark = theme === 'dark';
+
+      // CTA configuration
+      const ctaConfig = {
+        login: { label: 'Login', href: 'https://portal.cethos.com' },
+        quote: { label: 'Get a Quote', href: resolveUrl('/get-quote') }
+      };
+      const cta = ctaConfig[ctaType] || ctaConfig.login;
 
       const styles = `
         :host {
@@ -239,7 +257,7 @@
           z-index: 9999;
           background: ${isDark ? CONFIG.colors.navy : CONFIG.colors.white};
           transition: box-shadow 0.3s ease;
-          height: 72px;
+          height: 80px;
         }
 
         .header.scrolled {
@@ -247,7 +265,7 @@
         }
 
         .header-container {
-          max-width: 1280px;
+          max-width: 1440px;
           margin: 0 auto;
           padding: 0 32px;
           height: 100%;
@@ -271,13 +289,25 @@
           width: auto;
         }
 
+        @media (min-width: 768px) {
+          .logo img {
+            height: 38px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .logo img {
+            height: 40px;
+          }
+        }
+
         .desktop-nav {
           display: none;
           align-items: center;
           gap: 4px;
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
           .desktop-nav {
             display: flex;
           }
@@ -293,7 +323,7 @@
           align-items: center;
           gap: 4px;
           padding: 8px 16px;
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 500;
           color: ${isDark ? 'rgba(255,255,255,0.9)' : CONFIG.colors.navy};
           text-decoration: none;
@@ -376,18 +406,18 @@
 
         .cta-button {
           display: none;
-          padding: 10px 20px;
+          padding: 12px 24px;
           background: ${CONFIG.colors.teal};
           color: ${CONFIG.colors.white};
           font-size: 15px;
-          font-weight: 600;
+          font-weight: 500;
           text-decoration: none;
           border-radius: 8px;
           transition: background 0.2s ease;
           margin-left: 16px;
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
           .cta-button {
             display: inline-flex;
           }
@@ -416,7 +446,7 @@
           background: ${isDark ? 'rgba(255,255,255,0.1)' : CONFIG.colors.gray};
         }
 
-        @media (min-width: 1024px) {
+        @media (min-width: 768px) {
           .mobile-menu-button {
             display: none;
           }
@@ -582,7 +612,7 @@
 
         /* Spacer */
         .header-spacer {
-          height: 72px;
+          height: 80px;
         }
       `;
 
@@ -648,7 +678,7 @@
 
                 ${mainNavLinks}
 
-                ${!hideCta ? `<a href="${resolveUrl('/get-quote')}" class="cta-button">Get a Quote</a>` : ''}
+                ${!hideCta ? `<a href="${cta.href}" class="cta-button">${cta.label}</a>` : ''}
               </div>
 
               <button class="mobile-menu-button" aria-label="Open menu">
@@ -695,7 +725,7 @@
               ${mobileMainLinks}
             </div>
 
-            ${!hideCta ? `<a href="${resolveUrl('/get-quote')}" class="mobile-cta">Get a Quote</a>` : ''}
+            ${!hideCta ? `<a href="${cta.href}" class="mobile-cta">${cta.label}</a>` : ''}
           </div>
         </div>
 
@@ -779,7 +809,7 @@
     }
 
     static get observedAttributes() {
-      return ['minimal', 'hide-locations'];
+      return ['minimal', 'hide-industries'];
     }
 
     connectedCallback() {
@@ -792,7 +822,7 @@
 
     render() {
       const minimal = this.hasAttribute('minimal');
-      const hideLocations = this.hasAttribute('hide-locations');
+      const hideIndustries = this.hasAttribute('hide-industries');
 
       const styles = `
         :host {
@@ -812,12 +842,12 @@
         }
 
         .footer-main {
-          padding: 60px 0 40px;
+          padding: 64px 0 48px;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer-container {
-          max-width: 1280px;
+          max-width: 1200px;
           margin: 0 auto;
           padding: 0 32px;
         }
@@ -825,7 +855,7 @@
         .footer-grid {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 40px;
+          gap: 48px;
         }
 
         @media (min-width: 640px) {
@@ -836,7 +866,7 @@
 
         @media (min-width: 1024px) {
           .footer-grid {
-            grid-template-columns: ${hideLocations ? '2fr 1fr 1fr' : '2fr 1fr 1fr 1fr'};
+            grid-template-columns: ${hideIndustries ? '2fr 1fr 1fr' : '2fr 1fr 1fr 1fr'};
           }
         }
 
@@ -859,7 +889,7 @@
 
         .footer-logo {
           display: inline-block;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
 
         .footer-logo img {
@@ -867,10 +897,17 @@
           width: auto;
         }
 
+        @media (min-width: 768px) {
+          .footer-logo img {
+            width: 180px;
+            height: auto;
+          }
+        }
+
         .footer-tagline {
-          font-size: 18px;
-          font-weight: 600;
-          color: rgba(255, 255, 255, 0.9);
+          font-size: 16px;
+          font-weight: 500;
+          color: rgba(255, 255, 255, 0.8);
           margin-bottom: 8px;
         }
 
@@ -937,10 +974,10 @@
         }
 
         .footer-column-title {
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 600;
           color: ${CONFIG.colors.white};
-          margin-bottom: 20px;
+          margin-bottom: 16px;
         }
 
         .footer-links {
@@ -951,38 +988,14 @@
         }
 
         .footer-link {
-          color: rgba(255, 255, 255, 0.7);
+          color: rgba(255, 255, 255, 0.8);
           text-decoration: none;
           font-size: 15px;
           transition: color 0.2s ease;
         }
 
         .footer-link:hover {
-          color: ${CONFIG.colors.teal};
-        }
-
-        /* Locations */
-        .footer-locations {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .footer-location {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .footer-location-city {
-          font-size: 15px;
-          font-weight: 500;
-          color: rgba(255, 255, 255, 0.9);
-        }
-
-        .footer-location-meta {
-          font-size: 13px;
-          color: rgba(255, 255, 255, 0.5);
+          color: ${CONFIG.colors.white};
         }
 
         /* Bottom Footer */
@@ -1006,18 +1019,18 @@
 
         .footer-copyright {
           font-size: 14px;
-          color: rgba(255, 255, 255, 0.5);
+          color: rgba(255, 255, 255, 0.6);
         }
 
         .footer-legal {
           display: flex;
           align-items: center;
-          gap: 24px;
+          gap: 16px;
         }
 
         .footer-legal-link {
           font-size: 14px;
-          color: rgba(255, 255, 255, 0.5);
+          color: rgba(255, 255, 255, 0.6);
           text-decoration: none;
           transition: color 0.2s ease;
         }
@@ -1051,15 +1064,12 @@
         <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
       `).join('');
 
-      const legalLinks = NAVIGATION.footer.legal.map(item => `
-        <a href="${resolveUrl(item.href)}" class="footer-legal-link">${item.label}</a>
+      const industriesLinks = NAVIGATION.footer.industries.map(item => `
+        <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
       `).join('');
 
-      const locationsMarkup = NAVIGATION.footer.locations.map(loc => `
-        <div class="footer-location">
-          <span class="footer-location-city">${loc.city}</span>
-          <span class="footer-location-meta">${loc.country} ${loc.type ? `(${loc.type})` : ''}</span>
-        </div>
+      const legalLinks = NAVIGATION.footer.legal.map(item => `
+        <a href="${resolveUrl(item.href)}" class="footer-legal-link">${item.label}</a>
       `).join('');
 
       const currentYear = new Date().getFullYear();
@@ -1099,28 +1109,23 @@
                     Professional translation services in 200+ languages for life sciences, business, and certified documents.
                   </p>
                   <div class="footer-contact">
-                    <a href="tel:${CONFIG.contact.phone.replace(/[^\d+]/g, '')}" class="footer-contact-item">
-                      <span class="footer-contact-icon">${ICONS.phone}</span>
-                      <span>${CONFIG.contact.phone}</span>
-                    </a>
                     <a href="mailto:${CONFIG.contact.email}" class="footer-contact-item">
                       <span class="footer-contact-icon">${ICONS.mail}</span>
                       <span>${CONFIG.contact.email}</span>
+                    </a>
+                    <a href="tel:+15876000786" class="footer-contact-item">
+                      <span class="footer-contact-icon">${ICONS.phone}</span>
+                      <span>${CONFIG.contact.phone}</span>
                     </a>
                   </div>
                   <div class="footer-social">
                     <a href="https://linkedin.com/company/cethos" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="LinkedIn">
                       ${ICONS.linkedin}
                     </a>
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="Twitter">
+                      ${ICONS.twitter}
+                    </a>
                   </div>
-                </div>
-
-                <!-- Services Column -->
-                <div class="footer-column">
-                  <h4 class="footer-column-title">Services</h4>
-                  <ul class="footer-links">
-                    ${servicesLinks}
-                  </ul>
                 </div>
 
                 <!-- Company Column -->
@@ -1131,13 +1136,21 @@
                   </ul>
                 </div>
 
-                ${!hideLocations ? `
-                  <!-- Locations Column -->
+                <!-- Services Column -->
+                <div class="footer-column">
+                  <h4 class="footer-column-title">Services</h4>
+                  <ul class="footer-links">
+                    ${servicesLinks}
+                  </ul>
+                </div>
+
+                ${!hideIndustries ? `
+                  <!-- Industries Column -->
                   <div class="footer-column">
-                    <h4 class="footer-column-title">Locations</h4>
-                    <div class="footer-locations">
-                      ${locationsMarkup}
-                    </div>
+                    <h4 class="footer-column-title">Industries</h4>
+                    <ul class="footer-links">
+                      ${industriesLinks}
+                    </ul>
                   </div>
                 ` : ''}
               </div>
