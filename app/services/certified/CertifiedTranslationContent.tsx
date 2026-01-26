@@ -665,6 +665,41 @@ export default function CertifiedTranslationContent() {
       </section>
 
       {/* ===================================================================== */}
+      {/* SERVING ACROSS CANADA */}
+      {/* ===================================================================== */}
+      <section className="py-16 bg-slate-50">
+        <Container>
+          <SectionHeading
+            title="Certified Translation Across Canada"
+            subtitle="Serving clients from coast to coast with fast delivery and 100% IRCC acceptance."
+            className="mb-12"
+          />
+
+          <div className="flex flex-wrap justify-center gap-4">
+            {[
+              { label: 'Calgary', href: '/locations/calgary' },
+              { label: 'Edmonton', href: '/locations/edmonton' },
+              { label: 'Toronto', href: '/locations/toronto' },
+              { label: 'Vancouver', href: '/locations/vancouver' },
+              { label: 'Ottawa', href: '/locations/ottawa' },
+              { label: 'Montreal', href: '/locations/montreal' },
+              { label: 'Winnipeg', href: '/locations/winnipeg' },
+              { label: 'Halifax', href: '/locations/halifax' },
+              { label: 'Saskatoon', href: '/locations/saskatoon' },
+            ].map((location) => (
+              <Link
+                key={location.href}
+                href={location.href}
+                className="bg-white px-6 py-3 rounded-lg text-gray-800 font-medium hover:bg-[#0891B2] hover:text-white transition-colors shadow-sm"
+              >
+                {location.label}
+              </Link>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ===================================================================== */}
       {/* CTA */}
       {/* ===================================================================== */}
       <section className="py-16 bg-gradient-to-r from-[#0C2340] to-[#164e63]">
