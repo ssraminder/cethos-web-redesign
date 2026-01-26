@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface BlogImageProps {
   src: string | null;
@@ -24,13 +24,19 @@ export default function BlogImage({
   className = '',
   priority = false,
 }: BlogImageProps) {
-  const [imgSrc, setImgSrc] = useState(src || PLACEHOLDER_IMAGE);
   const [hasError, setHasError] = useState(false);
+
+  // Reset error state when src changes
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
+  // Derive image source directly from prop - don't store in state
+  const imageSrc = src && !hasError ? src : PLACEHOLDER_IMAGE;
 
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
-      setImgSrc(PLACEHOLDER_IMAGE);
     }
   };
 
@@ -38,14 +44,14 @@ export default function BlogImage({
   if (hasError) {
     return fill ? (
       <img
-        src={imgSrc}
+        src={PLACEHOLDER_IMAGE}
         alt={alt}
         className={`absolute inset-0 w-full h-full ${className}`}
         loading={priority ? 'eager' : 'lazy'}
       />
     ) : (
       <img
-        src={imgSrc}
+        src={PLACEHOLDER_IMAGE}
         alt={alt}
         width={width}
         height={height}
@@ -57,7 +63,7 @@ export default function BlogImage({
 
   return fill ? (
     <Image
-      src={imgSrc}
+      src={imageSrc}
       alt={alt}
       fill
       className={className}
@@ -66,7 +72,7 @@ export default function BlogImage({
     />
   ) : (
     <Image
-      src={imgSrc}
+      src={imageSrc}
       alt={alt}
       width={width || 1200}
       height={height || 630}
