@@ -13,7 +13,7 @@
 
   // Configuration
   const CONFIG = {
-    version: '1.1.0',
+    version: '1.2.0',
     baseUrl: 'https://cethos.com',
     assets: {
       logoLight: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg',
@@ -86,6 +86,17 @@
         { label: 'Technology', href: '/industries/technology' },
         { label: 'Finance', href: '/industries/finance' },
         { label: 'Healthcare', href: '/industries/healthcare' }
+      ],
+      locations: [
+        { label: 'Calgary', href: '/locations/calgary' },
+        { label: 'Edmonton', href: '/locations/edmonton' },
+        { label: 'Toronto', href: '/locations/toronto' },
+        { label: 'Vancouver', href: '/locations/vancouver' },
+        { label: 'Ottawa', href: '/locations/ottawa' },
+        { label: 'Montreal', href: '/locations/montreal' },
+        { label: 'Winnipeg', href: '/locations/winnipeg' },
+        { label: 'Halifax', href: '/locations/halifax' },
+        { label: 'Saskatoon', href: '/locations/saskatoon' }
       ],
       legal: [
         { label: 'Privacy Policy', href: '/privacy' },
@@ -866,7 +877,7 @@
 
         @media (min-width: 1024px) {
           .footer-grid {
-            grid-template-columns: ${hideIndustries ? '2fr 1fr 1fr' : '2fr 1fr 1fr 1fr'};
+            grid-template-columns: ${hideIndustries ? '2fr 1fr 1fr 1fr' : '2fr 1fr 1fr 1fr 1fr'};
           }
         }
 
@@ -1068,6 +1079,10 @@
         <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
       `).join('');
 
+      const locationsLinks = NAVIGATION.footer.locations.map(item => `
+        <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
+      `).join('');
+
       const legalLinks = NAVIGATION.footer.legal.map(item => `
         <a href="${resolveUrl(item.href)}" class="footer-legal-link">${item.label}</a>
       `).join('');
@@ -1153,6 +1168,14 @@
                     </ul>
                   </div>
                 ` : ''}
+
+                <!-- Locations Column -->
+                <div class="footer-column">
+                  <h4 class="footer-column-title">Locations</h4>
+                  <ul class="footer-links">
+                    ${locationsLinks}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

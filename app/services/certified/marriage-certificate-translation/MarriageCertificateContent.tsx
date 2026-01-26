@@ -359,6 +359,35 @@ export default function MarriageCertificateContent() {
         </Container>
       </section>
 
+      {/* Serving Across Canada */}
+      <section className="py-16 bg-slate-50">
+        <Container>
+          <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Certified Translation Across Canada</h2>
+          <p className="text-slate-600 text-center mb-8">Serving clients from coast to coast with fast delivery and 100% IRCC acceptance.</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            {[
+              { label: 'Calgary', href: '/locations/calgary' },
+              { label: 'Edmonton', href: '/locations/edmonton' },
+              { label: 'Toronto', href: '/locations/toronto' },
+              { label: 'Vancouver', href: '/locations/vancouver' },
+              { label: 'Ottawa', href: '/locations/ottawa' },
+              { label: 'Montreal', href: '/locations/montreal' },
+              { label: 'Winnipeg', href: '/locations/winnipeg' },
+              { label: 'Halifax', href: '/locations/halifax' },
+              { label: 'Saskatoon', href: '/locations/saskatoon' },
+            ].map((location) => (
+              <Link
+                key={location.href}
+                href={location.href}
+                className="bg-white px-6 py-3 rounded-lg text-gray-800 font-medium hover:bg-[#0891B2] hover:text-white transition-colors shadow-sm"
+              >
+                {location.label}
+              </Link>
+            ))}
+          </div>
+        </Container>
+      </section>
+
       {/* Related Links */}
       <section className="py-12 bg-white border-t">
         <Container>

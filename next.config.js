@@ -16,6 +16,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/services/certified/edmonton-translation-agency',
+        destination: '/locations/edmonton',
+        permanent: true,
+      },
+    ];
+  },
 }
 
 module.exports = nextConfig
