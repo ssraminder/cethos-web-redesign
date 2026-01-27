@@ -13,7 +13,7 @@
 
   // Configuration
   const CONFIG = {
-    version: '1.2.0',
+    version: '1.3.0',
     baseUrl: 'https://cethos.com',
     assets: {
       logoLight: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg',
@@ -486,21 +486,23 @@
         .mobile-menu {
           position: fixed;
           top: 0;
+          left: 0;
           right: 0;
           bottom: 0;
-          width: 320px;
-          max-width: 100%;
+          width: 100%;
           background: ${CONFIG.colors.white};
           z-index: 10000;
-          transform: translateX(100%);
-          transition: transform 0.3s ease;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
           overflow-y: auto;
           display: flex;
           flex-direction: column;
         }
 
         .mobile-menu.open {
-          transform: translateX(0);
+          opacity: 1;
+          visibility: visible;
         }
 
         .mobile-menu-header {
@@ -540,28 +542,27 @@
         }
 
         .mobile-section {
-          margin-bottom: 16px;
+          margin-bottom: 0;
         }
 
         .mobile-section-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 12px 0;
-          font-size: 14px;
-          font-weight: 600;
-          color: ${CONFIG.colors.textLight};
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+          padding: 16px 0;
+          font-size: 18px;
+          font-weight: 500;
+          color: ${CONFIG.colors.navy};
           border: none;
           background: none;
           width: 100%;
           cursor: pointer;
           transition: color 0.2s ease;
+          border-bottom: 1px solid ${CONFIG.colors.border};
         }
 
         .mobile-section-header:hover {
-          color: ${CONFIG.colors.navy};
+          color: ${CONFIG.colors.teal};
         }
 
         .mobile-section-content {
