@@ -550,8 +550,9 @@
           align-items: center;
           justify-content: space-between;
           padding: 16px 0;
+          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           font-size: 18px;
-          font-weight: 500;
+          font-weight: 500 !important;
           color: ${CONFIG.colors.navy};
           border: none;
           background: none;
