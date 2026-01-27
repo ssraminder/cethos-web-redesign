@@ -67,7 +67,7 @@ export function MobileNav({ isOpen, onClose, navigation }: MobileNavProps) {
                         <div>
                           <button
                             onClick={() => setExpandedItem(expandedItem === item.name ? null : item.name)}
-                            className="flex items-center justify-between w-full px-4 py-3 text-navy font-medium rounded-lg hover:bg-slate-50 transition-colors"
+                            className="flex items-center justify-between w-full px-4 py-3 text-navy font-semibold rounded-lg hover:bg-slate-50 transition-colors"
                           >
                             {item.name}
                             <ChevronDownIcon
@@ -107,7 +107,7 @@ export function MobileNav({ isOpen, onClose, navigation }: MobileNavProps) {
                         <Link
                           href={item.href}
                           onClick={onClose}
-                          className={`block px-4 py-3 font-medium rounded-lg transition-colors ${
+                          className={`block px-4 py-3 font-semibold rounded-lg transition-colors ${
                             pathname === item.href
                               ? 'text-teal-600 bg-teal-50'
                               : 'text-navy hover:bg-slate-50'
