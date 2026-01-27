@@ -1,0 +1,398 @@
+# =============================================================================
+# CETHOS WEBSITE 301 REDIRECTS
+# =============================================================================
+# Old Site: cethos-2.10web.me → New Site: cethos.com
+# Generated: January 27, 2026
+# Total Pages: 117 (from old sitemap)
+# =============================================================================
+#
+# INSTALLATION:
+# Option 1 (Recommended): Place this file in /public/_redirects
+# Option 2: Add to netlify.toml as [[redirects]] entries
+# Option 3: Add to next.config.js redirects() function
+#
+# REDIRECT STRATEGY:
+# ✓ Direct matches - Same URL exists on new site
+# ✓ Location pages - Map to /locations/{city}
+# ✓ Service pages - Map to /services/{service-type}
+# ✓ Multilingual - All redirect to English equivalents
+# ✓ Orphan pages - Redirect to closest relevant page or homepage
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# SECTION 1: ENGLISH PAGES - DIRECT MATCHES
+# Pages that exist with same or very similar URLs on new site
+# -----------------------------------------------------------------------------
+
+# Homepage
+/                                       /                                       301
+
+# Calgary Translation Agency
+/calgary-translation-agency/            /calgary-translation-agency/            301
+
+# Birth Certificate Translation (both URLs)
+/certified-birth-certificate-translation/  /certified-birth-certificate-translation/  301
+/birth-certificate-translation/         /certified-birth-certificate-translation/  301
+
+# Testimonials
+/certified-translation-testimonials/    /certified-translation-testimonials/    301
+
+# Immigration Translation
+/immigration-translation-services/      /immigration-translation-services/      301
+
+# Work as Translator / Careers
+/work-as-translator/                    /work-as-translator/                    301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 2: ENGLISH PAGES - LOCATION PAGES
+# City-specific pages → New /locations/{city} structure
+# -----------------------------------------------------------------------------
+
+# Edmonton
+/edmonton-translation-agency/           /locations/edmonton                     301
+
+# Toronto
+/toronto-translation-agency/            /locations/toronto                      301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 3: ENGLISH PAGES - SERVICE PAGES
+# Service-specific pages → New /services/{service} structure
+# -----------------------------------------------------------------------------
+
+# Life Sciences
+/life-sciences-translation-services/    /services/lifesciences                  301
+
+# Interpretation Services
+/interpretation-services/               /services/interpretation                301
+/video-remote-interpreting/             /services/interpretation                301
+/interpreter-lead-confirmation/         /services/interpretation                301
+/interpretation-request-form/           /services/interpretation                301
+
+# Driver's License Translation
+/driver-license-translation-services/   /services/certified                     301
+
+# Certified Translation in Alberta
+/certified-translation-service-in-alberta/  /services/certified                 301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 4: ENGLISH PAGES - CONTACT & QUOTE
+# -----------------------------------------------------------------------------
+
+# Contact Page
+/contact-us/                            /contact                                301
+
+# Quote/Order Pages → Get Quote
+/request-quote/                         /get-quote                              301
+/certified-translation-quote/           /get-quote                              301
+/order-now/                             /get-quote                              301
+/start-a-translate/                     /get-quote                              301
+/certified-translation-order/           /get-quote                              301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 5: ENGLISH PAGES - BLOG
+# -----------------------------------------------------------------------------
+
+/blog/                                  /blog                                   301
+/blog-2/                                /blog                                   301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 6: ENGLISH PAGES - REGISTRATION/CAREERS
+# -----------------------------------------------------------------------------
+
+/translator-registration/               /work-as-translator/                    301
+/interpreter-registration-form/         /work-as-translator/                    301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 7: ENGLISH PAGES - INFO PAGES
+# These pages don't exist on new site - redirect to closest match
+# RECOMMENDATION: Consider creating /faq and /languages pages
+# -----------------------------------------------------------------------------
+
+# FAQ - Redirect to homepage (or create /faq page)
+/frequently-asked-questions/            /                                       301
+
+# Supported Languages - Redirect to homepage (or create /languages page)
+/supported-languages/                   /                                       301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 8: ENGLISH PAGES - THANK YOU & CONFIRMATION
+# -----------------------------------------------------------------------------
+
+/quote-thank-you/                       /                                       301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 9: ENGLISH PAGES - TEST/INTERNAL (No public equivalent)
+# -----------------------------------------------------------------------------
+
+/test-payment-page/                     /                                       301
+/cethos-org-structure/                  /                                       301
+/vendor-information-form-urgent/        /                                       301
+/elementor-61/                          /                                       301
+
+
+# -----------------------------------------------------------------------------
+# SECTION 10: ENGLISH PAGES - GENERIC MARKETING
+# -----------------------------------------------------------------------------
+
+/linguistic-minds-at-your-service/      /                                       301
+/smart-solutions-for-every-need/        /                                       301
+/translation-for-your-industry/         /                                       301
+/what-our-clients-say/                  /certified-translation-testimonials/    301
+/technology-human-translation/          /                                       301
+
+
+# =============================================================================
+# SECTION 11: FRENCH PAGES → English Equivalents
+# =============================================================================
+
+# French Homepage/Marketing
+/des-solutions-intelligentes-pour-chaque-besoin/    /                           301
+/des-linguistes-a-votre-service/        /                                       301
+
+# French Immigration
+/traductions-pour-limmigration-ircc-et-uscis/   /immigration-translation-services/  301
+
+# French Birth Certificate
+/services-de-traduction-rapide-dactes-de-naissance-traductions-fiables-a-100-garanties/  /certified-birth-certificate-translation/  301
+
+# French Certified Translation
+/agence-de-traduction-certifiee-canada-services-de-traduction/  /services/certified  301
+
+# French Calgary Agency
+/agence-de-traduction-de-calgary/       /calgary-translation-agency/            301
+
+# French Driver's License
+/services-de-traduction-des-permis-de-conduire/  /services/certified            301
+
+# French Interpretation
+/trouver-un-interprete-linguistique-rapide-et-facile-n1-de-la-traduction/  /services/interpretation  301
+/interpretation-video-a-distance-vri/   /services/interpretation                301
+/services-dinterpretation-conversion-des-prospects/  /services/interpretation   301
+
+# French Registration Forms
+/formulaire-dinscription-du-traducteur/  /work-as-translator/                   301
+/formulaire-dinscription-pour-les-interpretes/  /work-as-translator/            301
+
+# French Quote/Order
+/demande-de-devis/                      /get-quote                              301
+/commander/                             /get-quote                              301
+/demarrer-une-traduction/               /get-quote                              301
+
+# French FAQ/Languages
+/questions-frequemment-posees/          /                                       301
+/langues-prises-en-charge/              /                                       301
+
+# French Thank You/Test Pages
+/nous-avons-recu-votre-document-pour-un-devis-de-traduction-certifiee/  /       301
+/page-de-paiement-du-test/              /                                       301
+
+# French Join Team
+/rejoignez-notre-equipe-en-tant-que-traducteur-independant/  /work-as-translator/  301
+
+
+# =============================================================================
+# SECTION 12: SPANISH PAGES → English Equivalents
+# =============================================================================
+
+# Spanish Homepage/Marketing
+/pagina-de-inicio/                      /                                       301
+/inicio/                                /                                       301
+/soluciones-inteligentes-para-cada-necesidad/  /                                301
+/mentes-linguisticas-a-tu-servicio/     /                                       301
+/traduccion-humana-potenciada-por-la-tecnologia/  /                             301
+
+# Spanish Immigration
+/traducciones-para-inmigracion-ircc-y-uscis/  /immigration-translation-services/  301
+
+# Spanish Certified Translation
+/traduccion-jurada/                     /services/certified                     301
+/agencia-de-traduccion-jurada-canada-servicios-de-traduccion/  /services/certified  301
+/orden-de-traduccion-jurada/            /get-quote                              301
+
+# Spanish Birth Certificate
+/servicios-rapidos-de-traduccion-de-partidas-de-nacimiento-traducciones-100-fiables-garantizadas/  /certified-birth-certificate-translation/  301
+
+# Spanish Calgary Agency
+/agencia-de-traduccion-de-calgary/      /calgary-translation-agency/            301
+
+# Spanish Driver's License
+/servicios-de-traduccion-de-permisos-de-conducir/  /services/certified          301
+
+# Spanish Interpretation
+/encontrar-interprete-de-idiomas-rapido-y-facil-empresa-de-traduccion-no-1/  /services/interpretation  301
+/interpretacion-a-distancia-por-video-vri/  /services/interpretation            301
+/servicios-de-interpretacion-conversion-de-clientes-potenciales/  /services/interpretation  301
+/servicio-de-interpretacion-no-1-en-canada-mejora-la-comunicacion-con-la-ayuda-de-expertos/  /services/interpretation  301
+
+# Spanish Registration Forms
+/formulario-de-inscripcion-de-traductor/  /work-as-translator/                  301
+/formulario-de-inscripcion-de-interprete/  /work-as-translator/                 301
+
+# Spanish Quote/Order
+/haz-tu-pedido/                         /get-quote                              301
+
+# Spanish FAQ/Languages/Contact
+/preguntas-frecuentes/                  /                                       301
+/lenguas-admitidas/                     /                                       301
+/ponte-en-contacto-con/                 /contact                                301
+
+# Spanish Testimonials
+/lo-que-dicen-nuestros-clientes/        /certified-translation-testimonials/    301
+
+# Spanish Thank You/Test Pages
+/hemos-recibido-tu-documento-para-presupuesto-de-servicios-de-traduccion-jurada/  /  301
+/pagina-de-pago-de-prueba/              /                                       301
+
+# Spanish Join Team
+/unete-a-nuestro-equipo-como-traductor-autonomo/  /work-as-translator/          301
+
+
+# =============================================================================
+# SECTION 13: CHINESE PAGES (URL-encoded) → English Equivalents
+# =============================================================================
+
+# Chinese Homepage/Marketing
+/%e4%b8%bb%e9%a1%b5/                    /                                       301
+/%e9%a6%96%e9%a1%b5/                    /                                       301
+/%e6%bb%a1%e8%b6%b3%e5%90%84%e7%a7%8d%e9%9c%80%e6%b1%82%e7%9a%84%e6%99%ba%e8%83%bd%e8%a7%a3%e5%86%b3%e6%96%b9%e6%a1%88/  /  301
+/%e8%af%ad%e8%a8%80%e4%b8%93%e5%ae%b6%e4%b8%ba%e6%82%a8%e6%9c%8d%e5%8a%a1/  /    301
+/%e6%8a%80%e6%9c%af%e9%a9%b1%e5%8a%a8%e4%ba%ba%e5%b7%a5%e7%bf%bb%e8%af%91/  /    301
+
+# Chinese Immigration
+/%e7%a7%bb%e6%b0%91%e7%bf%bb%e8%af%91-ircc-%e5%92%8c-uscis/  /immigration-translation-services/  301
+
+# Chinese Certified Translation
+/%e8%ae%a4%e8%af%81%e7%bf%bb%e8%af%91/  /services/certified                     301
+/%e5%8a%a0%e6%8b%bf%e5%a4%a7%e8%ae%a4%e8%af%81%e7%bf%bb%e8%af%91%e5%85%ac%e5%8f%b8-%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1/  /services/certified  301
+/%e8%ae%a4%e8%af%81%e7%bf%bb%e8%af%91%e4%bb%a4/  /get-quote                     301
+/%e8%ae%a4%e8%af%81%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1%e6%8a%a5%e4%bb%b7/  /get-quote  301
+
+# Chinese Birth Certificate
+/%e5%bf%ab%e9%80%9f%e5%87%ba%e7%94%9f%e8%af%81%e6%98%8e%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1%ef%bc%9a%e4%bf%9d%e8%af%81-100-%e5%8f%af%e9%9d%a0%e7%9a%84%e7%bf%bb%e8%af%91/  /certified-birth-certificate-translation/  301
+
+# Chinese Calgary Agency
+/%e5%8d%a1%e5%b0%94%e5%8a%a0%e9%87%8c%e7%bf%bb%e8%af%91%e5%85%ac%e5%8f%b8/  /calgary-translation-agency/  301
+
+# Chinese Driver's License
+/%e9%a9%be%e9%a9%b6%e6%89%a7%e7%85%a7%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1/  /services/certified  301
+
+# Chinese Interpretation
+/%e5%8a%a0%e6%8b%bf%e5%a4%a7%e6%8e%92%e5%90%8d%e7%ac%ac%e4%b8%80%e7%9a%84%e5%8f%a3%e8%af%91%e6%9c%8d%e5%8a%a1%ef%bc%9a%e9%80%9a%e8%bf%87%e4%b8%93%e5%ae%b6%e5%8d%8f%e5%8a%a9%e5%8a%a0%e5%bc%ba%e6%b2%9f/  /services/interpretation  301
+/%e5%8f%a3%e8%af%91%e6%9c%8d%e5%8a%a1-%e6%bd%9c%e5%9c%a8%e5%ae%a2%e6%88%b7%e8%bd%ac%e5%8c%96/  /services/interpretation  301
+/%e6%9f%a5%e6%89%be%e8%af%ad%e8%a8%80%e5%8f%a3%e8%af%91%e5%91%98-%e5%bf%ab%e6%8d%b7%e6%96%b9%e4%be%bf-1-%e7%bf%bb%e8%af%91%e5%85%ac%e5%8f%b8/  /services/interpretation  301
+/%e8%a7%86%e9%a2%91%e8%bf%9c%e7%a8%8b%e5%8f%a3%e8%af%91-vri/  /services/interpretation  301
+
+# Chinese Registration Forms
+/%e7%bf%bb%e8%af%91%e6%b3%a8%e5%86%8c%e8%a1%a8/  /work-as-translator/           301
+/%e5%8f%a3%e8%af%91%e5%91%98%e7%99%bb%e8%ae%b0%e8%a1%a8/  /work-as-translator/   301
+
+# Chinese Quote/Order
+/%e8%af%a2%e4%bb%b7/                    /get-quote                              301
+/%e7%ab%8b%e5%8d%b3%e8%ae%a2%e8%b4%ad/  /get-quote                              301
+
+# Chinese FAQ/Languages/Contact
+/%e5%b8%b8%e8%a7%81%e9%97%ae%e9%a2%98/  /                                       301
+/%e6%94%af%e6%8c%81%e7%9a%84%e8%af%ad%e8%a8%80/  /                               301
+/%e8%81%94%e7%b3%bb%e6%96%b9%e5%bc%8f/  /contact                                301
+
+# Chinese Testimonials
+/%e5%ae%a2%e6%88%b7%e6%84%9f%e8%a8%80/  /certified-translation-testimonials/    301
+
+# Chinese Thank You/Test Pages
+/%e6%88%91%e4%bb%ac%e5%b7%b2%e6%94%b6%e5%88%b0%e6%82%a8%e7%9a%84%e8%ae%a4%e8%af%81%e7%bf%bb%e8%af%91%e6%9c%8d%e5%8a%a1%e6%8a%a5%e4%bb%b7%e6%96%87%e4%bb%b6/  /  301
+/%e6%b5%8b%e8%af%95%e4%bb%98%e6%ac%be%e9%a1%b5%e9%9d%a2/  /                      301
+
+# Chinese Join Team
+/%e5%8a%a0%e5%85%a5%e6%88%91%e4%bb%ac%e7%9a%84%e5%9b%a2%e9%98%9f%ef%bc%8c%e6%88%90%e4%b8%ba%e8%87%aa%e7%94%b1%e8%af%91%e8%80%85/  /work-as-translator/  301
+
+# Chinese Blog
+/%e5%8d%9a%e5%ae%a2/                    /blog                                   301
+
+
+# =============================================================================
+# SECTION 14: HINDI PAGES (URL-encoded) → English Equivalents
+# =============================================================================
+
+# Hindi Homepage/Marketing
+/%e0%a4%98%e0%a4%b0/                    /                                       301
+/%e0%a4%b9%e0%a5%8b%e0%a4%ae-%e0%a4%aa%e0%a5%87%e0%a4%9c/  /                     301
+/%e0%a4%b9%e0%a4%b0-%e0%a4%9c%e0%a4%bc%e0%a4%b0%e0%a5%82%e0%a4%b0%e0%a4%a4-%e0%a4%95%e0%a5%87-%e0%a4%b2%e0%a4%bf%e0%a4%8f-%e0%a4%b8%e0%a5%8d%e0%a4%ae%e0%a4%be%e0%a4%b0%e0%a5%8d%e0%a4%9f-%e0%a4%b8/  /  301
+/%e0%a4%ad%e0%a4%be%e0%a4%b7%e0%a4%be%e0%a4%88-%e0%a4%a6%e0%a4%bf%e0%a4%ae%e0%a4%be%e0%a4%97-%e0%a4%86%e0%a4%aa%e0%a4%95%e0%a5%80-%e0%a4%b8%e0%a5%87%e0%a4%b5%e0%a4%be-%e0%a4%ae%e0%a5%87%e0%a4%82/  /  301
+/%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a5%8c%e0%a4%a6%e0%a5%8d%e0%a4%af%e0%a5%8b%e0%a4%97%e0%a4%bf%e0%a4%95%e0%a5%80-%e0%a4%b8%e0%a4%82%e0%a4%9a%e0%a4%be%e0%a4%b2%e0%a4%bf%e0%a4%a4-%e0%a4%ae%e0%a4%be%e0%a4%a8/  /  301
+
+# Hindi Immigration
+/%e0%a4%86%e0%a4%b5%e0%a5%8d%e0%a4%b0%e0%a4%9c%e0%a4%a8-%e0%a4%95%e0%a5%87-%e0%a4%b2%e0%a4%bf%e0%a4%8f-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6-ircc-%e0%a4%94%e0%a4%b0-uscis/  /immigration-translation-services/  301
+
+# Hindi Certified Translation
+/%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a4%ae%e0%a4%be%e0%a4%a3%e0%a4%bf%e0%a4%a4-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6/  /services/certified  301
+/%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a4%ae%e0%a4%be%e0%a4%a3%e0%a4%bf%e0%a4%a4-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6-%e0%a4%8f%e0%a4%9c%e0%a5%87%e0%a4%82%e0%a4%b8%e0%a5%80-%e0%a4%95/  /services/certified  301
+/%e0%a4%b9%e0%a4%ae%e0%a5%87%e0%a4%82-%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a4%ae%e0%a4%be%e0%a4%a3%e0%a4%bf%e0%a4%a4-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6-%e0%a4%b8%e0%a5%87%e0%a4%b5/  /services/certified  301
+/%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a4%ae%e0%a4%be%e0%a4%a3%e0%a4%bf%e0%a4%a4-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6-%e0%a4%86%e0%a4%a6%e0%a5%87%e0%a4%b6/  /get-quote  301
+
+# Hindi Birth Certificate
+/%e0%a4%a4%e0%a5%8d%e0%a4%b5%e0%a4%b0%e0%a4%bf%e0%a4%a4-%e0%a4%9c%e0%a4%a8%e0%a5%8d%e0%a4%ae-%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a4%ae%e0%a4%be%e0%a4%a3-%e0%a4%aa%e0%a4%a4%e0%a5%8d%e0%a4%b0-%e0%a4%85/  /certified-birth-certificate-translation/  301
+
+# Hindi Calgary Agency
+/%e0%a4%95%e0%a5%88%e0%a4%b2%e0%a4%97%e0%a4%b0%e0%a5%80-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6-%e0%a4%8f%e0%a4%9c%e0%a5%87%e0%a4%82%e0%a4%b8%e0%a5%80/  /calgary-translation-agency/  301
+
+# Hindi Driver's License
+/%e0%a4%a1%e0%a5%8d%e0%a4%b0%e0%a4%be%e0%a4%87%e0%a4%b5%e0%a4%b0-%e0%a4%b2%e0%a4%be%e0%a4%87%e0%a4%b8%e0%a5%87%e0%a4%82%e0%a4%b8-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6-%e0%a4%b8/  /services/certified  301
+
+# Hindi Interpretation
+/%e0%a4%95%e0%a4%a8%e0%a4%be%e0%a4%a1%e0%a4%be-%e0%a4%ae%e0%a5%87%e0%a4%82-1-%e0%a4%b5%e0%a5%8d%e0%a4%af%e0%a4%be%e0%a4%96%e0%a5%8d%e0%a4%af%e0%a4%be-%e0%a4%b8%e0%a5%87%e0%a4%b5%e0%a4%be-%e0%a4%b5/  /services/interpretation  301
+/%e0%a4%b5%e0%a5%8d%e0%a4%af%e0%a4%be%e0%a4%96%e0%a5%8d%e0%a4%af%e0%a4%be-%e0%a4%b8%e0%a5%87%e0%a4%b5%e0%a4%be%e0%a4%8f%e0%a4%81-%e0%a4%b2%e0%a5%80%e0%a4%a1-%e0%a4%b0%e0%a5%82%e0%a4%aa%e0%a4%be/  /services/interpretation  301
+/%e0%a4%ad%e0%a4%be%e0%a4%b7%e0%a4%be-%e0%a4%a6%e0%a5%81%e0%a4%ad%e0%a4%be%e0%a4%b7%e0%a4%bf%e0%a4%af%e0%a4%be-%e0%a4%96%e0%a5%8b%e0%a4%9c%e0%a5%87%e0%a4%82-%e0%a4%a4%e0%a5%87%e0%a4%9c%e0%a4%bc/  /services/interpretation  301
+/%e0%a4%b5%e0%a5%80%e0%a4%a1%e0%a4%bf%e0%a4%af%e0%a5%8b-%e0%a4%b0%e0%a4%bf%e0%a4%ae%e0%a5%8b%e0%a4%9f-%e0%a4%87%e0%a4%82%e0%a4%9f%e0%a4%b0%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a4%bf%e0%a4%9f%e0%a4%bf%e0%a4%82/  /services/interpretation  301
+
+# Hindi Registration Forms
+/%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6%e0%a4%95-%e0%a4%aa%e0%a4%82%e0%a4%9c%e0%a5%80%e0%a4%95%e0%a4%b0%e0%a4%a3-%e0%a4%ab%e0%a5%89%e0%a4%b0%e0%a5%8d%e0%a4%ae/  /work-as-translator/  301
+/%e0%a4%a6%e0%a5%81%e0%a4%ad%e0%a4%be%e0%a4%b7%e0%a4%bf%e0%a4%af%e0%a4%be-%e0%a4%aa%e0%a4%82%e0%a4%9c%e0%a5%80%e0%a4%95%e0%a4%b0%e0%a4%a3-%e0%a4%ab%e0%a5%89%e0%a4%b0%e0%a5%8d%e0%a4%ae/  /work-as-translator/  301
+
+# Hindi Quote/Order
+/%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6-%e0%a4%b6%e0%a5%81%e0%a4%b0%e0%a5%82-%e0%a4%95%e0%a4%b0%e0%a5%87%e0%a4%82/  /get-quote  301
+/%e0%a4%85%e0%a4%ac-%e0%a4%91%e0%a4%b0%e0%a5%8d%e0%a4%a1%e0%a4%b0-%e0%a4%a6%e0%a5%87%e0%a4%82/  /get-quote  301
+/%e0%a4%8f%e0%a4%95-%e0%a4%89%e0%a4%a6%e0%a5%8d%e0%a4%a7%e0%a4%b0%e0%a4%a3-%e0%a4%95%e0%a4%be-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b0%e0%a5%8b%e0%a4%a7-%e0%a4%95%e0%a4%b0%e0%a5%87%e0%a4%82/  /get-quote  301
+
+# Hindi FAQ/Languages/Contact
+/%e0%a4%85%e0%a4%95%e0%a5%8d%e0%a4%b8%e0%a4%b0-%e0%a4%aa%e0%a5%82%e0%a4%9b%e0%a5%87-%e0%a4%9c%e0%a4%be%e0%a4%a8%e0%a5%87-%e0%a4%b5%e0%a4%be%e0%a4%b2%e0%a5%87-%e0%a4%aa%e0%a5%8d%e0%a4%b0%e0%a4%b6/  /  301
+/%e0%a4%b8%e0%a4%ae%e0%a4%b0%e0%a5%8d%e0%a4%a5%e0%a4%bf%e0%a4%a4-%e0%a4%ad%e0%a4%be%e0%a4%b7%e0%a4%be%e0%a4%8f%e0%a4%81/  /  301
+/%e0%a4%b8%e0%a4%82%e0%a4%aa%e0%a4%b0%e0%a5%8d%e0%a4%95/  /contact  301
+
+# Hindi Thank You/Test Pages
+/%e0%a4%ad%e0%a5%81%e0%a4%97%e0%a4%a4%e0%a4%be%e0%a4%a8-%e0%a4%aa%e0%a5%83%e0%a4%b7%e0%a5%8d%e0%a4%a0-%e0%a4%95%e0%a4%be-%e0%a4%aa%e0%a4%b0%e0%a5%80%e0%a4%95%e0%a5%8d%e0%a4%b7%e0%a4%a3-%e0%a4%95/  /  301
+
+# Hindi Join Team
+/%e0%a4%8f%e0%a4%95-%e0%a4%b8%e0%a5%8d%e0%a4%b5%e0%a4%a4%e0%a4%82%e0%a4%a4%e0%a5%8d%e0%a4%b0-%e0%a4%85%e0%a4%a8%e0%a5%81%e0%a4%b5%e0%a4%be%e0%a4%a6%e0%a4%95-%e0%a4%95%e0%a5%87-%e0%a4%b0%e0%a5%82/  /work-as-translator/  301
+
+# Hindi Blog
+/%e0%a4%ac%e0%a5%8d%e0%a4%b2%e0%a5%89%e0%a4%97/  /blog  301
+
+
+# =============================================================================
+# END OF REDIRECTS FILE
+# =============================================================================
+# 
+# TOTAL REDIRECTS: ~117 pages
+# 
+# RECOMMENDATIONS FOR MISSING PAGES:
+# 1. Create /faq page for FAQ content
+# 2. Create /languages page for supported languages
+# 3. Ensure /locations/edmonton and /locations/toronto exist
+# 4. Monitor 404s in Netlify analytics for any missed redirects
+#
+# SEO NOTES:
+# - All redirects are 301 (permanent) to transfer link equity
+# - Keep redirects active for minimum 1 year
+# - Submit new sitemap to Google Search Console
+# - Request removal of old domain from Google index
+#
+# =============================================================================
