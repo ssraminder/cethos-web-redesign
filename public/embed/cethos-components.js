@@ -734,7 +734,7 @@
               </div>
             </div>
 
-            <div style="margin-top: 16px;">
+            <div>
               ${mobileMainLinks}
             </div>
 
