@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import Script from 'next/script'
 import { CethosHeader, CethosFooter } from '@/components/layout'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
@@ -75,6 +76,20 @@ export default function RootLayout({
         <CethosHeader ctaType="login" />
         <main>{children}</main>
         <CethosFooter />
+        {/* Tawk.to Live Chat Widget */}
+        <Script id="tawk-to" strategy="afterInteractive">
+          {`
+            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+            (function(){
+              var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+              s1.async=true;
+              s1.src='https://embed.tawk.to/62477a0b2abe5b455fc31fd7/1fvjj9fse';
+              s1.charset='UTF-8';
+              s1.setAttribute('crossorigin','*');
+              s0.parentNode.insertBefore(s1,s0);
+            })();
+          `}
+        </Script>
       </body>
     </html>
   )
