@@ -2,15 +2,15 @@ import { Metadata } from 'next'
 import ServicesPageContent from './ServicesPageContent'
 
 export const metadata: Metadata = {
-  title: 'Translation Services | Cethos Solutions Inc.',
-  description: 'Professional translation services in 200+ languages. Life sciences, linguistic validation, certified translation, business, software localization, multimedia, and interpretation services.',
-  keywords: ['translation services', 'localization services', 'life sciences translation', 'linguistic validation', 'certified translation', 'software localization', 'multimedia translation', 'interpretation services'],
+  title: 'Professional Translation Services | 200+ Languages | Cethos',
+  description: 'Life sciences, certified, website, software, and legal translation services in 200+ languages. ISO 17100 compliant. Same-day available.',
+  keywords: ['translation services', 'localization services', 'life sciences translation', 'linguistic validation', 'certified translation', 'software localization', 'interpretation services', 'transcription services'],
   alternates: {
     canonical: 'https://cethos.com/services',
   },
   openGraph: {
-    title: 'Translation Services | Cethos Solutions Inc.',
-    description: 'Professional translation services in 200+ languages. Life sciences, certified, business, software localization.',
+    title: 'Professional Translation Services | Cethos Solutions',
+    description: 'From life sciences to website localization, we deliver accurate translations in 200+ languages.',
     url: 'https://cethos.com/services',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',
