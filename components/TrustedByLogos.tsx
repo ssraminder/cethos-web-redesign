@@ -3,12 +3,18 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-const LOGO_BASE_URL = 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/logos/';
+interface LogoUrls {
+  small: string;
+  medium: string;
+  large: string;
+  original: string;
+}
 
 interface Logo {
   id: string;
   filename: string;
   display_name: string;
+  urls: LogoUrls;
 }
 
 interface TrustedByLogosProps {
@@ -89,11 +95,12 @@ export default function TrustedByLogos({
             >
               <div className="relative w-full h-full">
                 <Image
-                  src={`${LOGO_BASE_URL}${logo.filename}`}
+                  src={logo.urls.medium}
                   alt={logo.display_name}
                   fill
+                  loading="lazy"
                   className="object-contain p-2 filter grayscale hover:grayscale-0 transition-all duration-300"
-                  sizes="(max-width: 768px) 50vw, 16vw"
+                  sizes="(max-width: 768px) 80px, 160px"
                 />
               </div>
 
