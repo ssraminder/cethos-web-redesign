@@ -40,6 +40,8 @@ export default function TrustedByLogos({
     async function fetchLogos() {
       try {
         const params = new URLSearchParams();
+        params.set('random', 'true');
+        params.set('limit', displayCount.toString());
         if (featuredOnly) params.set('featured', 'true');
 
         const response = await fetch(`/api/logos?${params.toString()}`);
@@ -47,10 +49,9 @@ export default function TrustedByLogos({
 
         const data = await response.json();
 
-        // Shuffle and take only what we need to display
-        const shuffled = [...data.logos].sort(() => Math.random() - 0.5);
-        setLogos(shuffled.slice(0, displayCount));
-        setTotalCount(data.logos.length);
+        // Server already shuffled and limited, use directly
+        setLogos(data.logos);
+        setTotalCount(data.total);
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching logos:', error);
