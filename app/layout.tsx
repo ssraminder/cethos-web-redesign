@@ -1,9 +1,17 @@
 import type { Metadata, Viewport } from 'next'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import Script from 'next/script'
 import { CethosHeader, CethosFooter } from '@/components/layout'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
 import './globals.css'
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+  variable: '--font-plus-jakarta-sans',
+})
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -65,7 +73,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={plusJakartaSans.className} suppressHydrationWarning>
       <head>
         <OrganizationJsonLd />
         <WebSiteJsonLd />
@@ -76,8 +84,8 @@ export default function RootLayout({
         <CethosHeader ctaType="login" />
         <main>{children}</main>
         <CethosFooter />
-        {/* Tawk.to Live Chat Widget */}
-        <Script id="tawk-to" strategy="afterInteractive">
+        {/* Tawk.to Live Chat Widget - lazy loaded for better LCP */}
+        <Script id="tawk-to" strategy="lazyOnload">
           {`
             var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
             (function(){
