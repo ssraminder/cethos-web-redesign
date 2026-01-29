@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { LandingQuoteForm } from '@/components/landing/LandingQuoteForm'
 import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
+import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
 import TranscriptionQuoteForm from '@/components/forms/TranscriptionQuoteForm'
 import { InterpretationQuoteForm } from '@/components/forms/InterpretationQuoteForm'
 import BusinessQuoteForm from '@/components/forms/BusinessQuoteForm'
@@ -86,7 +86,7 @@ export default function GetQuotePageContent() {
   const renderForm = () => {
     switch (selectedService) {
       case 'lifesciences':
-        return <LandingQuoteForm />
+        return <LifeSciencesQuoteForm formLocation="get-quote-lifesciences" />
       case 'certified':
         return <CertifiedQuoteForm formLocation="get-quote-page" />
       case 'transcription':
