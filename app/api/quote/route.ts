@@ -4,6 +4,61 @@ import { lifeSciencesQuoteSchema } from '@/lib/validations/life-sciences-quote'
 
 const Brevo = require('@getbrevo/brevo')
 
+// Helper function to get service label
+function getServiceLabel(serviceType: string): string {
+  const labels: Record<string, string> = {
+    'life-sciences': 'Life Sciences',
+    'lifesciences': 'Life Sciences',
+    'certified': 'Certified Translation',
+    'certified-translation': 'Certified Translation',
+    'business': 'Business Translation',
+    'legal': 'Legal Translation',
+    'software': 'Software Localization',
+    'multimedia': 'Multimedia',
+    'interpretation': 'Interpretation',
+    'transcription': 'Transcription',
+    'transcription-translation': 'Transcription + Translation',
+    'cognitive-debriefing': 'Cognitive Debriefing',
+    'clinician-review': 'Clinician Review',
+    'linguistic-validation': 'Linguistic Validation',
+    'regulatory': 'Regulatory Translation',
+    'pharmacovigilance': 'Pharmacovigilance',
+    'ecoa-migration': 'eCOA Migration',
+    'medical-device': 'Medical Device Translation',
+  };
+  return labels[serviceType] || serviceType.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+// Helper function to format file size
+function formatFileSize(bytes: number): string {
+  if (!bytes || bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+// Helper function to get file icon based on type
+function getFileIcon(mimeType: string): string {
+  if (!mimeType) return '📄';
+  if (mimeType.includes('pdf')) return '📕';
+  if (mimeType.includes('word') || mimeType.includes('document')) return '📘';
+  if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return '📗';
+  if (mimeType.includes('image')) return '🖼️';
+  if (mimeType.includes('video')) return '🎬';
+  if (mimeType.includes('audio')) return '🎵';
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return '📦';
+  return '📄';
+}
+
+// Helper function to format field names
+function formatFieldName(fieldName: string): string {
+  return fieldName
+    .replace(/_/g, ' ')
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase());
+}
+
 // Route segment config - increase body size limit for file uploads
 export const maxDuration = 60 // Allow up to 60 seconds for file uploads
 export const dynamic = 'force-dynamic'
@@ -110,27 +165,44 @@ export async function POST(req: Request) {
 
     // Upload files to Supabase Storage
     const files = formData.getAll('files') as File[]
-    const fileUrls: string[] = []
+    const fileUrls: Array<{
+      name: string;
+      path: string;
+      url: string;
+      size: number;
+      type: string;
+    }> = []
     console.log('[API Quote] Files to upload:', files.length)
 
     for (const file of files) {
       if (file.size > 0) {
         const timestamp = Date.now()
         const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-        const fileName = `life-sciences/${timestamp}-${safeFileName}`
+        const filePath = `life-sciences/${timestamp}-${safeFileName}`
 
         const arrayBuffer = await file.arrayBuffer()
         const fileBuffer = new Uint8Array(arrayBuffer)
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('cethosweb-quote-files')
-          .upload(fileName, fileBuffer, {
+          .upload(filePath, fileBuffer, {
             contentType: file.type,
             cacheControl: '3600',
           })
 
         if (!uploadError && uploadData) {
-          fileUrls.push(uploadData.path)
+          // Generate public URL for the uploaded file
+          const { data: urlData } = supabase.storage
+            .from('cethosweb-quote-files')
+            .getPublicUrl(filePath)
+
+          fileUrls.push({
+            name: file.name,
+            path: filePath,
+            url: urlData.publicUrl,
+            size: file.size,
+            type: file.type
+          })
         } else {
           console.error('File upload error:', uploadError)
         }
@@ -143,7 +215,7 @@ export async function POST(req: Request) {
       .from('cethosweb_quote_submissions')
       .insert({
         ...dbData,
-        file_urls: fileUrls,
+        file_urls: fileUrls.map(f => f.url), // Store public URLs
       })
       .select()
       .single()
@@ -158,10 +230,13 @@ export async function POST(req: Request) {
 
     // Save file references
     if (quote && fileUrls.length > 0) {
-      const fileRecords = fileUrls.map(path => ({
+      const fileRecords = fileUrls.map(file => ({
         quote_id: quote.id,
-        file_name: path.split('/').pop() || '',
-        storage_path: path,
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+        storage_path: file.path,
+        public_url: file.url
       }))
 
       const { error: fileDbError } = await supabase
@@ -233,72 +308,280 @@ export async function POST(req: Request) {
       apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
 
       const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>New Quote Request</title>
-        </head>
-        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #0C2340 0%, #1a3a5c 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: #fff; margin: 0; font-size: 24px;">New Life Sciences Quote Request</h1>
-          </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Quote Request</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 600px; border-collapse: collapse;">
 
-          <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
-            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Contact Information</h2>
-              <p style="margin: 8px 0;"><strong>Name:</strong> ${validatedData.fullName}</p>
-              <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${validatedData.email}" style="color: #0891B2;">${validatedData.email}</a></p>
-              <p style="margin: 8px 0;"><strong>Phone:</strong> ${validatedData.phone}</p>
-              <p style="margin: 8px 0;"><strong>Company:</strong> ${validatedData.companyName}</p>
-              ${validatedData.jobTitle ? `<p style="margin: 8px 0;"><strong>Job Title:</strong> ${validatedData.jobTitle}</p>` : ''}
-            </div>
+          <!-- Header with Logo -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0C2340 0%, #0891B2 100%); padding: 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
+              <img src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/png_logo_cethos_light_bg.png"
+                   alt="Cethos Solutions Inc."
+                   style="max-width: 180px; height: auto; margin-bottom: 15px;">
+              <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">
+                New Quote Request
+              </h1>
+              <p style="color: #e0f2fe; margin: 10px 0 0 0; font-size: 14px;">
+                ${getServiceLabel(validatedData.serviceType)} Services
+              </p>
+            </td>
+          </tr>
 
-            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Service Details</h2>
-              <p style="margin: 8px 0;"><strong>Service Type:</strong> ${serviceLabels[validatedData.serviceType] || validatedData.serviceType}</p>
-              ${validatedData.therapeuticArea ? `<p style="margin: 8px 0;"><strong>Therapeutic Area:</strong> ${therapeuticLabels[validatedData.therapeuticArea] || validatedData.therapeuticArea}</p>` : ''}
-              ${validatedData.studyPhase ? `<p style="margin: 8px 0;"><strong>Study Phase:</strong> ${phaseLabels[validatedData.studyPhase] || validatedData.studyPhase}</p>` : ''}
-              ${validatedData.instrumentType ? `<p style="margin: 8px 0;"><strong>Instrument Type:</strong> ${validatedData.instrumentType.toUpperCase()}</p>` : ''}
-              ${validatedData.regulatoryPathway ? `<p style="margin: 8px 0;"><strong>Regulatory Pathway:</strong> ${regulatoryLabels[validatedData.regulatoryPathway] || validatedData.regulatoryPathway}</p>` : ''}
-            </div>
+          <!-- Main Content -->
+          <tr>
+            <td style="background-color: #ffffff; padding: 40px; border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
 
-            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Language & Scope</h2>
-              <p style="margin: 8px 0;"><strong>Source Language:</strong> ${validatedData.sourceLanguage}</p>
-              <p style="margin: 8px 0;"><strong>Target Languages:</strong> ${validatedData.targetLanguages.join(', ')}</p>
-              <p style="margin: 8px 0;"><strong>Word Count:</strong> ${validatedData.wordCount || 'TBD'}</p>
-              <p style="margin: 8px 0;"><strong>Timeline:</strong> ${timelineLabels[validatedData.timeline] || validatedData.timeline}</p>
-            </div>
+              <!-- Contact Information -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                  <td style="padding-bottom: 15px; border-bottom: 2px solid #0891B2;">
+                    <h2 style="color: #0C2340; margin: 0; font-size: 18px; font-weight: 600;">
+                      📋 Contact Information
+                    </h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-top: 20px;">
+                    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; width: 140px; vertical-align: top;">Name:</td>
+                        <td style="padding: 8px 0; color: #111827; font-weight: 500;">${validatedData.fullName}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Email:</td>
+                        <td style="padding: 8px 0;">
+                          <a href="mailto:${validatedData.email}" style="color: #0891B2; text-decoration: none;">${validatedData.email}</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Phone:</td>
+                        <td style="padding: 8px 0;">
+                          <a href="tel:${validatedData.phone}" style="color: #0891B2; text-decoration: none;">${validatedData.phone}</a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Company:</td>
+                        <td style="padding: 8px 0; color: #111827; font-weight: 500;">${validatedData.companyName}</td>
+                      </tr>
+                      ${validatedData.jobTitle ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Job Title:</td>
+                        <td style="padding: 8px 0; color: #111827;">${validatedData.jobTitle}</td>
+                      </tr>
+                      ` : ''}
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-            <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">Project Description</h2>
-              <p style="margin: 0; white-space: pre-wrap;">${validatedData.projectDescription}</p>
-            </div>
+              <!-- Project Details -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                  <td style="padding-bottom: 15px; border-bottom: 2px solid #0891B2;">
+                    <h2 style="color: #0C2340; margin: 0; font-size: 18px; font-weight: 600;">
+                      📁 Project Details
+                    </h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-top: 20px;">
+                    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; width: 140px; vertical-align: top;">Service Type:</td>
+                        <td style="padding: 8px 0;">
+                          <span style="background-color: #0891B2; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;">
+                            ${getServiceLabel(validatedData.serviceType)}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Source Language:</td>
+                        <td style="padding: 8px 0; color: #111827;">${validatedData.sourceLanguage}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Target Languages:</td>
+                        <td style="padding: 8px 0; color: #111827;">${validatedData.targetLanguages.join(', ')}</td>
+                      </tr>
+                      ${validatedData.wordCount ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Word Count:</td>
+                        <td style="padding: 8px 0; color: #111827;">${Number(validatedData.wordCount).toLocaleString()} words</td>
+                      </tr>
+                      ` : ''}
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Timeline:</td>
+                        <td style="padding: 8px 0;">
+                          <span style="background-color: ${validatedData.timeline === 'urgent' ? '#fef3c7' : '#e0f2fe'}; color: ${validatedData.timeline === 'urgent' ? '#92400e' : '#0C2340'}; padding: 4px 12px; border-radius: 20px; font-size: 13px;">
+                            ${timelineLabels[validatedData.timeline] || validatedData.timeline}
+                          </span>
+                        </td>
+                      </tr>
+                      ${validatedData.therapeuticArea ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Therapeutic Area:</td>
+                        <td style="padding: 8px 0; color: #111827;">${therapeuticLabels[validatedData.therapeuticArea] || validatedData.therapeuticArea}</td>
+                      </tr>
+                      ` : ''}
+                      ${validatedData.studyPhase ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Study Phase:</td>
+                        <td style="padding: 8px 0; color: #111827;">${phaseLabels[validatedData.studyPhase] || validatedData.studyPhase}</td>
+                      </tr>
+                      ` : ''}
+                      ${validatedData.instrumentType ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Instrument Type:</td>
+                        <td style="padding: 8px 0; color: #111827;">${validatedData.instrumentType.toUpperCase()}</td>
+                      </tr>
+                      ` : ''}
+                      ${validatedData.regulatoryPathway ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #6b7280; vertical-align: top;">Regulatory Pathway:</td>
+                        <td style="padding: 8px 0; color: #111827;">${regulatoryLabels[validatedData.regulatoryPathway] || validatedData.regulatoryPathway}</td>
+                      </tr>
+                      ` : ''}
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-            ${fileUrls.length > 0 ? `
-            <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-              <p style="margin: 0; color: #0C2340;"><strong>📎 ${fileUrls.length} file(s) attached</strong></p>
-              <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Files have been uploaded to the storage bucket.</p>
-            </div>
-            ` : ''}
+              <!-- Uploaded Files Section -->
+              ${fileUrls.length > 0 ? `
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                  <td style="padding-bottom: 15px; border-bottom: 2px solid #0891B2;">
+                    <h2 style="color: #0C2340; margin: 0; font-size: 18px; font-weight: 600;">
+                      📎 Uploaded Files (${fileUrls.length})
+                    </h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-top: 20px;">
+                    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                      ${fileUrls.map((file, index) => `
+                      <tr>
+                        <td style="padding: 12px 15px; background-color: ${index % 2 === 0 ? '#f8fafc' : '#ffffff'}; border-radius: 6px; margin-bottom: 8px;">
+                          <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                            <tr>
+                              <td style="width: 40px; vertical-align: middle;">
+                                <span style="font-size: 24px;">${getFileIcon(file.type)}</span>
+                              </td>
+                              <td style="vertical-align: middle;">
+                                <a href="${file.url}"
+                                   style="color: #0891B2; text-decoration: none; font-weight: 500; font-size: 14px;"
+                                   target="_blank">
+                                  ${file.name}
+                                </a>
+                                <br>
+                                <span style="color: #6b7280; font-size: 12px;">
+                                  ${formatFileSize(file.size)} · ${file.type || 'Unknown type'}
+                                </span>
+                              </td>
+                              <td style="width: 100px; text-align: right; vertical-align: middle;">
+                                <a href="${file.url}"
+                                   style="display: inline-block; background-color: #0891B2; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 500;"
+                                   target="_blank">
+                                  Download
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      `).join('')}
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
 
-            <div style="text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-              <p style="color: #6b7280; font-size: 14px; margin: 0;">Quote ID: ${quote.id}</p>
-              <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Submitted: ${new Date().toLocaleString('en-US', { timeZone: 'America/Edmonton' })}</p>
-            </div>
-          </div>
-        </body>
-        </html>
+              <!-- Project Description -->
+              ${validatedData.projectDescription ? `
+              <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                  <td style="padding-bottom: 15px; border-bottom: 2px solid #0891B2;">
+                    <h2 style="color: #0C2340; margin: 0; font-size: 18px; font-weight: 600;">
+                      💬 Project Description
+                    </h2>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-top: 20px;">
+                    <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #0891B2;">
+                      <p style="margin: 0; color: #374151; line-height: 1.6; white-space: pre-wrap;">${validatedData.projectDescription}</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+              ` : ''}
+
+              <!-- Quick Actions -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="text-align: center; padding-top: 20px;">
+                    <a href="mailto:${validatedData.email}?subject=Re: Your Quote Request - ${getServiceLabel(validatedData.serviceType)}"
+                       style="display: inline-block; background-color: #0891B2; color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-right: 10px;">
+                      Reply to Customer
+                    </a>
+                    <a href="tel:${validatedData.phone}"
+                       style="display: inline-block; background-color: #0C2340; color: white; padding: 12px 30px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                      Call Customer
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #0C2340; padding: 30px 40px; border-radius: 0 0 12px 12px; text-align: center;">
+              <p style="color: #94a3b8; margin: 0 0 10px 0; font-size: 14px;">
+                Quote ID: ${quote.id}
+              </p>
+              <p style="color: #ffffff; margin: 0 0 15px 0; font-size: 14px; font-weight: 500;">
+                Submitted: ${new Date().toLocaleString('en-US', { timeZone: 'America/Edmonton' })}
+              </p>
+              <p style="color: #64748b; margin: 0; font-size: 12px;">
+                Cethos Solutions Inc. · Calgary, AB · Dubai, UAE · Patiala, India
+              </p>
+              <p style="color: #64748b; margin: 10px 0 0 0; font-size: 12px;">
+                <a href="https://cethos.com" style="color: #0891B2; text-decoration: none;">cethos.com</a> ·
+                <a href="tel:+15876000786" style="color: #0891B2; text-decoration: none;">(587) 600-0786</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
       `
 
       const sendSmtpEmail = new Brevo.SendSmtpEmail()
-      sendSmtpEmail.subject = `New Life Sciences Quote - ${validatedData.companyName}`
-      sendSmtpEmail.htmlContent = htmlContent
-      sendSmtpEmail.sender = { name: 'Cethos Website', email: 'noreply@cethos.com' }
+      sendSmtpEmail.subject = `New ${getServiceLabel(validatedData.serviceType)} Quote - ${validatedData.companyName || validatedData.fullName}`
+      sendSmtpEmail.sender = {
+        name: 'Cethos Solutions Inc.',
+        email: 'quotes@cethos.com'
+      }
       sendSmtpEmail.to = emailRecipients.map((email: string) => ({ email: email.trim() }))
-      sendSmtpEmail.replyTo = { email: validatedData.email }
+      sendSmtpEmail.replyTo = {
+        name: validatedData.fullName,
+        email: validatedData.email
+      }
+      sendSmtpEmail.htmlContent = htmlContent
 
       await apiInstance.sendTransacEmail(sendSmtpEmail)
       console.log('[API Quote] Email sent successfully')
