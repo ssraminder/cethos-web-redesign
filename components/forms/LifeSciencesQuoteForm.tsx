@@ -899,7 +899,7 @@ export default function LifeSciencesQuoteForm({
             Trusted by leading pharmaceutical and biotech companies
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-slate-400 text-sm">
-            <span>ISO 17100 Certified</span>
+            <span>ISO 17100 Compliant</span>
             <span>HIPAA Compliant</span>
             <span>FDA 21 CFR Part 11</span>
           </div>
