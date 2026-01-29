@@ -323,14 +323,14 @@ export async function POST(req: Request) {
 
           <!-- Header with Logo -->
           <tr>
-            <td style="background: linear-gradient(135deg, #0C2340 0%, #0891B2 100%); padding: 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
+            <td style="background-color: #0C2340; padding: 30px 40px; border-radius: 12px 12px 0 0; text-align: center;">
               <img src="https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/png_logo_cethos_light_bg.png"
                    alt="Cethos Solutions Inc."
                    style="max-width: 180px; height: auto; margin-bottom: 15px;">
               <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">
                 New Quote Request
               </h1>
-              <p style="color: #e0f2fe; margin: 10px 0 0 0; font-size: 14px;">
+              <p style="color: #94a3b8; margin: 10px 0 0 0; font-size: 14px;">
                 ${getServiceLabel(validatedData.serviceType)} Services
               </p>
             </td>
