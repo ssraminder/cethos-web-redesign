@@ -13,7 +13,7 @@
 
   // Configuration
   const CONFIG = {
-    version: '1.3.0',
+    version: '1.4.0',
     baseUrl: 'https://cethos.com',
     assets: {
       logoLight: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg',
@@ -163,6 +163,82 @@
 
     attributeChangedCallback() {
       this.render();
+    }
+
+    /**
+     * Get user session data from localStorage or cookies
+     * @returns {Object} Session object with isLoggedIn, isAdmin, and email properties
+     */
+    getUserSession() {
+      try {
+        // Check localStorage for Supabase session
+        const storageKeys = [
+          'cethos_session',
+          'supabase.auth.token',
+          'sb-lmzoyezvsjgsxveoakdr-auth-token'
+        ];
+
+        for (const key of storageKeys) {
+          const data = localStorage.getItem(key);
+          if (data) {
+            const parsed = JSON.parse(data);
+            const user = parsed?.user || parsed?.currentSession?.user || parsed;
+
+            if (user?.email) {
+              const role = user?.user_metadata?.role ||
+                           user?.app_metadata?.role ||
+                           user?.role ||
+                           'customer';
+
+              return {
+                isLoggedIn: true,
+                isAdmin: ['admin', 'super_admin'].includes(role),
+                email: user.email
+              };
+            }
+          }
+        }
+
+        // Fallback: check cookies
+        const getCookie = (name) => {
+          const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+          return match ? match[2] : null;
+        };
+
+        if (getCookie('cethos_logged_in') === 'true') {
+          return {
+            isLoggedIn: true,
+            isAdmin: getCookie('cethos_role') === 'admin',
+            email: getCookie('cethos_email') || ''
+          };
+        }
+
+        return { isLoggedIn: false, isAdmin: false, email: '' };
+
+      } catch (e) {
+        console.warn('Error checking session:', e);
+        return { isLoggedIn: false, isAdmin: false, email: '' };
+      }
+    }
+
+    /**
+     * Generate login/dashboard/admin button HTML based on user session
+     * @param {boolean} isMobile - Whether this is for the mobile menu
+     * @returns {string} HTML string for the button
+     */
+    getLoginButton(isMobile = false) {
+      const session = this.getUserSession();
+      const baseUrl = CONFIG.baseUrl;
+      const className = isMobile ? 'mobile-cta' : 'cta-button';
+
+      if (session.isLoggedIn) {
+        if (session.isAdmin) {
+          return `<a href="${baseUrl}/admin" class="${className} admin-btn">Admin Panel</a>`;
+        }
+        return `<a href="${baseUrl}/dashboard" class="${className} dashboard-btn">Dashboard</a>`;
+      }
+
+      return `<a href="https://portal.cethos.com" class="${className}">Login</a>`;
     }
 
     _handleScroll() {
@@ -377,7 +453,18 @@
           visibility: hidden;
           transform: translateY(10px);
           transition: all 0.2s ease;
-          overflow: hidden;
+          overflow: visible;
+        }
+
+        /* Hover bridge to prevent dropdown from closing when moving mouse to menu */
+        .dropdown-menu::before {
+          content: '';
+          position: absolute;
+          top: -20px;
+          left: 0;
+          right: 0;
+          height: 20px;
+          background: transparent;
         }
 
         .dropdown-menu.open {
@@ -436,6 +523,30 @@
 
         .cta-button:hover {
           background: ${CONFIG.colors.tealHover};
+        }
+
+        /* Dashboard button variant */
+        .cta-button.dashboard-btn,
+        .mobile-cta.dashboard-btn {
+          background: ${CONFIG.colors.teal};
+          color: ${CONFIG.colors.white};
+        }
+
+        .cta-button.dashboard-btn:hover,
+        .mobile-cta.dashboard-btn:hover {
+          background: ${CONFIG.colors.tealHover};
+        }
+
+        /* Admin button variant */
+        .cta-button.admin-btn,
+        .mobile-cta.admin-btn {
+          background: ${CONFIG.colors.navy};
+          color: ${CONFIG.colors.white};
+        }
+
+        .cta-button.admin-btn:hover,
+        .mobile-cta.admin-btn:hover {
+          background: #0a1c33;
         }
 
         /* Mobile Menu Button */
@@ -691,7 +802,7 @@
 
                 ${mainNavLinks}
 
-                ${!hideCta ? `<a href="${cta.href}" class="cta-button">${cta.label}</a>` : ''}
+                ${!hideCta ? this.getLoginButton(false) : ''}
               </div>
 
               <button class="mobile-menu-button" aria-label="Open menu">
@@ -738,7 +849,7 @@
               ${mobileMainLinks}
             </div>
 
-            ${!hideCta ? `<a href="${cta.href}" class="mobile-cta">${cta.label}</a>` : ''}
+            ${!hideCta ? this.getLoginButton(true) : ''}
           </div>
         </div>
 
