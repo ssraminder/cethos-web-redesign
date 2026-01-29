@@ -72,7 +72,7 @@ export default function LinguisticValidationPage() {
             <span className="inline-block bg-[#0891B2]/20 text-[#06B6D4] text-sm font-medium px-3 py-1 rounded-full mb-4">
               Life Sciences Translation
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white">
               Linguistic Validation Services
             </h1>
             <p className="text-xl md:text-2xl mt-6 text-gray-300 max-w-3xl">
