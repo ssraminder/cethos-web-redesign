@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import Script from 'next/script'
+import { Toaster } from 'sonner'
 import { CethosHeader, CethosFooter } from '@/components/layout'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
@@ -80,6 +81,7 @@ export default function RootLayout({
         <LocalBusinessJsonLd />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
+        <Toaster position="top-right" richColors closeButton />
         <GoogleTagManager />
         <CethosHeader ctaType="login" />
         <main>{children}</main>
