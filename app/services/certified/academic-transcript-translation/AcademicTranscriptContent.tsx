@@ -7,7 +7,7 @@ import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
 import { TrustBar, StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
-import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
+import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
 const documentTypes = [
   {
@@ -187,7 +187,7 @@ export default function AcademicTranscriptContent() {
             >
               <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
               <p className="text-slate-600 mb-6">Upload your academic documents for a quick quote.</p>
-              <CertifiedQuoteForm
+              <EmbeddedCertifiedQuoteForm
                 defaultDocumentType="academic-transcript"
                 formLocation="academic-transcript-translation"
               />

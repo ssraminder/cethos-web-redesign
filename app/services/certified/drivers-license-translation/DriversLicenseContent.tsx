@@ -23,7 +23,7 @@ import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
 import { StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
-import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
+import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
 // =============================================================================
 // DATA
@@ -268,7 +268,7 @@ export default function DriversLicenseContent() {
             >
               <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get Your Free Quote</h2>
               <p className="text-slate-600 mb-6">Upload your driver&apos;s license for a quick quote.</p>
-              <CertifiedQuoteForm
+              <EmbeddedCertifiedQuoteForm
                 defaultDocumentType="drivers-license"
                 formLocation="drivers-license-translation"
               />
