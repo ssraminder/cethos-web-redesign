@@ -7,6 +7,33 @@ const Brevo = require('@getbrevo/brevo')
 export const maxDuration = 60 // Allow up to 60 seconds for file uploads
 export const dynamic = 'force-dynamic'
 
+// Interface for uploaded file metadata
+interface UploadedFile {
+  name: string
+  size: number
+  type: string
+  path: string
+  url: string
+}
+
+// Helper function to format file size
+function formatFileSize(bytes: number): string {
+  if (!bytes || bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
+
+// Helper function to get file icon based on type
+function getFileIcon(mimeType: string): string {
+  if (!mimeType) return '📄'
+  if (mimeType.includes('pdf')) return '📕'
+  if (mimeType.includes('word') || mimeType.includes('document')) return '📘'
+  if (mimeType.includes('image')) return '🖼️'
+  return '📄'
+}
+
 export async function POST(req: Request) {
   console.log('[API Certified Quote] Request received at:', new Date().toISOString())
 
@@ -115,27 +142,38 @@ export async function POST(req: Request) {
 
     // Upload files to Supabase Storage
     const files = formData.getAll('files') as File[]
-    const fileUrls: string[] = []
+    const uploadedFiles: UploadedFile[] = []
     console.log('[API Certified Quote] Files to upload:', files.length)
 
     for (const file of files) {
       if (file.size > 0) {
         const timestamp = Date.now()
         const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-        const fileName = `certified/${timestamp}-${safeFileName}`
+        const filePath = `certified/${timestamp}-${safeFileName}`
 
         const arrayBuffer = await file.arrayBuffer()
         const fileBuffer = new Uint8Array(arrayBuffer)
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('cethosweb-quote-files')
-          .upload(fileName, fileBuffer, {
+          .upload(filePath, fileBuffer, {
             contentType: file.type,
             cacheControl: '3600',
           })
 
         if (!uploadError && uploadData) {
-          fileUrls.push(uploadData.path)
+          // Generate public URL for the uploaded file
+          const { data: urlData } = supabase.storage
+            .from('cethosweb-quote-files')
+            .getPublicUrl(filePath)
+
+          uploadedFiles.push({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            path: filePath,
+            url: urlData.publicUrl,
+          })
         } else {
           console.error('File upload error:', uploadError)
         }
@@ -148,7 +186,7 @@ export async function POST(req: Request) {
       .from('cethosweb_quote_submissions')
       .insert({
         ...dbData,
-        file_urls: fileUrls,
+        file_urls: uploadedFiles.map(f => f.url), // Store public URLs
       })
       .select()
       .single()
@@ -162,11 +200,14 @@ export async function POST(req: Request) {
     console.log('[API Certified Quote] Quote saved with ID:', quote?.id)
 
     // Save file references
-    if (quote && fileUrls.length > 0) {
-      const fileRecords = fileUrls.map(path => ({
+    if (quote && uploadedFiles.length > 0) {
+      const fileRecords = uploadedFiles.map(file => ({
         quote_id: quote.id,
-        file_name: path.split('/').pop() || '',
-        storage_path: path,
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+        storage_path: file.path,
+        public_url: file.url,
       }))
 
       const { error: fileDbError } = await supabase
@@ -259,10 +300,36 @@ export async function POST(req: Request) {
             </div>
             ` : ''}
 
-            ${fileUrls.length > 0 ? `
-            <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-              <p style="margin: 0; color: #0C2340;"><strong>📎 ${fileUrls.length} file(s) attached</strong></p>
-              <p style="margin: 5px 0 0 0; font-size: 14px; color: #4b5563;">Files have been uploaded to the storage bucket.</p>
+            ${uploadedFiles.length > 0 ? `
+            <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bae6fd;">
+              <h2 style="color: #0C2340; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #0891B2; padding-bottom: 10px;">📎 Uploaded Documents (${uploadedFiles.length})</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                ${uploadedFiles.map((file, index) => `
+                <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                  <td style="padding: 12px; border-radius: 6px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="width: 40px; vertical-align: middle;">
+                          <span style="font-size: 24px;">${getFileIcon(file.type)}</span>
+                        </td>
+                        <td style="vertical-align: middle;">
+                          <a href="${file.url}" style="color: #0891B2; text-decoration: none; font-weight: 500; font-size: 14px;" target="_blank">
+                            ${file.name}
+                          </a>
+                          <br>
+                          <span style="color: #6b7280; font-size: 12px;">${formatFileSize(file.size)} · ${file.type || 'Unknown type'}</span>
+                        </td>
+                        <td style="width: 100px; text-align: right; vertical-align: middle;">
+                          <a href="${file.url}" style="display: inline-block; background-color: #0891B2; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 500;" target="_blank">
+                            Download
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                `).join('')}
+              </table>
             </div>
             ` : ''}
 
