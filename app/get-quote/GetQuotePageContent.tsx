@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
+import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
 import TranscriptionQuoteForm from '@/components/forms/TranscriptionQuoteForm'
 import { InterpretationQuoteForm } from '@/components/forms/InterpretationQuoteForm'
@@ -88,7 +88,7 @@ export default function GetQuotePageContent() {
       case 'lifesciences':
         return <LifeSciencesQuoteForm formLocation="get-quote-lifesciences" />
       case 'certified':
-        return <CertifiedQuoteForm formLocation="get-quote-page" />
+        return <EmbeddedCertifiedQuoteForm formLocation="get-quote-page" />
       case 'transcription':
         return <TranscriptionQuoteForm />
       case 'interpretation':

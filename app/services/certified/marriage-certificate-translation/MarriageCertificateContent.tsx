@@ -7,7 +7,7 @@ import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
 import { TrustBar, StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
-import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
+import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
 const documentTypes = [
   {
@@ -186,7 +186,7 @@ export default function MarriageCertificateContent() {
             >
               <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
               <p className="text-slate-600 mb-6">Upload your marriage certificate for a quick quote.</p>
-              <CertifiedQuoteForm
+              <EmbeddedCertifiedQuoteForm
                 defaultDocumentType="marriage-certificate"
                 formLocation="marriage-certificate-translation"
               />

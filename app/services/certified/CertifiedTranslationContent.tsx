@@ -26,7 +26,7 @@ import {
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
-import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm'
+import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
 // =============================================================================
 // DATA
@@ -412,7 +412,7 @@ export default function CertifiedTranslationContent() {
             >
               <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
               <p className="text-slate-600 mb-6">Upload your document for an instant quote.</p>
-              <CertifiedQuoteForm formLocation="certified-translation-main" />
+              <EmbeddedCertifiedQuoteForm formLocation="certified-translation-main" />
             </motion.div>
           </div>
         </div>
