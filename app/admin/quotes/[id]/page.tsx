@@ -186,7 +186,56 @@ export default function QuoteDetailsPage() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          {/* Mobile: Stacked layout */}
+          <div className="md:hidden">
+            {/* Back button and title */}
+            <div className="flex items-center justify-between mb-3">
+              <a
+                href="/admin/quotes"
+                className="inline-flex items-center gap-2 min-h-[44px] text-sm font-medium text-slate-600 active:text-slate-900 transition-colors"
+              >
+                <span>←</span> Back
+              </a>
+              <div className="text-center">
+                <h1 className="text-lg font-bold text-slate-900">Quote Details</h1>
+                <p className="text-sm text-slate-500">#{quote.id.slice(0, 8)}</p>
+              </div>
+              <div className="w-12" /> {/* Spacer for centering */}
+            </div>
+
+            {/* Action buttons */}
+            {!isConvertedToOrder && (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSendQuoteLink}
+                  disabled={sendingQuote}
+                  className="flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-3 py-2 text-sm font-medium text-purple-700 bg-white border-2 border-purple-300 rounded-lg active:bg-purple-50 transition-colors disabled:opacity-50"
+                >
+                  {sendingQuote ? (
+                    <span className="animate-spin h-4 w-4 border-2 border-purple-500 border-t-transparent rounded-full" />
+                  ) : (
+                    <span>✉️</span>
+                  )}
+                  Quote
+                </button>
+                <button
+                  onClick={handleSendPaymentLink}
+                  disabled={sendingPayment}
+                  className="flex-1 inline-flex items-center justify-center gap-2 min-h-[44px] px-3 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg active:bg-purple-700 transition-colors disabled:opacity-50"
+                >
+                  {sendingPayment ? (
+                    <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                  ) : (
+                    <span>💳</span>
+                  )}
+                  Payment
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Original layout */}
+          <div className="hidden md:flex items-center justify-between">
             {/* Left side - Back button */}
             <div className="flex items-center gap-3">
               <a
@@ -262,19 +311,19 @@ export default function QuoteDetailsPage() {
             </div>
 
             {/* Contact Information */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <span>👤</span> Contact Information
               </h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm text-slate-500">Name</label>
-                  <p className="font-medium text-slate-900">{quote.full_name}</p>
+                  <p className="font-medium text-slate-900 break-words">{quote.full_name}</p>
                 </div>
                 <div>
                   <label className="text-sm text-slate-500">Email</label>
-                  <p className="font-medium text-slate-900">
-                    <a href={`mailto:${quote.email}`} className="text-teal-600 hover:underline">
+                  <p className="font-medium text-slate-900 break-all">
+                    <a href={`mailto:${quote.email}`} className="text-teal-600 hover:underline active:underline">
                       {quote.email}
                     </a>
                   </p>
@@ -282,41 +331,41 @@ export default function QuoteDetailsPage() {
                 <div>
                   <label className="text-sm text-slate-500">Phone</label>
                   <p className="font-medium text-slate-900">
-                    <a href={`tel:${quote.phone}`} className="text-teal-600 hover:underline">
+                    <a href={`tel:${quote.phone}`} className="text-teal-600 hover:underline active:underline">
                       {quote.phone}
                     </a>
                   </p>
                 </div>
                 <div>
                   <label className="text-sm text-slate-500">Company</label>
-                  <p className="font-medium text-slate-900">{quote.company_name}</p>
+                  <p className="font-medium text-slate-900 break-words">{quote.company_name}</p>
                 </div>
                 {quote.job_title && (
                   <div>
                     <label className="text-sm text-slate-500">Job Title</label>
-                    <p className="font-medium text-slate-900">{quote.job_title}</p>
+                    <p className="font-medium text-slate-900 break-words">{quote.job_title}</p>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Project Details */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <span>📋</span> Project Details
               </h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm text-slate-500">Service Type</label>
-                  <p className="font-medium text-slate-900">{quote.service_type}</p>
+                  <p className="font-medium text-slate-900 break-words">{quote.service_type}</p>
                 </div>
                 <div>
                   <label className="text-sm text-slate-500">Source Language</label>
                   <p className="font-medium text-slate-900">{quote.source_language}</p>
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="text-sm text-slate-500">Target Languages</label>
-                  <p className="font-medium text-slate-900">{quote.target_languages?.join(', ')}</p>
+                  <p className="font-medium text-slate-900 break-words">{quote.target_languages?.join(', ')}</p>
                 </div>
                 {quote.word_count && (
                   <div>
@@ -332,14 +381,14 @@ export default function QuoteDetailsPage() {
               {quote.additional_notes && (
                 <div className="mt-4">
                   <label className="text-sm text-slate-500">Additional Notes</label>
-                  <p className="font-medium text-slate-900 whitespace-pre-wrap">{quote.additional_notes}</p>
+                  <p className="font-medium text-slate-900 whitespace-pre-wrap break-words">{quote.additional_notes}</p>
                 </div>
               )}
             </div>
 
             {/* Files */}
             {quote.file_urls && quote.file_urls.length > 0 && (
-              <div className="bg-white rounded-xl border border-slate-200 p-6">
+              <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6">
                 <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                   <span>📎</span> Uploaded Files ({quote.file_urls.length})
                 </h2>
@@ -350,10 +399,10 @@ export default function QuoteDetailsPage() {
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                      className="flex items-center gap-3 p-3 min-h-[44px] bg-slate-50 rounded-lg hover:bg-slate-100 active:bg-slate-100 transition-colors"
                     >
-                      <span className="text-xl">📄</span>
-                      <span className="text-sm font-medium text-teal-600 hover:underline truncate">
+                      <span className="text-xl flex-shrink-0">📄</span>
+                      <span className="text-sm font-medium text-teal-600 hover:underline active:underline truncate">
                         {url.split('/').pop()}
                       </span>
                     </a>
@@ -365,7 +414,7 @@ export default function QuoteDetailsPage() {
 
           {/* Right Column - Quote Summary */}
           <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-6 sticky top-24">
+            <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 lg:sticky lg:top-24">
               <h2 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <span>💰</span> Quote Summary
               </h2>
