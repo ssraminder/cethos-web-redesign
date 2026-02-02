@@ -140,7 +140,6 @@ export default function PunjabiTranslationContent() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
-              <h2 className="text-2xl font-bold text-[#0C2340] mb-6">Get Your Free Quote</h2>
               <EmbeddedCertifiedQuoteForm
                 formLocation="punjabi-translation-calgary"
               />
