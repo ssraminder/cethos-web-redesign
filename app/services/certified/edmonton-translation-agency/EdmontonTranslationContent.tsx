@@ -193,8 +193,7 @@ export default function EdmontonTranslationContent() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
-              <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Get a Free Quote</h2>
-              <p className="text-slate-600 mb-6">Upload your documents for a quick quote—no travel required.</p>
+              <h2 className="text-2xl font-bold text-[#0C2340] mb-6">Get Your Free Quote</h2>
               <EmbeddedCertifiedQuoteForm formLocation="edmonton-translation-agency" />
             </motion.div>
           </div>
