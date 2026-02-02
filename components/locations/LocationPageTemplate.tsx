@@ -207,12 +207,9 @@ export default function LocationPageTemplate({
 
             {/* Right Column - Quote Form */}
             <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-8">
-              <h2 className="text-2xl font-bold text-[#0C2340] mb-2">
-                Get a Free Quote
+              <h2 className="text-2xl font-bold text-[#0C2340] mb-6">
+                Get Your Free Quote
               </h2>
-              <p className="text-gray-600 mb-6">
-                Upload your document for an instant quote.
-              </p>
               <CertifiedQuoteForm formLocation={`location-${city.toLowerCase()}`} />
             </div>
           </div>
