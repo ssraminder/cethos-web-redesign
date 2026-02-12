@@ -457,7 +457,7 @@ export function EmbeddedCertifiedQuoteForm({
       setSubmitStatus('redirecting');
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const continueUrl = `${PORTAL_BASE_URL}/quote/${quoteId}/continue`;
+      const continueUrl = `${PORTAL_BASE_URL}/quote?id=${quoteId}&step=2`;
       window.location.href = continueUrl;
     } catch (error) {
       console.error('Submit error:', error);
