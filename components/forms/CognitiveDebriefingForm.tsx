@@ -1,15 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
 import { trackQuoteSubmission } from '@/lib/tracking'
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null
+const supabase = (() => {
+  try { return createBrowserSupabaseClient() } catch { return null }
+})()
 
 interface Locale {
   id: string

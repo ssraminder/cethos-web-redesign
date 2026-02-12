@@ -1,14 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-// Only create client if env vars exist
-const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null
+function getSupabase() {
+  try { return createBrowserSupabaseClient() } catch { return null }
+}
 
 export async function getSetting(key: string) {
+  const supabase = getSupabase()
   if (!supabase) return null
 
   try {
@@ -25,6 +22,7 @@ export async function getSetting(key: string) {
 }
 
 export async function getTrackingSettings() {
+  const supabase = getSupabase()
   if (!supabase) return {}
 
   try {
