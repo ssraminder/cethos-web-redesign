@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, FileText, CheckCircle, Loader2, AlertCircle, Phone, Mail } from 'lucide-react';
+import { Upload, X, FileText, CheckCircle, Loader2, AlertCircle, Phone, Mail, XCircle, ChevronDown } from 'lucide-react';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
 
 // ===========================================================================
@@ -14,12 +14,22 @@ interface EmbeddedCertifiedQuoteFormProps {
   defaultDocumentType?: string;
 }
 
-interface UploadedFile {
-  file: File;
+interface LocalFile {
   id: string;
+  file: File;
+  name: string;
+  size: number;
+  mimeType: string;
+  status: 'uploading' | 'success' | 'error';
+  progress: number;
   storagePath?: string;
-  uploadStatus: 'pending' | 'uploading' | 'uploaded' | 'error';
-  errorMessage?: string;
+  error?: string;
+}
+
+interface LanguageOption {
+  id: string;
+  name: string;
+  code: string;
 }
 
 // ===========================================================================
@@ -27,8 +37,28 @@ interface UploadedFile {
 // ===========================================================================
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+const ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png';
 const PORTAL_BASE_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://portal.cethos.com';
+
+// ===========================================================================
+// Helpers
+// ===========================================================================
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1048576).toFixed(1)} MB`;
+}
+
+function sanitizeFilename(filename: string): string {
+  return filename
+    .replace(/[()[\]]/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/[^a-zA-Z0-9._-]/g, '_')
+    .replace(/_+/g, '_')
+    .toLowerCase();
+}
 
 // ===========================================================================
 // Component
@@ -36,68 +66,204 @@ const PORTAL_BASE_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://portal.ce
 
 export function EmbeddedCertifiedQuoteForm({
   formLocation,
-  defaultDocumentType
+  defaultDocumentType,
 }: EmbeddedCertifiedQuoteFormProps) {
-  // State
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+  // File state
+  const [localFiles, setLocalFiles] = useState<LocalFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Language state
+  const [sourceLanguages, setSourceLanguages] = useState<LanguageOption[]>([]);
+  const [targetLanguages, setTargetLanguages] = useState<LanguageOption[]>([]);
+  const [sourceLanguageId, setSourceLanguageId] = useState('');
+  const [targetLanguageId, setTargetLanguageId] = useState('');
+
+  // UI state
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'uploading' | 'creating' | 'redirecting' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'creating' | 'redirecting' | 'error'>('idle');
   const [showFallback, setShowFallback] = useState(false);
 
+  // Supabase client (stable ref)
+  const supabaseRef = useRef(createBrowserSupabaseClient());
+  const supabase = supabaseRef.current;
+
   // =========================================================================
-  // File Handling
+  // Fetch Languages on Mount
   // =========================================================================
 
-  const handleFileSelect = useCallback((selectedFiles: FileList | File[]) => {
-    const newFiles: UploadedFile[] = [];
-    const errors: string[] = [];
+  useEffect(() => {
+    let cancelled = false;
 
-    Array.from(selectedFiles).forEach((file) => {
-      if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name} exceeds 10MB limit`);
-      } else if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        errors.push(`${file.name} is not a supported file type`);
-      } else {
-        // Check for duplicates
-        const isDuplicate = files.some(f =>
-          f.file.name === file.name && f.file.size === file.size
+    async function fetchLanguages() {
+      const [srcRes, tgtRes] = await Promise.all([
+        supabase
+          .from('languages')
+          .select('id, name, code')
+          .eq('is_active', true)
+          .eq('is_source_available', true)
+          .order('sort_order')
+          .order('name'),
+        supabase
+          .from('languages')
+          .select('id, name, code')
+          .eq('is_active', true)
+          .eq('is_target_available', true)
+          .order('sort_order')
+          .order('name'),
+      ]);
+
+      if (cancelled) return;
+
+      if (srcRes.data) setSourceLanguages(srcRes.data);
+      if (tgtRes.data) {
+        setTargetLanguages(tgtRes.data);
+        // Default target to English
+        const english = tgtRes.data.find(
+          (l) => l.code === 'en' || l.code === 'eng',
         );
-        if (!isDuplicate) {
-          newFiles.push({
-            file,
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            uploadStatus: 'pending',
-          });
-        }
+        if (english) setTargetLanguageId(english.id);
       }
-    });
+    }
 
-    if (errors.length > 0) {
-      setErrorMessage(errors.join('. '));
-      setTimeout(() => setErrorMessage(null), 5000);
+    fetchLanguages();
+    return () => { cancelled = true; };
+  }, [supabase]);
+
+  // =========================================================================
+  // Error Helpers
+  // =========================================================================
+
+  const clearError = useCallback((key: string) => {
+    setErrors((prev) => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }, []);
+
+  // =========================================================================
+  // File Validation & Upload
+  // =========================================================================
+
+  const validateFile = useCallback((file: File): string | null => {
+    if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
+      return `${file.name}: Unsupported file type. Please upload PDF, JPG, or PNG.`;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return `${file.name}: File exceeds 10 MB limit.`;
+    }
+    return null;
+  }, []);
+
+  /** Upload a single file to Supabase storage (temp path). */
+  const uploadFile = useCallback(async (localFile: LocalFile) => {
+    // Simulate progress since Supabase JS SDK doesn't emit progress events
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 25 + 5;
+      if (progress >= 95) {
+        clearInterval(interval);
+        progress = 95;
+      }
+      setLocalFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id && f.status === 'uploading'
+            ? { ...f, progress: Math.min(Math.round(progress), 95) }
+            : f,
+        ),
+      );
+    }, 200);
+
+    try {
+      const ext = localFile.name.split('.').pop();
+      const tempPath = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from('quote-files')
+        .upload(tempPath, localFile.file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      clearInterval(interval);
+
+      if (error) throw error;
+
+      setLocalFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, progress: 100, status: 'success' as const, storagePath: tempPath }
+            : f,
+        ),
+      );
+    } catch (err: any) {
+      clearInterval(interval);
+      setLocalFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, status: 'error' as const, error: err?.message || 'Upload failed' }
+            : f,
+        ),
+      );
+    }
+  }, [supabase]);
+
+  const processFiles = useCallback((files: File[]) => {
+    const newFiles: LocalFile[] = [];
+    const fileErrors: string[] = [];
+
+    for (const file of files) {
+      // Skip duplicates
+      if (localFiles.some((f) => f.name === file.name && f.size === file.size)) continue;
+
+      const err = validateFile(file);
+      if (err) {
+        fileErrors.push(err);
+        continue;
+      }
+
+      newFiles.push({
+        id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        file,
+        name: file.name,
+        size: file.size,
+        mimeType: file.type,
+        status: 'uploading',
+        progress: 0,
+      });
+    }
+
+    if (fileErrors.length > 0) {
+      setErrors((prev) => ({ ...prev, files: fileErrors.join(' ') }));
+    } else {
+      clearError('files');
     }
 
     if (newFiles.length > 0) {
-      setFiles(prev => [...prev, ...newFiles]);
+      setLocalFiles((prev) => [...prev, ...newFiles]);
+      clearError('noFiles');
+      // Upload each file immediately
+      newFiles.forEach((lf) => uploadFile(lf));
     }
-  }, [files]);
+  }, [localFiles, validateFile, clearError, uploadFile]);
 
+  /** Remove a file from the list (and from storage if already uploaded). */
   const removeFile = useCallback((fileId: string) => {
-    setFiles(prev => prev.filter(f => f.id !== fileId));
-  }, []);
+    const file = localFiles.find((f) => f.id === fileId);
+    if (file?.storagePath) {
+      supabase.storage.from('quote-files').remove([file.storagePath]).catch(() => {});
+    }
+    setLocalFiles((prev) => prev.filter((f) => f.id !== fileId));
+  }, [localFiles, supabase]);
 
   // =========================================================================
   // Drag & Drop Handlers
   // =========================================================================
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
@@ -113,11 +279,66 @@ export function EmbeddedCertifiedQuoteForm({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
     if (e.dataTransfer.files) {
-      handleFileSelect(e.dataTransfer.files);
+      processFiles(Array.from(e.dataTransfer.files));
     }
-  }, [handleFileSelect]);
+  }, [processFiles]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processFiles(Array.from(e.target.files));
+      e.target.value = '';
+    }
+  }, [processFiles]);
+
+  // =========================================================================
+  // Language Handlers
+  // =========================================================================
+
+  const handleSourceChange = (id: string) => {
+    setSourceLanguageId(id);
+    clearError('sourceLanguage');
+    if (id !== targetLanguageId) clearError('sameLang');
+  };
+
+  const handleTargetChange = (id: string) => {
+    setTargetLanguageId(id);
+    clearError('targetLanguage');
+    if (id !== sourceLanguageId) clearError('sameLang');
+  };
+
+  // =========================================================================
+  // Validation
+  // =========================================================================
+
+  const successFiles = localFiles.filter((f) => f.status === 'success');
+
+  const canSubmit =
+    successFiles.length > 0 &&
+    !!sourceLanguageId &&
+    !!targetLanguageId &&
+    sourceLanguageId !== targetLanguageId &&
+    !isSubmitting;
+
+  const validate = (): boolean => {
+    const next: Record<string, string> = {};
+
+    if (successFiles.length === 0) {
+      next.noFiles = 'Please upload at least one document.';
+    }
+    if (!sourceLanguageId) {
+      next.sourceLanguage = 'Please select a source language.';
+    }
+    if (!targetLanguageId) {
+      next.targetLanguage = 'Please select a target language.';
+    }
+    if (sourceLanguageId && targetLanguageId && sourceLanguageId === targetLanguageId) {
+      next.sameLang = 'Source and target languages must be different.';
+    }
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
   // =========================================================================
   // Form Submission
@@ -125,135 +346,132 @@ export function EmbeddedCertifiedQuoteForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (files.length === 0) {
-      setErrorMessage('Please upload at least one document');
-      return;
-    }
+    if (!validate() || isSubmitting) return;
 
     setIsSubmitting(true);
-    setSubmitStatus('uploading');
-    setErrorMessage(null);
+    setSubmitStatus('creating');
+    setErrors({});
 
     try {
-      // Supabase client
-      const supabase = createBrowserSupabaseClient();
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-      // Step 1: Upload files to Supabase Storage
-      const uploadedFiles: Array<{
-        storagePath: string;
-        originalFilename: string;
-        mimeType: string;
-        fileSize: number;
-      }> = [];
+      // 1. Create draft quote with language selections
+      const { data: quote, error: quoteError } = await supabase
+        .from('quotes')
+        .insert({
+          status: 'draft',
+          source_language_id: sourceLanguageId,
+          target_language_id: targetLanguageId,
+          entry_point: 'website_embed',
+          source_url: window.location.href,
+          source_location: formLocation,
+          subtotal: 0,
+          certification_total: 0,
+          rush_fee: 0,
+          delivery_fee: 0,
+          tax_amount: 0,
+          total: 0,
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .select('id, quote_number')
+        .single();
 
-      for (let i = 0; i < files.length; i++) {
-        const fileData = files[i];
+      if (quoteError || !quote) {
+        throw new Error(quoteError?.message || 'Failed to create quote');
+      }
 
-        // Update status
-        setFiles(prev => prev.map(f =>
-          f.id === fileData.id
-            ? { ...f, uploadStatus: 'uploading' as const }
-            : f
-        ));
+      const quoteId = quote.id;
 
-        // Generate unique path
-        const timestamp = Date.now();
-        const safeFilename = fileData.file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        const storagePath = `uploads/${timestamp}-${safeFilename}`;
+      // 2. Move files to canonical path and create quote_files records
+      for (const lf of successFiles) {
+        const sanitized = sanitizeFilename(lf.name);
+        const finalPath = `${quoteId}/${sanitized}`;
 
-        // Upload to Supabase Storage
+        // Re-upload to canonical {quoteId}/{filename} path
         const { error: uploadError } = await supabase.storage
           .from('quote-files')
-          .upload(storagePath, fileData.file, {
-            contentType: fileData.file.type,
+          .upload(finalPath, lf.file, {
             cacheControl: '3600',
+            upsert: true,
           });
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
-          setFiles(prev => prev.map(f =>
-            f.id === fileData.id
-              ? { ...f, uploadStatus: 'error' as const, errorMessage: uploadError.message }
-              : f
-          ));
-          throw new Error(`Failed to upload ${fileData.file.name}`);
+          console.error(`Failed to upload ${lf.name}:`, uploadError);
+          continue;
         }
 
-        // Mark as uploaded
-        setFiles(prev => prev.map(f =>
-          f.id === fileData.id
-            ? { ...f, uploadStatus: 'uploaded' as const, storagePath }
-            : f
-        ));
+        // Create quote_files record
+        const { error: recordError } = await supabase
+          .from('quote_files')
+          .insert({
+            quote_id: quoteId,
+            original_filename: lf.name,
+            storage_path: finalPath,
+            file_size: lf.size,
+            mime_type: lf.mimeType,
+            upload_status: 'uploaded',
+            ai_processing_status: 'pending',
+          });
 
-        uploadedFiles.push({
-          storagePath,
-          originalFilename: fileData.file.name,
-          mimeType: fileData.file.type,
-          fileSize: fileData.file.size,
-        });
+        if (recordError) {
+          console.error(`Failed to create file record for ${lf.name}:`, recordError);
+        }
+
+        // Clean up temp upload
+        if (lf.storagePath && lf.storagePath !== finalPath) {
+          supabase.storage.from('quote-files').remove([lf.storagePath]).catch(() => {});
+        }
       }
 
-      // Step 2: Call create-website-draft Edge Function
-      setSubmitStatus('creating');
-
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/create-website-draft`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseAnonKey}`,
+      // 3. Log status history
+      try {
+        await supabase.from('quote_status_history').insert({
+          quote_id: quoteId,
+          previous_status: null,
+          new_status: 'draft',
+          changed_by_type: 'system',
+          change_reason: `Website embed quote created from ${formLocation || 'unknown'}`,
+          metadata: {
+            source_url: window.location.href,
+            files_count: successFiles.length,
+            entry_point: 'website_embed',
+            default_document_type: defaultDocumentType || null,
           },
-          body: JSON.stringify({
-            files: uploadedFiles,
-            sourceUrl: window.location.href,
-            formLocation,
-            defaultDocumentType,
-            processWithAI: true,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to create quote');
+        });
+      } catch (logError) {
+        console.warn('Failed to log status history:', logError);
       }
 
-      const result = await response.json();
+      // 4. Fire AI processing (fire and forget)
+      fetch(`${supabaseUrl}/functions/v1/process-quote-documents`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ quoteId }),
+      });
 
-      if (!result.success || !result.continueUrl) {
-        throw new Error('Invalid response from server');
-      }
-
-      // Step 3: Redirect to portal
+      // 5. Redirect to portal
       setSubmitStatus('redirecting');
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      // Small delay for UX
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      window.location.href = result.continueUrl;
-
+      const continueUrl = `${PORTAL_BASE_URL}/quote/${quoteId}/continue`;
+      window.location.href = continueUrl;
     } catch (error) {
       console.error('Submit error:', error);
       setSubmitStatus('error');
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : 'Something went wrong. Please try again.'
-      );
-
-      // Show fallback form option
+      setErrors({
+        submit: error instanceof Error ? error.message : 'Something went wrong. Please try again.',
+      });
       setShowFallback(true);
       setIsSubmitting(false);
     }
   };
 
   // =========================================================================
-  // Fallback to Original Form
+  // Fallback UI
   // =========================================================================
 
   if (showFallback) {
@@ -271,7 +489,6 @@ export function EmbeddedCertifiedQuoteForm({
           </div>
         </div>
 
-        {/* Contact options */}
         <div className="text-center space-y-4">
           <p className="text-gray-600">Contact us for a quote:</p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -293,8 +510,9 @@ export function EmbeddedCertifiedQuoteForm({
           <button
             onClick={() => {
               setShowFallback(false);
-              setFiles([]);
-              setErrorMessage(null);
+              setLocalFiles([]);
+              setErrors({});
+              setSubmitStatus('idle');
             }}
             className="text-sm text-[#0891B2] hover:underline"
           >
@@ -319,9 +537,9 @@ export function EmbeddedCertifiedQuoteForm({
         Upload your documents and get an AI-powered price estimate in seconds
       </p>
 
-      {/* Error Message */}
+      {/* General Error */}
       <AnimatePresence>
-        {errorMessage && (
+        {errors.submit && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -329,17 +547,18 @@ export function EmbeddedCertifiedQuoteForm({
             className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2"
           >
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-            <p className="text-red-700 text-sm">{errorMessage}</p>
+            <p className="text-red-700 text-sm">{errors.submit}</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* File Upload Zone */}
+      {/* ── File Upload Zone ─────────────────────────────────────────────── */}
       <div
         onDragOver={handleDragOver}
-        onDragEnter={handleDragEnter}
+        onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); }}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onClick={() => !isSubmitting && fileInputRef.current?.click()}
         className={`
           border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer
           ${isDragging
@@ -350,65 +569,76 @@ export function EmbeddedCertifiedQuoteForm({
         `}
       >
         <input
+          ref={fileInputRef}
           type="file"
-          id="file-upload"
-          accept=".jpg,.jpeg,.png,.pdf"
+          accept={ACCEPTED_EXTENSIONS}
           multiple
-          onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+          onChange={handleFileSelect}
           className="hidden"
           disabled={isSubmitting}
         />
-        <label htmlFor="file-upload" className="cursor-pointer">
-          <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-          <p className="text-slate-700 mb-1">
-            <span className="font-semibold text-[#0891B2]">Click to upload</span>
-            {' '}or drag and drop
-          </p>
-          <p className="text-sm text-slate-500">PDF, JPG, PNG (max 10MB each)</p>
-        </label>
+        <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+        <p className="text-slate-700 mb-1">
+          <span className="font-semibold text-[#0891B2]">Click to upload</span>
+          {' '}or drag and drop
+        </p>
+        <p className="text-sm text-slate-500">PDF, JPG, PNG (max 10MB each)</p>
       </div>
 
-      {/* File List */}
+      {/* File-level validation errors */}
+      {errors.files && <p className="text-sm text-red-600 mt-2">{errors.files}</p>}
+      {errors.noFiles && <p className="text-sm text-red-600 mt-2">{errors.noFiles}</p>}
+
+      {/* ── File List ────────────────────────────────────────────────────── */}
       <AnimatePresence>
-        {files.length > 0 && (
+        {localFiles.length > 0 && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className="mt-4 space-y-2"
           >
-            {files.map((fileData) => (
+            {localFiles.map((f) => (
               <motion.div
-                key={fileData.id}
+                key={f.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  {fileData.uploadStatus === 'uploading' ? (
+                  {f.status === 'uploading' && (
                     <Loader2 className="w-5 h-5 text-[#0891B2] animate-spin flex-shrink-0" />
-                  ) : fileData.uploadStatus === 'uploaded' ? (
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  ) : fileData.uploadStatus === 'error' ? (
-                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  ) : (
-                    <FileText className="w-5 h-5 text-slate-500 flex-shrink-0" />
                   )}
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-[#0C2340] truncate">
-                      {fileData.file.name}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {(fileData.file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
+                  {f.status === 'success' && (
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  )}
+                  {f.status === 'error' && (
+                    <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-[#0C2340] truncate">{f.name}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500">{formatFileSize(f.size)}</span>
+                      {f.status === 'error' && f.error && (
+                        <span className="text-xs text-red-500 truncate">{f.error}</span>
+                      )}
+                    </div>
+                    {f.status === 'uploading' && (
+                      <div className="w-full bg-slate-200 rounded-full h-1 mt-1">
+                        <div
+                          className="bg-[#0891B2] h-1 rounded-full transition-all duration-200"
+                          style={{ width: `${f.progress}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
                 {!isSubmitting && (
                   <button
                     type="button"
-                    onClick={() => removeFile(fileData.id)}
-                    className="p-1 hover:bg-slate-200 rounded transition-colors"
+                    onClick={() => removeFile(f.id)}
+                    className="p-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0 ml-2"
                   >
                     <X className="w-4 h-4 text-slate-500" />
                   </button>
@@ -419,35 +649,99 @@ export function EmbeddedCertifiedQuoteForm({
         )}
       </AnimatePresence>
 
-      {/* Submit Button */}
+      {/* ── Language Dropdowns ────────────────────────────────────────────── */}
+      <div className="flex gap-3 mt-6">
+        {/* Source Language */}
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Source Language <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <select
+              value={sourceLanguageId}
+              onChange={(e) => handleSourceChange(e.target.value)}
+              disabled={isSubmitting}
+              className={`
+                w-full px-3 py-2.5 border rounded-lg text-sm bg-white appearance-none pr-8 transition
+                ${errors.sourceLanguage || errors.sameLang
+                  ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/10'
+                  : 'border-slate-300 focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10'
+                }
+                ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              <option value="">Select…</option>
+              {sourceLanguages.map((lang) => (
+                <option key={lang.id} value={lang.id}>{lang.name}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+          {errors.sourceLanguage && (
+            <p className="text-xs text-red-600 mt-1">{errors.sourceLanguage}</p>
+          )}
+        </div>
+
+        {/* Target Language */}
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Target Language <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <select
+              value={targetLanguageId}
+              onChange={(e) => handleTargetChange(e.target.value)}
+              disabled={isSubmitting}
+              className={`
+                w-full px-3 py-2.5 border rounded-lg text-sm bg-white appearance-none pr-8 transition
+                ${errors.targetLanguage || errors.sameLang
+                  ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/10'
+                  : 'border-slate-300 focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10'
+                }
+                ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}
+              `}
+            >
+              <option value="">Select…</option>
+              {targetLanguages.map((lang) => (
+                <option key={lang.id} value={lang.id}>{lang.name}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+          {errors.targetLanguage && (
+            <p className="text-xs text-red-600 mt-1">{errors.targetLanguage}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Same-language error */}
+      {errors.sameLang && (
+        <p className="text-sm text-red-600 mt-2">{errors.sameLang}</p>
+      )}
+
+      {/* ── Submit Button ────────────────────────────────────────────────── */}
       <button
         type="submit"
-        disabled={files.length === 0 || isSubmitting}
+        disabled={!canSubmit}
         className={`
           w-full mt-6 py-4 rounded-lg font-semibold text-white
           transition-all flex items-center justify-center gap-2
-          ${files.length === 0 || isSubmitting
+          ${!canSubmit
             ? 'bg-slate-300 cursor-not-allowed'
             : 'bg-[#0891B2] hover:bg-[#06B6D4]'
           }
         `}
       >
-        {submitStatus === 'uploading' && (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Uploading documents...
-          </>
-        )}
         {submitStatus === 'creating' && (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Creating your quote...
+            Creating your quote…
           </>
         )}
         {submitStatus === 'redirecting' && (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            Redirecting...
+            Redirecting…
           </>
         )}
         {(submitStatus === 'idle' || submitStatus === 'error') && (
@@ -458,7 +752,7 @@ export function EmbeddedCertifiedQuoteForm({
         )}
       </button>
 
-      {/* Trust Badges */}
+      {/* ── Trust Badges ─────────────────────────────────────────────────── */}
       <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-600">
         <span className="flex items-center gap-1">
           <CheckCircle className="w-3.5 h-3.5 text-green-500" />
@@ -474,7 +768,7 @@ export function EmbeddedCertifiedQuoteForm({
         </span>
       </div>
 
-      {/* Contact Alternative */}
+      {/* ── Contact Alternative ──────────────────────────────────────────── */}
       <div className="mt-6 pt-4 border-t border-slate-200 text-center">
         <p className="text-sm text-slate-600">
           Prefer to talk?{' '}
