@@ -939,8 +939,58 @@ export function EmbeddedCertifiedQuoteForm({
         )}
       </AnimatePresence>
 
+      {/* ── Language Dropdowns ────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row gap-3 mt-6">
+        <SearchableDropdown
+          label="Source Language"
+          required
+          options={allSourceLanguages}
+          value={sourceLanguageId}
+          onChange={handleSourceChange}
+          placeholder="Search languages…"
+          disabled={isSubmitting}
+          hasError={!!errors.sourceLanguage || !!errors.sameLang}
+          errorMessage={errors.sourceLanguage}
+        />
+
+        <SearchableDropdown
+          label="Target Language"
+          required
+          options={filteredTargetLanguages}
+          value={targetLanguageId}
+          onChange={handleTargetChange}
+          placeholder="Search languages…"
+          disabled={isSubmitting || !sourceLanguageId}
+          hasError={!!errors.targetLanguage || !!errors.sameLang}
+          errorMessage={errors.targetLanguage}
+        />
+      </div>
+
+      {/* "Other" free text input */}
+      <AnimatePresence>
+        {isOtherSelected && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-3">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              Specify Target Language <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={otherTargetLanguage}
+              onChange={(e) => { setOtherTargetLanguage(e.target.value); clearError('otherTarget'); }}
+              placeholder="e.g. Punjabi, Urdu, Tagalog…"
+              disabled={isSubmitting}
+              className={`w-full px-3 py-2.5 border rounded-lg bg-white transition text-[16px] sm:text-sm ${errors.otherTarget ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-slate-300 focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10'} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              autoComplete="off"
+            />
+            {errors.otherTarget && <p className="text-xs text-red-600 mt-1">{errors.otherTarget}</p>}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {errors.sameLang && <p className="text-sm text-red-600 mt-2">{errors.sameLang}</p>}
+
       {/* ── Reference Files Accordion ────────────────────────────────────── */}
-      <div className="mt-4 border border-slate-200 rounded-lg overflow-hidden">
+      <div className="mt-6 border border-slate-200 rounded-lg overflow-hidden">
         <button
           type="button"
           onClick={() => setRefSectionOpen(!refSectionOpen)}
@@ -1071,56 +1121,6 @@ export function EmbeddedCertifiedQuoteForm({
           )}
         </AnimatePresence>
       </div>
-
-      {/* ── Language Dropdowns ────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row gap-3 mt-6">
-        <SearchableDropdown
-          label="Source Language"
-          required
-          options={allSourceLanguages}
-          value={sourceLanguageId}
-          onChange={handleSourceChange}
-          placeholder="Search languages…"
-          disabled={isSubmitting}
-          hasError={!!errors.sourceLanguage || !!errors.sameLang}
-          errorMessage={errors.sourceLanguage}
-        />
-
-        <SearchableDropdown
-          label="Target Language"
-          required
-          options={filteredTargetLanguages}
-          value={targetLanguageId}
-          onChange={handleTargetChange}
-          placeholder="Search languages…"
-          disabled={isSubmitting || !sourceLanguageId}
-          hasError={!!errors.targetLanguage || !!errors.sameLang}
-          errorMessage={errors.targetLanguage}
-        />
-      </div>
-
-      {/* "Other" free text input */}
-      <AnimatePresence>
-        {isOtherSelected && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-3">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Specify Target Language <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={otherTargetLanguage}
-              onChange={(e) => { setOtherTargetLanguage(e.target.value); clearError('otherTarget'); }}
-              placeholder="e.g. Punjabi, Urdu, Tagalog…"
-              disabled={isSubmitting}
-              className={`w-full px-3 py-2.5 border rounded-lg bg-white transition text-[16px] sm:text-sm ${errors.otherTarget ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-500/10' : 'border-slate-300 focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10'} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-              autoComplete="off"
-            />
-            {errors.otherTarget && <p className="text-xs text-red-600 mt-1">{errors.otherTarget}</p>}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {errors.sameLang && <p className="text-sm text-red-600 mt-2">{errors.sameLang}</p>}
 
       {/* ── Submit Button ────────────────────────────────────────────────── */}
       <button
