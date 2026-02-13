@@ -837,7 +837,7 @@ export function EmbeddedCertifiedQuoteForm({
 
   if (showFallback) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div>
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -870,7 +870,7 @@ export function EmbeddedCertifiedQuoteForm({
   // =========================================================================
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6">
+    <form onSubmit={handleSubmit}>
       {/* Header */}
       <h3 className="text-xl font-bold text-[#0C2340] mb-1">Get Your Instant Quote</h3>
       <p className="text-gray-600 text-sm mb-6">Upload your documents and get an AI-powered price estimate in seconds</p>
