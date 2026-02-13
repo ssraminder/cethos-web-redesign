@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, CheckCircle, Loader2, AlertCircle, Phone, Mail, XCircle, ChevronDown, Search } from 'lucide-react';
+import { Upload, X, CheckCircle, Loader2, AlertCircle, Phone, Mail, XCircle, ChevronDown, ChevronRight, Search, Paperclip } from 'lucide-react';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
 
 // ===========================================================================
@@ -40,6 +40,16 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
 const ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png';
 const PORTAL_BASE_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://portal.cethos.com';
+
+// Reference files allow DOCX as well
+const REF_ACCEPTED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+const REF_ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png,.docx';
+const REF_MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 // English language codes to match against (covers all variants/locales)
 const ENGLISH_CODES = ['en', 'eng', 'en-us', 'en-gb', 'en-ca', 'en-au', 'en-nz', 'en-ie', 'en-za'];
@@ -249,6 +259,12 @@ export function EmbeddedCertifiedQuoteForm({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Reference file state
+  const [refFiles, setRefFiles] = useState<LocalFile[]>([]);
+  const [isRefDragging, setIsRefDragging] = useState(false);
+  const refFileInputRef = useRef<HTMLInputElement>(null);
+  const [refSectionOpen, setRefSectionOpen] = useState(false);
+
   // Language state
   const [allSourceLanguages, setAllSourceLanguages] = useState<LanguageOption[]>([]);
   const [allTargetLanguages, setAllTargetLanguages] = useState<LanguageOption[]>([]);
@@ -353,7 +369,6 @@ export function EmbeddedCertifiedQuoteForm({
     }
 
     if (sourceIsEnglish) {
-      // Source is English — clear target if it was English, __other__, or a restricted option
       const currentTarget = allTargetLanguages.find((l) => l.id === targetLanguageId);
       if (!currentTarget || isEnglishCode(currentTarget.code) || targetLanguageId === '__other__') {
         setTargetLanguageId('');
@@ -361,7 +376,6 @@ export function EmbeddedCertifiedQuoteForm({
         setOtherTargetLanguage('');
       }
     } else {
-      // Source is NOT English — default target to English
       const english = allTargetLanguages.find((l) => isEnglishCode(l.code));
       if (english) {
         setTargetLanguageId(english.id);
@@ -482,7 +496,99 @@ export function EmbeddedCertifiedQuoteForm({
   }, [localFiles, supabase]);
 
   // =========================================================================
-  // Drag & Drop
+  // Reference File Validation & Upload
+  // =========================================================================
+
+  const validateRefFile = useCallback((file: File): string | null => {
+    if (!REF_ACCEPTED_MIME_TYPES.includes(file.type)) {
+      return `${file.name}: Unsupported file type. Please upload PDF, JPG, PNG, or DOCX.`;
+    }
+    if (file.size > REF_MAX_FILE_SIZE) {
+      return `${file.name}: File exceeds 20 MB limit.`;
+    }
+    return null;
+  }, []);
+
+  const uploadRefFile = useCallback(async (localFile: LocalFile) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 25 + 5;
+      if (progress >= 95) { clearInterval(interval); progress = 95; }
+      setRefFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id && f.status === 'uploading'
+            ? { ...f, progress: Math.min(Math.round(progress), 95) }
+            : f,
+        ),
+      );
+    }, 200);
+
+    try {
+      const ext = localFile.name.split('.').pop();
+      const tempPath = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from('quote-reference-files')
+        .upload(tempPath, localFile.file, { cacheControl: '3600', upsert: false });
+
+      clearInterval(interval);
+      if (error) throw error;
+
+      setRefFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, progress: 100, status: 'success' as const, storagePath: tempPath }
+            : f,
+        ),
+      );
+    } catch (err: any) {
+      clearInterval(interval);
+      setRefFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, status: 'error' as const, error: err?.message || 'Upload failed' }
+            : f,
+        ),
+      );
+    }
+  }, [supabase]);
+
+  const processRefFiles = useCallback((files: File[]) => {
+    const newFiles: LocalFile[] = [];
+    const fileErrors: string[] = [];
+
+    for (const file of files) {
+      if (refFiles.some((f) => f.name === file.name && f.size === file.size)) continue;
+      const err = validateRefFile(file);
+      if (err) { fileErrors.push(err); continue; }
+
+      newFiles.push({
+        id: `ref-${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        file, name: file.name, size: file.size, mimeType: file.type,
+        status: 'uploading', progress: 0,
+      });
+    }
+
+    if (fileErrors.length > 0) {
+      setErrors((prev) => ({ ...prev, refFiles: fileErrors.join(' ') }));
+    } else { clearError('refFiles'); }
+
+    if (newFiles.length > 0) {
+      setRefFiles((prev) => [...prev, ...newFiles]);
+      newFiles.forEach((lf) => uploadRefFile(lf));
+    }
+  }, [refFiles, validateRefFile, clearError, uploadRefFile]);
+
+  const removeRefFile = useCallback((fileId: string) => {
+    const file = refFiles.find((f) => f.id === fileId);
+    if (file?.storagePath) {
+      supabase.storage.from('quote-reference-files').remove([file.storagePath]).catch(() => {});
+    }
+    setRefFiles((prev) => prev.filter((f) => f.id !== fileId));
+  }, [refFiles, supabase]);
+
+  // =========================================================================
+  // Drag & Drop (main files)
   // =========================================================================
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -501,6 +607,27 @@ export function EmbeddedCertifiedQuoteForm({
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) { processFiles(Array.from(e.target.files)); e.target.value = ''; }
   }, [processFiles]);
+
+  // =========================================================================
+  // Drag & Drop (reference files)
+  // =========================================================================
+
+  const handleRefDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setIsRefDragging(true);
+  }, []);
+
+  const handleRefDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setIsRefDragging(false);
+  }, []);
+
+  const handleRefDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); e.stopPropagation(); setIsRefDragging(false);
+    if (e.dataTransfer.files) processRefFiles(Array.from(e.dataTransfer.files));
+  }, [processRefFiles]);
+
+  const handleRefFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) { processRefFiles(Array.from(e.target.files)); e.target.value = ''; }
+  }, [processRefFiles]);
 
   // =========================================================================
   // Language Handlers
@@ -625,6 +752,38 @@ export function EmbeddedCertifiedQuoteForm({
         }
       }
 
+      // 2b. Upload reference files to final path and create quote_files records
+      const successRefFiles = refFiles.filter((f) => f.status === 'success');
+
+      for (const rf of successRefFiles) {
+        const sanitized = sanitizeFilename(rf.name);
+        const finalPath = `${quoteId}/ref_${sanitized}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('quote-reference-files')
+          .upload(finalPath, rf.file, { cacheControl: '3600', upsert: true });
+
+        if (uploadError) {
+          console.error(`Failed to upload ref file ${rf.name}:`, uploadError);
+          continue;
+        }
+
+        await supabase.from('quote_files').insert({
+          quote_id: quoteId,
+          original_filename: rf.name,
+          storage_path: finalPath,
+          file_size: rf.size,
+          mime_type: rf.mimeType,
+          upload_status: 'uploaded',
+          ai_processing_status: 'skipped',
+          category_id: 'f1aed462-a25f-4dd0-96c0-f952c3a72950', // "Reference"
+        });
+
+        if (rf.storagePath && rf.storagePath !== finalPath) {
+          supabase.storage.from('quote-reference-files').remove([rf.storagePath]).catch(() => {});
+        }
+      }
+
       // 3. Log status history
       try {
         await supabase.from('quote_status_history').insert({
@@ -636,6 +795,7 @@ export function EmbeddedCertifiedQuoteForm({
           metadata: {
             source_url: window.location.href,
             files_count: successFiles.length,
+            ref_files_count: successRefFiles.length,
             entry_point: 'website_embed',
             source_language: sourceLanguageName,
             target_language: resolvedTargetName,
@@ -697,7 +857,7 @@ export function EmbeddedCertifiedQuoteForm({
               <Mail className="w-5 h-5" /> Email Us
             </a>
           </div>
-          <button onClick={() => { setShowFallback(false); setLocalFiles([]); setErrors({}); setSubmitStatus('idle'); }} className="text-sm text-[#0891B2] hover:underline">
+          <button onClick={() => { setShowFallback(false); setLocalFiles([]); setRefFiles([]); setErrors({}); setSubmitStatus('idle'); }} className="text-sm text-[#0891B2] hover:underline">
             Try again
           </button>
         </div>
@@ -778,6 +938,139 @@ export function EmbeddedCertifiedQuoteForm({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Reference Files Accordion ────────────────────────────────────── */}
+      <div className="mt-4 border border-slate-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setRefSectionOpen(!refSectionOpen)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-slate-100 transition text-left"
+        >
+          <div className="flex items-center gap-2">
+            <Paperclip className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-medium text-slate-700">
+              Reference Files
+              <span className="text-slate-400 font-normal ml-1">(optional)</span>
+            </span>
+            {!refSectionOpen && refFiles.length > 0 && (
+              <span className="bg-[#E0F2FE] text-[#0891B2] text-xs px-1.5 py-0.5 rounded-full">
+                {refFiles.length}
+              </span>
+            )}
+          </div>
+          <ChevronRight
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+              refSectionOpen ? 'rotate-90' : ''
+            }`}
+          />
+        </button>
+
+        <AnimatePresence>
+          {refSectionOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="px-4 py-4">
+                <p className="text-xs text-slate-500 mb-3">
+                  Upload glossaries, style guides, or reference materials to help the translator. These files won&apos;t be translated or counted toward pricing.
+                </p>
+
+                <div
+                  onDragOver={handleRefDragOver}
+                  onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); setIsRefDragging(true); }}
+                  onDragLeave={handleRefDragLeave}
+                  onDrop={handleRefDrop}
+                  onClick={(e) => { e.stopPropagation(); !isSubmitting && refFileInputRef.current?.click(); }}
+                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all ${
+                    isRefDragging
+                      ? 'border-slate-400 bg-slate-50'
+                      : 'border-slate-200 bg-slate-50/50 hover:border-slate-400 hover:bg-slate-50'
+                  } ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}
+                >
+                  <input
+                    ref={refFileInputRef}
+                    type="file"
+                    accept={REF_ACCEPTED_EXTENSIONS}
+                    multiple
+                    onChange={handleRefFileSelect}
+                    className="hidden"
+                    disabled={isSubmitting}
+                  />
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400 mx-auto mb-2">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                  </svg>
+                  <p className="text-sm text-slate-500">
+                    Drag and drop reference files or click to browse
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    PDF, JPG, PNG, DOCX &mdash; max 20MB per file
+                  </p>
+                </div>
+
+                {errors.refFiles && (
+                  <p className="text-sm text-red-600 mt-2">{errors.refFiles}</p>
+                )}
+
+                {/* Reference File List */}
+                <AnimatePresence>
+                  {refFiles.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-3 space-y-2"
+                    >
+                      {refFiles.map((f) => (
+                        <motion.div
+                          key={f.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {f.status === 'uploading' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin flex-shrink-0" />}
+                            {f.status === 'success' && <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                            {f.status === 'error' && <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm text-slate-700 truncate">{f.name}</p>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-slate-500">{formatFileSize(f.size)}</span>
+                                {f.status === 'error' && f.error && <span className="text-xs text-red-500 truncate">{f.error}</span>}
+                              </div>
+                              {f.status === 'uploading' && (
+                                <div className="w-full bg-slate-200 rounded-full h-1 mt-1">
+                                  <div className="bg-slate-400 h-1 rounded-full transition-all duration-200" style={{ width: `${f.progress}%` }} />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                            <span className="text-[10px] uppercase tracking-wider text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Ref</span>
+                            {!isSubmitting && (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); removeRefFile(f.id); }}
+                                className="p-1 hover:bg-slate-200 rounded transition-colors"
+                              >
+                                <X className="w-4 h-4 text-slate-500" />
+                              </button>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* ── Language Dropdowns ────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row gap-3 mt-6">
