@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, CheckCircle, Loader2, AlertCircle, Phone, Mail, XCircle, ChevronDown, ChevronRight, Search, Paperclip } from 'lucide-react';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
 import { compressPdfIfNeeded, needsCompression } from '@/lib/compressPdf';
+import { combineImagesToPdf } from '@/lib/combineImagesToPdf';
+import { convertDocxToPdf } from '@/lib/convertDocxToPdf';
 
 // ===========================================================================
 // Types
@@ -21,10 +23,11 @@ interface LocalFile {
   name: string;
   size: number;
   mimeType: string;
-  status: 'uploading' | 'success' | 'error';
+  status: 'uploading' | 'converting' | 'success' | 'error';
   progress: number;
   storagePath?: string;
   error?: string;
+  isImage: boolean;
 }
 
 interface LanguageOption {
@@ -38,8 +41,10 @@ interface LanguageOption {
 // ===========================================================================
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
-const ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png';
+const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png,.docx';
+const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png'];
+const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 const PORTAL_BASE_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://portal.cethos.com';
 
 // Reference files allow DOCX as well
@@ -409,7 +414,7 @@ export function EmbeddedCertifiedQuoteForm({
 
   const validateFile = useCallback((file: File): string | null => {
     if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
-      return `${file.name}: Unsupported file type. Please upload PDF, JPG, or PNG.`;
+      return `${file.name}: Unsupported file type. Please upload PDF, JPG, PNG, or DOCX.`;
     }
     if (file.size > MAX_FILE_SIZE) {
       return `${file.name}: File exceeds 10 MB limit.`;
@@ -477,6 +482,29 @@ export function EmbeddedCertifiedQuoteForm({
     }
   }, [supabase]);
 
+  const convertAndUploadDocx = useCallback(async (localFile: LocalFile) => {
+    try {
+      const pdfFile = await convertDocxToPdf(localFile.file);
+      setLocalFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', status: 'uploading' as const, isImage: false }
+            : f,
+        ),
+      );
+      // Now upload the converted PDF
+      uploadFile({ ...localFile, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', isImage: false });
+    } catch (err: any) {
+      setLocalFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, status: 'error' as const, error: err?.message || 'DOCX conversion failed' }
+            : f,
+        ),
+      );
+    }
+  }, [uploadFile]);
+
   const processFiles = useCallback((files: File[]) => {
     const newFiles: LocalFile[] = [];
     const fileErrors: string[] = [];
@@ -486,10 +514,18 @@ export function EmbeddedCertifiedQuoteForm({
       const err = validateFile(file);
       if (err) { fileErrors.push(err); continue; }
 
+      const isImage = IMAGE_MIME_TYPES.includes(file.type);
+      const isDocx = file.type === DOCX_MIME_TYPE;
+
       newFiles.push({
         id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         file, name: file.name, size: file.size, mimeType: file.type,
-        status: 'uploading', progress: 0,
+        // Images: held in state only (combined into PDF at submit time)
+        // DOCX: will be converted server-side then uploaded
+        // PDF: uploaded immediately
+        status: isImage ? 'success' : isDocx ? 'converting' : 'uploading',
+        progress: isImage ? 100 : 0,
+        isImage,
       });
     }
 
@@ -500,13 +536,21 @@ export function EmbeddedCertifiedQuoteForm({
     if (newFiles.length > 0) {
       setLocalFiles((prev) => [...prev, ...newFiles]);
       clearError('noFiles');
-      newFiles.forEach((lf) => uploadFile(lf));
+      newFiles.forEach((lf) => {
+        if (lf.isImage) return; // Images stay client-side, combined at submit
+        if (lf.mimeType === DOCX_MIME_TYPE) {
+          convertAndUploadDocx(lf);
+        } else {
+          uploadFile(lf);
+        }
+      });
     }
-  }, [localFiles, validateFile, clearError, uploadFile]);
+  }, [localFiles, validateFile, clearError, uploadFile, convertAndUploadDocx]);
 
   const removeFile = useCallback((fileId: string) => {
     const file = localFiles.find((f) => f.id === fileId);
-    if (file?.storagePath) {
+    // Only clean up storage for files that were actually uploaded (not images held client-side)
+    if (file?.storagePath && !file.isImage) {
       supabase.storage.from('quote-files').remove([file.storagePath]).catch(() => {});
     }
     setLocalFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -570,6 +614,28 @@ export function EmbeddedCertifiedQuoteForm({
     }
   }, [supabase]);
 
+  const convertAndUploadRefDocx = useCallback(async (localFile: LocalFile) => {
+    try {
+      const pdfFile = await convertDocxToPdf(localFile.file);
+      setRefFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', status: 'uploading' as const, isImage: false }
+            : f,
+        ),
+      );
+      uploadRefFile({ ...localFile, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', isImage: false });
+    } catch (err: any) {
+      setRefFiles((prev) =>
+        prev.map((f) =>
+          f.id === localFile.id
+            ? { ...f, status: 'error' as const, error: err?.message || 'DOCX conversion failed' }
+            : f,
+        ),
+      );
+    }
+  }, [uploadRefFile]);
+
   const processRefFiles = useCallback((files: File[]) => {
     const newFiles: LocalFile[] = [];
     const fileErrors: string[] = [];
@@ -579,10 +645,15 @@ export function EmbeddedCertifiedQuoteForm({
       const err = validateRefFile(file);
       if (err) { fileErrors.push(err); continue; }
 
+      const isImage = IMAGE_MIME_TYPES.includes(file.type);
+      const isDocx = file.type === DOCX_MIME_TYPE;
+
       newFiles.push({
         id: `ref-${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         file, name: file.name, size: file.size, mimeType: file.type,
-        status: 'uploading', progress: 0,
+        status: isImage ? 'success' : isDocx ? 'converting' : 'uploading',
+        progress: isImage ? 100 : 0,
+        isImage,
       });
     }
 
@@ -592,13 +663,20 @@ export function EmbeddedCertifiedQuoteForm({
 
     if (newFiles.length > 0) {
       setRefFiles((prev) => [...prev, ...newFiles]);
-      newFiles.forEach((lf) => uploadRefFile(lf));
+      newFiles.forEach((lf) => {
+        if (lf.isImage) return;
+        if (lf.mimeType === DOCX_MIME_TYPE) {
+          convertAndUploadRefDocx(lf);
+        } else {
+          uploadRefFile(lf);
+        }
+      });
     }
-  }, [refFiles, validateRefFile, clearError, uploadRefFile]);
+  }, [refFiles, validateRefFile, clearError, uploadRefFile, convertAndUploadRefDocx]);
 
   const removeRefFile = useCallback((fileId: string) => {
     const file = refFiles.find((f) => f.id === fileId);
-    if (file?.storagePath) {
+    if (file?.storagePath && !file.isImage) {
       supabase.storage.from('quote-reference-files').remove([file.storagePath]).catch(() => {});
     }
     setRefFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -672,8 +750,12 @@ export function EmbeddedCertifiedQuoteForm({
 
   const successFiles = localFiles.filter((f) => f.status === 'success');
 
+  const hasFilesInProgress = localFiles.some((f) => f.status === 'uploading' || f.status === 'converting') ||
+    refFiles.some((f) => f.status === 'uploading' || f.status === 'converting');
+
   const canSubmit =
     successFiles.length > 0 &&
+    !hasFilesInProgress &&
     !!sourceLanguageId &&
     !!targetLanguageId &&
     (targetLanguageId !== '__other__' || otherTargetLanguage.trim().length > 0) &&
@@ -743,8 +825,43 @@ export function EmbeddedCertifiedQuoteForm({
 
       const quoteId = quote.id;
 
-      // 2. Move files to canonical path and create quote_files records
-      for (const lf of successFiles) {
+      // 2. Combine images into a single PDF, then upload all files
+      const imageFiles = successFiles.filter((f) => f.isImage);
+      const nonImageFiles = successFiles.filter((f) => !f.isImage);
+
+      // 2a. Combine all images into one PDF
+      if (imageFiles.length > 0) {
+        const combinedName = `${quote.quote_number}-combined-images.pdf`;
+        const combinedPdf = await combineImagesToPdf(
+          imageFiles.map((f) => f.file),
+          combinedName
+        );
+        // Compress the combined PDF if large
+        const finalPdf = await compressPdfIfNeeded(combinedPdf);
+        const sanitized = sanitizeFilename(finalPdf.name);
+        const finalPath = `${quoteId}/${sanitized}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('quote-files')
+          .upload(finalPath, finalPdf, { cacheControl: '3600', upsert: true });
+
+        if (uploadError) {
+          console.error('Failed to upload combined images PDF:', uploadError);
+        } else {
+          await supabase.from('quote_files').insert({
+            quote_id: quoteId,
+            original_filename: combinedName,
+            storage_path: finalPath,
+            file_size: finalPdf.size,
+            mime_type: 'application/pdf',
+            upload_status: 'uploaded',
+            ai_processing_status: 'pending',
+          });
+        }
+      }
+
+      // 2b. Upload individual PDFs (and converted DOCX) to final path
+      for (const lf of nonImageFiles) {
         const sanitized = sanitizeFilename(lf.name);
         const finalPath = `${quoteId}/${sanitized}`;
 
@@ -769,10 +886,40 @@ export function EmbeddedCertifiedQuoteForm({
         }
       }
 
-      // 2b. Upload reference files to final path and create quote_files records
+      // 2c. Upload reference files to final path and create quote_files records
       const successRefFiles = refFiles.filter((f) => f.status === 'success');
+      const refImageFiles = successRefFiles.filter((f) => f.isImage);
+      const refNonImageFiles = successRefFiles.filter((f) => !f.isImage);
 
-      for (const rf of successRefFiles) {
+      // Combine reference images into a single PDF
+      if (refImageFiles.length > 0) {
+        const refCombinedName = `${quote.quote_number}-ref-combined-images.pdf`;
+        const refCombinedPdf = await combineImagesToPdf(
+          refImageFiles.map((f) => f.file),
+          refCombinedName
+        );
+        const sanitized = sanitizeFilename(refCombinedPdf.name);
+        const finalPath = `${quoteId}/ref_${sanitized}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('quote-reference-files')
+          .upload(finalPath, refCombinedPdf, { cacheControl: '3600', upsert: true });
+
+        if (!uploadError) {
+          await supabase.from('quote_files').insert({
+            quote_id: quoteId,
+            original_filename: refCombinedName,
+            storage_path: finalPath,
+            file_size: refCombinedPdf.size,
+            mime_type: 'application/pdf',
+            upload_status: 'uploaded',
+            ai_processing_status: 'skipped',
+            category_id: 'f1aed462-a25f-4dd0-96c0-f952c3a72950',
+          });
+        }
+      }
+
+      for (const rf of refNonImageFiles) {
         const sanitized = sanitizeFilename(rf.name);
         const finalPath = `${quoteId}/ref_${sanitized}`;
 
@@ -793,7 +940,7 @@ export function EmbeddedCertifiedQuoteForm({
           mime_type: rf.mimeType,
           upload_status: 'uploaded',
           ai_processing_status: 'skipped',
-          category_id: 'f1aed462-a25f-4dd0-96c0-f952c3a72950', // "Reference"
+          category_id: 'f1aed462-a25f-4dd0-96c0-f952c3a72950',
         });
 
         if (rf.storagePath && rf.storagePath !== finalPath) {
@@ -916,7 +1063,7 @@ export function EmbeddedCertifiedQuoteForm({
         <p className="text-slate-700 mb-1">
           <span className="font-semibold text-[#0891B2]">Click to upload</span> or drag and drop
         </p>
-        <p className="text-sm text-slate-500">PDF, JPG, PNG (max 10MB each)</p>
+        <p className="text-sm text-slate-500">PDF, JPG, PNG, DOCX (max 10MB each)</p>
       </div>
 
       {errors.files && <p className="text-sm text-red-600 mt-2">{errors.files}</p>}
@@ -929,13 +1076,15 @@ export function EmbeddedCertifiedQuoteForm({
             {localFiles.map((f) => (
               <motion.div key={f.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex items-center gap-3 min-w-0">
-                  {f.status === 'uploading' && <Loader2 className="w-5 h-5 text-[#0891B2] animate-spin flex-shrink-0" />}
+                  {(f.status === 'uploading' || f.status === 'converting') && <Loader2 className="w-5 h-5 text-[#0891B2] animate-spin flex-shrink-0" />}
                   {f.status === 'success' && <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />}
                   {f.status === 'error' && <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-[#0C2340] truncate">{f.name}</p>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-slate-500">{formatFileSize(f.size)}</span>
+                      {f.status === 'converting' && <span className="text-xs text-[#0891B2]">Converting...</span>}
+                      {f.isImage && f.status === 'success' && <span className="text-xs text-slate-400">Will be combined into PDF</span>}
                       {f.status === 'error' && f.error && <span className="text-xs text-red-500 truncate">{f.error}</span>}
                     </div>
                     {f.status === 'uploading' && (
@@ -945,11 +1094,14 @@ export function EmbeddedCertifiedQuoteForm({
                     )}
                   </div>
                 </div>
-                {!isSubmitting && (
-                  <button type="button" onClick={() => removeFile(f.id)} className="p-1 hover:bg-slate-200 rounded transition-colors flex-shrink-0 ml-2">
-                    <X className="w-4 h-4 text-slate-500" />
-                  </button>
-                )}
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  {f.isImage && <span className="text-[10px] uppercase tracking-wider text-[#0891B2] bg-[#E0F2FE] px-1.5 py-0.5 rounded">IMG</span>}
+                  {!isSubmitting && (
+                    <button type="button" onClick={() => removeFile(f.id)} className="p-1 hover:bg-slate-200 rounded transition-colors">
+                      <X className="w-4 h-4 text-slate-500" />
+                    </button>
+                  )}
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -1100,13 +1252,14 @@ export function EmbeddedCertifiedQuoteForm({
                           className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-lg"
                         >
                           <div className="flex items-center gap-3 min-w-0">
-                            {f.status === 'uploading' && <Loader2 className="w-4 h-4 text-slate-400 animate-spin flex-shrink-0" />}
+                            {(f.status === 'uploading' || f.status === 'converting') && <Loader2 className="w-4 h-4 text-slate-400 animate-spin flex-shrink-0" />}
                             {f.status === 'success' && <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />}
                             {f.status === 'error' && <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />}
                             <div className="min-w-0 flex-1">
                               <p className="text-sm text-slate-700 truncate">{f.name}</p>
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-slate-500">{formatFileSize(f.size)}</span>
+                                {f.status === 'converting' && <span className="text-xs text-slate-400">Converting...</span>}
                                 {f.status === 'error' && f.error && <span className="text-xs text-red-500 truncate">{f.error}</span>}
                               </div>
                               {f.status === 'uploading' && (
