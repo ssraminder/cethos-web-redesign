@@ -40,11 +40,11 @@ interface LanguageOption {
 // Constants
 // ===========================================================================
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-const ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png,.docx';
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
+const ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
 const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png'];
-const DOCX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const DOC_MIME_TYPES = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
 const PORTAL_BASE_URL = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://portal.cethos.com';
 
 // Reference files allow DOCX as well
@@ -53,9 +53,10 @@ const REF_ACCEPTED_MIME_TYPES = [
   'image/png',
   'application/pdf',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/msword',
 ];
-const REF_ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png,.docx';
-const REF_MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const REF_ACCEPTED_EXTENSIONS = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
+const REF_MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 // English language codes to match against (covers all variants/locales)
 const ENGLISH_CODES = ['en', 'eng', 'en-us', 'en-gb', 'en-ca', 'en-au', 'en-nz', 'en-ie', 'en-za'];
@@ -414,10 +415,10 @@ export function EmbeddedCertifiedQuoteForm({
 
   const validateFile = useCallback((file: File): string | null => {
     if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
-      return `${file.name}: Unsupported file type. Please upload PDF, JPG, PNG, or DOCX.`;
+      return `${file.name}: Unsupported file type. Please upload PDF, JPG, PNG, DOC, or DOCX.`;
     }
     if (file.size > MAX_FILE_SIZE) {
-      return `${file.name}: File exceeds 10 MB limit.`;
+      return `${file.name}: File exceeds 50 MB limit.`;
     }
     return null;
   }, []);
@@ -515,7 +516,7 @@ export function EmbeddedCertifiedQuoteForm({
       if (err) { fileErrors.push(err); continue; }
 
       const isImage = IMAGE_MIME_TYPES.includes(file.type);
-      const isDocx = file.type === DOCX_MIME_TYPE;
+      const isDocx = DOC_MIME_TYPES.includes(file.type);
 
       newFiles.push({
         id: `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -538,7 +539,7 @@ export function EmbeddedCertifiedQuoteForm({
       clearError('noFiles');
       newFiles.forEach((lf) => {
         if (lf.isImage) return; // Images stay client-side, combined at submit
-        if (lf.mimeType === DOCX_MIME_TYPE) {
+        if (DOC_MIME_TYPES.includes(lf.mimeType)) {
           convertAndUploadDocx(lf);
         } else {
           uploadFile(lf);
@@ -562,10 +563,10 @@ export function EmbeddedCertifiedQuoteForm({
 
   const validateRefFile = useCallback((file: File): string | null => {
     if (!REF_ACCEPTED_MIME_TYPES.includes(file.type)) {
-      return `${file.name}: Unsupported file type. Please upload PDF, JPG, PNG, or DOCX.`;
+      return `${file.name}: Unsupported file type. Please upload PDF, JPG, PNG, DOC, or DOCX.`;
     }
     if (file.size > REF_MAX_FILE_SIZE) {
-      return `${file.name}: File exceeds 20 MB limit.`;
+      return `${file.name}: File exceeds 50 MB limit.`;
     }
     return null;
   }, []);
@@ -646,7 +647,7 @@ export function EmbeddedCertifiedQuoteForm({
       if (err) { fileErrors.push(err); continue; }
 
       const isImage = IMAGE_MIME_TYPES.includes(file.type);
-      const isDocx = file.type === DOCX_MIME_TYPE;
+      const isDocx = DOC_MIME_TYPES.includes(file.type);
 
       newFiles.push({
         id: `ref-${file.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -665,7 +666,7 @@ export function EmbeddedCertifiedQuoteForm({
       setRefFiles((prev) => [...prev, ...newFiles]);
       newFiles.forEach((lf) => {
         if (lf.isImage) return;
-        if (lf.mimeType === DOCX_MIME_TYPE) {
+        if (DOC_MIME_TYPES.includes(lf.mimeType)) {
           convertAndUploadRefDocx(lf);
         } else {
           uploadRefFile(lf);
@@ -1063,7 +1064,7 @@ export function EmbeddedCertifiedQuoteForm({
         <p className="text-slate-700 mb-1">
           <span className="font-semibold text-[#0891B2]">Click to upload</span> or drag and drop
         </p>
-        <p className="text-sm text-slate-500">PDF, JPG, PNG, DOCX (max 10MB each)</p>
+        <p className="text-sm text-slate-500">PDF, JPG, PNG, DOC, DOCX (max 50MB each)</p>
       </div>
 
       {errors.files && <p className="text-sm text-red-600 mt-2">{errors.files}</p>}
@@ -1226,7 +1227,7 @@ export function EmbeddedCertifiedQuoteForm({
                     Drag and drop reference files or click to browse
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
-                    PDF, JPG, PNG, DOCX &mdash; max 20MB per file
+                    PDF, JPG, PNG, DOC, DOCX &mdash; max 50MB per file
                   </p>
                 </div>
 
