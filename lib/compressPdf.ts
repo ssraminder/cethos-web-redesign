@@ -1,10 +1,4 @@
-import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument } from 'pdf-lib';
-
-if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
 
 const COMPRESSION_THRESHOLD_BYTES = 3 * 1024 * 1024; // 3MB
 const JPEG_QUALITY = 0.80;
@@ -17,6 +11,11 @@ export async function compressPdfIfNeeded(file: File): Promise<File> {
 
   try {
     console.log(`Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
+
+    // Dynamic import to avoid SSR issues (pdfjs-dist uses DOMMatrix which doesn't exist in Node.js)
+    const pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     const arrayBuffer = await file.arrayBuffer();
     const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
