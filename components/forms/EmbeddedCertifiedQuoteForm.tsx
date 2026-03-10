@@ -1315,7 +1315,7 @@ export function EmbeddedCertifiedQuoteForm({
       <div className="mt-6 pt-4 border-t border-slate-200 text-center">
         <p className="text-sm text-slate-600">
           Prefer to talk?{' '}
-          <a href="tel:5876000786" className="text-[#0891B2] font-medium hover:underline">(587) 600-0786Cal</a>
+          <a href="tel:5876000786" className="text-[#0891B2] font-medium hover:underline">(587) 600-0786</a>
           {' '}or{' '}
           <a href="mailto:info@cethos.com" className="text-[#0891B2] font-medium hover:underline">info@cethos.com</a>
         </p>
