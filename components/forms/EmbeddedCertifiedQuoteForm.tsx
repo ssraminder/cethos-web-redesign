@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, X, CheckCircle, Loader2, AlertCircle, Phone, Mail, XCircle, ChevronDown, ChevronRight, Search, Paperclip } from 'lucide-react';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
+import { compressPdfIfNeeded, needsCompression } from '@/lib/compressPdf';
 
 // ===========================================================================
 // Types
@@ -431,12 +432,28 @@ export function EmbeddedCertifiedQuoteForm({
     }, 200);
 
     try {
+      // Compress large PDFs before upload
+      let fileToUpload = localFile.file;
+      if (needsCompression(localFile.file)) {
+        fileToUpload = await compressPdfIfNeeded(localFile.file);
+        if (fileToUpload !== localFile.file) {
+          // Update state with compressed file and size
+          setLocalFiles((prev) =>
+            prev.map((f) =>
+              f.id === localFile.id
+                ? { ...f, file: fileToUpload, size: fileToUpload.size }
+                : f,
+            ),
+          );
+        }
+      }
+
       const ext = localFile.name.split('.').pop();
       const tempPath = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
       const { error } = await supabase.storage
         .from('quote-files')
-        .upload(tempPath, localFile.file, { cacheControl: '3600', upsert: false });
+        .upload(tempPath, fileToUpload, { cacheControl: '3600', upsert: false });
 
       clearInterval(interval);
       if (error) throw error;
