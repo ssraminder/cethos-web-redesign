@@ -1,5 +1,5 @@
 /**
- * Sends a DOCX file to the Supabase Edge Function for server-side PDF conversion.
+ * Sends a DOC/DOCX file to the Supabase Edge Function for server-side PDF conversion.
  */
 export async function convertDocxToPdf(file: File): Promise<File> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -27,7 +27,7 @@ export async function convertDocxToPdf(file: File): Promise<File> {
   }
 
   const pdfBuffer = await response.arrayBuffer();
-  const pdfName = file.name.replace(/\.docx$/i, '.pdf');
+  const pdfName = file.name.replace(/\.docx?$/i, '.pdf');
 
   return new File([pdfBuffer], pdfName, { type: 'application/pdf' });
 }
