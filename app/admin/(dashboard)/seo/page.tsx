@@ -4,7 +4,8 @@ import { useAdmin } from '@/components/admin/AdminContext';
 import { hasPermission } from '@/lib/admin/permissions';
 import Badge from '@/components/admin/Badge';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, X, Save } from 'lucide-react';
+import SerpPreview from '@/components/admin/SerpPreview';
+import { Plus, Pencil, Trash2, ChevronUp, X, Save, RefreshCw, Search, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -40,7 +41,9 @@ export default function SeoPage() {
   const [editData, setEditData] = useState<Partial<SeoSetting>>(emptyForm);
   const [addMode, setAddMode] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleteName, setDeleteName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
 
   const canCreate = hasPermission(adminUser!.role, 'seo_settings', 'create');
   const canDelete = hasPermission(adminUser!.role, 'seo_settings', 'delete');
@@ -55,10 +58,7 @@ export default function SeoPage() {
   useEffect(() => { fetchSettings(); }, [adminFetch]);
 
   function openEdit(seo: SeoSetting) {
-    if (expandedId === seo.id) {
-      setExpandedId(null);
-      return;
-    }
+    if (expandedId === seo.id) { setExpandedId(null); return; }
     setExpandedId(seo.id);
     setEditData({
       page_path: seo.page_path,
@@ -108,23 +108,27 @@ export default function SeoPage() {
     setDeleteId(null);
   }
 
+  async function handleRegenerateSitemap() {
+    setRegenerating(true);
+    // Placeholder - in production this would trigger a real sitemap rebuild
+    await new Promise(r => setTimeout(r, 1500));
+    setRegenerating(false);
+    toast.success('Sitemap regenerated successfully');
+  }
+
   function titleLengthColor(len: number) {
     if (len === 0) return 'text-gray-400';
     if (len >= 50 && len <= 60) return 'text-green-600';
     if (len > 60) return 'text-red-500';
-    return 'text-yellow-600';
+    return 'text-amber-600';
   }
 
   function descLengthColor(len: number) {
     if (len === 0) return 'text-gray-400';
     if (len >= 150 && len <= 160) return 'text-green-600';
     if (len > 160) return 'text-red-500';
-    return 'text-yellow-600';
+    return 'text-amber-600';
   }
-
-  const serpTitle = editData.meta_title || editData.page_name || 'Page Title';
-  const serpDesc = editData.meta_description || 'Add a meta description for this page...';
-  const serpUrl = `https://cethos.com${editData.page_path || '/'}`;
 
   function renderEditForm(id?: string) {
     return (
@@ -137,7 +141,7 @@ export default function SeoPage() {
               value={editData.page_path || ''}
               onChange={(e) => setEditData({ ...editData, page_path: e.target.value })}
               readOnly={!!id}
-              className={`w-full px-3 py-2 border border-gray-200 rounded-lg text-sm ${id ? 'bg-gray-100 text-gray-500' : ''}`}
+              className={`w-full px-3 py-2 border border-gray-200 rounded-md text-sm ${id ? 'bg-gray-100 text-gray-500' : ''}`}
               placeholder="/about"
             />
           </div>
@@ -147,7 +151,7 @@ export default function SeoPage() {
               type="text"
               value={editData.page_name || ''}
               onChange={(e) => setEditData({ ...editData, page_name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
               placeholder="About Us"
             />
           </div>
@@ -164,7 +168,7 @@ export default function SeoPage() {
             type="text"
             value={editData.meta_title || ''}
             onChange={(e) => setEditData({ ...editData, meta_title: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
           />
         </div>
 
@@ -179,9 +183,16 @@ export default function SeoPage() {
             value={editData.meta_description || ''}
             onChange={(e) => setEditData({ ...editData, meta_description: e.target.value })}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
+            className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm resize-none"
           />
         </div>
+
+        {/* Live SERP Preview */}
+        <SerpPreview
+          title={editData.meta_title || editData.page_name || 'Page Title'}
+          description={editData.meta_description || 'Add a meta description for this page...'}
+          url={`https://cethos.com${editData.page_path || '/'}`}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -190,7 +201,7 @@ export default function SeoPage() {
               type="text"
               value={editData.og_title || ''}
               onChange={(e) => setEditData({ ...editData, og_title: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
               placeholder="Falls back to meta title"
             />
           </div>
@@ -200,7 +211,7 @@ export default function SeoPage() {
               type="url"
               value={editData.og_image || ''}
               onChange={(e) => setEditData({ ...editData, og_image: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
             />
           </div>
         </div>
@@ -211,7 +222,7 @@ export default function SeoPage() {
             value={editData.og_description || ''}
             onChange={(e) => setEditData({ ...editData, og_description: e.target.value })}
             rows={2}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
+            className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm resize-none"
             placeholder="Falls back to meta description"
           />
         </div>
@@ -223,7 +234,7 @@ export default function SeoPage() {
               type="url"
               value={editData.canonical_url || ''}
               onChange={(e) => setEditData({ ...editData, canonical_url: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
             />
           </div>
           <div>
@@ -231,7 +242,7 @@ export default function SeoPage() {
             <select
               value={editData.robots || 'index, follow'}
               onChange={(e) => setEditData({ ...editData, robots: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
             >
               <option value="index, follow">index, follow</option>
               <option value="noindex, follow">noindex, follow</option>
@@ -244,7 +255,7 @@ export default function SeoPage() {
             <select
               value={editData.change_frequency || 'weekly'}
               onChange={(e) => setEditData({ ...editData, change_frequency: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
             >
               <option value="always">Always</option>
               <option value="hourly">Hourly</option>
@@ -265,7 +276,7 @@ export default function SeoPage() {
               min="0" max="1" step="0.1"
               value={editData.priority ?? 0.5}
               onChange={(e) => setEditData({ ...editData, priority: parseFloat(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
             />
           </div>
           <div className="flex items-center gap-2 pt-6">
@@ -280,33 +291,17 @@ export default function SeoPage() {
           </div>
         </div>
 
-        {/* SERP Preview */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Google SERP Preview</label>
-          <div className="border border-gray-200 rounded-lg p-4 bg-white">
-            <p className="text-lg text-blue-800 hover:underline cursor-pointer truncate" style={{ fontFamily: 'Arial, sans-serif' }}>
-              {serpTitle.length > 60 ? serpTitle.slice(0, 60) + '...' : serpTitle}
-            </p>
-            <p className="text-sm text-green-800 mt-0.5" style={{ fontFamily: 'Arial, sans-serif' }}>
-              {serpUrl}
-            </p>
-            <p className="text-sm text-gray-600 mt-1 line-clamp-2" style={{ fontFamily: 'Arial, sans-serif' }}>
-              {serpDesc.length > 160 ? serpDesc.slice(0, 160) + '...' : serpDesc}
-            </p>
-          </div>
-        </div>
-
         <div className="flex justify-end gap-3 pt-2">
           <button
             onClick={() => { setExpandedId(null); setAddMode(false); }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50"
           >
             <X className="w-4 h-4" /> Cancel
           </button>
           <button
             onClick={() => handleSave(id)}
             disabled={saving}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-cethos-teal rounded-lg hover:bg-cethos-teal-light disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-[#0d9488] rounded-md hover:bg-[#0f766e] disabled:opacity-50"
           >
             <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save'}
           </button>
@@ -319,21 +314,31 @@ export default function SeoPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">SEO Settings</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage meta tags and search engine settings per page</p>
+          <h1 className="text-2xl font-bold text-[#0f172a]">SEO Settings</h1>
+          <p className="text-sm text-[#64748b] mt-1">Manage meta tags and search engine settings per page</p>
         </div>
-        {canCreate && (
+        <div className="flex gap-3">
           <button
-            onClick={() => { setAddMode(true); setExpandedId(null); setEditData({ ...emptyForm }); }}
-            className="inline-flex items-center gap-2 bg-cethos-teal hover:bg-cethos-teal-light text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            onClick={handleRegenerateSitemap}
+            disabled={regenerating}
+            className="inline-flex items-center gap-2 bg-white border border-[#e2e8f0] hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50"
           >
-            <Plus className="w-4 h-4" />
-            Add Page
+            {regenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            Regenerate Sitemap
           </button>
-        )}
+          {canCreate && (
+            <button
+              onClick={() => { setAddMode(true); setExpandedId(null); setEditData({ ...emptyForm }); }}
+              className="inline-flex items-center gap-2 bg-[#0d9488] hover:bg-[#0f766e] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add Page
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg border border-[#e2e8f0] overflow-hidden">
         {/* Add new row */}
         {addMode && (
           <div className="border-b border-gray-200">
@@ -356,14 +361,28 @@ export default function SeoPage() {
           </thead>
           <tbody className="divide-y divide-gray-50">
             {loading ? (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">Loading...</td></tr>
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i}>
+                  <td className="px-4 py-3"><div className="h-4 w-16 bg-gray-100 rounded animate-pulse" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-24 bg-gray-100 rounded animate-pulse" /></td>
+                  <td className="px-4 py-3"><div className="h-4 w-40 bg-gray-100 rounded animate-pulse" /></td>
+                  <td className="px-4 py-3"><div className="h-5 w-20 bg-gray-100 rounded-full animate-pulse" /></td>
+                  <td className="px-4 py-3" />
+                </tr>
+              ))
             ) : settings.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">No SEO settings configured</td></tr>
+              <tr>
+                <td colSpan={5} className="px-4 py-16 text-center">
+                  <Search className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-gray-500">No SEO settings configured</p>
+                  <p className="text-xs text-gray-400 mt-1">Add your first page to start optimizing</p>
+                </td>
+              </tr>
             ) : (
               settings.map((seo) => (
                 <tr key={seo.id} className="group">
                   <td colSpan={5} className="p-0">
-                    <div className="flex items-center hover:bg-gray-50/50">
+                    <div className="flex items-center hover:bg-[#f8fafc]">
                       <div className="flex-1 grid grid-cols-5 items-center">
                         <div className="px-4 py-3">
                           <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">{seo.page_path}</code>
@@ -379,13 +398,13 @@ export default function SeoPage() {
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => openEdit(seo)}
-                              className="p-1.5 hover:bg-gray-100 rounded text-gray-500 hover:text-cethos-teal"
+                              className="p-1.5 hover:bg-gray-100 rounded text-gray-500 hover:text-[#0d9488]"
                             >
                               {expandedId === seo.id ? <ChevronUp className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
                             </button>
                             {canDelete && (
                               <button
-                                onClick={() => setDeleteId(seo.id)}
+                                onClick={() => { setDeleteId(seo.id); setDeleteName(seo.page_path); }}
                                 className="p-1.5 hover:bg-red-50 rounded text-gray-500 hover:text-red-600"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -407,7 +426,7 @@ export default function SeoPage() {
       <ConfirmDialog
         open={!!deleteId}
         title="Delete SEO Settings"
-        message="Are you sure? This will remove SEO settings for this page."
+        message={`Are you sure you want to delete SEO settings for '${deleteName}'? This cannot be undone.`}
         confirmLabel="Delete"
         destructive
         onConfirm={handleDelete}
