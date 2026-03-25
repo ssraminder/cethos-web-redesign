@@ -31,7 +31,7 @@ export function Hero() {
                 href="/get-quote"
                 className="px-6 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors inline-flex items-center gap-2"
               >
-                Get a Quote
+                Get a Free Quote
                 <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
               </Link>
               <Link

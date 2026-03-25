@@ -254,7 +254,7 @@ export default function TechnologyPage() {
       <section className="bg-gradient-to-r from-[#0C2340] via-[#1A365D] to-[#0891B2] py-24">
         <div className="max-w-[800px] mx-auto px-8 text-center">
           <h2 className="text-[40px] font-bold text-white mb-4">
-            Ready to Go Global?
+            Expand Your Tech to Global Markets
           </h2>
           <p className="text-xl text-white/80 mb-8">
             Get a free quote for your software localization project
