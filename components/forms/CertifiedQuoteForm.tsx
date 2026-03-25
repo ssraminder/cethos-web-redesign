@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, CheckCircle, AlertCircle, ArrowLeft, ArrowRight, X, FileText } from 'lucide-react'
+import { trackGenerateLead } from '@/lib/tracking'
 
 interface DropdownOption {
   id: string
@@ -294,6 +295,7 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
       }
 
       setIsSuccess(true)
+      trackGenerateLead('quote', 'Certified Translation Quote Submitted')
     } catch (error) {
       console.error('Submit error:', error)
       setSubmitError(

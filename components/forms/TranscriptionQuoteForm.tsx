@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { trackQuoteSubmission } from '@/lib/tracking';
+import { trackQuoteSubmission, trackGenerateLead } from '@/lib/tracking';
 
 // Service types with their configurations
 const SERVICE_TYPES = [
@@ -180,6 +180,7 @@ export default function TranscriptionQuoteForm() {
 
       // Track successful submission
       trackQuoteSubmission('transcription', formData.serviceType);
+      trackGenerateLead('quote', 'Transcription Quote Submitted');
 
       setSubmitStatus('success');
 

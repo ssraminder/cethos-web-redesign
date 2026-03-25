@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { trackGenerateLead } from '@/lib/tracking'
 
 const DOCUMENT_TYPES = [
   { value: 'contracts', label: 'Contracts & Agreements' },
@@ -142,6 +143,7 @@ export default function BusinessQuoteForm() {
       }
 
       setSubmitStatus('success')
+      trackGenerateLead('quote', 'Business Translation Quote Submitted')
       setFormData({
         documentType: '',
         industry: '',

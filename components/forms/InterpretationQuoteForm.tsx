@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Calendar, Clock, MapPin, X } from 'lucide-react'
+import { trackGenerateLead } from '@/lib/tracking'
 
 interface LocaleOption {
   id: string
@@ -255,6 +256,7 @@ export function InterpretationQuoteForm({ formLocation, defaultServiceType }: In
       }
 
       setIsSuccess(true)
+      trackGenerateLead('quote', 'Interpretation Quote Submitted')
 
       // Track conversion
       if (typeof window !== 'undefined' && window.gtag) {

@@ -10,6 +10,7 @@ import {
   ClockIcon,
 } from '@/components/icons'
 import { Upload, X, FileText, AlertCircle, ChevronDown } from 'lucide-react'
+import { trackGenerateLead } from '@/lib/tracking'
 import {
   serviceTypes,
   therapeuticAreas,
@@ -308,6 +309,7 @@ export default function LifeSciencesQuoteForm({
       }
 
       setIsSubmitted(true)
+      trackGenerateLead('quote', `Life Sciences Quote Submitted - ${variant}`)
     } catch (error) {
       console.error('Submit error:', error)
       setSubmitError(

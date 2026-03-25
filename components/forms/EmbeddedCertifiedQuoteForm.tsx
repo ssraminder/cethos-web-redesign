@@ -7,6 +7,7 @@ import { createBrowserSupabaseClient } from '@/lib/supabase';
 import { compressPdfIfNeeded, needsCompression } from '@/lib/compressPdf';
 import { combineImagesToPdf } from '@/lib/combineImagesToPdf';
 import { convertDocxToPdf } from '@/lib/convertDocxToPdf';
+import { trackGenerateLead } from '@/lib/tracking';
 
 // ===========================================================================
 // Types
@@ -979,7 +980,10 @@ export function EmbeddedCertifiedQuoteForm({
         body: JSON.stringify({ quoteId }),
       });
 
-      // 5. Redirect to portal Step 2
+      // 5. Track conversion
+      trackGenerateLead('quote', 'Certified Translation Quote Submitted');
+
+      // 6. Redirect to portal Step 2
       setSubmitStatus('redirecting');
       await new Promise((resolve) => setTimeout(resolve, 500));
 

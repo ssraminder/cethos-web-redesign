@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { trackGenerateLead } from '@/lib/tracking'
 
 const WEBSITE_TYPES = [
   { value: 'corporate', label: 'Corporate Website' },
@@ -147,6 +148,7 @@ export default function WebsiteQuoteForm() {
       }
 
       setSubmitStatus('success')
+      trackGenerateLead('quote', 'Website Localization Quote Submitted')
       setFormData({
         websiteType: '',
         cmsPlatform: '',

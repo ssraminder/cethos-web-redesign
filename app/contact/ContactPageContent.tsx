@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Container, Card, Button, Input, Textarea, Select } from '@/components/ui'
 import { MailIcon, PhoneIcon, MapPinIcon, ClockIcon, CheckIcon } from '@/components/icons'
 import { ContactLocations } from '@/components/ContactLocations'
+import { trackGenerateLead } from '@/lib/tracking'
 
 const contactInfo = [
   {
@@ -54,6 +55,7 @@ export default function ContactPageContent() {
 
     setIsLoading(false)
     setIsSubmitted(true)
+    trackGenerateLead('contact', 'Contact Message Submitted')
   }
 
   return (
