@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { CETHOS_LOGO_DARK_BG, CETHOS_LOGO_LIGHT_BG } from '@/lib/admin/brand';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -51,7 +52,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex font-sans">
       {/* Left panel - branding */}
       <div className="hidden lg:flex lg:w-[40%] bg-gradient-to-br from-[#0d9488] to-[#0f766e] relative overflow-hidden">
         {/* Decorative shapes */}
@@ -65,11 +66,12 @@ export default function AdminLoginPage() {
 
         <div className="relative z-10 flex flex-col justify-between p-10 w-full">
           {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">C</span>
-            </div>
-            <span className="text-white text-xl font-bold tracking-wide">CETHOS</span>
+          <div>
+            <img
+              src={CETHOS_LOGO_DARK_BG}
+              alt="Cethos Solutions Inc."
+              className="h-9 w-auto"
+            />
           </div>
 
           {/* Center content */}
@@ -93,11 +95,12 @@ export default function AdminLoginPage() {
       <div className="flex-1 flex items-center justify-center bg-white px-6">
         <div className="w-full max-w-md">
           {/* Logo for mobile / color version */}
-          <div className="flex items-center gap-2.5 mb-8">
-            <div className="w-10 h-10 rounded-lg bg-[#0d9488] flex items-center justify-center">
-              <span className="text-white font-bold text-lg">C</span>
-            </div>
-            <span className="text-[#0f172a] text-xl font-bold tracking-wide">CETHOS</span>
+          <div className="mb-8">
+            <img
+              src={CETHOS_LOGO_LIGHT_BG}
+              alt="Cethos Solutions Inc."
+              className="h-9 w-auto"
+            />
           </div>
 
           <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
