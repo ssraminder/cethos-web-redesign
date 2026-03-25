@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { trackGenerateLead } from '@/lib/tracking'
 
 const SERVICE_TYPES = [
   { value: 'subtitling', label: 'Subtitling' },
@@ -144,6 +145,7 @@ export default function MultimediaQuoteForm() {
       }
 
       setSubmitStatus('success')
+      trackGenerateLead('quote', 'Multimedia Translation Quote Submitted')
       setFormData({
         serviceType: '',
         contentType: '',

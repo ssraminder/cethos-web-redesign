@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { trackGenerateLead } from '@/lib/tracking'
 
 const PROJECT_TYPES = [
   { value: 'mobile-app', label: 'Mobile App' },
@@ -145,6 +146,7 @@ export default function SoftwareQuoteForm() {
       }
 
       setSubmitStatus('success')
+      trackGenerateLead('quote', 'Software Localization Quote Submitted')
       setFormData({
         projectType: '',
         fileFormat: '',
