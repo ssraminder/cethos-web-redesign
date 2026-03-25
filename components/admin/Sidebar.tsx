@@ -5,20 +5,36 @@ import { usePathname } from 'next/navigation';
 import { useAdmin } from './AdminContext';
 import { hasPermission } from '@/lib/admin/permissions';
 import {
-  LayoutDashboard, FileText, FolderOpen, Users, MapPin,
-  Search, LogOut, ChevronDown, ChevronRight, X, ExternalLink,
+  LayoutDashboard, FileText, FolderOpen, Users, Code2,
+  Search, LogOut, ChevronDown, ChevronRight, ChevronLeft,
+  X, ExternalLink, CalendarDays, Image, ArrowLeftRight,
+  Settings, User,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export default function Sidebar({ open, onClose }: SidebarProps) {
+export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
   const { adminUser, logout } = useAdmin();
   const [blogOpen, setBlogOpen] = useState(pathname.startsWith('/admin/blog'));
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (!adminUser) return null;
 
@@ -41,11 +57,17 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           : []),
       ],
     },
+    {
+      label: 'Calendar',
+      href: '/admin/calendar',
+      icon: CalendarDays,
+      active: pathname.startsWith('/admin/calendar'),
+    },
     ...(hasPermission(adminUser.role, 'tracking_pixels', 'read')
       ? [{
           label: 'Tracking Pixels',
           href: '/admin/tracking',
-          icon: MapPin,
+          icon: Code2,
           active: pathname.startsWith('/admin/tracking'),
         }]
       : []),
@@ -57,6 +79,18 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           active: pathname.startsWith('/admin/seo'),
         }]
       : []),
+    {
+      label: 'Media Library',
+      href: '/admin/media',
+      icon: Image,
+      active: pathname.startsWith('/admin/media'),
+    },
+    {
+      label: 'Redirects',
+      href: '/admin/redirects',
+      icon: ArrowLeftRight,
+      active: pathname.startsWith('/admin/redirects'),
+    },
   ];
 
   const roleLabels: Record<string, string> = {
@@ -67,6 +101,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     viewer: 'Viewer',
   };
 
+  const initials = adminUser.name
+    .split(' ')
+    .map((n) => n.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+
   return (
     <>
       {/* Mobile overlay */}
@@ -75,58 +116,61 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-cethos-navy text-white z-50 flex flex-col transition-transform lg:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 h-full bg-[#0f172a] text-white z-50 flex flex-col transition-all duration-300 ${
+          collapsed ? 'w-16' : 'w-[260px]'
+        } ${open ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
       >
-        {/* Header */}
-        <div className="p-5 border-b border-white/10">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-bold tracking-wide">CETHOS ADMIN</h1>
-            <button onClick={onClose} className="lg:hidden p-1 hover:bg-white/10 rounded">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="mt-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-cethos-teal flex items-center justify-center text-sm font-bold">
-              {adminUser.name.charAt(0)}
+        {/* Logo */}
+        <div className="h-14 flex items-center px-4 border-b border-white/10 flex-shrink-0">
+          <Link href="/admin" className="flex items-center gap-2.5 min-w-0" onClick={onClose}>
+            <div className="w-8 h-8 rounded-lg bg-[#0d9488] flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm">C</span>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium truncate">{adminUser.name}</p>
-              <p className="text-xs text-white/60">{roleLabels[adminUser.role]}</p>
-            </div>
-          </div>
+            {!collapsed && (
+              <span className="text-base font-bold tracking-wide truncate">CETHOS</span>
+            )}
+          </Link>
+          <button onClick={onClose} className="lg:hidden ml-auto p-1 hover:bg-white/10 rounded">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 overflow-y-auto">
+        <nav className="flex-1 py-3 overflow-y-auto">
           {navItems.map((item) => {
             if ('children' in item && item.children) {
               return (
                 <div key={item.label}>
                   <button
                     onClick={() => setBlogOpen(!blogOpen)}
-                    className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm transition-colors hover:bg-white/5 ${
-                      item.active ? 'text-white' : 'text-white/70'
+                    title={collapsed ? item.label : undefined}
+                    className={`w-full flex items-center gap-3 px-4 py-2 text-[13px] transition-colors hover:bg-[#1e293b] ${
+                      item.active
+                        ? 'text-white font-semibold border-l-[3px] border-[#0d9488] bg-[#1e293b]'
+                        : 'text-white/70 border-l-[3px] border-transparent'
                     }`}
                   >
-                    {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" />}
-                    <span className="flex-1 text-left">{item.label}</span>
-                    {blogOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    {item.icon && <item.icon className="w-[18px] h-[18px] flex-shrink-0" />}
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1 text-left">{item.label}</span>
+                        {blogOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                      </>
+                    )}
                   </button>
-                  {blogOpen && (
-                    <div className="ml-8 border-l border-white/10">
+                  {blogOpen && !collapsed && (
+                    <div className="ml-[27px] pl-3 border-l border-white/10">
                       {item.children.map((child) => {
-                        const isActive = pathname === child.href;
+                        const isActive = pathname === child.href || (child.href === '/admin/blog' && pathname.startsWith('/admin/blog/') && !pathname.includes('categories') && !pathname.includes('authors'));
                         return (
                           <Link
                             key={child.href}
                             href={child.href}
                             onClick={onClose}
-                            className={`block px-4 py-2 text-sm transition-colors ${
+                            className={`block py-1.5 pl-3 text-[13px] transition-colors rounded-r ${
                               isActive
-                                ? 'text-cethos-teal-light border-l-2 border-cethos-teal-light -ml-px bg-white/5'
-                                : 'text-white/60 hover:text-white hover:bg-white/5'
+                                ? 'text-[#5eead4] font-medium'
+                                : 'text-white/50 hover:text-white/80'
                             }`}
                           >
                             {child.label}
@@ -145,36 +189,80 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 key={navItem.href}
                 href={navItem.href}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${
+                title={collapsed ? navItem.label : undefined}
+                className={`flex items-center gap-3 px-4 py-2 text-[13px] transition-colors hover:bg-[#1e293b] ${
                   navItem.active
-                    ? 'text-white bg-white/10 border-l-3 border-cethos-teal-light'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    ? 'text-white font-semibold border-l-[3px] border-[#0d9488] bg-[#1e293b]'
+                    : 'text-white/70 border-l-[3px] border-transparent'
                 }`}
               >
-                <navItem.icon className="w-5 h-5 flex-shrink-0" />
-                <span>{navItem.label}</span>
+                <navItem.icon className="w-[18px] h-[18px] flex-shrink-0" />
+                {!collapsed && <span>{navItem.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-white/10 space-y-1">
-          <a
-            href="https://cethos.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded transition-colors"
-          >
-            <ExternalLink className="w-4 h-4" />
-            Back to Website
-          </a>
+        {/* Bottom section */}
+        <div className="border-t border-white/10 flex-shrink-0">
+          {/* User section */}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#1e293b] transition-colors"
+              title={collapsed ? adminUser.name : undefined}
+            >
+              <div className="w-8 h-8 rounded-full bg-[#0d9488] flex items-center justify-center text-xs font-bold flex-shrink-0">
+                {initials}
+              </div>
+              {!collapsed && (
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-sm font-medium truncate">{adminUser.name}</p>
+                  <p className="text-[11px] text-white/50">{roleLabels[adminUser.role]}</p>
+                </div>
+              )}
+            </button>
+
+            {/* User dropdown */}
+            {userMenuOpen && (
+              <div className={`absolute bottom-full mb-1 bg-[#1e293b] rounded-lg border border-white/10 shadow-xl py-1 min-w-[180px] ${
+                collapsed ? 'left-full ml-2' : 'left-4 right-4'
+              }`}>
+                <Link
+                  href="/admin/help"
+                  onClick={() => { setUserMenuOpen(false); onClose(); }}
+                  className="flex items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5"
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </Link>
+                <a
+                  href="https://cethos.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  View Site
+                </a>
+                <div className="border-t border-white/10 my-1" />
+                <button
+                  onClick={() => { setUserMenuOpen(false); logout(); }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-white/5"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Collapse toggle - desktop only */}
           <button
-            onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-white/60 hover:text-red-400 hover:bg-white/5 rounded transition-colors"
+            onClick={onToggleCollapse}
+            className="hidden lg:flex w-full items-center justify-center py-2 text-white/40 hover:text-white/70 hover:bg-[#1e293b] transition-colors"
           >
-            <LogOut className="w-4 h-4" />
-            Logout
+            <ChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
           </button>
         </div>
       </aside>
