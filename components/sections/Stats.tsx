@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 const stats = [
   {
@@ -15,7 +15,7 @@ const stats = [
     label: 'Specialists',
   },
   {
-    value: 99.7,
+    value: 99.8,
     suffix: '%',
     label: 'Accuracy',
   },
@@ -28,38 +28,54 @@ const stats = [
 
 function CountUp({ value, suffix, duration = 2 }: { value: number; suffix: string; duration?: number }) {
   const [count, setCount] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
-  const isInView = useInView(ref, { once: true })
+  const ref = useRef<HTMLDivElement>(null)
+  const hasAnimated = useRef(false)
 
   useEffect(() => {
-    if (!isInView) return
+    if (hasAnimated.current) return
 
-    const startTime = Date.now()
-    const endTime = startTime + duration * 1000
+    const el = ref.current
+    if (!el) return
 
-    const tick = () => {
-      const now = Date.now()
-      const progress = Math.min(1, (now - startTime) / (duration * 1000))
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4)
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true
 
-      setCount(Math.floor(value * easeOutQuart))
+          const startTime = performance.now()
+          const durationMs = duration * 1000
 
-      if (now < endTime) {
-        requestAnimationFrame(tick)
-      } else {
-        setCount(value)
-      }
-    }
+          const tick = (now: number) => {
+            const elapsed = now - startTime
+            const progress = Math.min(1, elapsed / durationMs)
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4)
 
-    requestAnimationFrame(tick)
-  }, [isInView, value, duration])
+            setCount(value * easeOutQuart)
 
-  const displayValue = value % 1 === 0 ? count.toLocaleString() : count.toFixed(1)
+            if (progress < 1) {
+              requestAnimationFrame(tick)
+            } else {
+              setCount(value)
+            }
+          }
+
+          requestAnimationFrame(tick)
+        }
+      },
+      { threshold: 0.3 }
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [value, duration])
+
+  const isInteger = value % 1 === 0
+  const displayValue = isInteger ? Math.floor(count).toLocaleString() : count.toFixed(1)
 
   return (
-    <span ref={ref}>
+    <div ref={ref}>
       {displayValue}{suffix}
-    </span>
+    </div>
   )
 }
 
