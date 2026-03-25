@@ -2,7 +2,10 @@
 
 import { useAdmin } from '@/components/admin/AdminContext';
 import { hasPermission } from '@/lib/admin/permissions';
-import { FileText, FolderOpen, Eye, Plus, ExternalLink, Clock, ArrowUpRight } from 'lucide-react';
+import {
+  FileText, FolderOpen, Eye, Plus, ExternalLink, Clock, ArrowUpRight,
+  BarChart3, TrendingUp, MousePointerClick, Search, Globe, Megaphone,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -25,6 +28,16 @@ interface AuditEntry {
 interface DraftPost {
   id: string;
   title: string;
+}
+
+// Section heading component for consistent sizing
+function SectionHeading({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
+  return (
+    <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+      <h2 className="text-sm font-semibold text-[#0f172a]">{children}</h2>
+      {icon}
+    </div>
+  );
 }
 
 export default function AdminDashboardPage() {
@@ -139,7 +152,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {statCards.map((card) => (
           <Link
             key={card.label}
@@ -148,7 +161,7 @@ export default function AdminDashboardPage() {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-[#64748b]">{card.label}</p>
+                <p className="text-xs text-[#64748b] uppercase tracking-wide">{card.label}</p>
                 <p className="text-2xl font-bold text-[#0f172a] mt-1">{card.value}</p>
                 <p className="text-xs text-[#64748b] mt-1">+0 this week</p>
               </div>
@@ -158,47 +171,86 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
+      {/* Analytics Row - Google Analytics, Search Console, Ads */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <AnalyticsCard
+          title="Google Analytics"
+          icon={<BarChart3 className="w-4 h-4 text-[#e37400]" />}
+          metrics={[
+            { label: 'Sessions (30d)', value: '--' },
+            { label: 'Page Views', value: '--' },
+            { label: 'Avg. Duration', value: '--' },
+            { label: 'Bounce Rate', value: '--' },
+          ]}
+          color="border-l-[#e37400]"
+          connectLabel="Connect Google Analytics"
+          connectHref="/admin/tracking"
+        />
+        <AnalyticsCard
+          title="Search Console"
+          icon={<Search className="w-4 h-4 text-[#4285f4]" />}
+          metrics={[
+            { label: 'Impressions (30d)', value: '--' },
+            { label: 'Clicks', value: '--' },
+            { label: 'Avg. CTR', value: '--' },
+            { label: 'Avg. Position', value: '--' },
+          ]}
+          color="border-l-[#4285f4]"
+          connectLabel="Connect Search Console"
+          connectHref="/admin/seo"
+        />
+        <AnalyticsCard
+          title="Google Ads"
+          icon={<Megaphone className="w-4 h-4 text-[#34a853]" />}
+          metrics={[
+            { label: 'Impressions (30d)', value: '--' },
+            { label: 'Clicks', value: '--' },
+            { label: 'Conversions', value: '--' },
+            { label: 'Spend', value: '--' },
+          ]}
+          color="border-l-[#34a853]"
+          connectLabel="Connect Google Ads"
+          connectHref="/admin/tracking"
+        />
+      </div>
+
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Recent Activity - 65% */}
         <div className="lg:col-span-3">
           {hasPermission(adminUser!.role, 'audit_log', 'read') && (
             <div className="bg-white rounded-lg border border-[#e2e8f0]">
-              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-semibold text-[#0f172a]">Recent Activity</h2>
-                <Clock className="w-4 h-4 text-gray-400" />
-              </div>
+              <SectionHeading icon={<Clock className="w-4 h-4 text-gray-400" />}>
+                Recent Activity
+              </SectionHeading>
               <div className="divide-y divide-gray-50">
                 {recentActivity.length === 0 ? (
-                  <div className="px-5 py-12 text-center">
-                    <Clock className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-500">No recent activity yet</p>
-                    <p className="text-xs text-gray-400 mt-1">Activity will appear here as you manage content</p>
+                  <div className="px-5 py-10 text-center">
+                    <Clock className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+                    <p className="text-xs font-medium text-gray-500">No recent activity yet</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Activity will appear here as you manage content</p>
                   </div>
                 ) : (
                   <>
-                    {recentActivity.slice(0, 15).map((entry) => (
-                      <div key={entry.id} className="px-5 py-3 flex items-center justify-between hover:bg-gray-50/50">
+                    {recentActivity.slice(0, 10).map((entry) => (
+                      <div key={entry.id} className="px-5 py-2.5 flex items-center justify-between hover:bg-gray-50/50">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-full bg-[#0d9488]/10 flex items-center justify-center text-xs font-bold text-[#0d9488] flex-shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-[#0d9488]/10 flex items-center justify-center text-[10px] font-bold text-[#0d9488] flex-shrink-0">
                             {entry.user_name?.charAt(0) || '?'}
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-sm text-gray-900 truncate">
-                              <span className="font-medium">{entry.user_name}</span>{' '}
-                              {entry.action}d{' '}
-                              <span className="text-gray-600">{entry.entity_type.replace('_', ' ')}</span>{' '}
-                              &ldquo;{entry.entity_name}&rdquo;
-                            </p>
-                          </div>
+                          <p className="text-xs text-gray-700 truncate">
+                            <span className="font-medium text-gray-900">{entry.user_name}</span>{' '}
+                            {entry.action}d {entry.entity_type.replace('_', ' ')}{' '}
+                            &ldquo;{entry.entity_name}&rdquo;
+                          </p>
                         </div>
-                        <span className="text-xs text-gray-400 flex-shrink-0 ml-4">
+                        <span className="text-[10px] text-gray-400 flex-shrink-0 ml-3">
                           {timeAgo(entry.created_at)}
                         </span>
                       </div>
                     ))}
-                    <div className="px-5 py-3 text-center">
-                      <button className="text-sm text-[#0d9488] hover:text-[#0f766e] font-medium">
+                    <div className="px-5 py-2.5 text-center">
+                      <button className="text-xs text-[#0d9488] hover:text-[#0f766e] font-medium">
                         View all activity
                       </button>
                     </div>
@@ -210,47 +262,120 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Quick Stats Panel - 35% */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Drafts Needing Review */}
           <div className="bg-white rounded-lg border border-[#e2e8f0]">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-[#0f172a]">Drafts Needing Review</h2>
-                <span className="text-xs font-medium bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200">
+            <SectionHeading
+              icon={
+                <span className="text-[10px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-full border border-amber-200">
                   {drafts.length}
                 </span>
-              </div>
-            </div>
+              }
+            >
+              Drafts Needing Review
+            </SectionHeading>
             <div className="divide-y divide-gray-50">
               {drafts.length === 0 ? (
-                <div className="px-5 py-8 text-center">
-                  <p className="text-sm text-gray-400">No drafts pending review</p>
+                <div className="px-5 py-6 text-center">
+                  <p className="text-xs text-gray-400">No drafts pending review</p>
                 </div>
               ) : (
                 drafts.map((draft) => (
                   <Link
                     key={draft.id}
                     href={`/admin/blog/${draft.id}/edit`}
-                    className="flex items-center justify-between px-5 py-2.5 hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between px-5 py-2 hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm text-gray-700 truncate">{draft.title}</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    <span className="text-xs text-gray-700 truncate">{draft.title}</span>
+                    <ArrowUpRight className="w-3 h-3 text-gray-400 flex-shrink-0" />
                   </Link>
                 ))
               )}
             </div>
           </div>
 
-          {/* Top Posts placeholder */}
+          {/* Top Posts */}
           <div className="bg-white rounded-lg border border-[#e2e8f0]">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-[#0f172a]">Top Posts This Month</h2>
+            <SectionHeading icon={<TrendingUp className="w-4 h-4 text-gray-400" />}>
+              Top Posts This Month
+            </SectionHeading>
+            <div className="px-5 py-6 text-center">
+              <Globe className="w-6 h-6 text-gray-200 mx-auto mb-1.5" />
+              <p className="text-xs text-gray-400">Connect Google Analytics to see top posts</p>
             </div>
-            <div className="px-5 py-8 text-center">
-              <p className="text-sm text-gray-400">Analytics data coming soon</p>
+          </div>
+
+          {/* Search Performance */}
+          <div className="bg-white rounded-lg border border-[#e2e8f0]">
+            <SectionHeading icon={<Search className="w-4 h-4 text-gray-400" />}>
+              Top Search Queries
+            </SectionHeading>
+            <div className="px-5 py-6 text-center">
+              <Search className="w-6 h-6 text-gray-200 mx-auto mb-1.5" />
+              <p className="text-xs text-gray-400">Connect Search Console to see top queries</p>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Analytics Card component
+function AnalyticsCard({
+  title,
+  icon,
+  metrics,
+  color,
+  connectLabel,
+  connectHref,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  metrics: { label: string; value: string }[];
+  color: string;
+  connectLabel: string;
+  connectHref: string;
+}) {
+  const isConnected = metrics.some(m => m.value !== '--');
+
+  return (
+    <div className={`bg-white rounded-lg border border-[#e2e8f0] border-l-4 ${color}`}>
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {icon}
+          <h3 className="text-sm font-semibold text-[#0f172a]">{title}</h3>
+        </div>
+        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+          isConnected
+            ? 'bg-green-50 text-green-700 border border-green-200'
+            : 'bg-gray-50 text-gray-500 border border-gray-200'
+        }`}>
+          {isConnected ? 'Connected' : 'Not connected'}
+        </span>
+      </div>
+      <div className="p-4">
+        {isConnected ? (
+          <div className="grid grid-cols-2 gap-3">
+            {metrics.map((m) => (
+              <div key={m.label}>
+                <p className="text-[10px] text-[#64748b] uppercase tracking-wide">{m.label}</p>
+                <p className="text-lg font-bold text-[#0f172a] mt-0.5">{m.value}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-2">
+            <p className="text-xs text-gray-400 mb-2">No data available yet</p>
+            <Link
+              href={connectHref}
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#0d9488] hover:text-[#0f766e]"
+            >
+              <MousePointerClick className="w-3 h-3" />
+              {connectLabel}
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
