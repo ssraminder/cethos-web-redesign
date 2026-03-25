@@ -116,36 +116,82 @@ export function WebSiteJsonLd() {
   )
 }
 
-export function LocalBusinessJsonLd() {
+export function LocalBusinessJsonLd({ location }: { location?: 'calgary' | 'dubai' | 'india' }) {
+  const locations = {
+    calgary: {
+      '@id': 'https://cethos.com/#calgary',
+      name: 'Cethos Solutions Inc. - Calgary (Headquarters)',
+      telephone: '+1-587-600-0786',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '421 7 Avenue SW, Floor 30',
+        addressLocality: 'Calgary',
+        addressRegion: 'AB',
+        postalCode: 'T2P 4K9',
+        addressCountry: 'CA',
+      },
+      geo: { '@type': 'GeoCoordinates', latitude: 51.0486, longitude: -114.0708 },
+      openingHoursSpecification: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '17:00',
+      },
+    },
+    dubai: {
+      '@id': 'https://cethos.com/#dubai',
+      name: 'Cethos Solutions Inc. - Dubai',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Building A1, Dubai Digital Park, Dubai Silicon Oasis',
+        addressLocality: 'Dubai',
+        addressCountry: 'AE',
+      },
+      geo: { '@type': 'GeoCoordinates', latitude: 25.1212, longitude: 55.3773 },
+      openingHoursSpecification: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+        opens: '09:00',
+        closes: '18:00',
+      },
+    },
+    india: {
+      '@id': 'https://cethos.com/#india',
+      name: 'Cethos Solutions Inc. - India',
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: '158/3, Dharampura Bazaar',
+        addressLocality: 'Patiala',
+        addressRegion: 'Punjab',
+        postalCode: '147001',
+        addressCountry: 'IN',
+      },
+      geo: { '@type': 'GeoCoordinates', latitude: 30.3398, longitude: 76.3869 },
+      openingHoursSpecification: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '09:00',
+        closes: '18:00',
+      },
+    },
+  }
+
+  // If no location specified, render Calgary (default for layout)
+  const loc = locations[location || 'calgary']
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://cethos.com/#localbusiness',
-    name: 'Cethos Solutions Inc.',
+    ...loc,
     image: 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/final_logo_light_bg_cethosAsset%201.svg',
-    telephone: '+1-587-600-0786',
     email: 'info@cethos.com',
     url: 'https://cethos.com',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: '421 7 Avenue SW, Floor 30',
-      addressLocality: 'Calgary',
-      addressRegion: 'AB',
-      postalCode: 'T2P 4K9',
-      addressCountry: 'CA',
-    },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: 51.0447,
-      longitude: -114.0719,
-    },
-    openingHoursSpecification: {
-      '@type': 'OpeningHoursSpecification',
-      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-      opens: '09:00',
-      closes: '17:00',
-    },
     priceRange: '$$',
+    parentOrganization: {
+      '@type': 'Organization',
+      name: 'Cethos Solutions Inc.',
+      '@id': 'https://cethos.com/#organization',
+    },
   }
 
   return (

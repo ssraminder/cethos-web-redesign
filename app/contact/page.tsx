@@ -1,9 +1,11 @@
 import { Metadata } from 'next'
 import ContactPageContent from './ContactPageContent'
+import { LocalBusinessJsonLd } from '@/components/JsonLd'
+import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 export const metadata: Metadata = {
   title: 'Contact Us | Cethos Solutions Inc.',
-  description: 'Contact Cethos Solutions Inc. for translation services. Offices in Calgary (HQ), Dubai, and India. Phone: 587-600-0786. Email: info@cethos.com. Response within 2 hours.',
+  description: 'Contact Cethos Solutions for professional translation services. Offices in Calgary, Dubai, and India. Call (587) 600-0786 or email info@cethos.com.',
   keywords: ['contact cethos', 'translation services contact', 'language services', 'Calgary translation', 'get quote'],
   alternates: {
     canonical: 'https://cethos.com/contact',
@@ -18,5 +20,15 @@ export const metadata: Metadata = {
 }
 
 export default function ContactPage() {
-  return <ContactPageContent />
+  return (
+    <>
+      <LocalBusinessJsonLd location="calgary" />
+      <LocalBusinessJsonLd location="dubai" />
+      <LocalBusinessJsonLd location="india" />
+      <BreadcrumbJsonLd items={[
+        { name: 'Contact', url: 'https://cethos.com/contact' },
+      ]} />
+      <ContactPageContent />
+    </>
+  )
 }

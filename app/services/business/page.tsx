@@ -14,6 +14,8 @@ import {
   CheckCircle,
 } from 'lucide-react'
 import TrustedByLogos from '@/components/TrustedByLogos'
+import { ServiceJsonLd } from '@/components/JsonLd'
+import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 export const metadata: Metadata = {
   title: 'Business Translation Services | Cethos Solutions Inc.',
@@ -81,6 +83,15 @@ const trustSignals = [
 export default function BusinessTranslationPage() {
   return (
     <>
+      <ServiceJsonLd
+        name="Business Translation Services"
+        description="Professional business translation for corporate communications, marketing materials, annual reports, and training documents in 200+ languages."
+        url="https://cethos.com/services/business"
+      />
+      <BreadcrumbJsonLd items={[
+        { name: 'Services', url: 'https://cethos.com/services' },
+        { name: 'Business Translation', url: 'https://cethos.com/services/business' },
+      ]} />
       {/* HERO SECTION */}
       <section className="pt-20 bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#164e63]">
         <div className="max-w-[1200px] mx-auto px-8 py-24">
