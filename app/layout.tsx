@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from 'next/font/google'
 import Script from 'next/script'
 import { Toaster } from 'sonner'
 import { CethosHeader, CethosFooter } from '@/components/layout'
+import PublicLayoutWrapper from '@/components/layout/PublicLayoutWrapper'
 import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
 import './globals.css'
@@ -83,9 +84,12 @@ export default function RootLayout({
       <body className="font-sans antialiased" suppressHydrationWarning>
         <Toaster position="top-right" richColors closeButton />
         <GoogleTagManager />
-        <CethosHeader ctaType="login" />
-        <main>{children}</main>
-        <CethosFooter />
+        <PublicLayoutWrapper
+          header={<CethosHeader ctaType="login" />}
+          footer={<CethosFooter />}
+        >
+          {children}
+        </PublicLayoutWrapper>
         {/* Tawk.to Live Chat Widget - lazy loaded for better LCP */}
         <Script id="tawk-to" strategy="lazyOnload">
           {`
