@@ -58,37 +58,40 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [statsRes, activityRes, draftsRes, pixelsRes] = await Promise.all([
-          adminFetch('/api/admin/dashboard/stats'),
-          hasPermission(adminUser!.role, 'audit_log', 'read')
-            ? adminFetch('/api/admin/dashboard/activity')
-            : Promise.resolve(null),
-          adminFetch('/api/admin/blog/posts?status=draft&limit=5'),
-          adminFetch('/api/admin/tracking'),
-        ]);
+    async function fetchAll() {
+      // Fetch each independently so one failure doesn't block others
+      const results = await Promise.allSettled([
+        adminFetch('/api/admin/dashboard/stats'),
+        hasPermission(adminUser!.role, 'audit_log', 'read')
+          ? adminFetch('/api/admin/dashboard/activity')
+          : Promise.resolve(null),
+        adminFetch('/api/admin/blog/posts?status=draft&limit=5'),
+        adminFetch('/api/admin/tracking'),
+      ]);
 
-        if (statsRes.ok) setStats(await statsRes.json());
-        if (activityRes?.ok) {
-          const data = await activityRes.json();
-          setRecentActivity(data.entries || []);
-        }
-        if (draftsRes.ok) {
-          const data = await draftsRes.json();
-          setDrafts(data.posts || []);
-        }
-        if (pixelsRes.ok) {
-          const data = await pixelsRes.json();
-          setPixels(Array.isArray(data) ? data : []);
-        }
-      } catch {
-        // Dashboard data is non-critical
-      } finally {
-        setLoading(false);
+      // Stats
+      if (results[0].status === 'fulfilled' && results[0].value?.ok) {
+        setStats(await results[0].value.json());
       }
+      // Activity
+      if (results[1].status === 'fulfilled' && results[1].value?.ok) {
+        const data = await results[1].value.json();
+        setRecentActivity(data.entries || []);
+      }
+      // Drafts
+      if (results[2].status === 'fulfilled' && results[2].value?.ok) {
+        const data = await results[2].value.json();
+        setDrafts(data.posts || []);
+      }
+      // Tracking pixels
+      if (results[3].status === 'fulfilled' && results[3].value?.ok) {
+        const data = await results[3].value.json();
+        setPixels(Array.isArray(data) ? data : []);
+      }
+
+      setLoading(false);
     }
-    fetchData();
+    fetchAll();
   }, [adminFetch, adminUser]);
 
   // Find connected pixels by type
