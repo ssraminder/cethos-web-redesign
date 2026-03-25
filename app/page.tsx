@@ -1,4 +1,4 @@
-import { Hero, Services, Stats, Industries, WhyUs, CTA } from '@/components/sections'
+import { Hero, Services, Stats, Industries, WhyUs, MidPageCTA, DualCTA } from '@/components/sections'
 import TrustedByLogos from '@/components/TrustedByLogos'
 
 export default function HomePage() {
@@ -13,7 +13,8 @@ export default function HomePage() {
         title="Trusted by Leading Global Companies"
         subtitle="Join 500+ enterprises who rely on Cethos for precision translation"
       />
-      <CTA />
+      <MidPageCTA />
+      <DualCTA />
     </>
   )
 }

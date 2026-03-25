@@ -289,7 +289,6 @@ export function LandingQuoteForm() {
             />
             <div className="text-center">
               <div className="font-semibold text-[#0C2340]">Same-Day Rush</div>
-              <div className="text-sm text-slate-600">+$25</div>
             </div>
           </label>
         </div>
