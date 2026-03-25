@@ -5,6 +5,7 @@ import { hasPermission } from '@/lib/admin/permissions';
 import {
   FileText, FolderOpen, Eye, Plus, ExternalLink, Clock, ArrowUpRight,
   BarChart3, TrendingUp, MousePointerClick, Search, Globe, Megaphone,
+  CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -30,6 +31,14 @@ interface DraftPost {
   title: string;
 }
 
+interface TrackingPixel {
+  id: string;
+  name: string;
+  type: string;
+  pixel_id: string | null;
+  is_active: boolean;
+}
+
 // Section heading component for consistent sizing
 function SectionHeading({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
@@ -45,17 +54,19 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentActivity, setRecentActivity] = useState<AuditEntry[]>([]);
   const [drafts, setDrafts] = useState<DraftPost[]>([]);
+  const [pixels, setPixels] = useState<TrackingPixel[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [statsRes, activityRes, draftsRes] = await Promise.all([
+        const [statsRes, activityRes, draftsRes, pixelsRes] = await Promise.all([
           adminFetch('/api/admin/dashboard/stats'),
           hasPermission(adminUser!.role, 'audit_log', 'read')
             ? adminFetch('/api/admin/dashboard/activity')
             : Promise.resolve(null),
           adminFetch('/api/admin/blog/posts?status=draft&limit=5'),
+          adminFetch('/api/admin/tracking'),
         ]);
 
         if (statsRes.ok) setStats(await statsRes.json());
@@ -67,6 +78,10 @@ export default function AdminDashboardPage() {
           const data = await draftsRes.json();
           setDrafts(data.posts || []);
         }
+        if (pixelsRes.ok) {
+          const data = await pixelsRes.json();
+          setPixels(Array.isArray(data) ? data : []);
+        }
       } catch {
         // Dashboard data is non-critical
       } finally {
@@ -75,6 +90,22 @@ export default function AdminDashboardPage() {
     }
     fetchData();
   }, [adminFetch, adminUser]);
+
+  // Find connected pixels by type
+  function findPixel(...types: string[]): TrackingPixel | undefined {
+    return pixels.find(p => types.includes(p.type) && p.is_active);
+  }
+
+  const gaPixel = findPixel('google_analytics');
+  const gtmPixel = findPixel('google_tag_manager');
+  const adsPixel = findPixel('google_ads');
+
+  // GA is connected if either GA4 or GTM is active
+  const gaConnected = !!(gaPixel || gtmPixel);
+  // Search Console — connected if GA or GTM is set up (GSC data flows via same property)
+  const gscConnected = gaConnected;
+  // Ads — only if an explicit google_ads pixel exists, or GTM is active (ads often fires through GTM)
+  const adsConnected = !!(adsPixel || gtmPixel);
 
   const now = new Date();
   const hour = now.getHours();
@@ -109,11 +140,26 @@ export default function AdminDashboardPage() {
             <div className="h-4 w-40 bg-gray-100 rounded animate-pulse mt-2" />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {[1,2,3,4].map(i => (
             <div key={i} className="bg-white rounded-lg border border-[#e2e8f0] p-5 border-l-4 border-l-gray-200">
               <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
               <div className="h-8 w-12 bg-gray-200 rounded animate-pulse mt-2" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          {[1,2,3].map(i => (
+            <div key={i} className="bg-white rounded-lg border border-[#e2e8f0] p-5 border-l-4 border-l-gray-200">
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {[1,2,3,4].map(j => (
+                  <div key={j}>
+                    <div className="h-3 w-16 bg-gray-100 rounded animate-pulse" />
+                    <div className="h-5 w-10 bg-gray-200 rounded animate-pulse mt-1" />
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -171,46 +217,57 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Analytics Row - Google Analytics, Search Console, Ads */}
+      {/* Analytics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <AnalyticsCard
           title="Google Analytics"
           icon={<BarChart3 className="w-4 h-4 text-[#e37400]" />}
+          connected={gaConnected}
+          pixelName={gaPixel?.name || gtmPixel?.name}
+          pixelId={gaPixel?.pixel_id || gtmPixel?.pixel_id}
           metrics={[
-            { label: 'Sessions (30d)', value: '--' },
-            { label: 'Page Views', value: '--' },
-            { label: 'Avg. Duration', value: '--' },
-            { label: 'Bounce Rate', value: '--' },
+            { label: 'Sessions (30d)', value: gaConnected ? 'See GA4' : '--' },
+            { label: 'Page Views', value: gaConnected ? 'See GA4' : '--' },
+            { label: 'Avg. Duration', value: gaConnected ? 'See GA4' : '--' },
+            { label: 'Bounce Rate', value: gaConnected ? 'See GA4' : '--' },
           ]}
           color="border-l-[#e37400]"
-          connectLabel="Connect Google Analytics"
+          connectLabel="Add GA4 Tracking"
           connectHref="/admin/tracking"
+          note={gaConnected ? 'View detailed analytics in your Google Analytics dashboard.' : undefined}
         />
         <AnalyticsCard
           title="Search Console"
           icon={<Search className="w-4 h-4 text-[#4285f4]" />}
+          connected={gscConnected}
+          pixelName={gscConnected ? 'Linked via GA4 / GTM' : undefined}
           metrics={[
-            { label: 'Impressions (30d)', value: '--' },
-            { label: 'Clicks', value: '--' },
-            { label: 'Avg. CTR', value: '--' },
-            { label: 'Avg. Position', value: '--' },
+            { label: 'Impressions (30d)', value: gscConnected ? 'See GSC' : '--' },
+            { label: 'Clicks', value: gscConnected ? 'See GSC' : '--' },
+            { label: 'Avg. CTR', value: gscConnected ? 'See GSC' : '--' },
+            { label: 'Avg. Position', value: gscConnected ? 'See GSC' : '--' },
           ]}
           color="border-l-[#4285f4]"
-          connectLabel="Connect Search Console"
+          connectLabel="Set up Search Console"
           connectHref="/admin/seo"
+          note={gscConnected ? 'View search performance in Google Search Console.' : undefined}
         />
         <AnalyticsCard
           title="Google Ads"
           icon={<Megaphone className="w-4 h-4 text-[#34a853]" />}
+          connected={adsConnected}
+          pixelName={adsPixel?.name || (adsConnected ? 'Linked via GTM' : undefined)}
+          pixelId={adsPixel?.pixel_id}
           metrics={[
-            { label: 'Impressions (30d)', value: '--' },
-            { label: 'Clicks', value: '--' },
-            { label: 'Conversions', value: '--' },
-            { label: 'Spend', value: '--' },
+            { label: 'Impressions (30d)', value: adsConnected ? 'See Ads' : '--' },
+            { label: 'Clicks', value: adsConnected ? 'See Ads' : '--' },
+            { label: 'Conversions', value: adsConnected ? 'See Ads' : '--' },
+            { label: 'Spend', value: adsConnected ? 'See Ads' : '--' },
           ]}
           color="border-l-[#34a853]"
-          connectLabel="Connect Google Ads"
+          connectLabel="Add Google Ads Tag"
           connectHref="/admin/tracking"
+          note={adsConnected ? 'View campaign performance in Google Ads dashboard.' : undefined}
         />
       </div>
 
@@ -301,7 +358,11 @@ export default function AdminDashboardPage() {
             </SectionHeading>
             <div className="px-5 py-6 text-center">
               <Globe className="w-6 h-6 text-gray-200 mx-auto mb-1.5" />
-              <p className="text-xs text-gray-400">Connect Google Analytics to see top posts</p>
+              <p className="text-xs text-gray-400">
+                {gaConnected
+                  ? 'View top pages in your Google Analytics dashboard'
+                  : 'Connect Google Analytics to see top posts'}
+              </p>
             </div>
           </div>
 
@@ -312,7 +373,11 @@ export default function AdminDashboardPage() {
             </SectionHeading>
             <div className="px-5 py-6 text-center">
               <Search className="w-6 h-6 text-gray-200 mx-auto mb-1.5" />
-              <p className="text-xs text-gray-400">Connect Search Console to see top queries</p>
+              <p className="text-xs text-gray-400">
+                {gscConnected
+                  ? 'View queries in Google Search Console'
+                  : 'Connect Search Console to see top queries'}
+              </p>
             </div>
           </div>
         </div>
@@ -325,20 +390,26 @@ export default function AdminDashboardPage() {
 function AnalyticsCard({
   title,
   icon,
+  connected,
+  pixelName,
+  pixelId,
   metrics,
   color,
   connectLabel,
   connectHref,
+  note,
 }: {
   title: string;
   icon: React.ReactNode;
+  connected: boolean;
+  pixelName?: string;
+  pixelId?: string | null;
   metrics: { label: string; value: string }[];
   color: string;
   connectLabel: string;
   connectHref: string;
+  note?: string;
 }) {
-  const isConnected = metrics.some(m => m.value !== '--');
-
   return (
     <div className={`bg-white rounded-lg border border-[#e2e8f0] border-l-4 ${color}`}>
       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
@@ -347,26 +418,42 @@ function AnalyticsCard({
           <h3 className="text-sm font-semibold text-[#0f172a]">{title}</h3>
         </div>
         <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-          isConnected
+          connected
             ? 'bg-green-50 text-green-700 border border-green-200'
             : 'bg-gray-50 text-gray-500 border border-gray-200'
         }`}>
-          {isConnected ? 'Connected' : 'Not connected'}
+          {connected ? 'Connected' : 'Not connected'}
         </span>
       </div>
       <div className="p-4">
-        {isConnected ? (
-          <div className="grid grid-cols-2 gap-3">
-            {metrics.map((m) => (
-              <div key={m.label}>
-                <p className="text-[10px] text-[#64748b] uppercase tracking-wide">{m.label}</p>
-                <p className="text-lg font-bold text-[#0f172a] mt-0.5">{m.value}</p>
-              </div>
-            ))}
+        {connected ? (
+          <div>
+            {/* Show which pixel is providing the connection */}
+            <div className="flex items-center gap-1.5 mb-3">
+              <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+              <span className="text-xs text-gray-600">
+                {pixelName}
+                {pixelId && (
+                  <code className="ml-1 text-[10px] bg-gray-100 px-1 py-0.5 rounded">{pixelId}</code>
+                )}
+              </span>
+            </div>
+            {/* Metrics grid */}
+            <div className="grid grid-cols-2 gap-2">
+              {metrics.map((m) => (
+                <div key={m.label} className="bg-gray-50 rounded px-2.5 py-2">
+                  <p className="text-[10px] text-[#64748b] uppercase tracking-wide">{m.label}</p>
+                  <p className="text-sm font-semibold text-[#0f172a] mt-0.5">{m.value}</p>
+                </div>
+              ))}
+            </div>
+            {note && (
+              <p className="text-[10px] text-gray-400 mt-2">{note}</p>
+            )}
           </div>
         ) : (
           <div className="text-center py-2">
-            <p className="text-xs text-gray-400 mb-2">No data available yet</p>
+            <p className="text-xs text-gray-400 mb-2">No tracking pixel detected</p>
             <Link
               href={connectHref}
               className="inline-flex items-center gap-1 text-xs font-medium text-[#0d9488] hover:text-[#0f766e]"
