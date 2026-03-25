@@ -11,6 +11,7 @@ import {
   Settings, User,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { CETHOS_LOGO_DARK_BG, CETHOS_FAVICON } from '@/lib/admin/brand';
 
 interface SidebarProps {
   open: boolean;
@@ -122,12 +123,19 @@ export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: 
       >
         {/* Logo */}
         <div className="h-14 flex items-center px-4 border-b border-white/10 flex-shrink-0">
-          <Link href="/admin" className="flex items-center gap-2.5 min-w-0" onClick={onClose}>
-            <div className="w-8 h-8 rounded-lg bg-[#0d9488] flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            {!collapsed && (
-              <span className="text-base font-bold tracking-wide truncate">CETHOS</span>
+          <Link href="/admin" className="flex items-center min-w-0" onClick={onClose}>
+            {collapsed ? (
+              <img
+                src={CETHOS_FAVICON}
+                alt="Cethos"
+                className="w-8 h-8 flex-shrink-0"
+              />
+            ) : (
+              <img
+                src={CETHOS_LOGO_DARK_BG}
+                alt="Cethos Solutions Inc."
+                className="h-7 w-auto"
+              />
             )}
           </Link>
           <button onClick={onClose} className="lg:hidden ml-auto p-1 hover:bg-white/10 rounded">

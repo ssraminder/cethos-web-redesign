@@ -101,7 +101,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     .slice(0, 2) || '?';
 
   return (
-    <div className="min-h-screen bg-[#f8fafc]">
+    <div className="min-h-screen bg-[#f8fafc] font-sans">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
