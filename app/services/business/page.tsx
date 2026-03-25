@@ -217,18 +217,25 @@ export default function BusinessTranslationPage() {
       <section className="py-20 bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#164e63]">
         <div className="max-w-[1200px] mx-auto px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Go Global?
+            Translate Your Business Content
           </h2>
           <p className="text-xl text-white/80 max-w-2xl mx-auto mb-8">
-            Get a free quote for your business translation project. Our team
-            will respond within 2 hours during business hours.
+            Professional translations for corporate communications, marketing materials, and internal documents.
           </p>
-          <Link
-            href="/get-quote"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold text-lg hover:bg-[#06B6D4] transition-colors"
-          >
-            Get a Free Quote <ArrowRight className="w-5 h-5" />
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/get-quote"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold text-lg hover:bg-[#06B6D4] transition-colors"
+            >
+              Get a Business Quote <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-white border-2 border-white/30 rounded-lg font-semibold hover:bg-white/10 transition-colors"
+            >
+              Contact Us
+            </Link>
+          </div>
         </div>
       </section>
     </>

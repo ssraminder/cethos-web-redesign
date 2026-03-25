@@ -4,7 +4,7 @@ import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
 
 export const metadata: Metadata = {
   title: 'Regulatory Affairs Translation | CTD, SmPC, PIL Translation | Cethos',
-  description: 'Expert regulatory translation for CTD Modules 1-5, SmPCs, PILs, and IMP labels. FDA, EMA, PMDA, Health Canada submissions. ISO 17100 certified.',
+  description: 'Expert regulatory translation for CTD Modules 1-5, SmPCs, PILs, and IMP labels. FDA, EMA, PMDA, Health Canada submissions. ISO 17100 compliant processes.',
   keywords: ['regulatory translation', 'CTD translation', 'SmPC translation', 'PIL translation', 'FDA submission', 'EMA submission', 'regulatory affairs'],
   openGraph: {
     title: 'Regulatory Affairs Translation | Cethos',
@@ -90,7 +90,7 @@ export default function RegulatoryAffairsPage() {
             <div className="flex flex-wrap gap-6 mt-12 text-sm text-gray-400">
               <span className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                ISO 17100 Certified
+                ISO 17100 Compliant
               </span>
               <span className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
@@ -302,7 +302,7 @@ export default function RegulatoryAffairsPage() {
               Contact Us
             </Link>
           </div>
-          <p className="mt-6 text-sm text-gray-400">Response within 2 hours - 8+ agencies supported - ISO 17100 certified</p>
+          <p className="mt-6 text-sm text-gray-400">Response within 2 hours - 8+ agencies supported - ISO 17100 compliant</p>
         </div>
       </section>
     </>

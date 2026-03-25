@@ -10,8 +10,8 @@ interface CTAProps {
 }
 
 export function CTA({
-  headline = "Ready to Go Global?",
-  subtext = "Get a free quote for your translation project. Our team is ready to help you reach new markets with precision and speed."
+  headline = "Get Your Translation Project Started Today",
+  subtext = "Upload your documents and receive a free quote in minutes. Certified translations start at $65."
 }: CTAProps) {
   return (
     <section className="relative py-24 overflow-hidden bg-gradient-to-r from-[#0C2340] via-[#1A365D] to-[#0891B2]">

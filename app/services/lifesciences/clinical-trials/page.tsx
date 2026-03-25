@@ -4,7 +4,7 @@ import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
 
 export const metadata: Metadata = {
   title: 'Clinical Trial Translation Services | Protocols, ICFs, CRFs | Cethos',
-  description: 'Specialized clinical trial document translation including protocols, ICFs, CRFs, patient materials, and site documentation. GCP-compliant with ISO 17100 certification.',
+  description: 'Specialized clinical trial document translation including protocols, ICFs, CRFs, patient materials, and site documentation. GCP-compliant with ISO 17100 compliant processes.',
   keywords: ['clinical trial translation', 'protocol translation', 'ICF translation', 'informed consent translation', 'CRF translation', 'GCP compliant'],
   openGraph: {
     title: 'Clinical Trial Translation Services | Cethos',
@@ -94,7 +94,7 @@ export default function ClinicalTrialsPage() {
               </span>
               <span className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                ISO 17100 Certified
+                ISO 17100 Compliant
               </span>
               <span className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
@@ -121,7 +121,7 @@ export default function ClinicalTrialsPage() {
             </p>
             <p className="mt-4 text-lg text-gray-600 leading-relaxed">
               From Phase I through post-marketing studies, we provide end-to-end translation support with
-              <strong> GCP-compliant workflows</strong> and <strong>ISO 17100 certification</strong>.
+              <strong> GCP-compliant workflows</strong> and <strong>ISO 17100 compliance</strong>.
             </p>
           </div>
 

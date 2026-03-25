@@ -29,16 +29,16 @@ const iconMap: Record<IconName, LucideIcon> = {
 // CTA content mapping by service type
 const ctaContent: Record<string, { headline: string; subtext: string }> = {
   business: {
-    headline: "Ready to Expand Globally?",
-    subtext: "Professional translations for your business documents."
+    headline: "Translate Your Business Content",
+    subtext: "Professional translations for corporate communications, marketing materials, and internal documents."
   },
   software: {
-    headline: "Ready to Go Global?",
-    subtext: "Get a free quote for your translation project. Our team is ready to help you reach new markets with precision and speed."
+    headline: "Localize Your Software for Global Markets",
+    subtext: "End-to-end software localization with QA testing, continuous integration support, and 40+ file format compatibility."
   },
   multimedia: {
-    headline: "Ready to Go Global?",
-    subtext: "Get a free quote for your translation project. Our team is ready to help you reach new markets with precision and speed."
+    headline: "Bring Your Content to Global Audiences",
+    subtext: "Professional multimedia translation and localization for video, audio, and interactive content."
   }
 }
 

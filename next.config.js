@@ -25,6 +25,11 @@ const nextConfig = {
         destination: '/locations/edmonton',
         permanent: true,
       },
+      {
+        source: '/%E6%94%AF%E6%8C%81%E7%9A%84%E8%AF%AD%E8%A8%80',
+        destination: '/services/certified',
+        permanent: true,
+      },
     ];
   },
 }
