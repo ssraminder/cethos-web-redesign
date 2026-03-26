@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import TrustedByLogos from '@/components/TrustedByLogos'
+import ClientTestimonials from '@/components/ClientTestimonials'
 
 // FAQ Accordion Item Component
 function FAQItem({ question, answer, isOpen, onClick }: {
@@ -859,12 +859,7 @@ export default function AboutPageContent() {
       </section>
 
       {/* Section 10: Client Logos */}
-      <TrustedByLogos
-        title="Trusted by Leading Organizations"
-        subtitle="From Fortune 500 pharmaceutical companies to government agencies and individuals worldwide"
-        displayCount={12}
-        bgClass="bg-white"
-      />
+      <ClientTestimonials />
 
       {/* Section 11: FAQ */}
       <section className="py-20 bg-gray-50">

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Hero, Services, Stats, Industries, WhyUs, MidPageCTA, DualCTA } from '@/components/sections'
-import TrustedByLogos from '@/components/TrustedByLogos'
+import ClientTestimonials from '@/components/ClientTestimonials'
 import { LocalBusinessJsonLd } from '@/components/JsonLd'
 import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
@@ -28,10 +28,7 @@ export default function HomePage() {
       <Stats />
       <Industries />
       <WhyUs />
-      <TrustedByLogos
-        title="Trusted by Leading Global Companies"
-        subtitle="Join 500+ enterprises who rely on Cethos for precision translation"
-      />
+      <ClientTestimonials />
       <MidPageCTA />
       <DualCTA />
     </>

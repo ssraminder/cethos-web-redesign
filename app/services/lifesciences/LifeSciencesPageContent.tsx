@@ -26,7 +26,7 @@ import {
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd, ServiceJsonLd } from '@/components/JsonLd'
-import TrustedByLogos from '@/components/TrustedByLogos'
+import ClientTestimonials from '@/components/ClientTestimonials'
 
 // =============================================================================
 // DATA
@@ -422,11 +422,7 @@ export default function LifeSciencesPageContent() {
       {/* ===================================================================== */}
       {/* TRUSTED BY LOGOS */}
       {/* ===================================================================== */}
-      <TrustedByLogos
-        title="Our Life Sciences Clients"
-        subtitle="Trusted by pharmaceutical, biotech, and medical device companies worldwide"
-        bgClass="bg-white"
-      />
+      <ClientTestimonials />
 
       {/* ===================================================================== */}
       {/* THERAPEUTIC AREAS */}

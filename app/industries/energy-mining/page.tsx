@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import TrustedByLogos from '@/components/TrustedByLogos'
+import ClientTestimonials from '@/components/ClientTestimonials'
 
 export const metadata: Metadata = {
   title: 'Energy & Mining Translation Services | Oil & Gas | Cethos',
@@ -1042,12 +1042,7 @@ export default function EnergyMiningPage() {
       </section>
 
       {/* Client Logos Section */}
-      <TrustedByLogos
-        title="Trusted by Energy & Mining Companies"
-        subtitle="From majors to independents, we serve the energy sector's translation needs"
-        displayCount={12}
-        bgClass="bg-gray-50"
-      />
+      <ClientTestimonials />
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#0C2340] via-[#0F3A5C] to-[#0891B2]">
