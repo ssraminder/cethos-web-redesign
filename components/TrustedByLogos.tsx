@@ -5,6 +5,12 @@ import { useState, useEffect } from 'react';
 interface ClientLogo {
   id: string;
   display_name: string;
+  urls?: {
+    small: string;
+    medium: string;
+    large: string;
+    original: string;
+  };
 }
 
 interface TrustedByLogosProps {
@@ -46,9 +52,10 @@ export default function TrustedByLogos({
 
         if (data.logos && Array.isArray(data.logos) && data.logos.length > 0) {
           setClients(
-            data.logos.map((logo: { id: string; display_name: string }) => ({
+            data.logos.map((logo: ClientLogo) => ({
               id: logo.id,
               display_name: logo.display_name,
+              urls: logo.urls,
             }))
           );
           setTotalCount(data.total || 527);
@@ -99,9 +106,20 @@ export default function TrustedByLogos({
               key={client.id}
               className="flex items-center justify-center h-16 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 transition-colors"
             >
-              <span className="text-sm font-semibold text-gray-700 text-center leading-tight">
-                {client.display_name}
-              </span>
+              {client.urls ? (
+                <img
+                  src={client.urls.medium}
+                  srcSet={`${client.urls.small} 80w, ${client.urls.medium} 160w, ${client.urls.large} 320w`}
+                  sizes="(max-width: 640px) 80px, 160px"
+                  alt={client.display_name}
+                  className="max-h-10 max-w-[120px] object-contain"
+                  loading="lazy"
+                />
+              ) : (
+                <span className="text-sm font-semibold text-gray-700 text-center leading-tight">
+                  {client.display_name}
+                </span>
+              )}
             </div>
           ))}
         </div>
