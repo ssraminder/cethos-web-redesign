@@ -13,7 +13,7 @@ import {
   Languages,
   CheckCircle,
 } from 'lucide-react'
-import TrustedByLogos from '@/components/TrustedByLogos'
+import ClientTestimonials from '@/components/ClientTestimonials'
 import { ServiceJsonLd } from '@/components/JsonLd'
 import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
@@ -209,8 +209,8 @@ export default function MultimediaTranslationPage() {
         </div>
       </section>
 
-      {/* TRUSTED BY LOGOS */}
-      <TrustedByLogos />
+      {/* CLIENT TESTIMONIALS */}
+      <ClientTestimonials />
 
       {/* CTA SECTION */}
       <section className="py-20 bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#164e63]">
