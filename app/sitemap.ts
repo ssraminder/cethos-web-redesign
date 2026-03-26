@@ -38,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/services/software`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/services/multimedia`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/services/transcription`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${baseUrl}/services/website`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
 
     // Services - Certified Translation
     { url: `${baseUrl}/services/certified/immigration-translation-services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
@@ -50,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/services/certified/hindi-translation-calgary`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/services/certified/police-clearance-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/services/certified/punjabi-translation-calgary`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/services/certified/edmonton-translation-agency`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
 
     // Locations
     { url: `${baseUrl}/locations`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
