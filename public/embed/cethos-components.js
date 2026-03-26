@@ -235,7 +235,7 @@
         if (session.isAdmin) {
           return `<a href="${baseUrl}/admin" class="${className} admin-btn">Admin Panel</a>`;
         }
-        return `<a href="${baseUrl}/dashboard" class="${className} dashboard-btn">Dashboard</a>`;
+        return `<a href="https://portal.cethos.com/dashboard" class="${className} dashboard-btn">Dashboard</a>`;
       }
 
       return `<a href="https://portal.cethos.com" class="${className}">Login</a>`;
