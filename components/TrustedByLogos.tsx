@@ -1,11 +1,4 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-
-interface ClientLogo {
-  id: string;
-  display_name: string;
-}
+import { Star } from 'lucide-react';
 
 interface TrustedByLogosProps {
   displayCount?: number;
@@ -14,103 +7,60 @@ interface TrustedByLogosProps {
   bgClass?: string;
 }
 
-const fallbackClients: ClientLogo[] = [
-  { id: '1', display_name: 'Catalent' },
-  { id: '2', display_name: 'DSM' },
-  { id: '3', display_name: 'Natera' },
-  { id: '4', display_name: 'Cipla' },
-  { id: '5', display_name: 'Nomura' },
-  { id: '6', display_name: 'ENOC' },
+const testimonials = [
+  {
+    quote:
+      "Cethos consistently delivers accurate, culturally nuanced translations on tight deadlines. They've become an indispensable partner for our global operations.",
+    author: 'Director of Global Communications',
+    stars: 5,
+  },
+  {
+    quote:
+      'Exceptional quality and attention to detail. Their team understood our technical terminology perfectly and delivered ahead of schedule.',
+    author: 'VP of Regulatory Affairs',
+    stars: 5,
+  },
 ];
 
+function StarRating({ count }: { count: number }) {
+  return (
+    <div className="flex gap-0.5" aria-label={`${count} out of 5 stars`}>
+      {[...Array(count)].map((_, i) => (
+        <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+      ))}
+    </div>
+  );
+}
+
 export default function TrustedByLogos({
-  displayCount = 6,
-  title = 'Trusted by Leading Global Companies',
-  subtitle,
   bgClass = 'bg-gray-50',
 }: TrustedByLogosProps) {
-  const [clients, setClients] = useState<ClientLogo[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-
-  useEffect(() => {
-    async function fetchLogos() {
-      try {
-        const params = new URLSearchParams();
-        params.set('random', 'true');
-        params.set('limit', displayCount.toString());
-
-        const response = await fetch(`/api/logos?${params.toString()}`);
-        if (!response.ok) throw new Error('Failed to fetch logos');
-
-        const data = await response.json();
-
-        if (data.logos && Array.isArray(data.logos) && data.logos.length > 0) {
-          setClients(
-            data.logos.map((logo: { id: string; display_name: string }) => ({
-              id: logo.id,
-              display_name: logo.display_name,
-            }))
-          );
-          setTotalCount(data.total || 527);
-        } else {
-          throw new Error('No logos returned');
-        }
-      } catch {
-        setClients(fallbackClients);
-        setTotalCount(527);
-      }
-    }
-    fetchLogos();
-  }, [displayCount]);
-
-  const displaySubtitle =
-    subtitle ||
-    `Join ${totalCount > 0 ? `${totalCount}+` : '500+'} enterprises who rely on Cethos for precision translation`;
-
-  if (clients.length === 0) {
-    return (
-      <section className={`py-16 ${bgClass}`}>
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-[#0C2340]">{title}</h2>
-            <p className="text-gray-600 mt-2">{displaySubtitle}</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {[...Array(displayCount)].map((_, i) => (
-              <div key={i} className="h-16 rounded-lg border border-gray-200 bg-white animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section className={`py-16 ${bgClass}`}>
-      <div className="max-w-6xl mx-auto px-4 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold text-[#0C2340] mb-2">
-          {title}
-        </h2>
-        <p className="text-gray-600 mb-10">{displaySubtitle}</p>
+      <div className="max-w-4xl mx-auto px-4 text-center">
+        <div className="flex items-center justify-center gap-1 mb-1">
+          <StarRating count={5} />
+        </div>
+        <p className="text-sm text-gray-500 mb-8">
+          139 five-star reviews on Google
+        </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
-          {clients.map((client) => (
-            <div
-              key={client.id}
-              className="flex items-center justify-center h-16 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-100 transition-colors"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {testimonials.map((t, i) => (
+            <blockquote
+              key={i}
+              className="bg-white rounded-xl border border-gray-200 p-6 text-left"
             >
-              <span className="text-sm font-semibold text-gray-700 text-center leading-tight">
-                {client.display_name}
-              </span>
-            </div>
+              <StarRating count={t.stars} />
+              <p className="mt-3 text-gray-700 leading-relaxed italic">
+                &ldquo;{t.quote}&rdquo;
+              </p>
+              <footer className="mt-4 text-sm font-medium text-gray-500">
+                &mdash; {t.author}
+              </footer>
+            </blockquote>
           ))}
         </div>
-
-        {totalCount > displayCount && (
-          <p className="text-sm text-teal-600 font-medium">
-            And {totalCount - displayCount}+ more global clients
-          </p>
-        )}
       </div>
     </section>
   );
