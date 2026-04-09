@@ -300,12 +300,36 @@ export default function HindiTranslationContent() {
               Punjabi Translation Calgary
             </Link>
             <span className="text-slate-300">•</span>
+            <Link href="/services/certified/arabic-translation-calgary" className="text-[#0891B2] hover:underline">
+              Arabic Translation Calgary
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/services/certified/spanish-translation-calgary" className="text-[#0891B2] hover:underline">
+              Spanish Translation Calgary
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/services/certified/french-translation-calgary" className="text-[#0891B2] hover:underline">
+              French Translation Calgary
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/services/certified/mandarin-translation-calgary" className="text-[#0891B2] hover:underline">
+              Mandarin Translation Calgary
+            </Link>
+            <span className="text-slate-300">•</span>
             <Link href="/services/certified/immigration-translation-services" className="text-[#0891B2] hover:underline">
               Immigration Translation Services
             </Link>
             <span className="text-slate-300">•</span>
             <Link href="/services/certified/birth-certificate-translation" className="text-[#0891B2] hover:underline">
               Birth Certificate Translation
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/services/certified" className="text-[#0891B2] hover:underline">
+              All Certified Translation Services
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/locations/calgary" className="text-[#0891B2] hover:underline">
+              Calgary Office
             </Link>
           </div>
         </Container>

@@ -337,6 +337,26 @@ const faqs = [
     question: 'What is your cancellation policy?',
     answer: 'Cancellation policies vary by service type. For scheduled on-site interpretation, we typically require 48-72 hours notice. OPI and VRI services are on-demand with no cancellation needed. Contact us for specific terms based on your booking.',
   },
+  {
+    question: 'How much does an interpreter cost in Calgary?',
+    answer: 'Interpretation rates in Calgary start at $85/hour for on-site interpretation. Over-the-phone (OPI) interpretation is available at competitive per-minute rates. Video remote interpretation (VRI) pricing varies by language and session length. Contact us for a custom quote based on your specific needs.',
+  },
+  {
+    question: 'Do you offer court interpreters in Calgary?',
+    answer: 'Yes, we provide certified court interpreters in Calgary for all legal proceedings including court hearings, depositions, immigration hearings, and attorney-client meetings. Our legal interpreters are experienced with Calgary courts and Alberta legal terminology.',
+  },
+  {
+    question: 'Can I book a same-day interpreter?',
+    answer: 'Yes, same-day interpreter booking is available in Calgary for most languages through our on-demand OPI and VRI services with connection in under 60 seconds. For on-site interpretation, same-day availability depends on language and location — contact us for urgent requests.',
+  },
+  {
+    question: 'What languages are available for interpretation in Calgary?',
+    answer: 'We offer interpretation in over 200 languages in Calgary including Punjabi, Hindi, Mandarin, Cantonese, Arabic, Spanish, French, Tagalog, Vietnamese, Korean, Urdu, Farsi, Somali, Tigrinya, and many more. All interpreters are certified professionals.',
+  },
+  {
+    question: 'Do you provide medical interpreters in Calgary?',
+    answer: 'Yes, we provide HIPAA-compliant medical interpreters in Calgary for hospital visits, clinical appointments, telehealth sessions, and mental health consultations. Our medical interpreters are trained in healthcare terminology and patient confidentiality protocols.',
+  },
 ]
 
 export default function InterpretationPageContent() {
@@ -348,8 +368,8 @@ export default function InterpretationPageContent() {
   return (
     <>
       <ServiceJsonLd
-        name="Interpretation Services"
-        description="Professional interpretation services in 200+ languages including simultaneous, consecutive, over-the-phone, and video remote interpretation. 24/7 availability with certified interpreters."
+        name="Interpretation Services Calgary"
+        description="Professional interpretation services in Calgary and across Alberta. 200+ languages including simultaneous, consecutive, over-the-phone, and video remote interpretation. 24/7 availability with certified interpreters."
         url="https://cethos.com/services/interpretation"
       />
       <FAQJsonLd faqs={faqs} />
@@ -369,10 +389,10 @@ export default function InterpretationPageContent() {
                   INTERPRETATION SERVICES
                 </div>
                 <h1 className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6">
-                  Professional Interpretation in 200+ Languages
+                  Professional Interpretation Services in Calgary
                 </h1>
                 <p className="text-xl text-[#4B5563] leading-relaxed mb-8">
-                  Real-time language support for conferences, meetings, healthcare, legal proceedings, and more. Connect with certified interpreters 24/7 with on-demand OPI in under 60 seconds.
+                  Real-time language support in Calgary and across Alberta for conferences, meetings, healthcare, legal proceedings, and more. Connect with certified interpreters 24/7 with on-demand OPI in under 60 seconds. On-site interpreters available at Calgary courthouses, hospitals, and immigration offices.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-[#4B5563]">
@@ -852,6 +872,30 @@ export default function InterpretationPageContent() {
                 </Card>
               </motion.div>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* Related Services */}
+      <section className="py-12 bg-white border-t border-slate-200">
+        <Container>
+          <h3 className="text-lg font-semibold text-[#0C2340] mb-4">Related Services</h3>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/services/certified" className="text-[#0891B2] hover:underline">
+              Certified Translation Services
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/locations/calgary" className="text-[#0891B2] hover:underline">
+              Calgary Office
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/services/languages" className="text-[#0891B2] hover:underline">
+              Translation by Language
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/get-quote" className="text-[#0891B2] hover:underline">
+              Get a Quote
+            </Link>
           </div>
         </Container>
       </section>

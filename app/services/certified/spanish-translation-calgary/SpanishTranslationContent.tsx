@@ -10,7 +10,7 @@ import { TrustBar, StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/compone
 import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
 const whatsIncluded = [
-  'Certified translation by native Punjabi translator',
+  'Certified translation by native Spanish translator',
   'Signed certificate of accuracy',
   'Commissioner certification (notarization equivalent)',
   'Digital copy via email',
@@ -20,7 +20,7 @@ const whatsIncluded = [
 ]
 
 const documentTypes = [
-  'Birth Certificates',
+  'Birth Certificates (Acta de Nacimiento)',
   'Marriage Certificates',
   'Divorce Decrees',
   'Academic Transcripts',
@@ -28,10 +28,10 @@ const documentTypes = [
   'Police Clearance Certificates',
   'Employment Letters',
   'Affidavits',
-  'Land Records',
-  'Property Documents',
+  'National ID Cards (Cedula)',
   'Medical Records',
   'Driver\'s Licenses',
+  'Criminal Record Checks',
 ]
 
 const pricingTable = [
@@ -42,42 +42,42 @@ const pricingTable = [
 ]
 
 const howItWorks = [
-  { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your Punjabi document and upload it through our secure form.' },
+  { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your Spanish document and upload it through our secure form.' },
   { step: 2, title: 'Get Your Quote', description: 'Receive an exact quote within 2 hours. No hidden fees, no surprises.' },
-  { step: 3, title: 'We Translate', description: 'Our native Punjabi translator completes your translation with 100% accuracy.' },
+  { step: 3, title: 'We Translate', description: 'Our native Spanish translator completes your translation with 100% accuracy.' },
   { step: 4, title: 'Receive Your Translation', description: 'Pick up in downtown Calgary or receive via email/courier.' },
 ]
 
 const faqs = [
   {
-    question: 'Do you translate documents in Gurmukhi script?',
-    answer: 'Yes, we specialize in translating documents written in Gurmukhi script, the traditional script used for Punjabi language in India. Our native Punjabi translators are fully proficient in reading and translating Gurmukhi text.',
+    question: 'Do you translate documents from all Spanish-speaking countries?',
+    answer: 'Yes, we translate documents from Mexico, Colombia, Venezuela, Peru, Chile, Argentina, Ecuador, Guatemala, and all other Spanish-speaking countries. Our native Spanish translators are familiar with the document formats and terminology used across Latin America and Spain.',
   },
   {
-    question: 'Can you translate Punjabi documents from Pakistan?',
-    answer: 'Yes, we translate Punjabi documents from both India and Pakistan. Pakistani Punjabi documents often use Shahmukhi (Arabic) script, and our translators are experienced with both Gurmukhi and Shahmukhi scripts.',
+    question: 'Can you translate Mexican birth certificates (Acta de Nacimiento)?',
+    answer: 'Yes, we specialize in Mexican civil registry documents including birth certificates, marriage certificates, and divorce decrees. All translations are certified for IRCC acceptance.',
   },
   {
-    question: 'How much does Punjabi translation cost?',
-    answer: 'Punjabi translation starts at $65 for a single-page document like a birth certificate, which includes certified translation and commissioner certification. Multi-page documents are priced at $35 per additional page.',
+    question: 'How much does Spanish translation cost?',
+    answer: 'Spanish translation starts at $65 for a single-page document like a birth certificate, which includes certified translation and commissioner certification. Multi-page documents are priced at $35 per additional page.',
   },
   {
-    question: 'What Punjabi documents do you translate most often?',
-    answer: 'We frequently translate birth certificates, marriage certificates, academic transcripts, and degrees from Punjab. We also translate police clearance certificates, employment letters, and property documents for immigration purposes.',
+    question: 'What Spanish documents do you translate most often?',
+    answer: 'We frequently translate birth certificates, marriage certificates, academic transcripts, and police clearance certificates from Latin American countries. We also translate employment letters, national ID cards, and various government-issued documents.',
   },
   {
-    question: 'Are your Punjabi translations accepted by IRCC?',
-    answer: 'Yes, all our Punjabi translations are certified and 100% accepted by IRCC. We provide a signed certificate of accuracy with every translation, which meets IRCC requirements for immigration applications.',
+    question: 'Are your Spanish translations accepted by IRCC?',
+    answer: 'Yes, all our Spanish translations are certified and 100% accepted by IRCC. We provide a signed certificate of accuracy with every translation, which meets IRCC requirements for immigration applications.',
   },
 ]
 
 const breadcrumbItems = [
   { name: 'Services', url: '/services' },
   { name: 'Certified Translation', url: '/services/certified' },
-  { name: 'Punjabi Translation Calgary', url: '/services/certified/punjabi-translation-calgary' },
+  { name: 'Spanish Translation Calgary', url: '/services/certified/spanish-translation-calgary' },
 ]
 
-export default function PunjabiTranslationContent() {
+export default function SpanishTranslationContent() {
   return (
     <>
       <LandingLocalBusinessJsonLd areaServed={['Calgary', 'Edmonton', 'Alberta', 'Canada']} />
@@ -97,7 +97,7 @@ export default function PunjabiTranslationContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
               >
-                Punjabi Translation Calgary
+                Spanish Translation Services Calgary
               </motion.h1>
 
               <motion.p
@@ -106,7 +106,7 @@ export default function PunjabiTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-xl text-[#4B5563] leading-relaxed mb-6"
               >
-                IRCC-certified Punjabi translations by native translators. Gurmukhi and Shahmukhi scripts. Same-day service available with on-site notarization.
+                IRCC-certified Spanish translations by native translators. Expertise with documents from Mexico, Colombia, Venezuela, and all Latin American countries. Same-day service available with on-site notarization.
               </motion.p>
 
               <motion.div
@@ -128,7 +128,7 @@ export default function PunjabiTranslationContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <TrustBar items={['Starting at $65', 'Same-Day Available', '100% IRCC Acceptance Guarantee', 'Native Punjabi Translators']} />
+                <TrustBar items={['Starting at $65', 'Same-Day Available', '100% IRCC Acceptance Guarantee', 'Native Spanish Translators']} />
               </motion.div>
             </div>
 
@@ -141,7 +141,7 @@ export default function PunjabiTranslationContent() {
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
               <EmbeddedCertifiedQuoteForm
-                formLocation="punjabi-translation-calgary"
+                formLocation="spanish-translation-calgary"
               />
             </motion.div>
           </div>
@@ -152,21 +152,21 @@ export default function PunjabiTranslationContent() {
       <section className="py-16 bg-white">
         <Container>
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why Choose Native Punjabi Translators</h2>
+            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why Choose Native Spanish Translators</h2>
             <p className="text-slate-600">
-              Our Punjabi translators are native speakers with deep understanding of both Gurmukhi and Shahmukhi scripts, regional dialects, and document formats used in Punjab.
+              Our Spanish translators are native speakers with deep understanding of regional variations across Latin America and Spain.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <Card className="p-6 text-center">
               <Globe className="w-10 h-10 text-teal-600 mx-auto mb-4" />
               <h3 className="font-semibold text-[#0C2340] mb-2">Native Speakers</h3>
-              <p className="text-sm text-slate-600">Our translators are native Punjabi speakers from Punjab, India and Pakistan.</p>
+              <p className="text-sm text-slate-600">Our translators are native Spanish speakers familiar with regional variations across Latin America and Spain.</p>
             </Card>
             <Card className="p-6 text-center">
               <FileText className="w-10 h-10 text-teal-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-[#0C2340] mb-2">Gurmukhi Experts</h3>
-              <p className="text-sm text-slate-600">Expert translation of traditional Gurmukhi script documents.</p>
+              <h3 className="font-semibold text-[#0C2340] mb-2">Latin American Expertise</h3>
+              <p className="text-sm text-slate-600">Expert translation of documents from Mexico, Colombia, Venezuela, Peru, Chile, and all Spanish-speaking countries.</p>
             </Card>
             <Card className="p-6 text-center">
               <Award className="w-10 h-10 text-teal-600 mx-auto mb-4" />
@@ -199,8 +199,8 @@ export default function PunjabiTranslationContent() {
       {/* Document Types */}
       <section className="py-16 bg-white">
         <Container>
-          <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Punjabi Documents We Translate</h2>
-          <p className="text-center text-slate-600 mb-8">Common documents from Punjab, India and Pakistan:</p>
+          <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Spanish Documents We Translate</h2>
+          <p className="text-center text-slate-600 mb-8">Common documents from Spanish-speaking countries:</p>
           <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
             {documentTypes.map((doc) => (
               <span key={doc} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-sm">
@@ -208,7 +208,7 @@ export default function PunjabiTranslationContent() {
               </span>
             ))}
           </div>
-          <p className="text-center text-sm text-slate-500 mt-4">Don&apos;t see your document type? Contact us—we translate all Punjabi documents.</p>
+          <p className="text-center text-sm text-slate-500 mt-4">Don&apos;t see your document type? Contact us—we translate all Spanish documents.</p>
         </Container>
       </section>
 
@@ -275,7 +275,7 @@ export default function PunjabiTranslationContent() {
       <section className="py-16 bg-[#0891B2]">
         <Container>
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Get Your Punjabi Documents Translated Today</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Get Your Spanish Documents Translated Today</h2>
             <p className="text-white/90 mb-8 max-w-xl mx-auto">
               Starting at $65. Same-day service available.
             </p>
@@ -300,12 +300,12 @@ export default function PunjabiTranslationContent() {
               Hindi Translation Calgary
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/services/certified/arabic-translation-calgary" className="text-[#0891B2] hover:underline">
-              Arabic Translation Calgary
+            <Link href="/services/certified/punjabi-translation-calgary" className="text-[#0891B2] hover:underline">
+              Punjabi Translation Calgary
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/services/certified/spanish-translation-calgary" className="text-[#0891B2] hover:underline">
-              Spanish Translation Calgary
+            <Link href="/services/certified/arabic-translation-calgary" className="text-[#0891B2] hover:underline">
+              Arabic Translation Calgary
             </Link>
             <span className="text-slate-300">•</span>
             <Link href="/services/certified/french-translation-calgary" className="text-[#0891B2] hover:underline">
@@ -325,11 +325,15 @@ export default function PunjabiTranslationContent() {
             </Link>
             <span className="text-slate-300">•</span>
             <Link href="/services/certified" className="text-[#0891B2] hover:underline">
-              All Certified Translation Services
+              Certified Translation
             </Link>
             <span className="text-slate-300">•</span>
             <Link href="/locations/calgary" className="text-[#0891B2] hover:underline">
               Calgary Office
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/get-quote" className="text-[#0891B2] hover:underline">
+              Get a Quote
             </Link>
           </div>
         </Container>
