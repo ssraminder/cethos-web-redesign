@@ -10,7 +10,7 @@ import { TrustBar, StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/compone
 import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
 const whatsIncluded = [
-  'Certified translation by native Chinese translator',
+  'Certified translation by native Mandarin translator',
   'Signed certificate of accuracy',
   'Commissioner certification (notarization equivalent)',
   'Digital copy via email',
@@ -44,30 +44,30 @@ const pricingTable = [
 const howItWorks = [
   { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your Chinese document and upload it through our secure form.' },
   { step: 2, title: 'Get Your Quote', description: 'Receive an exact quote within 2 hours. No hidden fees, no surprises.' },
-  { step: 3, title: 'We Translate', description: 'Our native Chinese translator completes your translation with 100% accuracy.' },
+  { step: 3, title: 'We Translate', description: 'Our native Mandarin translator completes your translation with 100% accuracy.' },
   { step: 4, title: 'Receive Your Translation', description: 'Pick up in downtown Calgary or receive via email/courier.' },
 ]
 
 const faqs = [
   {
-    question: 'Do you translate both Simplified and Traditional Chinese?',
-    answer: 'Yes, we handle both Simplified Chinese (used in mainland China) and Traditional Chinese (used in Taiwan, Hong Kong, and Macau). Our translators are proficient in both writing systems.',
+    question: 'What is the difference between Mandarin and Cantonese translation?',
+    answer: 'Mandarin uses Simplified Chinese characters and is the official language of mainland China — the vast majority of Chinese documents we translate use Simplified Chinese. Cantonese uses Traditional Chinese characters and is spoken in Hong Kong and parts of southern China. We translate both, but most immigration documents from China are in Simplified Chinese (Mandarin).',
   },
   {
     question: 'Can you translate Chinese notarized documents?',
     answer: 'Yes, we regularly translate Chinese notarized documents (gong zheng shu), including birth certificates, marriage certificates, degree certificates, and police clearance that have been notarized by Chinese notary offices.',
   },
   {
-    question: 'How much does Chinese translation cost?',
-    answer: 'Chinese translation starts at $65 for a single-page document like a birth certificate, which includes certified translation and commissioner certification. Multi-page documents are priced at $35 per additional page.',
+    question: 'How much does Mandarin Chinese translation cost?',
+    answer: 'Mandarin Chinese translation starts at $65 for a single-page document like a birth certificate, which includes certified translation and commissioner certification. Multi-page documents are priced at $35 per additional page.',
   },
   {
     question: 'What Chinese documents do you translate most often?',
-    answer: 'We frequently translate birth certificates, academic transcripts, degree certificates, hukou (household registration), marriage certificates, and police clearance from China.',
+    answer: 'We frequently translate birth certificates, academic transcripts, degree certificates, hukou (household registration), marriage certificates, and police clearance from mainland China. These are almost always in Simplified Chinese (Mandarin).',
   },
   {
     question: 'Are your Chinese translations accepted by IRCC?',
-    answer: 'Yes, all our Chinese translations are certified and 100% accepted by IRCC. We provide a signed certificate of accuracy with every translation, which meets IRCC requirements for immigration applications.',
+    answer: 'Yes, all our Mandarin and Cantonese translations are certified and 100% accepted by IRCC. We provide a signed certificate of accuracy with every translation, which meets IRCC requirements for immigration applications.',
   },
 ]
 
@@ -97,7 +97,7 @@ export default function MandarinTranslationContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
               >
-                Mandarin Chinese Translation Services Calgary
+                Mandarin (Simplified Chinese) Translation Services Calgary
               </motion.h1>
 
               <motion.p
@@ -106,7 +106,7 @@ export default function MandarinTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-xl text-[#4B5563] leading-relaxed mb-6"
               >
-                IRCC-certified Mandarin Chinese translations by native translators. Simplified and Traditional Chinese expertise. Same-day service available with on-site notarization.
+                IRCC-certified Mandarin (Simplified Chinese) translations by native translators. We also handle Cantonese (Traditional Chinese) documents. Same-day service available with on-site notarization.
               </motion.p>
 
               <motion.div
@@ -128,7 +128,7 @@ export default function MandarinTranslationContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <TrustBar items={['Starting at $65', 'Same-Day Available', '100% IRCC Acceptance Guarantee', 'Native Chinese Translators']} />
+                <TrustBar items={['Starting at $65', 'Same-Day Available', '100% IRCC Acceptance Guarantee', 'Native Mandarin Translators']} />
               </motion.div>
             </div>
 
@@ -152,21 +152,21 @@ export default function MandarinTranslationContent() {
       <section className="py-16 bg-white">
         <Container>
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why Choose Native Chinese Translators</h2>
+            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why Choose Native Mandarin Translators</h2>
             <p className="text-slate-600">
-              Our Chinese translators are native speakers with deep understanding of both Simplified and Traditional Chinese and the various document formats used across China, Taiwan, and Hong Kong.
+              Our Mandarin translators are native speakers with deep understanding of Simplified Chinese characters and the various document formats used in mainland China. Cantonese (Traditional Chinese) translation also available.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <Card className="p-6 text-center">
               <Globe className="w-10 h-10 text-teal-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-[#0C2340] mb-2">Native Speakers</h3>
-              <p className="text-sm text-slate-600">Our translators are native Mandarin speakers from China and Taiwan with cultural expertise.</p>
+              <h3 className="font-semibold text-[#0C2340] mb-2">Native Mandarin Speakers</h3>
+              <p className="text-sm text-slate-600">Our translators are native Mandarin speakers from mainland China with cultural and document expertise.</p>
             </Card>
             <Card className="p-6 text-center">
               <FileText className="w-10 h-10 text-teal-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-[#0C2340] mb-2">Simplified & Traditional</h3>
-              <p className="text-sm text-slate-600">Expert translation of both Simplified Chinese (mainland China) and Traditional Chinese (Taiwan, Hong Kong) documents.</p>
+              <h3 className="font-semibold text-[#0C2340] mb-2">Simplified Chinese Experts</h3>
+              <p className="text-sm text-slate-600">Specialized in Simplified Chinese (Mandarin) documents from mainland China. Cantonese (Traditional Chinese) also available on request.</p>
             </Card>
             <Card className="p-6 text-center">
               <Award className="w-10 h-10 text-teal-600 mx-auto mb-4" />
@@ -200,7 +200,7 @@ export default function MandarinTranslationContent() {
       <section className="py-16 bg-white">
         <Container>
           <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Chinese Documents We Translate</h2>
-          <p className="text-center text-slate-600 mb-8">Common documents from China, Taiwan, and Hong Kong:</p>
+          <p className="text-center text-slate-600 mb-8">Common Simplified Chinese documents from mainland China:</p>
           <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
             {documentTypes.map((doc) => (
               <span key={doc} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-sm">

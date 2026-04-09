@@ -738,7 +738,7 @@ export default function CertifiedTranslationContent() {
               { label: 'Arabic Translation', href: '/services/certified/arabic-translation-calgary' },
               { label: 'French Translation', href: '/services/certified/french-translation-calgary' },
               { label: 'Hindi Translation', href: '/services/certified/hindi-translation-calgary' },
-              { label: 'Mandarin Translation', href: '/services/certified/mandarin-translation-calgary' },
+              { label: 'Mandarin (Chinese) Translation', href: '/services/certified/mandarin-translation-calgary' },
               { label: 'Punjabi Translation', href: '/services/certified/punjabi-translation-calgary' },
               { label: 'Spanish Translation', href: '/services/certified/spanish-translation-calgary' },
             ].map((lang) => (

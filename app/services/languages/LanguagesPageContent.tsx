@@ -23,9 +23,9 @@ const featuredLanguages = [
     description: 'Devanagari script expertise for documents from India.',
   },
   {
-    name: 'Mandarin Chinese',
+    name: 'Mandarin (Simplified Chinese)',
     href: '/services/certified/mandarin-translation-calgary',
-    description: 'Simplified and Traditional Chinese document translation.',
+    description: 'Simplified Chinese documents from mainland China. Cantonese (Traditional) also available.',
   },
   {
     name: 'Punjabi',
