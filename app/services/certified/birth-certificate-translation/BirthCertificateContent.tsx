@@ -29,14 +29,14 @@ const pricingTable = [
   { service: 'Birth Certificate Translation', price: 'Starting at $65' },
   { service: 'Commissioner Certification', price: 'Included' },
   { service: 'Same-Day Rush', price: '+$25' },
-  { service: 'Courier Delivery (Calgary)', price: '+$15' },
+  { service: 'Courier Delivery', price: '+$15' },
 ]
 
 const howItWorks = [
   { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your birth certificate and upload it through our secure form.' },
   { step: 2, title: 'Get Your Quote', description: 'Receive an exact quote within 2 hours. No hidden fees, no surprises.' },
   { step: 3, title: 'We Translate', description: 'Our IRCC-certified translator completes your translation with 100% accuracy.' },
-  { step: 4, title: 'Receive Your Translation', description: 'Pick up in downtown Calgary or receive via email/courier.' },
+  { step: 4, title: 'Receive Your Translation', description: 'Receive via email, courier, or collect from our office.' },
 ]
 
 const faqs = [
@@ -71,7 +71,7 @@ const breadcrumbItems = [
 export default function BirthCertificateContent() {
   return (
     <>
-      <LandingLocalBusinessJsonLd areaServed={['Calgary', 'Edmonton', 'Alberta', 'Canada']} />
+      <LandingLocalBusinessJsonLd areaServed={['Canada']} />
       <FAQJsonLd faqs={faqs} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
 
@@ -88,7 +88,7 @@ export default function BirthCertificateContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
-                Birth Certificate Translation Calgary
+                Birth Certificate Translation Across Canada
               </motion.h1>
 
               <motion.p

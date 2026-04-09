@@ -29,13 +29,13 @@ const services = [
   },
   {
     title: 'Interpretation Services',
-    description: 'On-site, phone, and video interpretation in Calgary and across Canada. 200+ languages, 24/7.',
+    description: 'On-site, phone, and video interpretation across Canada. 200+ languages, 24/7 availability.',
     icon: Mic,
     href: '/services/interpretation',
   },
   {
     title: 'Translation by Language',
-    description: 'Arabic, French, Hindi, Mandarin, Punjabi, Spanish, and 200+ more languages in Calgary.',
+    description: 'Arabic, French, Hindi, Mandarin, Punjabi, Spanish, and 200+ more languages across Canada.',
     icon: Languages,
     href: '/services/languages',
   },

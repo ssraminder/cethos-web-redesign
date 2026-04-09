@@ -73,7 +73,7 @@ const breadcrumbItems = [
 export default function MarriageCertificateContent() {
   return (
     <>
-      <LandingLocalBusinessJsonLd areaServed={['Calgary', 'Edmonton', 'Alberta', 'Canada']} />
+      <LandingLocalBusinessJsonLd areaServed={['Canada']} />
       <FAQJsonLd faqs={faqs} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
 
@@ -90,7 +90,7 @@ export default function MarriageCertificateContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
-                Marriage Certificate Translation Calgary
+                Marriage Certificate Translation Across Canada
               </motion.h1>
 
               <motion.p

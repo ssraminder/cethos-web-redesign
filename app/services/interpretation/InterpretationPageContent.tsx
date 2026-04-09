@@ -338,24 +338,24 @@ const faqs = [
     answer: 'Cancellation policies vary by service type. For scheduled on-site interpretation, we typically require 48-72 hours notice. OPI and VRI services are on-demand with no cancellation needed. Contact us for specific terms based on your booking.',
   },
   {
-    question: 'How much does an interpreter cost in Calgary?',
-    answer: 'Interpretation rates in Calgary start at $85/hour for on-site interpretation. Over-the-phone (OPI) interpretation is available at competitive per-minute rates. Video remote interpretation (VRI) pricing varies by language and session length. Contact us for a custom quote based on your specific needs.',
+    question: 'How much does an interpreter cost?',
+    answer: 'Interpretation rates start at $85/hour for on-site interpretation. Over-the-phone (OPI) interpretation is available at competitive per-minute rates. Video remote interpretation (VRI) pricing varies by language and session length. Contact us for a custom quote based on your specific needs.',
   },
   {
-    question: 'Do you offer court interpreters in Calgary?',
-    answer: 'Yes, we provide certified court interpreters in Calgary for all legal proceedings including court hearings, depositions, immigration hearings, and attorney-client meetings. Our legal interpreters are experienced with Calgary courts and Alberta legal terminology.',
+    question: 'Do you offer court interpreters across Canada?',
+    answer: 'Yes, we provide certified court interpreters across Canada for all legal proceedings including court hearings, depositions, immigration hearings, and attorney-client meetings. Our legal interpreters are experienced with Canadian courts and legal terminology.',
   },
   {
     question: 'Can I book a same-day interpreter?',
-    answer: 'Yes, same-day interpreter booking is available in Calgary for most languages through our on-demand OPI and VRI services with connection in under 60 seconds. For on-site interpretation, same-day availability depends on language and location — contact us for urgent requests.',
+    answer: 'Yes, same-day interpreter booking is available for most languages through our on-demand OPI and VRI services with connection in under 60 seconds. For on-site interpretation, same-day availability depends on language and location — contact us for urgent requests.',
   },
   {
-    question: 'What languages are available for interpretation in Calgary?',
-    answer: 'We offer interpretation in over 200 languages in Calgary including Punjabi, Hindi, Mandarin, Cantonese, Arabic, Spanish, French, Tagalog, Vietnamese, Korean, Urdu, Farsi, Somali, Tigrinya, and many more. All interpreters are certified professionals.',
+    question: 'What languages are available for interpretation?',
+    answer: 'We offer interpretation in over 200 languages across Canada including Punjabi, Hindi, Mandarin, Cantonese, Arabic, Spanish, French, Tagalog, Vietnamese, Korean, Urdu, Farsi, Somali, Tigrinya, and many more. All interpreters are certified professionals.',
   },
   {
-    question: 'Do you provide medical interpreters in Calgary?',
-    answer: 'Yes, we provide HIPAA-compliant medical interpreters in Calgary for hospital visits, clinical appointments, telehealth sessions, and mental health consultations. Our medical interpreters are trained in healthcare terminology and patient confidentiality protocols.',
+    question: 'Do you provide medical interpreters?',
+    answer: 'Yes, we provide HIPAA-compliant medical interpreters across Canada for hospital visits, clinical appointments, telehealth sessions, and mental health consultations. Our medical interpreters are trained in healthcare terminology and patient confidentiality protocols.',
   },
 ]
 
@@ -368,8 +368,8 @@ export default function InterpretationPageContent() {
   return (
     <>
       <ServiceJsonLd
-        name="Interpretation Services Calgary"
-        description="Professional interpretation services in Calgary and across Alberta. 200+ languages including simultaneous, consecutive, over-the-phone, and video remote interpretation. 24/7 availability with certified interpreters."
+        name="Professional Interpretation Services"
+        description="Professional interpretation services across Canada. 200+ languages including simultaneous, consecutive, over-the-phone, and video remote interpretation. 24/7 availability with certified interpreters."
         url="https://cethos.com/services/interpretation"
       />
       <FAQJsonLd faqs={faqs} />
@@ -389,10 +389,10 @@ export default function InterpretationPageContent() {
                   INTERPRETATION SERVICES
                 </div>
                 <h1 className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6">
-                  Professional Interpretation Services in Calgary
+                  Professional Interpretation Services Across Canada
                 </h1>
                 <p className="text-xl text-[#4B5563] leading-relaxed mb-8">
-                  Real-time language support in Calgary and across Alberta for conferences, meetings, healthcare, legal proceedings, and more. Connect with certified interpreters 24/7 with on-demand OPI in under 60 seconds. On-site interpreters available at Calgary courthouses, hospitals, and immigration offices.
+                  Real-time language support across Canada for conferences, meetings, healthcare, legal proceedings, and more. Connect with certified interpreters 24/7 with on-demand OPI in under 60 seconds. On-site interpreters available at courthouses, hospitals, and immigration offices nationwide.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-4 mb-8 text-sm text-[#4B5563]">
@@ -876,6 +876,35 @@ export default function InterpretationPageContent() {
         </Container>
       </section>
 
+      {/* Interpretation Across Canada */}
+      <section className="py-12 bg-slate-50 border-t border-slate-200">
+        <Container>
+          <h3 className="text-xl font-bold text-[#0C2340] mb-2 text-center">Interpretation Services Across Canada</h3>
+          <p className="text-slate-600 text-center mb-6">On-site, phone, and video interpretation available in major cities nationwide.</p>
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {[
+              { label: 'Calgary', href: '/locations/calgary' },
+              { label: 'Edmonton', href: '/locations/edmonton' },
+              { label: 'Toronto', href: '/locations/toronto' },
+              { label: 'Vancouver', href: '/locations/vancouver' },
+              { label: 'Ottawa', href: '/locations/ottawa' },
+              { label: 'Montreal', href: '/locations/montreal' },
+              { label: 'Winnipeg', href: '/locations/winnipeg' },
+              { label: 'Halifax', href: '/locations/halifax' },
+              { label: 'Saskatoon', href: '/locations/saskatoon' },
+            ].map((location) => (
+              <Link
+                key={location.href}
+                href={location.href}
+                className="bg-white px-5 py-2.5 rounded-lg text-gray-800 font-medium hover:bg-[#0891B2] hover:text-white transition-colors shadow-sm text-sm"
+              >
+                {location.label}
+              </Link>
+            ))}
+          </div>
+        </Container>
+      </section>
+
       {/* Related Services */}
       <section className="py-12 bg-white border-t border-slate-200">
         <Container>
@@ -883,10 +912,6 @@ export default function InterpretationPageContent() {
           <div className="flex flex-wrap gap-3">
             <Link href="/services/certified" className="text-[#0891B2] hover:underline">
               Certified Translation Services
-            </Link>
-            <span className="text-slate-300">•</span>
-            <Link href="/locations/calgary" className="text-[#0891B2] hover:underline">
-              Calgary Office
             </Link>
             <span className="text-slate-300">•</span>
             <Link href="/services/languages" className="text-[#0891B2] hover:underline">

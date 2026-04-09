@@ -88,7 +88,7 @@ const breadcrumbItems = [
 export default function PRCitizenshipContent() {
   return (
     <>
-      <LandingLocalBusinessJsonLd areaServed={['Calgary', 'Edmonton', 'Alberta', 'Canada']} />
+      <LandingLocalBusinessJsonLd areaServed={['Canada']} />
       <FAQJsonLd faqs={faqs} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
 

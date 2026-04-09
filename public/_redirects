@@ -396,5 +396,15 @@
 #
 # =============================================================================
 
+# -----------------------------------------------------------------------------
+# SECTION 7: LANGUAGE PAGE URL RESTRUCTURE (Calgary -> Canada-wide)
+# -----------------------------------------------------------------------------
+/services/certified/arabic-translation-calgary    /services/certified/arabic-translation    301
+/services/certified/french-translation-calgary    /services/certified/french-translation    301
+/services/certified/hindi-translation-calgary     /services/certified/hindi-translation     301
+/services/certified/mandarin-translation-calgary  /services/certified/mandarin-translation  301
+/services/certified/punjabi-translation-calgary   /services/certified/punjabi-translation   301
+/services/certified/spanish-translation-calgary   /services/certified/spanish-translation   301
+
 # NOTE: Do NOT add a catch-all /* redirect as it will redirect all valid pages
 # to the homepage, breaking the entire site!

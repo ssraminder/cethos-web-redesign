@@ -9,32 +9,32 @@ import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 const featuredLanguages = [
   {
     name: 'Arabic',
-    href: '/services/certified/arabic-translation-calgary',
+    href: '/services/certified/arabic-translation',
     description: 'Arabic script expertise for documents from the Middle East and North Africa.',
   },
   {
     name: 'French',
-    href: '/services/certified/french-translation-calgary',
+    href: '/services/certified/french-translation',
     description: 'Quebec, France, and Francophone African document translation.',
   },
   {
     name: 'Hindi',
-    href: '/services/certified/hindi-translation-calgary',
+    href: '/services/certified/hindi-translation',
     description: 'Devanagari script expertise for documents from India.',
   },
   {
     name: 'Mandarin (Simplified Chinese)',
-    href: '/services/certified/mandarin-translation-calgary',
+    href: '/services/certified/mandarin-translation',
     description: 'Simplified Chinese documents from mainland China. Cantonese (Traditional) also available.',
   },
   {
     name: 'Punjabi',
-    href: '/services/certified/punjabi-translation-calgary',
+    href: '/services/certified/punjabi-translation',
     description: 'Gurmukhi and Shahmukhi script expertise for documents from India and Pakistan.',
   },
   {
     name: 'Spanish',
-    href: '/services/certified/spanish-translation-calgary',
+    href: '/services/certified/spanish-translation',
     description: 'Documents from Mexico, Colombia, and all Latin American countries.',
   },
 ]
@@ -122,7 +122,7 @@ export default function LanguagesPageContent() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-xl text-[#4B5563] leading-relaxed max-w-3xl mb-8"
           >
-            Cethos provides IRCC-certified translation services in over 200 languages at our Calgary office.
+            Cethos provides IRCC-certified translation services in over 200 languages across Canada.
             Every translation includes certification, commissioner of oaths certification, and a 100% IRCC
             acceptance guarantee. Same-day service available.
           </motion.p>
@@ -153,7 +153,7 @@ export default function LanguagesPageContent() {
         <Container>
           <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Popular Language Services</h2>
           <p className="text-center text-slate-600 mb-12 max-w-2xl mx-auto">
-            Dedicated translation pages for our most requested languages in Calgary, with native translators
+            Dedicated translation pages for our most requested languages across Canada, with native translators
             and language-specific expertise.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -214,7 +214,7 @@ export default function LanguagesPageContent() {
             {[
               { title: '100% IRCC Accepted', desc: 'All translations guaranteed accepted by IRCC for immigration applications.' },
               { title: 'Native Translators', desc: 'Every translation is completed by a native speaker of the source language.' },
-              { title: 'Same-Day Service', desc: 'Rush and same-day service available at our Calgary office.' },
+              { title: 'Same-Day Service', desc: 'Rush and same-day service available.' },
               { title: 'Notarization Included', desc: 'Commissioner of oaths certification included free with every translation.' },
             ].map((item, index) => (
               <motion.div
@@ -240,7 +240,7 @@ export default function LanguagesPageContent() {
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white mb-4">Need a Translation in Any Language?</h2>
             <p className="text-white/90 mb-8 max-w-xl mx-auto">
-              Starting at $65 per document. Same-day service available in Calgary.
+              Starting at $65 per document. Same-day service available.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link

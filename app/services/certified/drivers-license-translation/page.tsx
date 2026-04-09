@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   keywords: [
     "driver's license translation Alberta",
     "certified translation Service Alberta",
-    "foreign license translation Calgary",
+    "foreign license translation Canada",
     "Alberta Registry translation services",
     "driver's license translation Edmonton",
     "vehicle registration translation",

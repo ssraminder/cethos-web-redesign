@@ -4,7 +4,7 @@ import TranscriptionPageContent from './TranscriptionPageContent';
 export const metadata: Metadata = {
   title: 'Professional Transcription Services | Legal, Medical, Business | Cethos',
   description: 'Professional transcription services with 99%+ accuracy. Legal transcription for depositions, court hearings, and trials. Medical, business, and academic transcription in 200+ languages. Court-certified. Rush available.',
-  keywords: 'transcription services, legal transcription, deposition transcription, court transcription, medical transcription, business transcription, academic transcription, verbatim transcription, certified transcription, Calgary transcription services',
+  keywords: 'transcription services, legal transcription, deposition transcription, court transcription, medical transcription, business transcription, academic transcription, verbatim transcription, certified transcription, professional transcription services Canada',
   alternates: { canonical: 'https://cethos.com/services/transcription' },
   openGraph: {
     title: 'Professional Transcription Services | Cethos Solutions Inc.',

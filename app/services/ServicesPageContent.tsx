@@ -336,16 +336,16 @@ export default function ServicesPageContent() {
           <div className="text-center">
             <h2 className="text-2xl font-bold text-[#0C2340] mb-3">Translation by Language</h2>
             <p className="text-slate-600 mb-6">
-              Dedicated translation pages for our most requested languages in Calgary.
+              Dedicated translation pages for our most requested languages across Canada.
             </p>
             <div className="flex flex-wrap justify-center gap-3 mb-6">
               {[
-                { label: 'Arabic', href: '/services/certified/arabic-translation-calgary' },
-                { label: 'French', href: '/services/certified/french-translation-calgary' },
-                { label: 'Hindi', href: '/services/certified/hindi-translation-calgary' },
-                { label: 'Mandarin', href: '/services/certified/mandarin-translation-calgary' },
-                { label: 'Punjabi', href: '/services/certified/punjabi-translation-calgary' },
-                { label: 'Spanish', href: '/services/certified/spanish-translation-calgary' },
+                { label: 'Arabic', href: '/services/certified/arabic-translation' },
+                { label: 'French', href: '/services/certified/french-translation' },
+                { label: 'Hindi', href: '/services/certified/hindi-translation' },
+                { label: 'Mandarin', href: '/services/certified/mandarin-translation' },
+                { label: 'Punjabi', href: '/services/certified/punjabi-translation' },
+                { label: 'Spanish', href: '/services/certified/spanish-translation' },
               ].map((lang) => (
                 <Link
                   key={lang.href}

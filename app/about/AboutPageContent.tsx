@@ -43,7 +43,7 @@ export default function AboutPageContent() {
   const faqItems = [
     {
       question: "Where is Cethos located?",
-      answer: "Our corporate headquarters is in Calgary, Canada, with additional offices in Dubai, UAE and Patiala, India. This three-continent presence enables 24/7 operations and local expertise worldwide."
+      answer: "Our corporate headquarters is in Calgary, Canada, with additional offices in Dubai, UAE and Patiala, India. We serve clients across Canada and in 50+ countries worldwide. This three-continent presence enables 24/7 operations and local expertise worldwide."
     },
     {
       question: "Are your translations accepted by IRCC?",

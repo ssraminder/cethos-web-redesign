@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import PRCitizenshipContent from './PRCitizenshipContent'
 
 export const metadata: Metadata = {
-  title: 'PR & Citizenship Translation Calgary | Complete Document Package | Cethos',
+  title: 'PR & Citizenship Translation Canada | Complete Document Package | Cethos',
   description: 'Complete translation packages for PR and citizenship applications. All documents translated: birth, marriage, diplomas, police clearance. Bundle pricing available.',
   alternates: {
     canonical: 'https://cethos.com/services/certified/pr-citizenship-translation',

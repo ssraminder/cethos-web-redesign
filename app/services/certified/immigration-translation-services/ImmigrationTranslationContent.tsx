@@ -38,7 +38,7 @@ const whyChooseUs = [
   {
     icon: Award,
     title: 'Translation + Notary Same Visit',
-    description: 'Get your translation and commissioner certification in one convenient downtown Calgary visit.',
+    description: 'Get your translation and commissioner certification in one convenient visit or by mail.',
   },
   {
     icon: Users,
@@ -104,7 +104,7 @@ const howItWorks = [
   { step: 1, title: 'Submit Your Document', description: 'Upload a photo or scan of your document through our secure form.' },
   { step: 2, title: 'Receive Your Quote', description: 'Get a detailed quote within 2 hours. No hidden fees.' },
   { step: 3, title: 'We Translate', description: 'IRCC-certified translator completes your translation with accuracy guarantee.' },
-  { step: 4, title: 'Pick Up or Delivery', description: 'Collect in downtown Calgary or receive via email/courier.' },
+  { step: 4, title: 'Pick Up or Delivery', description: 'Receive via email, courier, or collect from our office.' },
 ]
 
 const faqs = [
@@ -139,7 +139,7 @@ const breadcrumbItems = [
 export default function ImmigrationTranslationContent() {
   return (
     <>
-      <LandingLocalBusinessJsonLd areaServed={['Calgary', 'Edmonton', 'Alberta', 'Canada']} />
+      <LandingLocalBusinessJsonLd areaServed={['Canada']} />
       <FAQJsonLd faqs={faqs} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
 
@@ -165,7 +165,7 @@ export default function ImmigrationTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-lg text-[#4B5563] leading-relaxed mb-4"
               >
-                Certified translations accepted by Immigration, Refugees and Citizenship Canada. Birth certificates, marriage documents, academic credentials, and more—translated and notarized same-day in downtown Calgary.
+                Certified translations accepted by Immigration, Refugees and Citizenship Canada. Birth certificates, marriage documents, academic credentials, and more—translated and notarized same-day across Canada.
               </motion.p>
 
               <motion.p

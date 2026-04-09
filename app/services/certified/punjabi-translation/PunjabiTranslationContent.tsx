@@ -6,11 +6,11 @@ import { Phone, CheckCircle, Shield, Clock, Award, FileText, Globe } from 'lucid
 import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
-import { TrustBar, StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
+import { TrustBar, StickyMobileCTA } from '@/components/landing'
 import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
 const whatsIncluded = [
-  'Certified translation by native Hindi translator',
+  'Certified translation by native Punjabi translator',
   'Signed certificate of accuracy',
   'Commissioner certification (notarization equivalent)',
   'Digital copy via email',
@@ -28,8 +28,8 @@ const documentTypes = [
   'Police Clearance Certificates',
   'Employment Letters',
   'Affidavits',
-  'Aadhaar Cards',
-  'PAN Cards',
+  'Land Records',
+  'Property Documents',
   'Medical Records',
   'Driver\'s Licenses',
 ]
@@ -42,45 +42,45 @@ const pricingTable = [
 ]
 
 const howItWorks = [
-  { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your Hindi document and upload it through our secure form.' },
+  { step: 1, title: 'Upload Your Document', description: 'Take a clear photo or scan of your Punjabi document and upload it through our secure form.' },
   { step: 2, title: 'Get Your Quote', description: 'Receive an exact quote within 2 hours. No hidden fees, no surprises.' },
-  { step: 3, title: 'We Translate', description: 'Our native Hindi translator completes your translation with 100% accuracy.' },
-  { step: 4, title: 'Receive Your Translation', description: 'Pick up in downtown Calgary or receive via email/courier.' },
+  { step: 3, title: 'We Translate', description: 'Our native Punjabi translator completes your translation with 100% accuracy.' },
+  { step: 4, title: 'Receive Your Translation', description: 'Receive via email or courier anywhere in Canada.' },
 ]
 
 const faqs = [
   {
-    question: 'Do you translate documents in Devanagari script?',
-    answer: 'Yes, we specialize in translating documents written in Devanagari script, the traditional script used for Hindi and many other Indian languages. Our native Hindi translators are fully proficient in reading and translating Devanagari text.',
+    question: 'Do you translate documents in Gurmukhi script?',
+    answer: 'Yes, we specialize in translating documents written in Gurmukhi script, the traditional script used for Punjabi language in India. Our native Punjabi translators are fully proficient in reading and translating Gurmukhi text.',
   },
   {
-    question: 'Can you translate official Indian government documents?',
-    answer: 'Yes, we regularly translate Indian government documents including birth certificates, marriage certificates, educational documents, Aadhaar cards, PAN cards, and police clearance certificates. All translations are certified for IRCC acceptance.',
+    question: 'Can you translate Punjabi documents from Pakistan?',
+    answer: 'Yes, we translate Punjabi documents from both India and Pakistan. Pakistani Punjabi documents often use Shahmukhi (Arabic) script, and our translators are experienced with both Gurmukhi and Shahmukhi scripts.',
   },
   {
-    question: 'How much does Hindi translation cost?',
-    answer: 'Hindi translation starts at $65 for a single-page document like a birth certificate, which includes certified translation and commissioner certification. Multi-page documents are priced at $35 per additional page.',
+    question: 'How much does Punjabi translation cost?',
+    answer: 'Punjabi translation starts at $65 for a single-page document like a birth certificate, which includes certified translation and commissioner certification. Multi-page documents are priced at $35 per additional page.',
   },
   {
-    question: 'What Hindi documents do you translate most often?',
-    answer: 'We frequently translate birth certificates, marriage certificates, academic transcripts, and degrees from India. We also translate employment letters, police clearance certificates, and various government-issued identity documents.',
+    question: 'What Punjabi documents do you translate most often?',
+    answer: 'We frequently translate birth certificates, marriage certificates, academic transcripts, and degrees from Punjab. We also translate police clearance certificates, employment letters, and property documents for immigration purposes.',
   },
   {
-    question: 'Are your Hindi translations accepted by IRCC?',
-    answer: 'Yes, all our Hindi translations are certified and 100% accepted by IRCC. We provide a signed certificate of accuracy with every translation, which meets IRCC requirements for immigration applications.',
+    question: 'Are your Punjabi translations accepted by IRCC?',
+    answer: 'Yes, all our Punjabi translations are certified and 100% accepted by IRCC. We provide a signed certificate of accuracy with every translation, which meets IRCC requirements for immigration applications.',
   },
 ]
 
 const breadcrumbItems = [
   { name: 'Services', url: '/services' },
   { name: 'Certified Translation', url: '/services/certified' },
-  { name: 'Hindi Translation Calgary', url: '/services/certified/hindi-translation-calgary' },
+  { name: 'Punjabi Translation', url: '/services/certified/punjabi-translation' },
 ]
 
-export default function HindiTranslationContent() {
+export default function PunjabiTranslationContent() {
   return (
     <>
-      <LandingLocalBusinessJsonLd areaServed={['Calgary', 'Edmonton', 'Alberta', 'Canada']} />
+      {/* LocalBusiness JSON-LD removed - service is Canada-wide */}
       <FAQJsonLd faqs={faqs} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
 
@@ -97,7 +97,7 @@ export default function HindiTranslationContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[48px] font-bold text-[#0C2340] leading-[1.1] mb-6"
               >
-                Hindi Translation Calgary
+                Punjabi Translation Services Across Canada
               </motion.h1>
 
               <motion.p
@@ -106,7 +106,7 @@ export default function HindiTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-xl text-[#4B5563] leading-relaxed mb-6"
               >
-                IRCC-certified Hindi translations by native translators. Devanagari script expertise. Same-day service available with on-site notarization.
+                IRCC-certified Punjabi translations by native translators. Gurmukhi and Shahmukhi scripts. Same-day service available with on-site notarization.
               </motion.p>
 
               <motion.div
@@ -128,7 +128,7 @@ export default function HindiTranslationContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <TrustBar items={['Starting at $65', 'Same-Day Available', '100% IRCC Acceptance Guarantee', 'Native Hindi Translators']} />
+                <TrustBar items={['Starting at $65', 'Same-Day Available', '100% IRCC Acceptance Guarantee', 'Native Punjabi Translators']} />
               </motion.div>
             </div>
 
@@ -141,7 +141,7 @@ export default function HindiTranslationContent() {
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
               <EmbeddedCertifiedQuoteForm
-                formLocation="hindi-translation-calgary"
+                formLocation="punjabi-translation"
               />
             </motion.div>
           </div>
@@ -152,21 +152,21 @@ export default function HindiTranslationContent() {
       <section className="py-16 bg-white">
         <Container>
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why Choose Native Hindi Translators</h2>
+            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why Choose Native Punjabi Translators</h2>
             <p className="text-slate-600">
-              Our Hindi translators are native speakers with deep understanding of Devanagari script and the various document formats used across India.
+              Our Punjabi translators are native speakers with deep understanding of both Gurmukhi and Shahmukhi scripts, regional dialects, and document formats used in Punjab.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <Card className="p-6 text-center">
               <Globe className="w-10 h-10 text-teal-600 mx-auto mb-4" />
               <h3 className="font-semibold text-[#0C2340] mb-2">Native Speakers</h3>
-              <p className="text-sm text-slate-600">Our translators are native Hindi speakers from India with cultural expertise.</p>
+              <p className="text-sm text-slate-600">Our translators are native Punjabi speakers from Punjab, India and Pakistan.</p>
             </Card>
             <Card className="p-6 text-center">
               <FileText className="w-10 h-10 text-teal-600 mx-auto mb-4" />
-              <h3 className="font-semibold text-[#0C2340] mb-2">Devanagari Experts</h3>
-              <p className="text-sm text-slate-600">Expert translation of traditional Devanagari script documents.</p>
+              <h3 className="font-semibold text-[#0C2340] mb-2">Gurmukhi Experts</h3>
+              <p className="text-sm text-slate-600">Expert translation of traditional Gurmukhi script documents.</p>
             </Card>
             <Card className="p-6 text-center">
               <Award className="w-10 h-10 text-teal-600 mx-auto mb-4" />
@@ -199,8 +199,8 @@ export default function HindiTranslationContent() {
       {/* Document Types */}
       <section className="py-16 bg-white">
         <Container>
-          <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Hindi Documents We Translate</h2>
-          <p className="text-center text-slate-600 mb-8">Common documents from India:</p>
+          <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Punjabi Documents We Translate</h2>
+          <p className="text-center text-slate-600 mb-8">Common documents from Punjab, India and Pakistan:</p>
           <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
             {documentTypes.map((doc) => (
               <span key={doc} className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-full text-sm">
@@ -208,7 +208,7 @@ export default function HindiTranslationContent() {
               </span>
             ))}
           </div>
-          <p className="text-center text-sm text-slate-500 mt-4">Don&apos;t see your document type? Contact us—we translate all Hindi documents.</p>
+          <p className="text-center text-sm text-slate-500 mt-4">Don&apos;t see your document type? Contact us—we translate all Punjabi documents.</p>
         </Container>
       </section>
 
@@ -275,7 +275,7 @@ export default function HindiTranslationContent() {
       <section className="py-16 bg-[#0891B2]">
         <Container>
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">Get Your Hindi Documents Translated Today</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Get Your Punjabi Documents Translated Today</h2>
             <p className="text-white/90 mb-8 max-w-xl mx-auto">
               Starting at $65. Same-day service available.
             </p>
@@ -296,24 +296,24 @@ export default function HindiTranslationContent() {
         <Container>
           <h3 className="text-lg font-semibold text-[#0C2340] mb-4">Related Services</h3>
           <div className="flex flex-wrap gap-3">
-            <Link href="/services/certified/punjabi-translation-calgary" className="text-[#0891B2] hover:underline">
-              Punjabi Translation Calgary
+            <Link href="/services/certified/hindi-translation" className="text-[#0891B2] hover:underline">
+              Hindi Translation
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/services/certified/arabic-translation-calgary" className="text-[#0891B2] hover:underline">
-              Arabic Translation Calgary
+            <Link href="/services/certified/arabic-translation" className="text-[#0891B2] hover:underline">
+              Arabic Translation
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/services/certified/spanish-translation-calgary" className="text-[#0891B2] hover:underline">
-              Spanish Translation Calgary
+            <Link href="/services/certified/spanish-translation" className="text-[#0891B2] hover:underline">
+              Spanish Translation
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/services/certified/french-translation-calgary" className="text-[#0891B2] hover:underline">
-              French Translation Calgary
+            <Link href="/services/certified/french-translation" className="text-[#0891B2] hover:underline">
+              French Translation
             </Link>
             <span className="text-slate-300">•</span>
-            <Link href="/services/certified/mandarin-translation-calgary" className="text-[#0891B2] hover:underline">
-              Mandarin Translation Calgary
+            <Link href="/services/certified/mandarin-translation" className="text-[#0891B2] hover:underline">
+              Mandarin Translation
             </Link>
             <span className="text-slate-300">•</span>
             <Link href="/services/certified/immigration-translation-services" className="text-[#0891B2] hover:underline">
@@ -326,10 +326,6 @@ export default function HindiTranslationContent() {
             <span className="text-slate-300">•</span>
             <Link href="/services/certified" className="text-[#0891B2] hover:underline">
               All Certified Translation Services
-            </Link>
-            <span className="text-slate-300">•</span>
-            <Link href="/locations/calgary" className="text-[#0891B2] hover:underline">
-              Calgary Office
             </Link>
           </div>
         </Container>

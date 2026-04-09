@@ -5,14 +5,14 @@ import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 export const metadata: Metadata = {
   title: 'Contact Us | Cethos Solutions Inc.',
-  description: 'Contact Cethos Solutions for professional translation services. Offices in Calgary, Dubai, and India. Call (587) 600-0786 or email info@cethos.com.',
-  keywords: ['contact cethos', 'translation services contact', 'language services', 'Calgary translation', 'get quote'],
+  description: 'Contact Cethos Solutions for professional translation services. Offices in Canada, Dubai, and India. Call (587) 600-0786 or email info@cethos.com.',
+  keywords: ['contact cethos', 'translation services contact', 'language services', 'translation company Canada', 'get quote'],
   alternates: {
     canonical: 'https://cethos.com/contact',
   },
   openGraph: {
     title: 'Contact Us | Cethos Solutions Inc.',
-    description: 'Contact Cethos Solutions Inc. for translation services. Offices in Calgary, Dubai, and India.',
+    description: 'Contact Cethos Solutions Inc. for translation services. Offices in Canada, Dubai, and India.',
     url: 'https://cethos.com/contact',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',

@@ -2,14 +2,14 @@ import { Metadata } from 'next'
 import InterpretationPageContent from './InterpretationPageContent'
 
 export const metadata: Metadata = {
-  title: 'Interpretation Services Calgary | In-Person, Phone & Video | Cethos',
-  description: 'Professional interpretation services in Calgary. On-site, over-the-phone (OPI), and video remote interpretation (VRI) in 200+ languages. 24/7 availability. HIPAA compliant medical, certified legal, and conference interpreters.',
+  title: 'Interpretation Services Across Canada | In-Person, Phone & Video | Cethos',
+  description: 'Professional interpretation services across Canada. On-site, over-the-phone (OPI), and video remote interpretation (VRI) in 200+ languages. 24/7 availability. HIPAA compliant medical, certified legal, and conference interpreters.',
   keywords: [
-    'interpretation services Calgary',
-    'interpreter Calgary',
-    'court interpreter Calgary',
-    'medical interpreter Calgary',
-    'Calgary interpretation',
+    'interpretation services Canada',
+    'professional interpreters',
+    'court interpreter Canada',
+    'medical interpreter',
+    'interpretation services near me',
     'simultaneous interpretation',
     'consecutive interpretation',
     'over-the-phone interpretation',
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/services/interpretation',
   },
   openGraph: {
-    title: 'Interpretation Services Calgary | In-Person, Phone & Video | Cethos',
-    description: 'Professional interpretation services in Calgary. On-site, OPI, and VRI in 200+ languages. 24/7 availability with certified interpreters.',
+    title: 'Interpretation Services Across Canada | In-Person, Phone & Video | Cethos',
+    description: 'Professional interpretation services across Canada. On-site, OPI, and VRI in 200+ languages. 24/7 availability with certified interpreters.',
     url: 'https://cethos.com/services/interpretation',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',
@@ -67,8 +67,8 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  name: 'Professional Interpretation Services Calgary',
-  description: 'Professional interpretation services in Calgary and across Alberta. 200+ languages including simultaneous, consecutive, over-the-phone (OPI), and video remote interpretation (VRI). Available 24/7 with certified interpreters for medical, legal, business, and conference settings.',
+  name: 'Professional Interpretation Services',
+  description: 'Professional interpretation services across Canada. 200+ languages including simultaneous, consecutive, over-the-phone (OPI), and video remote interpretation (VRI). Available 24/7 with certified interpreters for medical, legal, business, and conference settings.',
   provider: {
     '@type': 'Organization',
     name: 'Cethos Solutions Inc.',
@@ -102,7 +102,6 @@ const jsonLd = {
     'ASL Interpretation',
   ],
   areaServed: [
-    { '@type': 'City', name: 'Calgary' },
     { '@type': 'Country', name: 'Canada' },
     { '@type': 'Country', name: 'United States' },
   ],
@@ -147,41 +146,12 @@ const jsonLd = {
   url: 'https://cethos.com/services/interpretation',
 }
 
-const localBusinessJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
-  name: 'Cethos Interpretation Services - Calgary',
-  description: 'Professional interpretation services in Calgary. On-site, OPI, and VRI in 200+ languages.',
-  url: 'https://cethos.com/services/interpretation',
-  telephone: '+1-587-600-0786',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: '421 7 Avenue SW, Floor 30',
-    addressLocality: 'Calgary',
-    addressRegion: 'AB',
-    postalCode: 'T2P 4K9',
-    addressCountry: 'CA',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 51.0486,
-    longitude: -114.0708,
-  },
-  priceRange: '$$',
-  openingHours: 'Mo-Fr 09:00-17:00',
-  areaServed: { '@type': 'City', name: 'Calgary' },
-}
-
 export default function InterpretationPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
       />
       <InterpretationPageContent />
     </>

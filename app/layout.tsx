@@ -4,7 +4,7 @@ import Script from 'next/script'
 import { Toaster } from 'sonner'
 import { CethosHeader, CethosFooter } from '@/components/layout'
 import PublicLayoutWrapper from '@/components/layout/PublicLayoutWrapper'
-import { OrganizationJsonLd, WebSiteJsonLd, LocalBusinessJsonLd } from '@/components/JsonLd'
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
 import './globals.css'
 
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     default: 'Cethos Solutions Inc. | Professional Translation Services',
     template: '%s | Cethos',
   },
-  description: 'Expert translation services in 200+ languages. Specializing in life sciences, linguistic validation, clinical trials, and certified translations. ISO compliant, Calgary-based with global reach.',
+  description: 'Expert translation services in 200+ languages. Specializing in life sciences, linguistic validation, clinical trials, and certified translations. ISO 17100 compliant. Serving Canada and clients worldwide.',
   keywords: ['translation services', 'localization', 'language services', 'certified translation', 'life sciences translation', 'linguistic validation', 'clinical trial translation', 'software localization'],
   authors: [{ name: 'Cethos Solutions Inc.' }],
   creator: 'Cethos Solutions Inc.',
@@ -79,7 +79,7 @@ export default function RootLayout({
       <head>
         <OrganizationJsonLd />
         <WebSiteJsonLd />
-        <LocalBusinessJsonLd />
+        {/* LocalBusinessJsonLd rendered on individual pages (homepage, locations, contact) — not site-wide */}
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <Toaster position="top-right" richColors closeButton />

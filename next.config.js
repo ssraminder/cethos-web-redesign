@@ -30,6 +30,37 @@ const nextConfig = {
         destination: '/services/certified',
         permanent: true,
       },
+      // Language page URL restructure: drop -calgary suffix
+      {
+        source: '/services/certified/arabic-translation-calgary',
+        destination: '/services/certified/arabic-translation',
+        permanent: true,
+      },
+      {
+        source: '/services/certified/french-translation-calgary',
+        destination: '/services/certified/french-translation',
+        permanent: true,
+      },
+      {
+        source: '/services/certified/hindi-translation-calgary',
+        destination: '/services/certified/hindi-translation',
+        permanent: true,
+      },
+      {
+        source: '/services/certified/mandarin-translation-calgary',
+        destination: '/services/certified/mandarin-translation',
+        permanent: true,
+      },
+      {
+        source: '/services/certified/punjabi-translation-calgary',
+        destination: '/services/certified/punjabi-translation',
+        permanent: true,
+      },
+      {
+        source: '/services/certified/spanish-translation-calgary',
+        destination: '/services/certified/spanish-translation',
+        permanent: true,
+      },
     ];
   },
 }

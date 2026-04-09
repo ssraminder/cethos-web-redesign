@@ -4,7 +4,7 @@ interface LandingLocalBusinessJsonLdProps {
   areaServed?: string[]
 }
 
-export function LandingLocalBusinessJsonLd({ areaServed = ['Calgary', 'Edmonton', 'Alberta'] }: LandingLocalBusinessJsonLdProps) {
+export function LandingLocalBusinessJsonLd({ areaServed = ['Canada'] }: LandingLocalBusinessJsonLdProps) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
