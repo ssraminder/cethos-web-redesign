@@ -2,14 +2,14 @@ import { Metadata } from 'next'
 import IqasAlbertaContent from './IqasAlbertaContent'
 
 export const metadata: Metadata = {
-  title: 'IQAS Translation Alberta | Certified Academic Translation | Cethos',
-  description: 'Certified translation for IQAS credential assessment in Alberta. Academic transcripts, diplomas, and certificates. From $65. Accepted by IQAS, AINP, and Alberta employers.',
+  title: 'IQAS Translation Services Alberta | Credential Evaluation | Cethos',
+  description: 'Certified translations for IQAS credential evaluations in Alberta. IRCC and Government of Alberta approved. Academic transcripts, diplomas, and professional credentials. Same-day available from $65.',
   alternates: {
     canonical: 'https://cethos.com/services/certified/iqas-alberta',
   },
   openGraph: {
-    title: 'IQAS Translation Alberta | Certified Academic Translation | Cethos',
-    description: 'Certified translation for IQAS credential assessment. Academic documents for Alberta immigration. From $65.',
+    title: 'IQAS Translation Services Alberta | Credential Evaluation | Cethos',
+    description: 'Certified translations for IQAS credential evaluations in Alberta. IRCC and Government of Alberta approved. Academic transcripts, diplomas, and professional credentials. From $65.',
     url: 'https://cethos.com/services/certified/iqas-alberta',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',

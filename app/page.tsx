@@ -6,11 +6,11 @@ import { LocalBusinessJsonLd } from '@/components/JsonLd'
 import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 export const metadata: Metadata = {
-  title: 'Cethos | Certified, Business & Life Sciences Translation Services Across Canada',
+  title: "Cethos | Canada's Certified Translation & Life Sciences Language Company",
   description: 'Professional translation services specializing in life sciences, certified translations, and enterprise solutions. ISO 17100 compliant. Offices across Canada, Dubai, and India.',
   alternates: { canonical: 'https://cethos.com' },
   openGraph: {
-    title: 'Cethos | Certified, Business & Life Sciences Translation Services Across Canada',
+    title: "Cethos | Canada's Certified Translation & Life Sciences Language Company",
     description: 'Professional translation services in 200+ languages. Life Sciences, certified, business, and legal translation.',
     url: 'https://cethos.com',
     siteName: 'Cethos Solutions Inc.',
@@ -36,8 +36,8 @@ export default function HomePage() {
       {/* Serving Across Canada */}
       <section className="py-12 bg-white border-t border-slate-200">
         <div className="max-w-[1200px] mx-auto px-8 text-center">
-          <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Serving Clients Across Canada</h2>
-          <p className="text-slate-600 mb-6">Translation and interpretation services available in major cities nationwide.</p>
+          <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Our Locations</h2>
+          <p className="text-slate-600 mb-6">Translation and interpretation services available in major cities across Canada.</p>
           <div className="flex flex-wrap justify-center gap-3">
             {[
               { label: 'Calgary', href: '/locations/calgary' },

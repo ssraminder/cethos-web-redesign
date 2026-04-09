@@ -101,7 +101,7 @@ export default function SpousalSponsorshipContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
-                Spousal Sponsorship Translation Canada
+                Spousal Sponsorship Translation Services Across Canada
               </motion.h1>
 
               <motion.p

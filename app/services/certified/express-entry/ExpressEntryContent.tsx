@@ -100,7 +100,7 @@ export default function ExpressEntryContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
-                Express Entry Document Translation
+                Express Entry Document Translation Across Canada
               </motion.h1>
 
               <motion.p

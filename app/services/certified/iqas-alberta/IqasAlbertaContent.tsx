@@ -89,7 +89,7 @@ export default function IqasAlbertaContent() {
                 transition={{ duration: 0.5 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
-                IQAS Translation Alberta
+                IQAS Certified Translation Services in Alberta
               </motion.h1>
 
               <motion.p
