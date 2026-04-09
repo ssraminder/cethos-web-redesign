@@ -56,6 +56,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/services/certified/french-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/services/certified/mandarin-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/services/certified/edmonton-translation-agency`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/services/certified/wes-evaluation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/services/certified/express-entry`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/services/certified/iqas-alberta`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/services/certified/spousal-sponsorship`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
 
     // Languages index
     { url: `${baseUrl}/services/languages`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
