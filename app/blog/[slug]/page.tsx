@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import BlogImage from '@/components/BlogImage';
 import { getPostBySlug, getRelatedPosts, getAllPostSlugs, formatDate } from '@/lib/blog-db';
 
@@ -178,6 +179,7 @@ export default async function BlogPostPage({
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="blog-content">
             <ReactMarkdown
+              rehypePlugins={[rehypeRaw]}
               components={{
                 h1: ({ children }) => (
                   <h1 className="text-2xl md:text-3xl font-bold text-[#0C2340] mt-10 mb-4 pb-2 border-b-2 border-[#0891B2]">
