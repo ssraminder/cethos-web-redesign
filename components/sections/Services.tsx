@@ -9,6 +9,8 @@ import {
   Code2,
   Play,
   Globe,
+  Mic,
+  Languages,
   ArrowRight,
 } from 'lucide-react'
 
@@ -24,6 +26,18 @@ const services = [
     description: 'Official documents with certified accuracy for legal, immigration, and government purposes.',
     icon: FileCheck,
     href: '/services/certified',
+  },
+  {
+    title: 'Interpretation Services',
+    description: 'On-site, phone, and video interpretation in Calgary and across Canada. 200+ languages, 24/7.',
+    icon: Mic,
+    href: '/services/interpretation',
+  },
+  {
+    title: 'Translation by Language',
+    description: 'Arabic, French, Hindi, Mandarin, Punjabi, Spanish, and 200+ more languages in Calgary.',
+    icon: Languages,
+    href: '/services/languages',
   },
   {
     title: 'Business Translation',

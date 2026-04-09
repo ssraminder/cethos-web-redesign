@@ -45,6 +45,7 @@
       { label: 'Software Localization', href: '/services/software', description: 'Apps, websites, and software' },
       { label: 'Multimedia Translation', href: '/services/multimedia', description: 'Video, audio, and subtitles' },
       { label: 'Interpretation Services', href: '/services/interpretation', description: 'On-site and remote interpretation' },
+      { label: 'Translation by Language', href: '/services/languages', description: '200+ languages available' },
       { label: 'Transcription Services', href: '/services/transcription', description: 'Audio and video transcription' }
     ],
     industries: [
@@ -71,6 +72,7 @@
         { label: 'Software', href: '/services/software' },
         { label: 'Multimedia', href: '/services/multimedia' },
         { label: 'Interpretation', href: '/services/interpretation' },
+        { label: 'Languages', href: '/services/languages' },
         { label: 'Transcription', href: '/services/transcription' }
       ],
       company: [
