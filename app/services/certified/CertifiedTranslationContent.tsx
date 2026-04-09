@@ -262,6 +262,26 @@ const faqs = [
     answer:
       'We translate from 95+ languages including Punjabi, Hindi, Urdu, Mandarin, Cantonese, Arabic, Farsi, Spanish, French, Vietnamese, Korean, Japanese, Tagalog, Russian, Ukrainian, and many more. All translators are native speakers with professional certification.',
   },
+  {
+    question: 'How much does certified translation cost in Calgary?',
+    answer:
+      'Certified translation in Calgary starts at $65 per document, which includes translation, certification, and commissioner of oaths certification. Multi-page documents are priced at $35 per additional page. Bundle pricing is available for PR and citizenship packages starting at $120.',
+  },
+  {
+    question: 'How long does certified translation take?',
+    answer:
+      'Standard certified translation takes 2-3 business days. Rush service (24 hours) and same-day service are available at our Calgary office for urgent deadlines. Contact us directly for same-day requests.',
+  },
+  {
+    question: 'Is Cethos IRCC certified?',
+    answer:
+      'Yes, Cethos Solutions is an IRCC-accepted certified translation provider. All our translations are 100% accepted by Immigration, Refugees and Citizenship Canada for Express Entry, family sponsorship, citizenship, and all other immigration applications. We offer a full money-back guarantee.',
+  },
+  {
+    question: 'What documents can be certified translated?',
+    answer:
+      'We certify translations of all document types including birth certificates, marriage certificates, divorce decrees, academic transcripts, diplomas, police clearance certificates, employment letters, bank statements, medical records, and any other official documents required for immigration, legal, or academic purposes.',
+  },
 ]
 
 const breadcrumbItems = [
@@ -278,12 +298,52 @@ export default function CertifiedTranslationContent() {
     <>
       {/* Structured Data */}
       <ServiceJsonLd
-        name="Certified Translation Services Calgary"
-        description="Certified translation services for immigration, legal, and academic documents. Government of Alberta approved. 100% acceptance guarantee. From $65."
+        name="Translation Services Calgary"
+        description="Professional translation services in Calgary. IRCC certified for immigration, legal, and academic documents. Government of Alberta approved. 100% acceptance guarantee. From $65."
         url="https://cethos.com/services/certified"
       />
       <FAQJsonLd faqs={faqs} />
       <BreadcrumbJsonLd items={breadcrumbItems} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'LocalBusiness',
+            name: 'Cethos Translation Services',
+            description: 'IRCC certified translation services in Calgary, Alberta. 95+ languages.',
+            url: 'https://cethos.com/services/certified',
+            telephone: '+1-587-600-0786',
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: '421 7 Avenue SW, Floor 30',
+              addressLocality: 'Calgary',
+              addressRegion: 'AB',
+              postalCode: 'T2P 4K9',
+              addressCountry: 'CA',
+            },
+            geo: {
+              '@type': 'GeoCoordinates',
+              latitude: 51.0486,
+              longitude: -114.0708,
+            },
+            priceRange: '$$',
+            openingHours: 'Mo-Fr 09:00-17:00',
+            areaServed: 'Calgary',
+            hasOfferCatalog: {
+              '@type': 'OfferCatalog',
+              name: 'Translation Services',
+              itemListElement: [
+                { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Certified Translation' } },
+                { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'IRCC Document Translation' } },
+                { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Legal Translation' } },
+                { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Birth Certificate Translation' } },
+                { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Marriage Certificate Translation' } },
+              ],
+            },
+          }),
+        }}
+      />
 
       {/* ===================================================================== */}
       {/* HERO SECTION */}
@@ -310,7 +370,7 @@ export default function CertifiedTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-6"
               >
-                Certified Translation Services Calgary
+                Translation Services Calgary
               </motion.h1>
 
               <motion.p
@@ -319,9 +379,10 @@ export default function CertifiedTranslationContent() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="text-lg text-[#4B5563] leading-relaxed mb-4"
               >
-                Official document translations accepted by IRCC, courts, WES, IQAS, and government
-                agencies across Canada. Birth certificates, marriage documents, academic credentials,
-                and immigration papers—translated and certified same-day.
+                Looking for professional translation services in Calgary? Cethos Solutions provides
+                IRCC-certified translations for immigration, legal, and academic documents — accepted
+                by courts, WES, IQAS, and government agencies across Canada. Same-day certified
+                translation service available at our downtown Calgary office.
               </motion.p>
 
               <motion.p
@@ -331,7 +392,7 @@ export default function CertifiedTranslationContent() {
                 className="text-lg text-[#4B5563] leading-relaxed mb-6"
               >
                 Government of Alberta approved translator. Notarization included with every
-                translation.
+                translation. 95+ languages available.
               </motion.p>
 
               {/* Price Badge */}
@@ -658,6 +719,59 @@ export default function CertifiedTranslationContent() {
                 </Card>
               </motion.div>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ===================================================================== */}
+      {/* POPULAR LANGUAGE SERVICES */}
+      {/* ===================================================================== */}
+      <section className="py-16 bg-white">
+        <Container>
+          <SectionHeading
+            title="Popular Language Translation Services"
+            subtitle="Dedicated translation pages for Calgary's most requested languages."
+            className="mb-12"
+          />
+          <div className="flex flex-wrap justify-center gap-4">
+            {[
+              { label: 'Arabic Translation', href: '/services/certified/arabic-translation-calgary' },
+              { label: 'French Translation', href: '/services/certified/french-translation-calgary' },
+              { label: 'Hindi Translation', href: '/services/certified/hindi-translation-calgary' },
+              { label: 'Mandarin Translation', href: '/services/certified/mandarin-translation-calgary' },
+              { label: 'Punjabi Translation', href: '/services/certified/punjabi-translation-calgary' },
+              { label: 'Spanish Translation', href: '/services/certified/spanish-translation-calgary' },
+            ].map((lang) => (
+              <Link
+                key={lang.href}
+                href={lang.href}
+                className="bg-slate-100 px-5 py-3 rounded-lg text-gray-800 font-medium hover:bg-[#0891B2] hover:text-white transition-colors"
+              >
+                {lang.label}
+              </Link>
+            ))}
+          </div>
+          <div className="text-center mt-6">
+            <Link href="/services/languages" className="text-[#0891B2] font-medium hover:underline">
+              View all 200+ languages →
+            </Link>
+          </div>
+        </Container>
+      </section>
+
+      {/* ===================================================================== */}
+      {/* RELATED SERVICES */}
+      {/* ===================================================================== */}
+      <section className="py-12 bg-slate-50 border-t border-slate-200">
+        <Container>
+          <div className="flex flex-wrap justify-center gap-6 text-sm">
+            <Link href="/services/interpretation" className="text-[#0891B2] font-medium hover:underline">
+              Need an interpreter? View Interpretation Services →
+            </Link>
+            <span className="text-slate-300 hidden md:inline">|</span>
+            <Link href="/locations/calgary" className="text-[#0891B2] font-medium hover:underline">
+              Visit our Calgary office →
+            </Link>
           </div>
         </Container>
       </section>

@@ -697,6 +697,30 @@ export default function LocationPageTemplate({
         </div>
       </section>
 
+      {/* Other Services */}
+      <section className="py-12 bg-gray-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h3 className="text-lg font-semibold text-[#0C2340] mb-4">More Services in {city}</h3>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/services/interpretation" className="text-[#0891B2] hover:underline">
+              Interpretation Services
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/services/languages" className="text-[#0891B2] hover:underline">
+              Translation by Language
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/services/certified" className="text-[#0891B2] hover:underline">
+              Certified Translation Services
+            </Link>
+            <span className="text-slate-300">•</span>
+            <Link href="/get-quote" className="text-[#0891B2] hover:underline">
+              Get a Free Quote
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-16 bg-[#0891B2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

@@ -329,6 +329,41 @@ export default function ServicesPageContent() {
       </section>
 
       {/* ===================================================================== */}
+      {/* TRANSLATION BY LANGUAGE */}
+      {/* ===================================================================== */}
+      <section className="py-12 bg-white border-t border-slate-200">
+        <Container>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-[#0C2340] mb-3">Translation by Language</h2>
+            <p className="text-slate-600 mb-6">
+              Dedicated translation pages for our most requested languages in Calgary.
+            </p>
+            <div className="flex flex-wrap justify-center gap-3 mb-6">
+              {[
+                { label: 'Arabic', href: '/services/certified/arabic-translation-calgary' },
+                { label: 'French', href: '/services/certified/french-translation-calgary' },
+                { label: 'Hindi', href: '/services/certified/hindi-translation-calgary' },
+                { label: 'Mandarin', href: '/services/certified/mandarin-translation-calgary' },
+                { label: 'Punjabi', href: '/services/certified/punjabi-translation-calgary' },
+                { label: 'Spanish', href: '/services/certified/spanish-translation-calgary' },
+              ].map((lang) => (
+                <Link
+                  key={lang.href}
+                  href={lang.href}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 rounded-full text-sm font-medium hover:bg-[#0891B2] hover:text-white transition-colors"
+                >
+                  {lang.label}
+                </Link>
+              ))}
+            </div>
+            <Link href="/services/languages" className="text-[#0891B2] font-medium hover:underline text-sm">
+              View all 200+ languages →
+            </Link>
+          </div>
+        </Container>
+      </section>
+
+      {/* ===================================================================== */}
       {/* CTA SECTION */}
       {/* ===================================================================== */}
       <section className="py-20 bg-gradient-to-r from-[#0C2340] to-[#164e63]">

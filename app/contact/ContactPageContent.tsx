@@ -478,8 +478,8 @@ export default function ContactPageContent() {
               <h3 className="text-xl font-semibold text-white mb-6">
                 Need a certified translation?
               </h3>
-              <Button href="/get-quote" variant="primary" showArrow>
-                Get a Free Quote
+              <Button href="/services/certified" variant="primary" showArrow>
+                View Translation Services
               </Button>
             </motion.div>
 
