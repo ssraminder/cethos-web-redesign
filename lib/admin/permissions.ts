@@ -54,6 +54,9 @@ export const PERMISSIONS = {
   audit_log: {
     read: ['super_admin', 'admin'],
   },
+  seo_dashboard: {
+    read: ['super_admin', 'admin'],
+  },
 } as const;
 
 export function hasPermission(

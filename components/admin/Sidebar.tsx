@@ -8,7 +8,7 @@ import {
   LayoutDashboard, FileText, FolderOpen, Users, Code2,
   Search, LogOut, ChevronDown, ChevronRight, ChevronLeft,
   X, ExternalLink, CalendarDays, Image, ArrowLeftRight,
-  Settings, User,
+  Settings, User, BarChart3,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { CETHOS_LOGO_DARK_BG, CETHOS_FAVICON } from '@/lib/admin/brand';
@@ -92,6 +92,14 @@ export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: 
       icon: ArrowLeftRight,
       active: pathname.startsWith('/admin/redirects'),
     },
+    ...(hasPermission(adminUser.role, 'seo_dashboard', 'read')
+      ? [{
+          label: 'SEO Dashboard',
+          href: '/admin/seo-dashboard',
+          icon: BarChart3,
+          active: pathname.startsWith('/admin/seo-dashboard'),
+        }]
+      : []),
   ];
 
   const roleLabels: Record<string, string> = {
