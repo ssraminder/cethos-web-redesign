@@ -40,27 +40,58 @@ const featuredLanguages = [
 ]
 
 const allLanguages = [
-  'Afrikaans', 'Albanian', 'Amharic', 'Arabic', 'Armenian', 'Azerbaijani',
-  'Bengali', 'Bosnian', 'Bulgarian', 'Burmese',
-  'Cantonese', 'Catalan', 'Croatian', 'Czech',
-  'Danish', 'Dari', 'Dutch',
-  'Estonian',
-  'Farsi (Persian)', 'Filipino (Tagalog)', 'Finnish', 'French',
-  'Georgian', 'German', 'Greek', 'Gujarati',
-  'Haitian Creole', 'Hausa', 'Hebrew', 'Hindi', 'Hungarian',
-  'Indonesian', 'Italian',
-  'Japanese',
-  'Kannada', 'Kazakh', 'Khmer', 'Korean', 'Kurdish',
-  'Lao', 'Latvian', 'Lithuanian',
-  'Macedonian', 'Malay', 'Malayalam', 'Mandarin Chinese', 'Marathi', 'Mongolian',
-  'Nepali', 'Norwegian',
-  'Pashto', 'Polish', 'Portuguese', 'Punjabi',
-  'Romanian', 'Russian',
-  'Serbian', 'Sinhala', 'Slovak', 'Slovenian', 'Somali', 'Spanish', 'Swahili', 'Swedish',
-  'Tamil', 'Telugu', 'Thai', 'Tigrinya', 'Turkish',
-  'Ukrainian', 'Urdu', 'Uzbek',
-  'Vietnamese',
-  'Yoruba',
+  // A
+  'Acehnese', 'Afar', 'Afrikaans', 'Akan', 'Albanian', 'Amharic', 'Arabic', 'Arabic (Egyptian)', 'Arabic (Gulf)', 'Arabic (Levantine)', 'Arabic (Maghrebi)', 'Arabic (Sudanese)', 'Armenian', 'Assamese', 'Austronesian', 'Azerbaijani',
+  // B
+  'Balochi', 'Bambara', 'Basque', 'Belarusian', 'Bengali', 'Bhojpuri', 'Bosnian', 'Breton', 'Bulgarian', 'Burmese',
+  // C
+  'Cantonese', 'Catalan', 'Cebuano', 'Chamorro', 'Chechen', 'Cherokee', 'Chichewa', 'Chittagonian', 'Cree', 'Croatian', 'Czech',
+  // D
+  'Danish', 'Dinka', 'Divehi (Maldivian)', 'Dogri', 'Dutch', 'Dzongkha',
+  // E
+  'Edo', 'Estonian', 'Ewe',
+  // F
+  'Fang', 'Fijian', 'Filipino (Tagalog)', 'Finnish', 'Flemish', 'Fon', 'French', 'French (Canadian)', 'Friulian', 'Fula',
+  // G
+  'Ga', 'Galician', 'Ganda (Luganda)', 'Georgian', 'German', 'Greek', 'Guarani', 'Gujarati',
+  // H
+  'Haitian Creole', 'Hakka', 'Harari', 'Hausa', 'Hawaiian', 'Hebrew', 'Hiligaynon', 'Hindi', 'Hmong', 'Hokkien', 'Hungarian',
+  // I
+  'Icelandic', 'Igbo', 'Ilocano', 'Indonesian', 'Inuktitut', 'Irish (Gaeilge)', 'Italian',
+  // J
+  'Japanese', 'Javanese', 'Juba Arabic',
+  // K
+  'Kabyle', 'Kamba', 'Kannada', 'Karen', 'Kashmiri', 'Kazakh', 'Khmer', 'Kiche', 'Kikuyu', 'Kinyarwanda', 'Kirundi', 'Konkani', 'Korean', 'Krio', 'Kurdish (Kurmanji)', 'Kurdish (Sorani)', 'Kyrgyz',
+  // L
+  'Lao', 'Latvian', 'Lingala', 'Lithuanian', 'Luba-Katanga', 'Luxembourgish',
+  // M
+  'Macedonian', 'Maithili', 'Malagasy', 'Malay', 'Malayalam', 'Maltese', 'Mandarin Chinese', 'Mandinka', 'Manipuri (Meitei)', 'Maori', 'Marathi', 'Marshallese', 'Mien', 'Mizo', 'Moldovan', 'Mongolian', 'Montenegrin', 'Mossi',
+  // N
+  'Ndebele', 'Nepali', 'Newari', 'Norwegian', 'Nuer', 'Nyanja',
+  // O
+  'Odia (Oriya)', 'Ojibwe', 'Oromo',
+  // P
+  'Pashto', 'Persian (Dari)', 'Persian (Farsi)', 'Polish', 'Portuguese', 'Portuguese (Brazilian)', 'Punjabi (Gurmukhi)', 'Punjabi (Shahmukhi)',
+  // Q
+  'Quechua',
+  // R
+  'Romani', 'Romanian', 'Romansh', 'Russian', 'Rwandan',
+  // S
+  'Samoan', 'Sango', 'Sanskrit', 'Santali', 'Saraiki', 'Serbian', 'Shanghainese', 'Shan', 'Shona', 'Sindhi', 'Sinhala', 'Slovak', 'Slovenian', 'Somali', 'Somali (Maay)', 'Sotho', 'Spanish', 'Spanish (Latin American)', 'Sundanese', 'Susu', 'Swahili', 'Swati', 'Swedish', 'Sylheti',
+  // T
+  'Tajik', 'Tamil', 'Tatar', 'Telugu', 'Temne', 'Teochew', 'Thai', 'Tibetan', 'Tigrinya', 'Tiv', 'Tok Pisin', 'Tongan', 'Tsonga', 'Tswana', 'Tulu', 'Turkish', 'Turkmen', 'Twi',
+  // U
+  'Ukrainian', 'Urdu', 'Uyghur', 'Uzbek',
+  // V
+  'Venda', 'Vietnamese',
+  // W
+  'Welsh', 'Wolof',
+  // X
+  'Xhosa',
+  // Y
+  'Yiddish', 'Yoruba',
+  // Z
+  'Zulu',
 ]
 
 const breadcrumbItems = [
