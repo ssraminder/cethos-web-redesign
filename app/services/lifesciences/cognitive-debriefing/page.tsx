@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Cognitive Debriefing Services | ISPOR-Compliant Patient Interviews | Cethos',
@@ -43,12 +44,21 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'How many cognitive debriefing participants are needed per language?', answer: 'ISPOR guidelines recommend 5-8 participants per language for cognitive debriefing interviews to ensure adequate assessment of patient comprehension and cultural appropriateness.' },
+  { question: 'What interview formats are available for cognitive debriefing?', answer: 'We offer video call, telephone, and in-person cognitive debriefing interviews depending on your study requirements, participant population, and geographic locations.' },
+  { question: 'How long does cognitive debriefing take?', answer: 'Cognitive debriefing typically takes 2-4 weeks depending on the number of languages, participant recruitment complexity, and interview scheduling requirements.' },
+  { question: 'Can you recruit specialized patient populations?', answer: 'Yes, we have extensive experience recruiting pediatric patients (ages 5-17), geriatric populations, rare disease patients, and individuals with cognitive impairment.' },
+  { question: 'Is cognitive debriefing required by FDA and EMA?', answer: 'Yes, both FDA and EMA require cognitive debriefing as part of linguistic validation to demonstrate content validity for translated clinical outcome assessments.' },
+]
+
 export default function CognitiveDebriefingPage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -217,21 +227,15 @@ export default function CognitiveDebriefingPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'How many cognitive debriefing participants are needed per language?', a: 'ISPOR guidelines recommend 5-8 participants per language for cognitive debriefing interviews to ensure adequate assessment of patient comprehension and cultural appropriateness.' },
-              { q: 'What interview formats are available for cognitive debriefing?', a: 'We offer video call, telephone, and in-person cognitive debriefing interviews depending on your study requirements, participant population, and geographic locations.' },
-              { q: 'How long does cognitive debriefing take?', a: 'Cognitive debriefing typically takes 2-4 weeks depending on the number of languages, participant recruitment complexity, and interview scheduling requirements.' },
-              { q: 'Can you recruit specialized patient populations?', a: 'Yes, we have extensive experience recruiting pediatric patients (ages 5-17), geriatric populations, rare disease patients, and individuals with cognitive impairment.' },
-              { q: 'Is cognitive debriefing required by FDA and EMA?', a: 'Yes, both FDA and EMA require cognitive debriefing as part of linguistic validation to demonstrate content validity for translated clinical outcome assessments.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-gray-50 rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>

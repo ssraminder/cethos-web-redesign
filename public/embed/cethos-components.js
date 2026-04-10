@@ -1252,9 +1252,7 @@
                     <a href="https://linkedin.com/company/cethos" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="LinkedIn">
                       ${ICONS.linkedin}
                     </a>
-                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="footer-social-link" aria-label="Twitter">
-                      ${ICONS.twitter}
-                    </a>
+                    <!-- Twitter/X link removed — no active Cethos handle -->
                   </div>
                 </div>
 

@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Regulatory Affairs Translation | CTD, SmPC, PIL Translation | Cethos',
@@ -43,12 +44,20 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'Do you translate full CTD dossiers?', answer: 'Yes, we translate complete CTD dossiers including all five modules. We also handle partial translations, updates, and variations. Our translators have extensive experience with the technical and scientific content in each module.' },
+  { question: 'How do you ensure regulatory compliance in translations?', answer: 'Our regulatory translators are trained in the specific requirements of each target agency. We use agency-specific terminology databases, adhere to QRD templates where applicable, and maintain consistency with previously approved texts.' },
+  { question: 'Can you handle urgent regulatory submissions?', answer: 'Yes, we offer expedited services for urgent regulatory submissions with turnaround as fast as 48 hours depending on document length and complexity. Our 24/7 project management ensures continuous progress on critical timelines.' },
+  { question: 'Do you provide certified translations for regulatory submissions?', answer: 'Yes, all regulatory translations include translation certificates suitable for submission to FDA, EMA, and other regulatory agencies. We maintain complete audit trails and documentation as required.' },
+]
+
 export default function RegulatoryAffairsPage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -249,20 +258,15 @@ export default function RegulatoryAffairsPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'Do you translate full CTD dossiers?', a: 'Yes, we translate complete CTD dossiers including all five modules. We also handle partial translations, updates, and variations. Our translators have extensive experience with the technical and scientific content in each module.' },
-              { q: 'How do you ensure regulatory compliance in translations?', a: 'Our regulatory translators are trained in the specific requirements of each target agency. We use agency-specific terminology databases, adhere to QRD templates where applicable, and maintain consistency with previously approved texts.' },
-              { q: 'Can you handle urgent regulatory submissions?', a: 'Yes, we offer expedited services for urgent regulatory submissions with turnaround as fast as 48 hours depending on document length and complexity. Our 24/7 project management ensures continuous progress on critical timelines.' },
-              { q: 'Do you provide certified translations for regulatory submissions?', a: 'Yes, all regulatory translations include translation certificates suitable for submission to FDA, EMA, and other regulatory agencies. We maintain complete audit trails and documentation as required.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-gray-50 rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>

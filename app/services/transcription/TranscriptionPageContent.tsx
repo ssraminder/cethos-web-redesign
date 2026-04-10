@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import TranscriptionQuoteForm from '@/components/forms/TranscriptionQuoteForm';
+import { FAQJsonLd } from '@/components/JsonLd';
 
 // Service type data
 const SERVICE_TYPES = [
@@ -316,6 +317,7 @@ export default function TranscriptionPageContent() {
 
   return (
     <main>
+      <FAQJsonLd faqs={FAQS} />
       {/* HERO SECTION */}
       <section id="top" className="relative bg-gradient-to-br from-[#0C2340] via-[#0F3A5C] to-[#0891B2] min-h-[750px] lg:min-h-[700px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16">

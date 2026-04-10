@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ClientTestimonials from '@/components/ClientTestimonials'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 // FAQ Accordion Item Component
 function FAQItem({ question, answer, isOpen, onClick }: {
@@ -69,6 +70,7 @@ export default function AboutPageContent() {
 
   return (
     <main className="min-h-screen bg-white">
+      <FAQJsonLd faqs={faqItems} />
       {/* Section 1: Hero */}
       <section className="min-h-[400px] bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#0891B2] pt-32 pb-16 flex items-center">
         <div className="container mx-auto px-4 text-center">

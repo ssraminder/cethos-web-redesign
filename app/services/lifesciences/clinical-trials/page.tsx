@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Clinical Trial Translation Services | Protocols, ICFs, CRFs | Cethos',
@@ -43,12 +44,21 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'What is the typical turnaround time for ICF translation?', answer: 'Standard turnaround for informed consent form translation is 5-7 business days per language. We offer expedited services with 24-48 hour turnaround for urgent needs. Turnaround depends on document length and language pair.' },
+  { question: 'Do you provide back translation for clinical trial documents?', answer: 'Yes, we provide certified back translation services for all clinical trial documents when required by your sponsor or ethics committee. Back translations are performed by independent translators who have not seen the source text.' },
+  { question: 'How do you ensure consistency across multiple study amendments?', answer: 'We maintain dedicated translation memories and glossaries for each study. All amendments reference the existing TM to ensure consistent terminology and phrasing across document versions and languages.' },
+  { question: 'Can you handle urgent protocol amendments?', answer: 'Yes, we have 24/7 project management support and can accommodate urgent protocol amendments with expedited turnaround. Contact us to discuss your specific timeline requirements.' },
+  { question: 'Do you provide regulatory submission support?', answer: 'Yes, we provide translation certificates and documentation suitable for regulatory submission to FDA, EMA, and other regulatory agencies. All translations are performed in compliance with GCP guidelines.' },
+]
+
 export default function ClinicalTrialsPage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -278,21 +288,15 @@ export default function ClinicalTrialsPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'What is the typical turnaround time for ICF translation?', a: 'Standard turnaround for informed consent form translation is 5-7 business days per language. We offer expedited services with 24-48 hour turnaround for urgent needs. Turnaround depends on document length and language pair.' },
-              { q: 'Do you provide back translation for clinical trial documents?', a: 'Yes, we provide certified back translation services for all clinical trial documents when required by your sponsor or ethics committee. Back translations are performed by independent translators who have not seen the source text.' },
-              { q: 'How do you ensure consistency across multiple study amendments?', a: 'We maintain dedicated translation memories and glossaries for each study. All amendments reference the existing TM to ensure consistent terminology and phrasing across document versions and languages.' },
-              { q: 'Can you handle urgent protocol amendments?', a: 'Yes, we have 24/7 project management support and can accommodate urgent protocol amendments with expedited turnaround. Contact us to discuss your specific timeline requirements.' },
-              { q: 'Do you provide regulatory submission support?', a: 'Yes, we provide translation certificates and documentation suitable for regulatory submission to FDA, EMA, and other regulatory agencies. All translations are performed in compliance with GCP guidelines.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-white rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>

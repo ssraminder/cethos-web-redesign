@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Pharmacovigilance Translation Services | ICSRs, PSURs, DSURs | Cethos',
@@ -43,12 +44,20 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'What is your turnaround time for ICSR translation?', answer: 'We offer 4-hour turnaround for urgent ICSR translations to help you meet regulatory reporting timelines. Our 24/7 availability ensures we can support your PV needs around the clock, including weekends and holidays.' },
+  { question: 'Do you have experience with MedDRA terminology?', answer: 'Yes, our pharmacovigilance translators are trained in MedDRA coding and maintain current terminology databases. We ensure consistent use of preferred terms across all translations to facilitate accurate safety reporting.' },
+  { question: 'Can you handle high-volume ICSR translation?', answer: 'Yes, we have dedicated PV translation teams that can scale to handle high-volume adverse event reporting. We use translation memory and terminology management to ensure consistency and efficiency across large volumes.' },
+  { question: 'Do you provide translation for spontaneous and solicited reports?', answer: 'Yes, we translate all types of adverse event reports including spontaneous reports from patients and healthcare providers, solicited reports from clinical trials, and reports from post-marketing surveillance activities.' },
+]
+
 export default function PharmacovigilancePage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -265,20 +274,15 @@ export default function PharmacovigilancePage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'What is your turnaround time for ICSR translation?', a: 'We offer 4-hour turnaround for urgent ICSR translations to help you meet regulatory reporting timelines. Our 24/7 availability ensures we can support your PV needs around the clock, including weekends and holidays.' },
-              { q: 'Do you have experience with MedDRA terminology?', a: 'Yes, our pharmacovigilance translators are trained in MedDRA coding and maintain current terminology databases. We ensure consistent use of preferred terms across all translations to facilitate accurate safety reporting.' },
-              { q: 'Can you handle high-volume ICSR translation?', a: 'Yes, we have dedicated PV translation teams that can scale to handle high-volume adverse event reporting. We use translation memory and terminology management to ensure consistency and efficiency across large volumes.' },
-              { q: 'Do you provide translation for spontaneous and solicited reports?', a: 'Yes, we translate all types of adverse event reports including spontaneous reports from patients and healthcare providers, solicited reports from clinical trials, and reports from post-marketing surveillance activities.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-white rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>
