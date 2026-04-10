@@ -150,7 +150,15 @@ export function Footer() {
                 >
                   <Linkedin className="w-5 h-5" strokeWidth={1.5} />
                 </a>
-                {/* Twitter/X link removed — no active Cethos handle */}
+                <a
+                  href="https://www.proz.com/business/51142"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+                  aria-label="ProZ.com"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3" /><text x="12" y="16.5" textAnchor="middle" fontSize="13" fontWeight="600" fill="currentColor" stroke="none" fontFamily="sans-serif">Pz</text></svg>
+                </a>
               </div>
             </div>
           </div>

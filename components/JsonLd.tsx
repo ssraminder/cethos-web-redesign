@@ -58,6 +58,7 @@ export function OrganizationJsonLd() {
     },
     sameAs: [
       'https://www.linkedin.com/company/cethos',
+      'https://www.proz.com/business/51142',
     ],
     knowsAbout: [
       'Translation Services',

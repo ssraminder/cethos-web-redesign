@@ -4,6 +4,6 @@
 INSERT INTO cethosweb_settings (key, value)
 VALUES (
   'default_og_image',
-  'https://cethos.com/images/og-default.jpg'
+  'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/og-image-cethos.jpg'
 )
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;

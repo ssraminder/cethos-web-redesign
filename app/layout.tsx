@@ -23,7 +23,7 @@ export const viewport: Viewport = {
   themeColor: '#0C2340',
 }
 
-const DEFAULT_OG_IMAGE_FALLBACK = '/images/og-default.jpg'
+const DEFAULT_OG_IMAGE_FALLBACK = 'https://lmzoyezvsjgsxveoakdr.supabase.co/storage/v1/object/public/web-assets/og-image-cethos.jpg'
 
 export async function generateMetadata(): Promise<Metadata> {
   const ogImageUrl = await getSettingServer('default_og_image') || DEFAULT_OG_IMAGE_FALLBACK
