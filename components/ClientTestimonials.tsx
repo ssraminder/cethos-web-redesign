@@ -110,7 +110,7 @@ export default function ClientTestimonials({ compact = false }: ClientTestimonia
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
             What Our Clients Say
           </h2>
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2" role="img" aria-label="Google Reviews 4.9 out of 5 stars from 139 reviews">
             <FiveStars />
             <span className="text-sm text-gray-600">
               4.9 out of 5 &bull; Based on 139 Google Reviews
@@ -157,13 +157,15 @@ export default function ClientTestimonials({ compact = false }: ClientTestimonia
         {/* Trust Badges */}
         <div className="flex flex-wrap justify-center gap-3 mb-6">
           {[
-            { icon: 'shield', text: 'Government of Alberta Approved' },
-            { icon: 'check', text: 'BBB Accredited \u2014 A+ Rating' },
-            { icon: 'cert', text: 'ISO 17100 Compliant' },
+            { icon: 'shield', text: 'Government of Alberta Approved', alt: 'Government of Alberta Approved Translation Provider' },
+            { icon: 'check', text: 'BBB Accredited \u2014 A+ Rating', alt: 'Better Business Bureau A+ Accredited Business' },
+            { icon: 'cert', text: 'ISO 17100 Compliant', alt: 'ISO 17100 Compliant Translation Services' },
           ].map((badge) => (
             <div
               key={badge.text}
               className="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-600"
+              role="img"
+              aria-label={badge.alt}
             >
               <svg
                 className="w-4 h-4 text-teal-600 flex-shrink-0"
@@ -171,6 +173,7 @@ export default function ClientTestimonials({ compact = false }: ClientTestimonia
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"

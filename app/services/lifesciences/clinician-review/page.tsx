@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Clinician Review Services | Medical Expert Translation Review | Cethos',
@@ -43,12 +44,21 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'What qualifications do your clinician reviewers have?', answer: 'All our clinician reviewers are licensed healthcare professionals (MDs, DOs, PharmDs, or specialist nurses) with native-level language proficiency and relevant clinical experience in the therapeutic area.' },
+  { question: 'How quickly can you complete a clinician review?', answer: 'Standard turnaround is 5-7 business days. We offer urgent service (48-72 hours) for time-sensitive projects at an additional fee.' },
+  { question: 'What does the review process include?', answer: 'Our review includes verification of medical terminology accuracy, clinical appropriateness of translated content, dosing and unit conversions, and overall readability for the target audience.' },
+  { question: 'Can you match reviewers to specific therapeutic areas?', answer: 'Yes, we maintain a network of 300+ reviewers across 25+ therapeutic areas and will match the most qualified clinician to your specific project.' },
+  { question: 'What deliverables are included?', answer: 'You receive the annotated document with tracked changes, a summary report of findings, and recommendations for any necessary revisions.' },
+]
+
 export default function ClinicianReviewPage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -224,21 +234,15 @@ export default function ClinicianReviewPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'What qualifications do your clinician reviewers have?', a: 'All our clinician reviewers are licensed healthcare professionals (MDs, DOs, PharmDs, or specialist nurses) with native-level language proficiency and relevant clinical experience in the therapeutic area.' },
-              { q: 'How quickly can you complete a clinician review?', a: 'Standard turnaround is 5-7 business days. We offer urgent service (48-72 hours) for time-sensitive projects at an additional fee.' },
-              { q: 'What does the review process include?', a: 'Our review includes verification of medical terminology accuracy, clinical appropriateness of translated content, dosing and unit conversions, and overall readability for the target audience.' },
-              { q: 'Can you match reviewers to specific therapeutic areas?', a: 'Yes, we maintain a network of 300+ reviewers across 25+ therapeutic areas and will match the most qualified clinician to your specific project.' },
-              { q: 'What deliverables are included?', a: 'You receive the annotated document with tracked changes, a summary report of findings, and recommendations for any necessary revisions.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-white rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>

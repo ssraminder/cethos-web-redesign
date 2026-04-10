@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Medical Device Translation | EU MDR/IVDR Compliance | Cethos',
@@ -43,12 +44,20 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'Which EU languages are required for medical device labeling?', answer: 'EU MDR requires device labeling and IFUs to be provided in the official language(s) of each member state where the device is marketed. This can include up to 24 official EU languages depending on your target markets. We can help you determine the required languages for your distribution strategy.' },
+  { question: 'Do you translate clinical evaluation reports (CERs)?', answer: 'Yes, we translate clinical evaluation reports and other technical documentation required for EU MDR compliance. Our translators have experience with medical device terminology and understand the regulatory context of these documents.' },
+  { question: 'Can you handle updates to existing IFUs?', answer: 'Yes, we maintain translation memories and terminology databases for each client to ensure consistency between original translations and updates. This also makes the process more efficient and cost-effective for ongoing IFU revisions.' },
+  { question: 'What is your turnaround time for IFU translation?', answer: 'Standard turnaround for IFU translation is 5-7 business days depending on document length and number of languages. We offer expedited services for urgent timelines. Contact us with your specific requirements for a customized quote.' },
+]
+
 export default function MedicalDevicesPage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -339,20 +348,15 @@ export default function MedicalDevicesPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'Which EU languages are required for medical device labeling?', a: 'EU MDR requires device labeling and IFUs to be provided in the official language(s) of each member state where the device is marketed. This can include up to 24 official EU languages depending on your target markets. We can help you determine the required languages for your distribution strategy.' },
-              { q: 'Do you translate clinical evaluation reports (CERs)?', a: 'Yes, we translate clinical evaluation reports and other technical documentation required for EU MDR compliance. Our translators have experience with medical device terminology and understand the regulatory context of these documents.' },
-              { q: 'Can you handle updates to existing IFUs?', a: 'Yes, we maintain translation memories and terminology databases for each client to ensure consistency between original translations and updates. This also makes the process more efficient and cost-effective for ongoing IFU revisions.' },
-              { q: 'What is your turnaround time for IFU translation?', a: 'Standard turnaround for IFU translation is 5-7 business days depending on document length and number of languages. We offer expedited services for urgent timelines. Contact us with your specific requirements for a customized quote.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-white rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>

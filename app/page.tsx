@@ -6,12 +6,12 @@ import { LocalBusinessJsonLd } from '@/components/JsonLd'
 import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 export const metadata: Metadata = {
-  title: "Cethos | Canada's Certified Translation & Life Sciences Language Company",
-  description: 'Professional translation services specializing in life sciences, certified translations, and enterprise solutions. ISO 17100 compliant. Offices across Canada, Dubai, and India.',
+  title: "Cethos | Certified Translation & Life Sciences",
+  description: 'Professional translation services: life sciences, certified translations & enterprise solutions. ISO 17100 compliant. Canada, Dubai & India.',
   alternates: { canonical: 'https://cethos.com' },
   openGraph: {
-    title: "Cethos | Canada's Certified Translation & Life Sciences Language Company",
-    description: 'Professional translation services in 200+ languages. Life Sciences, certified, business, and legal translation.',
+    title: "Cethos | Certified Translation & Life Sciences",
+    description: 'Professional translation services: life sciences, certified translations & enterprise solutions. ISO 17100 compliant. Canada, Dubai & India.',
     url: 'https://cethos.com',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',

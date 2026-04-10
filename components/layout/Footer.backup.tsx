@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Mail, Phone, Linkedin, Twitter } from 'lucide-react'
+import { Mail, Phone, Linkedin } from 'lucide-react'
 import { FooterLocation } from './FooterLocation'
 
 const footerLinks = {
@@ -150,15 +150,7 @@ export function Footer() {
                 >
                   <Linkedin className="w-5 h-5" strokeWidth={1.5} />
                 </a>
-                <a
-                  href="https://twitter.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-                  aria-label="Twitter"
-                >
-                  <Twitter className="w-5 h-5" strokeWidth={1.5} />
-                </a>
+                {/* Twitter/X link removed — no active Cethos handle */}
               </div>
             </div>
           </div>

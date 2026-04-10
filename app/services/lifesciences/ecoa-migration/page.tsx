@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'eCOA Migration Services | ePRO Platform Translation | Cethos',
@@ -43,12 +44,20 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'What is the difference between eCOA migration and standard translation?', answer: 'eCOA migration involves additional steps beyond translation including character count optimization, screenshot review to verify proper display, and format localization for dates, times, and numbers. Standard translation does not account for the technical constraints of electronic platforms.' },
+  { question: 'Do you provide audio recording for IVRS systems?', answer: 'Yes, we provide professional audio recording services for Interactive Voice Response Systems (IVRS) and audio-assisted ePRO applications. All recordings are performed by native speakers with clear diction and appropriate pacing for patient comprehension.' },
+  { question: 'How do you handle character limits in eCOA platforms?', answer: 'We work within specified character limits during the translation process. When translations naturally exceed limits, we provide alternative phrasings that preserve meaning while fitting the display constraints. All solutions are documented in our deliverables.' },
+  { question: 'Can you work directly with our eCOA vendor?', answer: 'Yes, we have established workflows with all major eCOA platform providers. We can receive files directly from your vendor, upload translations to their systems, and coordinate screenshot review and audio recording deliverables.' },
+]
+
 export default function EcoaMigrationPage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -263,20 +272,15 @@ export default function EcoaMigrationPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'What is the difference between eCOA migration and standard translation?', a: 'eCOA migration involves additional steps beyond translation including character count optimization, screenshot review to verify proper display, and format localization for dates, times, and numbers. Standard translation does not account for the technical constraints of electronic platforms.' },
-              { q: 'Do you provide audio recording for IVRS systems?', a: 'Yes, we provide professional audio recording services for Interactive Voice Response Systems (IVRS) and audio-assisted ePRO applications. All recordings are performed by native speakers with clear diction and appropriate pacing for patient comprehension.' },
-              { q: 'How do you handle character limits in eCOA platforms?', a: 'We work within specified character limits during the translation process. When translations naturally exceed limits, we provide alternative phrasings that preserve meaning while fitting the display constraints. All solutions are documented in our deliverables.' },
-              { q: 'Can you work directly with our eCOA vendor?', a: 'Yes, we have established workflows with all major eCOA platform providers. We can receive files directly from your vendor, upload translations to their systems, and coordinate screenshot review and audio recording deliverables.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-gray-50 rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>

@@ -27,7 +27,7 @@ const stats = [
 ]
 
 function CountUp({ value, suffix, duration = 2 }: { value: number; suffix: string; duration?: number }) {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(value)
   const ref = useRef<HTMLDivElement>(null)
   const hasAnimated = useRef(false)
 
@@ -42,6 +42,7 @@ function CountUp({ value, suffix, duration = 2 }: { value: number; suffix: strin
         if (entry.isIntersecting && !hasAnimated.current) {
           hasAnimated.current = true
 
+          setCount(0)
           const startTime = performance.now()
           const durationMs = duration * 1000
 
@@ -73,7 +74,7 @@ function CountUp({ value, suffix, duration = 2 }: { value: number; suffix: strin
   const displayValue = isInteger ? Math.floor(count).toLocaleString() : count.toFixed(1)
 
   return (
-    <div ref={ref}>
+    <div ref={ref} data-target={value}>
       {displayValue}{suffix}
     </div>
   )

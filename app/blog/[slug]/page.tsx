@@ -26,16 +26,24 @@ export async function generateMetadata({
     return { title: 'Post Not Found' };
   }
 
+  const description = post.meta_description || post.excerpt || 'Read this article on the Cethos blog.';
+
   return {
-    title: `${post.title} | Cethos Blog`,
-    description: post.excerpt ?? undefined,
+    title: post.meta_title || `${post.title} | Cethos Blog`,
+    description,
     openGraph: {
-      title: post.title,
-      description: post.excerpt ?? undefined,
+      title: post.meta_title || post.title,
+      description,
       type: 'article',
       publishedTime: post.published_at ?? undefined,
-      authors: [post.author?.name || 'Cethos Team'],
-      images: post.featured_image ? [{ url: post.featured_image }] : [],
+      authors: [post.author?.name || 'Cethos Team'].filter(Boolean),
+      images: post.featured_image ? [{ url: post.featured_image, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.meta_title || post.title,
+      description,
+      images: post.featured_image ? [post.featured_image] : undefined,
     },
   };
 }
@@ -53,30 +61,41 @@ export default async function BlogPostPage({
 
   const relatedPosts = await getRelatedPosts(post.id, post.category_id);
 
-  const articleSchema = {
+  const blogPostingSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: post.title,
-    description: post.excerpt,
-    image: post.featured_image,
+    description: post.meta_description || post.excerpt,
+    image: post.featured_image || undefined,
+    datePublished: post.published_at,
+    dateModified: post.updated_at || post.published_at,
     author: {
       '@type': 'Person',
-      name: post.author?.name,
-      jobTitle: post.author?.title,
+      name: post.author?.name || 'Cethos Solutions',
+      url: post.author?.slug ? `https://cethos.com/blog/author/${post.author.slug}` : 'https://cethos.com/about',
     },
     publisher: {
       '@type': 'Organization',
       name: 'Cethos Solutions Inc.',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://cethos.com/images/logo.svg',
+      },
     },
-    datePublished: post.published_at,
-    dateModified: post.updated_at,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://cethos.com/blog/${post.slug}`,
+    },
+    wordCount: post.content ? post.content.split(/\s+/).length : undefined,
+    articleSection: post.category?.name || undefined,
+    keywords: post.tags?.join(', ') || undefined,
   };
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
       />
 
       <article className="min-h-screen bg-white">

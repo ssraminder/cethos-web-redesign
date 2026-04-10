@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import { FAQJsonLd } from '@/components/JsonLd'
 
 export const metadata: Metadata = {
   title: 'Linguistic Validation Services | ISPOR-Compliant COA Translation | Cethos',
@@ -43,12 +44,21 @@ const breadcrumbData = {
   ]
 }
 
+const faqs = [
+  { question: 'What is the difference between linguistic validation and standard translation?', answer: 'Linguistic validation follows a rigorous multi-step process (ISPOR 9-step methodology) that includes dual forward translation, back translation, cognitive debriefing with patients, and harmonization review. Standard translation lacks these quality controls and patient input, making it unsuitable for clinical outcome assessments.' },
+  { question: 'Which regulatory agencies require linguistic validation?', answer: 'FDA, EMA, PMDA, Health Canada, MHRA, and other major regulatory agencies require linguistic validation for PRO instruments used to support labeling claims in clinical trials. This includes all patient-reported outcome measures used as primary or secondary endpoints.' },
+  { question: 'How long does a full linguistic validation project take?', answer: 'A typical linguistic validation project takes 6-12 weeks depending on the number of languages, instrument complexity, and cognitive debriefing requirements. We can accommodate accelerated timelines when needed.' },
+  { question: 'Do you provide licensing support for validated instruments?', answer: 'Yes, we work with instrument developers and copyright holders to ensure proper licensing agreements are in place before beginning translation. We can also advise on public domain instruments and help navigate licensing requirements.' },
+  { question: 'What documentation do you provide for regulatory submissions?', answer: 'We provide comprehensive linguistic validation reports including translation certificates, back translation certificates, cognitive debriefing reports, harmonization meeting minutes, and a complete audit trail suitable for regulatory submission.' },
+]
+
 export default function LinguisticValidationPage() {
   return (
     <>
       {/* Structured Data */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }} />
+      <FAQJsonLd faqs={faqs} />
 
       {/* Breadcrumb */}
       <nav className="bg-gray-50 py-3 border-b pt-20" aria-label="Breadcrumb">
@@ -224,21 +234,15 @@ export default function LinguisticValidationPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">Frequently Asked Questions</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
-            {[
-              { q: 'What is the difference between linguistic validation and standard translation?', a: 'Linguistic validation follows a rigorous multi-step process (ISPOR 9-step methodology) that includes dual forward translation, back translation, cognitive debriefing with patients, and harmonization review. Standard translation lacks these quality controls and patient input, making it unsuitable for clinical outcome assessments.' },
-              { q: 'Which regulatory agencies require linguistic validation?', a: 'FDA, EMA, PMDA, Health Canada, MHRA, and other major regulatory agencies require linguistic validation for PRO instruments used to support labeling claims in clinical trials. This includes all patient-reported outcome measures used as primary or secondary endpoints.' },
-              { q: 'How long does a full linguistic validation project take?', a: 'A typical linguistic validation project takes 6-12 weeks depending on the number of languages, instrument complexity, and cognitive debriefing requirements. We can accommodate accelerated timelines when needed.' },
-              { q: 'Do you provide licensing support for validated instruments?', a: 'Yes, we work with instrument developers and copyright holders to ensure proper licensing agreements are in place before beginning translation. We can also advise on public domain instruments and help navigate licensing requirements.' },
-              { q: 'What documentation do you provide for regulatory submissions?', a: 'We provide comprehensive linguistic validation reports including translation certificates, back translation certificates, cognitive debriefing reports, harmonization meeting minutes, and a complete audit trail suitable for regulatory submission.' },
-            ].map((faq, i) => (
+            {faqs.map((faq, i) => (
               <details key={i} className="bg-gray-50 rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
-                  {faq.q}
+                  {faq.question}
                   <svg className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600">{faq.a}</p>
+                <p className="px-5 pb-5 text-gray-600">{faq.answer}</p>
               </details>
             ))}
           </div>
