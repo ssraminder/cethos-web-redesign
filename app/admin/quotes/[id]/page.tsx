@@ -44,6 +44,7 @@ export default function QuoteDetailsPage() {
   const fetchQuote = useCallback(async () => {
     try {
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       const { data, error } = await supabase
         .from('cethosweb_quote_submissions')
         .select('*')
@@ -95,6 +96,7 @@ export default function QuoteDetailsPage() {
 
       // Update quote status
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       await supabase
         .from('cethosweb_quote_submissions')
         .update({
@@ -142,6 +144,7 @@ export default function QuoteDetailsPage() {
 
       // Update quote status
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       await supabase
         .from('cethosweb_quote_submissions')
         .update({

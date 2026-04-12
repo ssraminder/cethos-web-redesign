@@ -15,14 +15,15 @@ export function createServerSupabaseClient() {
 // Client-side Supabase client (singleton to avoid multiple GoTrueClient instances)
 let browserClient: SupabaseClient | null = null
 
-export function createBrowserSupabaseClient() {
+export function createBrowserSupabaseClient(): SupabaseClient | null {
   if (browserClient) return browserClient
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables')
+    console.warn('Missing Supabase environment variables — browser client unavailable')
+    return null
   }
 
   browserClient = createClient(supabaseUrl, supabaseAnonKey)

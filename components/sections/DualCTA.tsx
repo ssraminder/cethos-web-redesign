@@ -3,8 +3,11 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export function DualCTA() {
+  const t = useTranslations('homepage.dualcta')
+
   return (
     <section className="py-24 bg-slate-50">
       <div className="max-w-[1200px] mx-auto px-8">
@@ -16,7 +19,7 @@ export function DualCTA() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl lg:text-[40px] font-bold text-[#0C2340]">
-            Get Your Translation Project Started Today
+            {t('heading')}
           </h2>
         </motion.div>
 
@@ -29,16 +32,16 @@ export function DualCTA() {
             className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex flex-col"
           >
             <h3 className="text-xl font-bold text-[#0C2340] mb-3">
-              For Businesses
+              {t('business_label')}
             </h3>
             <p className="text-slate-600 mb-8 flex-1">
-              Enterprise &amp; Life Sciences translation services with dedicated project management.
+              {t('business_desc')}
             </p>
             <Link
               href="/services/lifesciences"
               className="min-h-[48px] px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors inline-flex items-center justify-center gap-2 w-full"
             >
-              Request Enterprise Quote
+              {t('business_cta')}
               <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
             </Link>
           </motion.div>
@@ -51,16 +54,16 @@ export function DualCTA() {
             className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex flex-col"
           >
             <h3 className="text-xl font-bold text-[#0C2340] mb-3">
-              For Individuals
+              {t('individual_label')}
             </h3>
             <p className="text-slate-600 mb-8 flex-1">
-              Certified translations starting at $65. Government-approved for IRCC submissions.
+              {t('individual_desc')}
             </p>
             <Link
               href="/get-quote"
               className="min-h-[48px] px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors inline-flex items-center justify-center gap-2 w-full"
             >
-              Get Certified Quote
+              {t('individual_cta')}
               <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
             </Link>
           </motion.div>

@@ -3,42 +3,7 @@
 import { motion } from 'framer-motion'
 import { Container, SectionHeading } from '@/components/ui'
 import { ShieldCheckIcon, ClockIcon, UsersIcon, CheckIcon } from '@/components/icons'
-
-const features = [
-  {
-    title: 'Quality Assurance',
-    description: 'ISO 17100 and ISO 9001 compliant processes ensure every translation meets the highest standards. Our multi-step QA process includes translation, editing, and proofreading.',
-    icon: ShieldCheckIcon,
-    highlights: [
-      'ISO 17100 & ISO 9001 Compliant',
-      'Native-speaking linguists only',
-      'Subject matter experts',
-      'Multi-step review process',
-    ],
-  },
-  {
-    title: 'Fast Turnaround',
-    description: 'Meet your deadlines with our efficient workflows and global team. Rush services available for urgent projects without compromising quality.',
-    icon: ClockIcon,
-    highlights: [
-      '24/7 project support',
-      'Rush delivery available',
-      'Real-time project tracking',
-      'Scalable capacity',
-    ],
-  },
-  {
-    title: 'Subject Matter Experts',
-    description: 'Our translators are specialists in their fields. From medical professionals to legal experts, we match the right linguist to your content.',
-    icon: UsersIcon,
-    highlights: [
-      '5,000+ specialized linguists',
-      'Industry-specific expertise',
-      'Continuous training',
-      'Terminology management',
-    ],
-  },
-]
+import { useTranslations } from 'next-intl'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -62,12 +27,35 @@ const itemVariants = {
 }
 
 export function WhyUs() {
+  const t = useTranslations('homepage.whyus')
+
+  const features = [
+    {
+      titleKey: 'qa_title',
+      descKey: 'qa_desc',
+      icon: ShieldCheckIcon,
+      highlightKeys: ['qa_highlight1', 'qa_highlight2', 'qa_highlight3', 'qa_highlight4'],
+    },
+    {
+      titleKey: 'speed_title',
+      descKey: 'speed_desc',
+      icon: ClockIcon,
+      highlightKeys: ['speed_highlight1', 'speed_highlight2', 'speed_highlight3', 'speed_highlight4'],
+    },
+    {
+      titleKey: 'experts_title',
+      descKey: 'experts_desc',
+      icon: UsersIcon,
+      highlightKeys: ['experts_highlight1', 'experts_highlight2', 'experts_highlight3', 'experts_highlight4'],
+    },
+  ]
+
   return (
     <section className="section-padding bg-slate-50">
       <Container>
         <SectionHeading
-          title="Why Choose Cethos"
-          subtitle="We combine industry expertise, advanced technology, and rigorous quality processes to deliver translations you can trust."
+          title={t('heading')}
+          subtitle={t('description')}
           className="mb-16"
         />
 
@@ -80,22 +68,22 @@ export function WhyUs() {
         >
           {features.map((feature) => (
             <motion.div
-              key={feature.title}
+              key={feature.titleKey}
               variants={itemVariants}
               className="bg-white rounded-2xl p-8 shadow-soft hover:shadow-medium transition-shadow duration-300"
             >
               <div className="icon-container-lg mb-6">
                 <feature.icon size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-navy mb-4">{feature.title}</h3>
-              <p className="text-slate-600 mb-6">{feature.description}</p>
+              <h3 className="text-xl font-semibold text-navy mb-4">{t(feature.titleKey)}</h3>
+              <p className="text-slate-600 mb-6">{t(feature.descKey)}</p>
               <ul className="space-y-3">
-                {feature.highlights.map((highlight) => (
-                  <li key={highlight} className="flex items-center gap-3 text-sm">
+                {feature.highlightKeys.map((key) => (
+                  <li key={key} className="flex items-center gap-3 text-sm">
                     <div className="w-5 h-5 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
                       <CheckIcon size={12} className="text-teal-600" />
                     </div>
-                    <span className="text-slate-700">{highlight}</span>
+                    <span className="text-slate-700">{t(key)}</span>
                   </li>
                 ))}
               </ul>

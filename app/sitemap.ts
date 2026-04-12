@@ -1,109 +1,141 @@
 import { MetadataRoute } from 'next';
 import { getAllPublishedPosts, getAllCategorySlugs } from '@/lib/blog-db';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://cethos.com';
+const locales = ['en', 'fr'] as const;
+const baseUrl = 'https://cethos.com';
 
-  // Static pages
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
-    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/get-quote`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
-    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${baseUrl}/careers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
-    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${baseUrl}/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${baseUrl}/cookies`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+/** Build the full URL for a path + locale. English uses no prefix (canonical). */
+function localizedUrl(path: string, locale: string): string {
+  if (locale === 'en') return `${baseUrl}${path}`;
+  return `${baseUrl}/${locale}${path}`;
+}
+
+/** Build hreflang alternates for a given path. */
+function alternates(path: string): MetadataRoute.Sitemap[number]['alternates'] {
+  return {
+    languages: Object.fromEntries(
+      locales.map((locale) => [locale, localizedUrl(path, locale)])
+    ),
+  };
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Static pages with their priorities
+  const staticPaths: { path: string; changeFrequency: 'daily' | 'weekly' | 'monthly'; priority: number }[] = [
+    { path: '/', changeFrequency: 'weekly', priority: 1 },
+    { path: '/about', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/contact', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/get-quote', changeFrequency: 'monthly', priority: 0.9 },
+    { path: '/blog', changeFrequency: 'daily', priority: 0.8 },
+    { path: '/careers', changeFrequency: 'weekly', priority: 0.7 },
+    { path: '/privacy', changeFrequency: 'monthly', priority: 0.3 },
+    { path: '/terms', changeFrequency: 'monthly', priority: 0.3 },
+    { path: '/cookies', changeFrequency: 'monthly', priority: 0.3 },
 
     // Industries
-    { url: `${baseUrl}/industries/ecommerce`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/energy-mining`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/finance`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/gaming`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/healthcare`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/legal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/manufacturing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/pharmaceutical`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/industries/technology`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/ecommerce', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/energy-mining', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/finance', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/gaming', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/healthcare', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/legal', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/manufacturing', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/pharmaceutical', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/technology', changeFrequency: 'monthly', priority: 0.8 },
 
     // Services - Main
-    { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/certified`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/lifesciences`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/canadian`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/interpretation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/business`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/legal`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/software`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/multimedia`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/transcription`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/services/website`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/certified', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/lifesciences', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/canadian', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/interpretation', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/business', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/legal', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/software', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/multimedia', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/transcription', changeFrequency: 'weekly', priority: 0.9 },
+    { path: '/services/website', changeFrequency: 'weekly', priority: 0.9 },
 
     // Services - Certified Translation
-    { url: `${baseUrl}/services/certified/immigration-translation-services`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/birth-certificate-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/marriage-certificate-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/academic-transcript-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/pr-citizenship-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/divorce-certificate-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/drivers-license-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/hindi-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/police-clearance-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/punjabi-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/arabic-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/spanish-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/french-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/mandarin-translation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/edmonton-translation-agency`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/wes-evaluation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/express-entry`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/iqas-alberta`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/certified/spousal-sponsorship`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/immigration-translation-services', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/birth-certificate-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/marriage-certificate-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/academic-transcript-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/pr-citizenship-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/divorce-certificate-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/drivers-license-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/hindi-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/police-clearance-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/punjabi-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/arabic-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/spanish-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/french-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/mandarin-translation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/edmonton-translation-agency', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/wes-evaluation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/express-entry', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/iqas-alberta', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/certified/spousal-sponsorship', changeFrequency: 'weekly', priority: 0.8 },
 
     // Languages index
-    { url: `${baseUrl}/services/languages`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/languages', changeFrequency: 'weekly', priority: 0.8 },
 
     // Locations
-    { url: `${baseUrl}/locations`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/calgary`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/edmonton`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/toronto`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/vancouver`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/ottawa`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/montreal`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/winnipeg`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/halifax`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${baseUrl}/locations/saskatoon`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/calgary', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/edmonton', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/toronto', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/vancouver', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/ottawa', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/montreal', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/winnipeg', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/halifax', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/locations/saskatoon', changeFrequency: 'monthly', priority: 0.8 },
 
     // Services - Life Sciences
-    { url: `${baseUrl}/services/lifesciences/cognitive-debriefing`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/lifesciences/clinician-review`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/lifesciences/clinical-trials`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/lifesciences/ecoa-migration`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/lifesciences/linguistic-validation`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/lifesciences/medical-devices`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/lifesciences/pharmacovigilance`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/services/lifesciences/regulatory-affairs`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/cognitive-debriefing', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/clinician-review', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/clinical-trials', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/ecoa-migration', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/linguistic-validation', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/medical-devices', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/pharmacovigilance', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/regulatory-affairs', changeFrequency: 'weekly', priority: 0.8 },
   ];
 
-  // Blog posts
-  const posts = await getAllPublishedPosts();
-  const blogPosts: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.updated_at),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  }));
+  // Generate entries for each locale with hreflang alternates
+  const staticPages: MetadataRoute.Sitemap = staticPaths.flatMap(({ path, changeFrequency, priority }) =>
+    locales.map((locale) => ({
+      url: localizedUrl(path, locale),
+      lastModified: new Date(),
+      changeFrequency,
+      priority,
+      alternates: alternates(path),
+    }))
+  );
 
-  // Blog categories
+  // Blog posts (per locale with alternates)
+  const posts = await getAllPublishedPosts();
+  const blogPosts: MetadataRoute.Sitemap = posts.flatMap((post) =>
+    locales.map((locale) => ({
+      url: localizedUrl(`/blog/${post.slug}`, locale),
+      lastModified: new Date(post.updated_at),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+      alternates: alternates(`/blog/${post.slug}`),
+    }))
+  );
+
+  // Blog categories (per locale with alternates)
   const categorySlugs = await getAllCategorySlugs();
-  const categoryPages: MetadataRoute.Sitemap = categorySlugs.map((slug) => ({
-    url: `${baseUrl}/blog/category/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.6,
-  }));
+  const categoryPages: MetadataRoute.Sitemap = categorySlugs.flatMap((slug) =>
+    locales.map((locale) => ({
+      url: localizedUrl(`/blog/category/${slug}`, locale),
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+      alternates: alternates(`/blog/category/${slug}`),
+    }))
+  );
 
   return [...staticPages, ...blogPosts, ...categoryPages];
 }

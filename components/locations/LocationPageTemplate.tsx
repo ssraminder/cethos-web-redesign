@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Phone, CheckCircle, Clock, Shield, Star, Globe, FileText, Users } from 'lucide-react';
 import { CertifiedQuoteForm } from '@/components/forms/CertifiedQuoteForm';
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs';
+import { useTranslations } from 'next-intl';
 
 interface LocationPageProps {
   city: string;
@@ -38,14 +39,16 @@ export default function LocationPageTemplate({
   frenchContent = false
 }: LocationPageProps) {
 
+  const t = useTranslations('locations.template');
+
   // Certified subpages for internal linking
   const certifiedServices = [
-    { label: 'Immigration Translation Services', href: '/services/certified/immigration-translation-services' },
-    { label: 'Birth Certificate Translation', href: '/services/certified/birth-certificate-translation' },
-    { label: 'Marriage Certificate Translation', href: '/services/certified/marriage-certificate-translation' },
-    { label: 'Academic Transcript Translation', href: '/services/certified/academic-transcript-translation' },
-    { label: 'PR & Citizenship Translation', href: '/services/certified/pr-citizenship-translation' },
-    { label: "Driver's License Translation", href: '/services/certified/drivers-license-translation' }
+    { label: t('cert_svc1'), href: '/services/certified/immigration-translation-services' },
+    { label: t('cert_svc2'), href: '/services/certified/birth-certificate-translation' },
+    { label: t('cert_svc3'), href: '/services/certified/marriage-certificate-translation' },
+    { label: t('cert_svc4'), href: '/services/certified/academic-transcript-translation' },
+    { label: t('cert_svc5'), href: '/services/certified/pr-citizenship-translation' },
+    { label: t('cert_svc6'), href: '/services/certified/drivers-license-translation' }
   ];
 
   // All location pages for cross-linking
@@ -63,23 +66,23 @@ export default function LocationPageTemplate({
 
   // Documents we translate
   const documents = [
-    'Birth Certificates',
-    'Marriage Certificates',
-    'Divorce Decrees',
-    'Death Certificates',
-    'Academic Transcripts',
-    'Diplomas & Degrees',
-    'Police Clearance Certificates',
-    "Driver's Licenses",
-    'Medical Records',
-    'Bank Statements',
-    'Employment Letters',
-    'Affidavits'
+    t('doc_birth'),
+    t('doc_marriage'),
+    t('doc_divorce'),
+    t('doc_death'),
+    t('doc_academic'),
+    t('doc_diplomas'),
+    t('doc_police'),
+    t('doc_drivers'),
+    t('doc_medical'),
+    t('doc_bank'),
+    t('doc_employment'),
+    t('doc_affidavits')
   ];
 
   // Breadcrumb items for Breadcrumbs component (uses name/url)
   const breadcrumbItems = [
-    { name: 'Locations', url: '/locations' },
+    { name: t('breadcrumb_locations'), url: '/locations' },
     { name: city, url: `/locations/${city.toLowerCase()}` }
   ];
 
@@ -151,46 +154,45 @@ export default function LocationPageTemplate({
 
               {frenchContent && (
                 <p className="text-xl text-teal-300 mb-4">
-                  Services de traduction certifiee a {city}
+                  {t('hero_french_subtitle', { city })}
                 </p>
               )}
 
               <p className="text-xl text-gray-300 mb-8">
-                Certified IRCC translation for immigration, birth certificates,
-                marriage certificates & all official documents in {city}.
+                {t('hero_description', { city })}
               </p>
 
               {/* Trust Badges */}
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="flex items-center gap-2 text-white">
                   <CheckCircle className="w-5 h-5 text-teal-400" />
-                  <span>IRCC 100% Accepted</span>
+                  <span>{t('trust_ircc')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-white">
                   <Star className="w-5 h-5 text-yellow-400" />
-                  <span>139 Five-Star Reviews</span>
+                  <span>{t('trust_reviews')}</span>
                 </div>
                 <div className="flex items-center gap-2 text-white">
                   <Shield className="w-5 h-5 text-teal-400" />
-                  <span>Certified & Notarized</span>
+                  <span>{t('trust_certified')}</span>
                 </div>
                 {hasSameDay ? (
                   <div className="flex items-center gap-2 text-white">
                     <Clock className="w-5 h-5 text-teal-400" />
-                    <span>Same-Day Available</span>
+                    <span>{t('trust_sameday')}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-white">
                     <Clock className="w-5 h-5 text-teal-400" />
-                    <span>Fast Turnaround</span>
+                    <span>{t('trust_fast')}</span>
                   </div>
                 )}
               </div>
 
               {/* Price Badge */}
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-4 py-2 rounded-full mb-8">
-                <span className="text-teal-400 font-semibold">From $65</span>
-                <span className="text-gray-300">per document</span>
+                <span className="text-teal-400 font-semibold">{t('price_from')}</span>
+                <span className="text-gray-300">{t('price_per_doc')}</span>
               </div>
 
               {/* Phone CTA */}
@@ -208,7 +210,7 @@ export default function LocationPageTemplate({
             {/* Right Column - Quote Form */}
             <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-8">
               <h2 className="text-2xl font-bold text-[#0C2340] mb-6">
-                Get Your Free Quote
+                {t('get_free_quote')}
               </h2>
               <CertifiedQuoteForm formLocation={`location-${city.toLowerCase()}`} />
             </div>
@@ -220,21 +222,11 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-            Certified Translation {city} - IRCC Accepted
+            {t('certified_heading', { city })}
           </h2>
           <div className="prose prose-lg max-w-none text-gray-700">
-            <p>
-              Cethos provides professional <strong>certified translation in {city}</strong> for
-              all IRCC immigration applications. Our translations are 100% accepted by Immigration,
-              Refugees and Citizenship Canada (IRCC) for Express Entry, Provincial Nominee Programs,
-              family sponsorship, and citizenship applications.
-            </p>
-            <p>
-              Every <strong>certified translation</strong> includes a signed certificate of accuracy,
-              translator credentials, and notarization - meeting all government requirements. With
-              <strong> 139 five-star Google reviews</strong>, we&apos;re trusted by thousands of immigrants
-              across Canada.
-            </p>
+            <p dangerouslySetInnerHTML={{ __html: t('certified_p1', { city }) }} />
+            <p dangerouslySetInnerHTML={{ __html: t('certified_p2') }} />
             {uniqueFeatures.length > 0 && (
               <ul className="mt-4">
                 {uniqueFeatures.map((feature, index) => (
@@ -248,7 +240,7 @@ export default function LocationPageTemplate({
               href="/services/certified"
               className="inline-flex items-center text-[#0891B2] font-semibold hover:text-[#06B6D4] transition-colors"
             >
-              Learn more about our Certified Translation Services &rarr;
+              {t('certified_link')} &rarr;
             </Link>
           </div>
         </div>
@@ -258,25 +250,20 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-            Immigration Translation {city} for PR & Citizenship
+            {t('immigration_heading', { city })}
           </h2>
           <div className="prose prose-lg max-w-none text-gray-700 mb-8">
-            <p>
-              Our <strong>immigration translation services in {city}</strong> support all
-              IRCC programs and the <strong>{pnpName}</strong>. Whether you&apos;re applying for
-              permanent residence, citizenship, or a work permit, we ensure your documents
-              meet all requirements.
-            </p>
+            <p dangerouslySetInnerHTML={{ __html: t('immigration_desc', { city, pnpName }) }} />
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              'Express Entry',
+              t('immigration_express'),
               `${pnpProgram}`,
-              'Family Sponsorship',
-              'Citizenship Applications',
-              'Study Permits',
-              'Work Permits'
+              t('immigration_family'),
+              t('immigration_citizenship'),
+              t('immigration_study'),
+              t('immigration_work')
             ].map((program, index) => (
               <div key={index} className="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm">
                 <CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0" />
@@ -290,13 +277,13 @@ export default function LocationPageTemplate({
               href="/services/certified/immigration-translation-services"
               className="inline-flex items-center text-[#0891B2] font-semibold hover:text-[#06B6D4] transition-colors"
             >
-              Immigration Translation Services &rarr;
+              {t('immigration_link1')} &rarr;
             </Link>
             <Link
               href="/services/certified/pr-citizenship-translation"
               className="inline-flex items-center text-[#0891B2] font-semibold hover:text-[#06B6D4] transition-colors"
             >
-              PR & Citizenship Translation &rarr;
+              {t('immigration_link2')} &rarr;
             </Link>
           </div>
         </div>
@@ -308,20 +295,11 @@ export default function LocationPageTemplate({
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-                Birth Certificate Translation {city}
+                {t('birth_heading', { city })}
               </h2>
               <div className="prose prose-lg text-gray-700">
-                <p>
-                  <strong>Birth certificate translation in {city}</strong> is required for
-                  most immigration applications. IRCC requires certified translations of all
-                  foreign-language birth certificates for Express Entry, family sponsorship,
-                  and citizenship applications.
-                </p>
-                <p>
-                  We translate birth certificates from <strong>200+ languages</strong> with
-                  guaranteed IRCC acceptance. Each translation includes certification and
-                  notarization.
-                </p>
+                <p dangerouslySetInnerHTML={{ __html: t('birth_p1', { city }) }} />
+                <p dangerouslySetInnerHTML={{ __html: t('birth_p2') }} />
               </div>
               <div className="mt-6">
                 <Link
@@ -329,12 +307,12 @@ export default function LocationPageTemplate({
                   className="inline-flex items-center gap-2 bg-[#0891B2] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
                 >
                   <FileText className="w-5 h-5" />
-                  Birth Certificate Translation &rarr;
+                  {t('birth_link')} &rarr;
                 </Link>
               </div>
             </div>
             <div className="bg-gray-50 p-8 rounded-2xl">
-              <h3 className="text-xl font-semibold text-[#0C2340] mb-4">Popular Languages</h3>
+              <h3 className="text-xl font-semibold text-[#0C2340] mb-4">{t('popular_languages')}</h3>
               <div className="flex flex-wrap gap-2">
                 {topLanguages.slice(0, 8).map((lang, index) => (
                   <span
@@ -345,7 +323,7 @@ export default function LocationPageTemplate({
                   </span>
                 ))}
                 <span className="bg-[#0891B2] px-3 py-1 rounded-full text-sm text-white">
-                  +200 more
+                  {t('plus_200_more')}
                 </span>
               </div>
             </div>
@@ -358,14 +336,14 @@ export default function LocationPageTemplate({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1 bg-white p-8 rounded-2xl shadow-sm">
-              <h3 className="text-xl font-semibold text-[#0C2340] mb-4">Required For:</h3>
+              <h3 className="text-xl font-semibold text-[#0C2340] mb-4">{t('marriage_required_for')}</h3>
               <ul className="space-y-3">
                 {[
-                  'Spouse Sponsorship Applications',
-                  'Family Class Immigration',
-                  'Name Change Documentation',
-                  'Citizenship Applications',
-                  'Provincial Services'
+                  t('marriage_req1'),
+                  t('marriage_req2'),
+                  t('marriage_req3'),
+                  t('marriage_req4'),
+                  t('marriage_req5')
                 ].map((item, index) => (
                   <li key={index} className="flex items-center gap-3 text-gray-700">
                     <CheckCircle className="w-5 h-5 text-[#0891B2]" />
@@ -376,18 +354,11 @@ export default function LocationPageTemplate({
             </div>
             <div className="order-1 lg:order-2">
               <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-                Marriage Certificate Translation {city}
+                {t('marriage_heading', { city })}
               </h2>
               <div className="prose prose-lg text-gray-700">
-                <p>
-                  <strong>Marriage certificate translation in {city}</strong> is essential
-                  for spouse sponsorship and family immigration applications. We provide
-                  certified translations of marriage certificates from any country.
-                </p>
-                <p>
-                  Our translations meet all IRCC requirements for family class immigration
-                  and spousal sponsorship programs.
-                </p>
+                <p dangerouslySetInnerHTML={{ __html: t('marriage_p1', { city }) }} />
+                <p dangerouslySetInnerHTML={{ __html: t('marriage_p2') }} />
               </div>
               <div className="mt-6">
                 <Link
@@ -395,7 +366,7 @@ export default function LocationPageTemplate({
                   className="inline-flex items-center gap-2 bg-[#0891B2] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
                 >
                   <FileText className="w-5 h-5" />
-                  Marriage Certificate Translation &rarr;
+                  {t('marriage_link')} &rarr;
                 </Link>
               </div>
             </div>
@@ -407,12 +378,9 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-            Document Translation {city} - All Official Documents
+            {t('documents_heading', { city })}
           </h2>
-          <p className="text-lg text-gray-700 mb-8 max-w-3xl">
-            We provide <strong>document translation in {city}</strong> for all types of
-            official documents. Every translation is certified and notarized for government acceptance.
-          </p>
+          <p className="text-lg text-gray-700 mb-8 max-w-3xl" dangerouslySetInnerHTML={{ __html: t('documents_desc', { city }) }} />
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {documents.map((doc, index) => (
@@ -431,13 +399,13 @@ export default function LocationPageTemplate({
               href="/services/certified/academic-transcript-translation"
               className="inline-flex items-center text-[#0891B2] font-semibold hover:text-[#06B6D4] transition-colors"
             >
-              Academic Transcript Translation &rarr;
+              {t('doc_link_academic')} &rarr;
             </Link>
             <Link
               href="/services/certified/drivers-license-translation"
               className="inline-flex items-center text-[#0891B2] font-semibold hover:text-[#06B6D4] transition-colors"
             >
-              Driver&apos;s License Translation &rarr;
+              {t('doc_link_drivers')} &rarr;
             </Link>
           </div>
         </div>
@@ -447,42 +415,40 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-[#0C2340]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-white mb-12 text-center">
-            Why Choose Cethos in {city}?
+            {t('why_heading', { city })}
           </h2>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 icon: Shield,
-                title: 'IRCC 100% Acceptance',
-                description: 'All translations guaranteed accepted by IRCC for immigration applications.'
+                title: t('why1_title'),
+                description: t('why1_desc')
               },
               {
                 icon: Star,
-                title: '139 Five-Star Reviews',
-                description: 'Trusted by thousands of immigrants across Canada.'
+                title: t('why2_title'),
+                description: t('why2_desc')
               },
               {
                 icon: CheckCircle,
-                title: 'Certified & Notarized',
-                description: 'Every translation includes certification and notarization.'
+                title: t('why3_title'),
+                description: t('why3_desc')
               },
               {
                 icon: Globe,
-                title: '200+ Languages',
-                description: 'We translate from virtually any language in the world.'
+                title: t('why4_title'),
+                description: t('why4_desc')
               },
               {
                 icon: Clock,
-                title: hasSameDay ? 'Same-Day Available' : 'Fast Turnaround',
-                description: hasSameDay
-                  ? 'Need it today? Same-day service available in Calgary.'
-                  : 'Rush service available for urgent deadlines.'
+                title: hasSameDay ? t('why5_sameday_title') : t('why5_fast_title'),
+                description: hasSameDay ? t('why5_sameday_desc') : t('why5_fast_desc')
               },
               {
                 icon: Users,
-                title: 'Expert Translators',
-                description: 'Certified translators with immigration document expertise.'
+                title: t('why6_title'),
+                description: t('why6_desc')
               }
             ].map((item, index) => (
               <div key={index} className="text-center">
@@ -502,22 +468,22 @@ export default function LocationPageTemplate({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-              Certified Translation Pricing
+              {t('pricing_heading')}
             </h2>
 
             <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-[#0891B2] rounded-2xl p-8 shadow-lg">
               <div className="text-5xl font-bold text-[#0C2340] mb-2">
-                From $65
+                {t('pricing_amount')}
               </div>
-              <div className="text-gray-600 mb-6">per document</div>
+              <div className="text-gray-600 mb-6">{t('pricing_per')}</div>
 
               <ul className="space-y-3 text-left max-w-xs mx-auto mb-8">
                 {[
-                  'Certified translation',
-                  'Notarization included',
-                  'Digital + hard copy delivery',
-                  'IRCC accepted',
-                  '139 five-star reviews'
+                  t('pricing_item1'),
+                  t('pricing_item2'),
+                  t('pricing_item3'),
+                  t('pricing_item4'),
+                  t('pricing_item5')
                 ].map((item, index) => (
                   <li key={index} className="flex items-center gap-3 text-gray-700">
                     <CheckCircle className="w-5 h-5 text-[#0891B2]" />
@@ -530,7 +496,7 @@ export default function LocationPageTemplate({
                 href="#quote-form"
                 className="inline-flex items-center gap-2 bg-[#0891B2] text-white px-8 py-4 rounded-xl font-semibold hover:bg-[#06B6D4] transition-colors text-lg"
               >
-                Get Your Free Quote
+                {t('get_free_quote')}
               </Link>
             </div>
           </div>
@@ -541,15 +507,15 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-12 text-center">
-            How It Works
+            {t('how_heading')}
           </h2>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { step: '1', title: 'Upload Document', description: 'Submit your document online securely' },
-              { step: '2', title: 'Get Instant Quote', description: 'Receive pricing immediately' },
-              { step: '3', title: 'We Translate', description: 'Expert translation & certification' },
-              { step: '4', title: 'Receive Documents', description: 'Digital delivery + mail' }
+              { step: '1', title: t('how1_title'), description: t('how1_desc') },
+              { step: '2', title: t('how2_title'), description: t('how2_desc') },
+              { step: '3', title: t('how3_title'), description: t('how3_desc') },
+              { step: '4', title: t('how4_title'), description: t('how4_desc') }
             ].map((item, index) => (
               <div key={index} className="text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-[#0891B2] text-white text-xl font-bold rounded-full mb-4">
@@ -567,12 +533,9 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-            Languages We Translate in {city}
+            {t('languages_heading', { city })}
           </h2>
-          <p className="text-lg text-gray-700 mb-8">
-            We provide certified translation from <strong>200+ languages</strong>.
-            Popular languages in {city} include:
-          </p>
+          <p className="text-lg text-gray-700 mb-8" dangerouslySetInnerHTML={{ __html: t('languages_desc', { city }) }} />
 
           <div className="flex flex-wrap gap-3">
             {topLanguages.map((lang, index) => (
@@ -584,7 +547,7 @@ export default function LocationPageTemplate({
               </span>
             ))}
             <span className="bg-[#0891B2] px-4 py-2 rounded-full text-white font-medium">
-              + 200 more languages
+              {t('languages_more')}
             </span>
           </div>
         </div>
@@ -594,13 +557,13 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
-            Service Areas in {city}
+            {t('areas_heading', { city })}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-xl font-semibold text-[#0C2340] mb-4">
-                {city} Neighborhoods
+                {t('areas_neighborhoods', { city })}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {serviceAreas.map((area, index) => (
@@ -615,7 +578,7 @@ export default function LocationPageTemplate({
             </div>
             <div>
               <h3 className="text-xl font-semibold text-[#0C2340] mb-4">
-                Nearby Cities
+                {t('areas_nearby')}
               </h3>
               <div className="flex flex-wrap gap-2">
                 {nearbyAreas.map((area, index) => (
@@ -636,7 +599,7 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-12 text-center">
-            Frequently Asked Questions
+            {t('faq_heading')}
           </h2>
 
           <div className="max-w-3xl mx-auto space-y-6">
@@ -656,7 +619,7 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-8">
-            Other Certified Translation Services
+            {t('other_certified_heading')}
           </h2>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -680,7 +643,7 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-[#0C2340] mb-8 text-center">
-            Serving Across Canada
+            {t('canada_heading')}
           </h2>
 
           <div className="flex flex-wrap justify-center gap-4">
@@ -700,22 +663,22 @@ export default function LocationPageTemplate({
       {/* Other Services */}
       <section className="py-12 bg-gray-50 border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-lg font-semibold text-[#0C2340] mb-4">More Services in {city}</h3>
+          <h3 className="text-lg font-semibold text-[#0C2340] mb-4">{t('more_heading', { city })}</h3>
           <div className="flex flex-wrap gap-3">
             <Link href="/services/interpretation" className="text-[#0891B2] hover:underline">
-              Interpretation Services
+              {t('more_interpretation')}
             </Link>
-            <span className="text-slate-300">•</span>
+            <span className="text-slate-300">&bull;</span>
             <Link href="/services/languages" className="text-[#0891B2] hover:underline">
-              Translation by Language
+              {t('more_languages')}
             </Link>
-            <span className="text-slate-300">•</span>
+            <span className="text-slate-300">&bull;</span>
             <Link href="/services/certified" className="text-[#0891B2] hover:underline">
-              Certified Translation Services
+              {t('more_certified')}
             </Link>
-            <span className="text-slate-300">•</span>
+            <span className="text-slate-300">&bull;</span>
             <Link href="/get-quote" className="text-[#0891B2] hover:underline">
-              Get a Free Quote
+              {t('more_quote')}
             </Link>
           </div>
         </div>
@@ -725,18 +688,17 @@ export default function LocationPageTemplate({
       <section className="py-16 bg-[#0891B2]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Get Certified Translation in {city} Today
+            {t('cta_heading', { city })}
           </h2>
           <p className="text-xl text-teal-50 mb-8 max-w-2xl mx-auto">
-            IRCC-accepted translations from $65. 139 five-star reviews.
-            {hasSameDay ? ' Same-day service available.' : ' Fast turnaround.'}
+            {t('cta_desc')}{' '}{hasSameDay ? t('cta_sameday') : t('cta_fast')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#quote-form"
               className="inline-flex items-center justify-center gap-2 bg-white text-[#0891B2] px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors text-lg"
             >
-              Get Your Free Quote
+              {t('get_free_quote')}
             </a>
             <a
               href="tel:+15876000786"

@@ -9,11 +9,13 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Initialize Supabase client (gracefully handle missing env vars for local dev)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = supabaseUrl && supabaseKey
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
 
 // ============================================================================
 // TYPES
@@ -81,6 +83,7 @@ export interface BlogPost {
  * Get all categories with post counts
  */
 export async function getCategories(): Promise<BlogCategory[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('cethosweb_blog_categories')
     .select('*')
@@ -98,6 +101,7 @@ export async function getCategories(): Promise<BlogCategory[]> {
  * Get a single category by slug
  */
 export async function getCategoryBySlug(slug: string): Promise<BlogCategory | null> {
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from('cethosweb_blog_categories')
     .select('*')
@@ -116,6 +120,7 @@ export async function getCategoryBySlug(slug: string): Promise<BlogCategory | nu
  * Get all category slugs (for generateStaticParams)
  */
 export async function getAllCategorySlugs(): Promise<string[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('cethosweb_blog_categories')
     .select('slug');
@@ -136,6 +141,7 @@ export async function getAllCategorySlugs(): Promise<string[]> {
  * Get all active authors
  */
 export async function getAuthors(): Promise<BlogAuthor[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('cethosweb_blog_authors')
     .select('*')
@@ -154,6 +160,7 @@ export async function getAuthors(): Promise<BlogAuthor[]> {
  * Get an author by slug
  */
 export async function getAuthorBySlug(slug: string): Promise<BlogAuthor | null> {
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from('cethosweb_blog_authors')
     .select('*')
@@ -180,6 +187,7 @@ export async function getPublishedPosts(
   limit: number = 10,
   offset: number = 0
 ): Promise<{ posts: BlogPost[]; total: number }> {
+  if (!supabase) return { posts: [], total: 0 };
   // Get total count
   const { count } = await supabase
     .from('cethosweb_blog_posts')
@@ -215,6 +223,7 @@ export async function getPublishedPosts(
  * Get all published posts (for sitemap)
  */
 export async function getAllPublishedPosts(): Promise<BlogPost[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('cethosweb_blog_posts')
     .select(`
@@ -238,6 +247,7 @@ export async function getAllPublishedPosts(): Promise<BlogPost[]> {
  * Get a single post by slug
  */
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from('cethosweb_blog_posts')
     .select(`
@@ -262,6 +272,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
  * Get all post slugs (for generateStaticParams)
  */
 export async function getAllPostSlugs(): Promise<string[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('cethosweb_blog_posts')
     .select('slug')
@@ -284,6 +295,7 @@ export async function getPostsByCategory(
   limit: number = 10,
   offset: number = 0
 ): Promise<{ posts: BlogPost[]; total: number; category: BlogCategory | null }> {
+  if (!supabase) return { posts: [], total: 0, category: null };
   // Get category first
   const category = await getCategoryBySlug(categorySlug);
   if (!category) {
@@ -332,6 +344,7 @@ export async function getPostsByAuthor(
   limit: number = 10,
   offset: number = 0
 ): Promise<{ posts: BlogPost[]; total: number; author: BlogAuthor | null }> {
+  if (!supabase) return { posts: [], total: 0, author: null };
   // Get author first
   const author = await getAuthorBySlug(authorSlug);
   if (!author) {
@@ -380,6 +393,7 @@ export async function getPostsByTag(
   limit: number = 10,
   offset: number = 0
 ): Promise<{ posts: BlogPost[]; total: number }> {
+  if (!supabase) return { posts: [], total: 0 };
   // Get total count
   const { count } = await supabase
     .from('cethosweb_blog_posts')
@@ -421,7 +435,7 @@ export async function getRelatedPosts(
   categoryId: string | null,
   limit: number = 3
 ): Promise<BlogPost[]> {
-  if (!categoryId) return [];
+  if (!supabase || !categoryId) return [];
 
   const { data, error } = await supabase
     .from('cethosweb_blog_posts')
@@ -452,6 +466,7 @@ export async function searchPosts(
   query: string,
   limit: number = 10
 ): Promise<BlogPost[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('cethosweb_blog_posts')
     .select(`
@@ -477,6 +492,7 @@ export async function searchPosts(
  * Get featured posts
  */
 export async function getFeaturedPosts(limit: number = 3): Promise<BlogPost[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from('cethosweb_blog_posts')
     .select(`
@@ -502,6 +518,7 @@ export async function getFeaturedPosts(limit: number = 3): Promise<BlogPost[]> {
  * Increment view count for a post
  */
 export async function incrementViewCount(postId: string): Promise<void> {
+  if (!supabase) return;
   const { error } = await supabase.rpc('increment_post_view_count', {
     post_id: postId,
   });

@@ -12,7 +12,7 @@ export function useAdminAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = createBrowserSupabaseClient();
+    const supabase = createBrowserSupabaseClient()!;
 
     async function checkAuth() {
       try {
@@ -59,7 +59,7 @@ export function useAdminAuth() {
   }, [router]);
 
   const logout = useCallback(async () => {
-    const supabase = createBrowserSupabaseClient();
+    const supabase = createBrowserSupabaseClient()!;
     await supabase.auth.signOut();
     router.push('/admin/login');
   }, [router]);

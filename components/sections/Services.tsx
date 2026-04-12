@@ -13,57 +13,7 @@ import {
   Languages,
   ArrowRight,
 } from 'lucide-react'
-
-const services = [
-  {
-    title: 'Life Sciences Translation',
-    description: 'Regulatory documents, clinical trials, medical devices, and pharmaceutical content translated with precision.',
-    icon: FlaskConical,
-    href: '/services/lifesciences',
-  },
-  {
-    title: 'Certified Translation',
-    description: 'Official documents with certified accuracy for legal, immigration, and government purposes.',
-    icon: FileCheck,
-    href: '/services/certified',
-  },
-  {
-    title: 'Interpretation Services',
-    description: 'On-site, phone, and video interpretation across Canada. 200+ languages, 24/7 availability.',
-    icon: Mic,
-    href: '/services/interpretation',
-  },
-  {
-    title: 'Translation by Language',
-    description: 'Arabic, French, Hindi, Mandarin, Punjabi, Spanish, and 200+ more languages across Canada.',
-    icon: Languages,
-    href: '/services/languages',
-  },
-  {
-    title: 'Business Translation',
-    description: 'Corporate communications, marketing materials, and financial documents for global markets.',
-    icon: Building2,
-    href: '/services/business',
-  },
-  {
-    title: 'Software Localization',
-    description: 'UI/UX, help documentation, and software strings adapted for international users.',
-    icon: Code2,
-    href: '/services/software',
-  },
-  {
-    title: 'Multimedia Translation',
-    description: 'Video subtitling, voiceover, and dubbing services for global content reach.',
-    icon: Play,
-    href: '/services/multimedia',
-  },
-  {
-    title: 'Website Localization',
-    description: 'Full website adaptation including content, SEO, and cultural optimization.',
-    icon: Globe,
-    href: '/services/website',
-  },
-]
+import { useTranslations } from 'next-intl'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -87,19 +37,32 @@ const itemVariants = {
 }
 
 export function Services() {
+  const t = useTranslations('homepage.services')
+
+  const services = [
+    { titleKey: 'lifesciences_title', descKey: 'lifesciences_desc', icon: FlaskConical, href: '/services/lifesciences' },
+    { titleKey: 'certified_title', descKey: 'certified_desc', icon: FileCheck, href: '/services/certified' },
+    { titleKey: 'interpretation_title', descKey: 'interpretation_desc', icon: Mic, href: '/services/interpretation' },
+    { titleKey: 'languages_title', descKey: 'languages_desc', icon: Languages, href: '/services/languages' },
+    { titleKey: 'business_title', descKey: 'business_desc', icon: Building2, href: '/services/business' },
+    { titleKey: 'software_title', descKey: 'software_desc', icon: Code2, href: '/services/software' },
+    { titleKey: 'multimedia_title', descKey: 'multimedia_desc', icon: Play, href: '/services/multimedia' },
+    { titleKey: 'website_title', descKey: 'website_desc', icon: Globe, href: '/services/website' },
+  ]
+
   return (
     <section className="py-24 bg-white">
       <div className="max-w-[1200px] mx-auto px-8">
         {/* Section header */}
         <div className="text-center mb-16">
           <p className="text-sm font-semibold text-[#0891B2] uppercase tracking-widest mb-4">
-            Our Services
+            {t('eyebrow')}
           </p>
           <h2 className="text-[32px] md:text-[40px] font-bold text-[#0C2340] leading-tight mb-4">
-            Translation Services
+            {t('heading')}
           </h2>
           <p className="text-xl text-[#4B5563] max-w-2xl mx-auto">
-            Comprehensive language solutions for every industry and document type.
+            {t('description')}
           </p>
         </div>
 
@@ -114,7 +77,7 @@ export function Services() {
           {services.map((service) => {
             const Icon = service.icon
             return (
-              <motion.div key={service.title} variants={itemVariants}>
+              <motion.div key={service.titleKey} variants={itemVariants}>
                 <Link href={service.href} className="block h-full group">
                   <div className="bg-white rounded-lg p-8 border border-[#E5E7EB] shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col cursor-pointer">
                     {/* Icon */}
@@ -124,17 +87,17 @@ export function Services() {
 
                     {/* Title */}
                     <h3 className="text-xl font-semibold text-[#0C2340] mb-3">
-                      {service.title}
+                      {t(service.titleKey)}
                     </h3>
 
                     {/* Description */}
                     <p className="text-[#4B5563] mb-6 flex-grow">
-                      {service.description}
+                      {t(service.descKey)}
                     </p>
 
                     {/* Learn More link */}
                     <div className="flex items-center gap-1 text-sm text-[#0891B2] font-medium group-hover:gap-2 transition-all">
-                      <span>Learn More</span>
+                      <span>{t('learn_more')}</span>
                       <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
                     </div>
                   </div>

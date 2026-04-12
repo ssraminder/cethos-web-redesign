@@ -290,7 +290,7 @@ export function EmbeddedCertifiedQuoteForm({
 
   // Supabase client (stable ref)
   const supabaseRef = useRef(createBrowserSupabaseClient());
-  const supabase = supabaseRef.current;
+  const supabase = supabaseRef.current!;
 
   // =========================================================================
   // Derived: Is source English?

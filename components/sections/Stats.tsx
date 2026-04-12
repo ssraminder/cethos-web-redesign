@@ -2,29 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-
-const stats = [
-  {
-    value: 200,
-    suffix: '+',
-    label: 'Languages',
-  },
-  {
-    value: 5000,
-    suffix: '+',
-    label: 'Specialists',
-  },
-  {
-    value: 99.8,
-    suffix: '%',
-    label: 'Accuracy',
-  },
-  {
-    value: 24,
-    suffix: '/7',
-    label: 'Support',
-  },
-]
+import { useTranslations } from 'next-intl'
 
 function CountUp({ value, suffix, duration = 2 }: { value: number; suffix: string; duration?: number }) {
   const [count, setCount] = useState(value)
@@ -81,6 +59,15 @@ function CountUp({ value, suffix, duration = 2 }: { value: number; suffix: strin
 }
 
 export function Stats() {
+  const t = useTranslations('homepage.stats')
+
+  const stats = [
+    { value: 200, suffix: '+', label: t('languages_label') },
+    { value: 5000, suffix: '+', label: t('specialists_label') },
+    { value: 99.8, suffix: '%', label: t('accuracy_label') },
+    { value: 24, suffix: '/7', label: t('support_label') },
+  ]
+
   return (
     <section className="bg-[#0C2340] py-16">
       <div className="max-w-[1200px] mx-auto px-8">

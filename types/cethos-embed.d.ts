@@ -110,7 +110,9 @@ declare module 'react' {
         React.HTMLAttributes<HTMLElement> & {
           'current-site'?: string;
           'hide-cta'?: string | boolean;
+          'cta-type'?: 'login' | 'quote';
           theme?: 'light' | 'dark';
+          locale?: string;
           ref?: React.Ref<HTMLElement>;
         },
         HTMLElement
@@ -119,6 +121,8 @@ declare module 'react' {
         React.HTMLAttributes<HTMLElement> & {
           minimal?: string | boolean;
           'hide-locations'?: string | boolean;
+          'hide-industries'?: string | boolean;
+          locale?: string;
           ref?: React.Ref<HTMLElement>;
         },
         HTMLElement

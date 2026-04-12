@@ -5,16 +5,18 @@ import { useEffect, useState } from 'react';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'cethos-header': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+      'cethos-header': React.HTMLAttributes<HTMLElement> & {
         'current-site'?: string;
         'hide-cta'?: boolean | '';
         'theme'?: 'light' | 'dark';
         'cta-type'?: 'login' | 'quote';
-      }, HTMLElement>;
-      'cethos-footer': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        locale?: string;
+      };
+      'cethos-footer': React.HTMLAttributes<HTMLElement> & {
         'minimal'?: boolean | '';
         'hide-industries'?: boolean | '';
-      }, HTMLElement>;
+        locale?: string;
+      };
     }
   }
 }
@@ -24,14 +26,16 @@ interface CethosHeaderProps {
   hideCta?: boolean;
   theme?: 'light' | 'dark';
   ctaType?: 'login' | 'quote';
+  locale?: string;
 }
 
 interface CethosFooterProps {
   minimal?: boolean;
   hideIndustries?: boolean;
+  locale?: string;
 }
 
-export function CethosHeader({ currentSite, hideCta, theme, ctaType = 'login' }: CethosHeaderProps) {
+export function CethosHeader({ currentSite, hideCta, theme, ctaType = 'login', locale }: CethosHeaderProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -85,11 +89,12 @@ export function CethosHeader({ currentSite, hideCta, theme, ctaType = 'login' }:
       hide-cta={hideCta ? '' : undefined}
       theme={theme}
       cta-type={ctaType}
+      locale={locale}
     />
   );
 }
 
-export function CethosFooter({ minimal, hideIndustries }: CethosFooterProps) {
+export function CethosFooter({ minimal, hideIndustries, locale }: CethosFooterProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -177,6 +182,7 @@ export function CethosFooter({ minimal, hideIndustries }: CethosFooterProps) {
     <cethos-footer
       minimal={minimal ? '' : undefined}
       hide-industries={hideIndustries ? '' : undefined}
+      locale={locale}
     />
   );
 }

@@ -22,6 +22,7 @@ export default function AdminLoginPage() {
 
     try {
       const supabase = createBrowserSupabaseClient();
+      if (!supabase) return;
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,

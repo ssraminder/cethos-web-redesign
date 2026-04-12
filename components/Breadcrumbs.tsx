@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ChevronRight, Home } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export interface BreadcrumbItem {
   name: string
@@ -14,7 +15,9 @@ interface BreadcrumbsProps {
 }
 
 export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
-  const allItems = [{ name: 'Home', url: '/' }, ...items]
+  const tCommon = useTranslations('common')
+  const homeLabel = tCommon('breadcrumb_home')
+  const allItems = [{ name: homeLabel, url: '/' }, ...items]
 
   return (
     <nav aria-label="Breadcrumb" className={`${className}`}>
@@ -62,8 +65,10 @@ export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
   )
 }
 
-export function BreadcrumbJsonLd({ items }: { items: BreadcrumbItem[] }) {
-  const allItems = [{ name: 'Home', url: 'https://cethos.com/' }, ...items]
+export function BreadcrumbJsonLd({ items, locale = 'en' }: { items: BreadcrumbItem[]; locale?: string }) {
+  const homeLabel = locale === 'fr' ? 'Accueil' : 'Home'
+  const homeUrl = locale === 'fr' ? 'https://cethos.com/fr/' : 'https://cethos.com/'
+  const allItems = [{ name: homeLabel, url: homeUrl }, ...items]
 
   const jsonLd = {
     '@context': 'https://schema.org',

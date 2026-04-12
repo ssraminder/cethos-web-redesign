@@ -1,4 +1,4 @@
-export type AdminRole = 'super_admin' | 'admin' | 'editor' | 'author' | 'viewer';
+export type AdminRole = 'super_admin' | 'admin' | 'editor' | 'author' | 'viewer' | 'translator';
 
 export interface AdminUser {
   id: string;
@@ -12,6 +12,7 @@ export interface AdminUser {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  assigned_locales: string[] | null; // null = all locales, array = restricted
 }
 
 export const PERMISSIONS = {
@@ -56,6 +57,13 @@ export const PERMISSIONS = {
   },
   seo_dashboard: {
     read: ['super_admin', 'admin'],
+  },
+  translations: {
+    read: ['super_admin', 'admin', 'editor', 'translator'],
+    update: ['super_admin', 'admin', 'editor', 'translator'],
+    export: ['super_admin', 'admin', 'editor', 'translator'],
+    import: ['super_admin', 'admin'],
+    publish: ['super_admin', 'admin'],
   },
 } as const;
 

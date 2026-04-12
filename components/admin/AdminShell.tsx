@@ -28,6 +28,7 @@ function Breadcrumbs() {
     calendar: 'Calendar',
     media: 'Media Library',
     redirects: 'Redirects',
+    translations: 'Translations',
     help: 'Help',
   };
 

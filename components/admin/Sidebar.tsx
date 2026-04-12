@@ -8,7 +8,7 @@ import {
   LayoutDashboard, FileText, FolderOpen, Users, Code2,
   Search, LogOut, ChevronDown, ChevronRight, ChevronLeft,
   X, ExternalLink, CalendarDays, Image, ArrowLeftRight,
-  Settings, User, BarChart3,
+  Settings, User, BarChart3, Globe,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { CETHOS_LOGO_DARK_BG, CETHOS_FAVICON } from '@/lib/admin/brand';
@@ -46,24 +46,28 @@ export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: 
       icon: LayoutDashboard,
       active: pathname === '/admin',
     },
-    {
-      label: 'Blog',
-      icon: FileText,
-      active: pathname.startsWith('/admin/blog'),
-      children: [
-        { label: 'Posts', href: '/admin/blog' },
-        { label: 'Categories', href: '/admin/blog/categories' },
-        ...(hasPermission(adminUser.role, 'blog_authors', 'read')
-          ? [{ label: 'Authors', href: '/admin/blog/authors' }]
-          : []),
-      ],
-    },
-    {
-      label: 'Calendar',
-      href: '/admin/calendar',
-      icon: CalendarDays,
-      active: pathname.startsWith('/admin/calendar'),
-    },
+    ...(hasPermission(adminUser.role, 'blog_posts', 'read')
+      ? [{
+          label: 'Blog',
+          icon: FileText,
+          active: pathname.startsWith('/admin/blog'),
+          children: [
+            { label: 'Posts', href: '/admin/blog' },
+            { label: 'Categories', href: '/admin/blog/categories' },
+            ...(hasPermission(adminUser.role, 'blog_authors', 'read')
+              ? [{ label: 'Authors', href: '/admin/blog/authors' }]
+              : []),
+          ],
+        }]
+      : []),
+    ...(adminUser.role !== 'translator'
+      ? [{
+          label: 'Calendar',
+          href: '/admin/calendar',
+          icon: CalendarDays,
+          active: pathname.startsWith('/admin/calendar'),
+        }]
+      : []),
     ...(hasPermission(adminUser.role, 'tracking_pixels', 'read')
       ? [{
           label: 'Tracking Pixels',
@@ -80,24 +84,34 @@ export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: 
           active: pathname.startsWith('/admin/seo'),
         }]
       : []),
-    {
-      label: 'Media Library',
-      href: '/admin/media',
-      icon: Image,
-      active: pathname.startsWith('/admin/media'),
-    },
-    {
-      label: 'Redirects',
-      href: '/admin/redirects',
-      icon: ArrowLeftRight,
-      active: pathname.startsWith('/admin/redirects'),
-    },
+    ...(adminUser.role !== 'translator'
+      ? [{
+          label: 'Media Library',
+          href: '/admin/media',
+          icon: Image,
+          active: pathname.startsWith('/admin/media'),
+        },
+        {
+          label: 'Redirects',
+          href: '/admin/redirects',
+          icon: ArrowLeftRight,
+          active: pathname.startsWith('/admin/redirects'),
+        }]
+      : []),
     ...(hasPermission(adminUser.role, 'seo_dashboard', 'read')
       ? [{
           label: 'SEO Dashboard',
           href: '/admin/seo-dashboard',
           icon: BarChart3,
           active: pathname.startsWith('/admin/seo-dashboard'),
+        }]
+      : []),
+    ...(hasPermission(adminUser.role, 'translations', 'read')
+      ? [{
+          label: 'Translations',
+          href: '/admin/translations',
+          icon: Globe,
+          active: pathname.startsWith('/admin/translations'),
         }]
       : []),
   ];
@@ -108,6 +122,7 @@ export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: 
     editor: 'Editor',
     author: 'Author',
     viewer: 'Viewer',
+    translator: 'Translator',
   };
 
   const initials = adminUser.name

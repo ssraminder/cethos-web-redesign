@@ -53,6 +53,7 @@ export default function HITLReviewPage() {
   const fetchQuote = useCallback(async () => {
     try {
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       const { data, error } = await supabase
         .from('cethosweb_quote_submissions')
         .select('*')
@@ -83,6 +84,7 @@ export default function HITLReviewPage() {
     setSaving(true)
     try {
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       const { error } = await supabase
         .from('cethosweb_quote_submissions')
         .update({
@@ -114,6 +116,7 @@ export default function HITLReviewPage() {
 
     try {
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       const { error } = await supabase
         .from('cethosweb_quote_submissions')
         .update({ status: 'rejected' })
@@ -131,6 +134,7 @@ export default function HITLReviewPage() {
   const handleEscalate = async () => {
     try {
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       const { error } = await supabase
         .from('cethosweb_quote_submissions')
         .update({ status: 'escalated' })
@@ -178,6 +182,7 @@ export default function HITLReviewPage() {
 
       // Update quote status
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       await supabase
         .from('cethosweb_quote_submissions')
         .update({
@@ -228,6 +233,7 @@ export default function HITLReviewPage() {
 
       // Update quote status
       const supabase = createBrowserSupabaseClient()
+      if (!supabase) return
       await supabase
         .from('cethosweb_quote_submissions')
         .update({

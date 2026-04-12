@@ -10,39 +10,7 @@ import {
   GamepadIcon,
   ShoppingCartIcon,
 } from '@/components/icons'
-
-const industries = [
-  {
-    name: 'Pharmaceutical',
-    description: 'Clinical trials, regulatory submissions, and medical documentation.',
-    icon: MoleculeIcon,
-  },
-  {
-    name: 'Legal',
-    description: 'Contracts, court documents, patents, and legal proceedings.',
-    icon: ScaleIcon,
-  },
-  {
-    name: 'Technology',
-    description: 'Software, hardware documentation, and technical manuals.',
-    icon: CodeIcon,
-  },
-  {
-    name: 'Finance',
-    description: 'Banking, insurance, investment, and financial reports.',
-    icon: BankIcon,
-  },
-  {
-    name: 'Gaming',
-    description: 'Video games, mobile apps, and interactive entertainment.',
-    icon: GamepadIcon,
-  },
-  {
-    name: 'E-commerce',
-    description: 'Product listings, customer support, and marketing content.',
-    icon: ShoppingCartIcon,
-  },
-]
+import { useTranslations } from 'next-intl'
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -66,12 +34,23 @@ const itemVariants = {
 }
 
 export function Industries() {
+  const t = useTranslations('homepage.industries')
+
+  const industries = [
+    { nameKey: 'pharma_title', descKey: 'pharma_desc', icon: MoleculeIcon },
+    { nameKey: 'legal_title', descKey: 'legal_desc', icon: ScaleIcon },
+    { nameKey: 'tech_title', descKey: 'tech_desc', icon: CodeIcon },
+    { nameKey: 'finance_title', descKey: 'finance_desc', icon: BankIcon },
+    { nameKey: 'gaming_title', descKey: 'gaming_desc', icon: GamepadIcon },
+    { nameKey: 'ecommerce_title', descKey: 'ecommerce_desc', icon: ShoppingCartIcon },
+  ]
+
   return (
     <section className="section-padding">
       <Container>
         <SectionHeading
-          title="Industries We Serve"
-          subtitle="Specialized translation services tailored to the unique terminology and requirements of your industry."
+          title={t('heading')}
+          subtitle={t('description')}
           className="mb-16"
         />
 
@@ -84,7 +63,7 @@ export function Industries() {
         >
           {industries.map((industry) => (
             <motion.div
-              key={industry.name}
+              key={industry.nameKey}
               variants={itemVariants}
               className="group cursor-pointer"
             >
@@ -92,8 +71,8 @@ export function Industries() {
                 <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 mb-4 group-hover:scale-110 group-hover:bg-teal-100 transition-all duration-300">
                   <industry.icon size={32} />
                 </div>
-                <h3 className="font-semibold text-navy mb-2">{industry.name}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{industry.description}</p>
+                <h3 className="font-semibold text-navy mb-2">{t(industry.nameKey)}</h3>
+                <p className="text-sm text-slate-500 leading-relaxed">{t(industry.descKey)}</p>
               </div>
             </motion.div>
           ))}

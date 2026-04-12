@@ -36,6 +36,16 @@
     }
   };
 
+  // DB-driven navigation translations (fetched from /api/i18n/nav-translations)
+  // Keyed by locale code, populated by _fetchNavTranslations()
+  const _navTranslationsCache = {};
+
+  function t(text, locale) {
+    if (!locale || locale === 'en') return text;
+    const translations = _navTranslationsCache[locale];
+    return translations?.[text] || text;
+  }
+
   // Navigation Structure (matches main site)
   const NAVIGATION = {
     services: [
@@ -117,8 +127,13 @@
   }
 
   // Helper function to resolve URLs
+  // When running on the same origin (e.g., cethos.com or localhost), use relative paths
+  const isSameOrigin = typeof window !== 'undefined' &&
+    (window.location.origin === CONFIG.baseUrl || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
   function resolveUrl(path) {
     if (path.startsWith('http')) return path;
+    if (isSameOrigin) return path;
     return CONFIG.baseUrl + path;
   }
 
@@ -132,8 +147,18 @@
     linkedin: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>`,
     twitter: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>`,
     mapPin: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`,
-    proz: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><text x="12" y="16.5" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none" font-family="sans-serif">Pz</text></svg>`
+    proz: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><text x="12" y="16.5" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor" stroke="none" font-family="sans-serif">Pz</text></svg>`,
+    globe: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`
   };
+
+  // Fallback languages (used until API responds)
+  const FALLBACK_LANGUAGES = [
+    { code: 'en', label: 'English', shortLabel: 'EN' }
+  ];
+
+  // Cache for published locales (shared across instances)
+  let _publishedLocalesCache = null;
+  let _publishedLocalesFetching = false;
 
   /**
    * CethosHeader Web Component
@@ -145,18 +170,70 @@
       this._isScrolled = false;
       this._isMobileMenuOpen = false;
       this._openDropdown = null;
+      this._isLangDropdownOpen = false;
+      this._languages = _publishedLocalesCache || FALLBACK_LANGUAGES;
       this._boundHandleScroll = this._handleScroll.bind(this);
       this._boundHandleClickOutside = this._handleClickOutside.bind(this);
     }
 
     static get observedAttributes() {
-      return ['current-site', 'hide-cta', 'theme', 'cta-type'];
+      return ['current-site', 'hide-cta', 'theme', 'cta-type', 'locale'];
     }
 
     connectedCallback() {
       this.render();
       window.addEventListener('scroll', this._boundHandleScroll);
       document.addEventListener('click', this._boundHandleClickOutside);
+      this._fetchPublishedLocales();
+    }
+
+    async _fetchPublishedLocales() {
+      // Use cache if available
+      if (_publishedLocalesCache) {
+        this._languages = _publishedLocalesCache;
+        this._fetchNavTranslations();
+        return;
+      }
+      // Prevent duplicate fetches
+      if (_publishedLocalesFetching) return;
+      _publishedLocalesFetching = true;
+
+      try {
+        const apiUrl = isSameOrigin ? '/api/i18n/locales' : CONFIG.baseUrl + '/api/i18n/locales';
+        const res = await fetch(apiUrl);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.locales && data.locales.length > 0) {
+          _publishedLocalesCache = data.locales;
+          this._languages = data.locales;
+          // Fetch nav translations for non-English locales, then re-render
+          await this._fetchNavTranslations();
+          this.render();
+        }
+      } catch (e) {
+        // Silently fail — keep fallback (English only, selector hidden)
+      } finally {
+        _publishedLocalesFetching = false;
+      }
+    }
+
+    async _fetchNavTranslations() {
+      const currentLocale = this._getCurrentLocale();
+      if (currentLocale === 'en' || _navTranslationsCache[currentLocale]) return;
+
+      try {
+        const apiUrl = isSameOrigin
+          ? '/api/i18n/nav-translations?locale=' + currentLocale
+          : CONFIG.baseUrl + '/api/i18n/nav-translations?locale=' + currentLocale;
+        const res = await fetch(apiUrl);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.translations) {
+          _navTranslationsCache[currentLocale] = data.translations;
+        }
+      } catch (e) {
+        // Silently fail — English fallback
+      }
     }
 
     disconnectedCallback() {
@@ -233,15 +310,16 @@
       const session = this.getUserSession();
       const baseUrl = CONFIG.baseUrl;
       const className = isMobile ? 'mobile-cta' : 'cta-button';
+      const locale = this._getCurrentLocale();
 
       if (session.isLoggedIn) {
         if (session.isAdmin) {
-          return `<a href="${baseUrl}/admin" class="${className} admin-btn">Admin Panel</a>`;
+          return `<a href="${baseUrl}/admin" class="${className} admin-btn">${t('Admin Panel', locale)}</a>`;
         }
-        return `<a href="https://portal.cethos.com/dashboard" class="${className} dashboard-btn">Dashboard</a>`;
+        return `<a href="https://portal.cethos.com/dashboard" class="${className} dashboard-btn">${t('Dashboard', locale)}</a>`;
       }
 
-      return `<a href="https://portal.cethos.com" class="${className}">Login</a>`;
+      return `<a href="https://portal.cethos.com" class="${className}">${t('Login', locale)}</a>`;
     }
 
     _handleScroll() {
@@ -256,9 +334,16 @@
     }
 
     _handleClickOutside(event) {
-      if (!this.contains(event.target) && this._openDropdown) {
-        this._openDropdown = null;
-        this._updateDropdowns();
+      if (!this.contains(event.target)) {
+        if (this._openDropdown) {
+          this._openDropdown = null;
+          this._updateDropdowns();
+        }
+        if (this._isLangDropdownOpen) {
+          this._isLangDropdownOpen = false;
+          const dropdown = this.shadowRoot.querySelector('.lang-dropdown');
+          if (dropdown) dropdown.classList.remove('open');
+        }
       }
     }
 
@@ -313,12 +398,57 @@
       }
     }
 
+    _getCurrentLocale() {
+      // Check attribute first, then detect from URL
+      const attr = this.getAttribute('locale');
+      if (attr && this._languages.some(l => l.code === attr)) return attr;
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        // Check known locale prefixes from URL
+        const match = path.match(/^\/([a-z]{2})(\/|$)/);
+        if (match && match[1] !== 'en') {
+          return match[1];
+        }
+      }
+      return 'en';
+    }
+
+    _getLanguageSwitchUrl(targetLocale) {
+      const currentLocale = this._getCurrentLocale();
+      let path = window.location.pathname;
+
+      // Strip current locale prefix if present
+      if (currentLocale !== 'en') {
+        const prefix = '/' + currentLocale;
+        if (path === prefix) {
+          path = '/';
+        } else if (path.startsWith(prefix + '/')) {
+          path = path.substring(prefix.length);
+        }
+      }
+
+      // Add target locale prefix (English = no prefix)
+      if (targetLocale === 'en') {
+        return path || '/';
+      }
+      return '/' + targetLocale + path;
+    }
+
+    _toggleLangDropdown() {
+      this._isLangDropdownOpen = !this._isLangDropdownOpen;
+      const dropdown = this.shadowRoot.querySelector('.lang-dropdown');
+      if (dropdown) {
+        dropdown.classList.toggle('open', this._isLangDropdownOpen);
+      }
+    }
+
     render() {
       const currentSite = this.getAttribute('current-site') || '';
       const hideCta = this.hasAttribute('hide-cta');
       const theme = this.getAttribute('theme') || 'light';
       const ctaType = this.getAttribute('cta-type') || 'login';
       const isDark = theme === 'dark';
+      const currentLocale = this._getCurrentLocale();
 
       // CTA configuration
       const ctaConfig = {
@@ -552,6 +682,163 @@
           background: #0a1c33;
         }
 
+        /* Language Selector — Desktop dropdown */
+        .lang-selector {
+          position: relative;
+          display: none;
+          align-items: center;
+          margin-left: 12px;
+        }
+
+        @media (min-width: 768px) {
+          .lang-selector {
+            display: flex;
+          }
+        }
+
+        .lang-select {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 10px;
+          background: ${isDark ? 'rgba(255,255,255,0.08)' : CONFIG.colors.gray};
+          border: 1px solid ${isDark ? 'rgba(255,255,255,0.15)' : CONFIG.colors.border};
+          border-radius: 6px;
+          cursor: pointer;
+          color: ${isDark ? 'rgba(255,255,255,0.9)' : CONFIG.colors.textDark};
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          outline: none;
+        }
+
+        .lang-select:hover,
+        .lang-select:focus {
+          border-color: ${CONFIG.colors.teal};
+          color: ${CONFIG.colors.teal};
+        }
+
+        .lang-select .globe-icon {
+          display: flex;
+          opacity: 0.6;
+        }
+
+        .lang-select:hover .globe-icon {
+          opacity: 1;
+        }
+
+        .lang-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          margin-top: 6px;
+          min-width: 150px;
+          background: ${CONFIG.colors.white};
+          border-radius: 8px;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+          border: 1px solid ${CONFIG.colors.border};
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(8px);
+          transition: all 0.2s ease;
+          overflow: hidden;
+          z-index: 100;
+        }
+
+        .lang-dropdown::before {
+          content: '';
+          position: absolute;
+          top: -10px;
+          left: 0;
+          right: 0;
+          height: 10px;
+          background: transparent;
+        }
+
+        .lang-dropdown.open {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .lang-option {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 14px;
+          color: ${CONFIG.colors.navy};
+          text-decoration: none;
+          font-size: 13px;
+          font-weight: 500;
+          transition: all 0.15s ease;
+          border-bottom: 1px solid ${CONFIG.colors.border};
+        }
+
+        .lang-option:last-child {
+          border-bottom: none;
+        }
+
+        .lang-option:hover {
+          background: ${CONFIG.colors.gray};
+          color: ${CONFIG.colors.teal};
+        }
+
+        .lang-option.active {
+          color: ${CONFIG.colors.teal};
+          background: rgba(8, 145, 178, 0.05);
+        }
+
+        .lang-option .lang-check {
+          margin-left: auto;
+          color: ${CONFIG.colors.teal};
+          font-size: 12px;
+        }
+
+        /* Mobile language selector */
+        .mobile-lang-selector {
+          display: flex;
+          gap: 0;
+          margin: 16px 24px;
+          border: 1px solid ${CONFIG.colors.border};
+          border-radius: 10px;
+          overflow: hidden;
+        }
+
+        .mobile-lang-option {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 12px;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+          color: ${CONFIG.colors.textGray};
+          background: ${CONFIG.colors.white};
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          font-family: inherit;
+        }
+
+        .mobile-lang-option + .mobile-lang-option {
+          border-left: 1px solid ${CONFIG.colors.border};
+        }
+
+        .mobile-lang-option.active {
+          background: ${CONFIG.colors.teal};
+          color: ${CONFIG.colors.white};
+        }
+
+        .mobile-lang-option:not(.active):hover {
+          background: ${CONFIG.colors.gray};
+        }
+
         /* Mobile Menu Button */
         .mobile-menu-button {
           display: flex;
@@ -743,33 +1030,40 @@
         }
       `;
 
+      // Localize URL: add locale prefix for non-English
+      const localizeUrl = (href) => {
+        const resolved = resolveUrl(href);
+        if (currentLocale === 'en' || !isSameOrigin) return resolved;
+        return '/' + currentLocale + resolved;
+      };
+
       const servicesDropdown = NAVIGATION.services.map(item => `
-        <a href="${resolveUrl(item.href)}" class="dropdown-item">
-          <div class="dropdown-item-label">${item.label}</div>
-          ${item.description ? `<div class="dropdown-item-description">${item.description}</div>` : ''}
+        <a href="${localizeUrl(item.href)}" class="dropdown-item">
+          <div class="dropdown-item-label">${t(item.label, currentLocale)}</div>
+          ${item.description ? `<div class="dropdown-item-description">${t(item.description, currentLocale)}</div>` : ''}
         </a>
       `).join('');
 
       const industriesDropdown = NAVIGATION.industries.map(item => `
-        <a href="${resolveUrl(item.href)}" class="dropdown-item">
-          <div class="dropdown-item-label">${item.label}</div>
+        <a href="${localizeUrl(item.href)}" class="dropdown-item">
+          <div class="dropdown-item-label">${t(item.label, currentLocale)}</div>
         </a>
       `).join('');
 
       const mainNavLinks = NAVIGATION.main.map(item => `
-        <a href="${resolveUrl(item.href)}" class="nav-link">${item.label}</a>
+        <a href="${localizeUrl(item.href)}" class="nav-link">${t(item.label, currentLocale)}</a>
       `).join('');
 
       const mobileServicesLinks = NAVIGATION.services.map(item => `
-        <a href="${resolveUrl(item.href)}" class="mobile-nav-link">${item.label}</a>
+        <a href="${localizeUrl(item.href)}" class="mobile-nav-link">${t(item.label, currentLocale)}</a>
       `).join('');
 
       const mobileIndustriesLinks = NAVIGATION.industries.map(item => `
-        <a href="${resolveUrl(item.href)}" class="mobile-nav-link">${item.label}</a>
+        <a href="${localizeUrl(item.href)}" class="mobile-nav-link">${t(item.label, currentLocale)}</a>
       `).join('');
 
       const mobileMainLinks = NAVIGATION.main.map(item => `
-        <a href="${resolveUrl(item.href)}" class="mobile-main-link">${item.label}</a>
+        <a href="${localizeUrl(item.href)}" class="mobile-main-link">${t(item.label, currentLocale)}</a>
       `).join('');
 
       this.shadowRoot.innerHTML = `
@@ -778,14 +1072,14 @@
         <header class="header ${this._isScrolled ? 'scrolled' : ''}">
           <div class="header-container">
             <nav class="header-nav">
-              <a href="${CONFIG.baseUrl}" class="logo">
+              <a href="${isSameOrigin ? (currentLocale && currentLocale !== 'en' ? '/' + currentLocale : '/') : CONFIG.baseUrl}" class="logo">
                 <img src="${isDark ? CONFIG.assets.logoDark : CONFIG.assets.logoLight}" alt="Cethos Solutions Inc.">
               </a>
 
               <div class="desktop-nav">
                 <div class="nav-item">
                   <button class="dropdown-trigger" data-name="services">
-                    Services
+                    ${t('Services', currentLocale)}
                     <span class="chevron">${ICONS.chevronDown}</span>
                   </button>
                   <div class="dropdown-menu" data-name="services">
@@ -795,7 +1089,7 @@
 
                 <div class="nav-item">
                   <button class="dropdown-trigger" data-name="industries">
-                    Industries
+                    ${t('Industries', currentLocale)}
                     <span class="chevron">${ICONS.chevronDown}</span>
                   </button>
                   <div class="dropdown-menu" data-name="industries">
@@ -806,6 +1100,24 @@
                 ${mainNavLinks}
 
                 ${!hideCta ? this.getLoginButton(false) : ''}
+
+                ${this._languages.length > 1 ? `
+                <div class="lang-selector">
+                  <button class="lang-select" aria-label="Select language">
+                    <span class="globe-icon">${ICONS.globe}</span>
+                    <span>${(this._languages.find(l => l.code === currentLocale) || this._languages[0])?.shortLabel || 'EN'}</span>
+                    <span class="chevron">${ICONS.chevronDown}</span>
+                  </button>
+                  <div class="lang-dropdown">
+                    ${this._languages.map(lang => `
+                      <a href="${this._getLanguageSwitchUrl(lang.code)}" class="lang-option ${lang.code === currentLocale ? 'active' : ''}" data-locale="${lang.code}">
+                        <span>${lang.label}</span>
+                        ${lang.code === currentLocale ? '<span class="lang-check">&#10003;</span>' : ''}
+                      </a>
+                    `).join('')}
+                  </div>
+                </div>
+                ` : ''}
               </div>
 
               <button class="mobile-menu-button" aria-label="Open menu">
@@ -819,7 +1131,7 @@
 
         <div class="mobile-menu">
           <div class="mobile-menu-header">
-            <a href="${CONFIG.baseUrl}" class="logo">
+            <a href="${isSameOrigin ? (currentLocale && currentLocale !== 'en' ? '/' + currentLocale : '/') : CONFIG.baseUrl}" class="logo">
               <img src="${CONFIG.assets.logoLight}" alt="Cethos Solutions Inc.">
             </a>
             <button class="mobile-close-button" aria-label="Close menu">
@@ -830,7 +1142,7 @@
           <div class="mobile-menu-content">
             <div class="mobile-section" data-name="services">
               <button class="mobile-section-header">
-                Services
+                ${t('Services', currentLocale)}
                 <span class="chevron">${ICONS.chevronDown}</span>
               </button>
               <div class="mobile-section-content">
@@ -840,7 +1152,7 @@
 
             <div class="mobile-section" data-name="industries">
               <button class="mobile-section-header">
-                Industries
+                ${t('Industries', currentLocale)}
                 <span class="chevron">${ICONS.chevronDown}</span>
               </button>
               <div class="mobile-section-content">
@@ -851,6 +1163,16 @@
             <div>
               ${mobileMainLinks}
             </div>
+
+            ${this._languages.length > 1 ? `
+            <div class="mobile-lang-selector">
+              ${this._languages.map(lang => `
+                <a href="${this._getLanguageSwitchUrl(lang.code)}" class="mobile-lang-option ${lang.code === currentLocale ? 'active' : ''}" data-locale="${lang.code}">
+                  ${lang.label}
+                </a>
+              `).join('')}
+            </div>
+            ` : ''}
 
             ${!hideCta ? this.getLoginButton(true) : ''}
           </div>
@@ -923,6 +1245,30 @@
           }
         });
       });
+
+      // Language dropdown button (desktop)
+      const langToggle = this.shadowRoot.querySelector('.lang-select');
+      if (langToggle) {
+        langToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this._toggleLangDropdown();
+        });
+      }
+
+      // Language selector hover behavior (desktop)
+      const langSelector = this.shadowRoot.querySelector('.lang-selector');
+      if (langSelector) {
+        langSelector.addEventListener('mouseenter', () => {
+          this._isLangDropdownOpen = true;
+          const dropdown = this.shadowRoot.querySelector('.lang-dropdown');
+          if (dropdown) dropdown.classList.add('open');
+        });
+        langSelector.addEventListener('mouseleave', () => {
+          this._isLangDropdownOpen = false;
+          const dropdown = this.shadowRoot.querySelector('.lang-dropdown');
+          if (dropdown) dropdown.classList.remove('open');
+        });
+      }
     }
   }
 
@@ -936,7 +1282,7 @@
     }
 
     static get observedAttributes() {
-      return ['minimal', 'hide-industries'];
+      return ['minimal', 'hide-industries', 'locale'];
     }
 
     connectedCallback() {
@@ -947,9 +1293,20 @@
       this.render();
     }
 
+    _getLocale() {
+      const attr = this.getAttribute('locale');
+      if (attr) return attr;
+      if (typeof window !== 'undefined') {
+        const match = window.location.pathname.match(/^\/([a-z]{2})(\/|$)/);
+        if (match && match[1] !== 'en') return match[1];
+      }
+      return 'en';
+    }
+
     render() {
       const minimal = this.hasAttribute('minimal');
       const hideIndustries = this.hasAttribute('hide-industries');
+      const currentLocale = this._getLocale();
 
       const styles = `
         :host {
@@ -1183,24 +1540,31 @@
         }
       `;
 
+      // Localize URL: add locale prefix for non-English
+      const localizeUrl = (href) => {
+        const resolved = resolveUrl(href);
+        if (currentLocale === 'en' || !isSameOrigin) return resolved;
+        return '/' + currentLocale + resolved;
+      };
+
       const servicesLinks = NAVIGATION.footer.services.map(item => `
-        <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
+        <li><a href="${localizeUrl(item.href)}" class="footer-link">${t(item.label, currentLocale)}</a></li>
       `).join('');
 
       const companyLinks = NAVIGATION.footer.company.map(item => `
-        <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
+        <li><a href="${localizeUrl(item.href)}" class="footer-link">${t(item.label, currentLocale)}</a></li>
       `).join('');
 
       const industriesLinks = NAVIGATION.footer.industries.map(item => `
-        <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
+        <li><a href="${localizeUrl(item.href)}" class="footer-link">${t(item.label, currentLocale)}</a></li>
       `).join('');
 
       const locationsLinks = NAVIGATION.footer.locations.map(item => `
-        <li><a href="${resolveUrl(item.href)}" class="footer-link">${item.label}</a></li>
+        <li><a href="${localizeUrl(item.href)}" class="footer-link">${item.label}</a></li>
       `).join('');
 
       const legalLinks = NAVIGATION.footer.legal.map(item => `
-        <a href="${resolveUrl(item.href)}" class="footer-legal-link">${item.label}</a>
+        <a href="${localizeUrl(item.href)}" class="footer-legal-link">${t(item.label, currentLocale)}</a>
       `).join('');
 
       const currentYear = new Date().getFullYear();
@@ -1232,12 +1596,12 @@
               <div class="footer-grid">
                 <!-- Brand Column -->
                 <div class="footer-brand">
-                  <a href="${CONFIG.baseUrl}" class="footer-logo">
+                  <a href="${isSameOrigin ? '/' : CONFIG.baseUrl}" class="footer-logo">
                     <img src="${CONFIG.assets.logoDark}" alt="Cethos Solutions Inc.">
                   </a>
-                  <p class="footer-tagline">Global Communication. Local Precision.</p>
+                  <p class="footer-tagline">${t('Global Communication. Local Precision.', currentLocale)}</p>
                   <p class="footer-description">
-                    Professional translation services in 200+ languages for life sciences, business, and certified documents.
+                    ${t('Professional translation services in 200+ languages for life sciences, business, and certified documents.', currentLocale)}
                   </p>
                   <div class="footer-contact">
                     <a href="mailto:${CONFIG.contact.email}" class="footer-contact-item">
@@ -1261,7 +1625,7 @@
 
                 <!-- Company Column -->
                 <div class="footer-column">
-                  <h4 class="footer-column-title">Company</h4>
+                  <h4 class="footer-column-title">${t('Company', currentLocale)}</h4>
                   <ul class="footer-links">
                     ${companyLinks}
                   </ul>
@@ -1269,7 +1633,7 @@
 
                 <!-- Services Column -->
                 <div class="footer-column">
-                  <h4 class="footer-column-title">Services</h4>
+                  <h4 class="footer-column-title">${t('Our Services', currentLocale)}</h4>
                   <ul class="footer-links">
                     ${servicesLinks}
                   </ul>
@@ -1278,7 +1642,7 @@
                 ${!hideIndustries ? `
                   <!-- Industries Column -->
                   <div class="footer-column">
-                    <h4 class="footer-column-title">Industries</h4>
+                    <h4 class="footer-column-title">${t('Industries', currentLocale)}</h4>
                     <ul class="footer-links">
                       ${industriesLinks}
                     </ul>
@@ -1287,7 +1651,7 @@
 
                 <!-- Locations Column -->
                 <div class="footer-column">
-                  <h4 class="footer-column-title">Locations</h4>
+                  <h4 class="footer-column-title">${t('Locations', currentLocale)}</h4>
                   <ul class="footer-links">
                     ${locationsLinks}
                   </ul>

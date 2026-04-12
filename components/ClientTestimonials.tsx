@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface Testimonial {
   id?: string;
@@ -79,6 +80,7 @@ interface ClientTestimonialsProps {
 }
 
 export default function ClientTestimonials({ compact = false }: ClientTestimonialsProps) {
+  const tTestimonials = useTranslations('testimonials');
   const [reviews, setReviews] = useState<Testimonial[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -108,12 +110,12 @@ export default function ClientTestimonials({ compact = false }: ClientTestimonia
         {/* Heading */}
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            What Our Clients Say
+            {tTestimonials('heading')}
           </h2>
-          <div className="flex items-center justify-center gap-2" role="img" aria-label="Google Reviews 4.9 out of 5 stars from 139 reviews">
+          <div className="flex items-center justify-center gap-2" role="img" aria-label={tTestimonials('rating_aria_label')}>
             <FiveStars />
             <span className="text-sm text-gray-600">
-              4.9 out of 5 &bull; Based on 139 Google Reviews
+              {tTestimonials('rating_text')}
             </span>
           </div>
         </div>
@@ -157,9 +159,9 @@ export default function ClientTestimonials({ compact = false }: ClientTestimonia
         {/* Trust Badges */}
         <div className="flex flex-wrap justify-center gap-3 mb-6">
           {[
-            { icon: 'shield', text: 'Government of Alberta Approved', alt: 'Government of Alberta Approved Translation Provider' },
-            { icon: 'check', text: 'BBB Accredited \u2014 A+ Rating', alt: 'Better Business Bureau A+ Accredited Business' },
-            { icon: 'cert', text: 'ISO 17100 Compliant', alt: 'ISO 17100 Compliant Translation Services' },
+            { icon: 'shield', text: tTestimonials('badge1'), alt: tTestimonials('badge1_alt') },
+            { icon: 'check', text: tTestimonials('badge2'), alt: tTestimonials('badge2_alt') },
+            { icon: 'cert', text: tTestimonials('badge3'), alt: tTestimonials('badge3_alt') },
           ].map((badge) => (
             <div
               key={badge.text}
@@ -194,7 +196,7 @@ export default function ClientTestimonials({ compact = false }: ClientTestimonia
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-700 text-sm font-medium transition-colors"
           >
-            Read all reviews on Google
+            {tTestimonials('read_all')}
             <svg
               className="w-4 h-4"
               fill="none"
