@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS cethosweb_i18n_translations (
   key TEXT NOT NULL,
   segment_index INT NOT NULL DEFAULT 0,
   locale TEXT NOT NULL DEFAULT 'en'
-    CHECK (locale IN ('en', 'fr')),
+    CHECK (locale IN ('en', 'fr', 'es', 'de', 'ja', 'zh', 'ko', 'pt', 'it', 'ar', 'ru')),
   value TEXT NOT NULL,
   is_html BOOLEAN NOT NULL DEFAULT FALSE,
   status TEXT NOT NULL DEFAULT 'published'
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS cethosweb_i18n_metadata (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   page_path TEXT NOT NULL,
   locale TEXT NOT NULL DEFAULT 'en'
-    CHECK (locale IN ('en', 'fr')),
+    CHECK (locale IN ('en', 'fr', 'es', 'de', 'ja', 'zh', 'ko', 'pt', 'it', 'ar', 'ru')),
   title TEXT NOT NULL,
   description TEXT,
   keywords TEXT[],
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS cethosweb_i18n_structured (
   content_type TEXT NOT NULL,
   content_key TEXT NOT NULL,
   locale TEXT NOT NULL DEFAULT 'en'
-    CHECK (locale IN ('en', 'fr')),
+    CHECK (locale IN ('en', 'fr', 'es', 'de', 'ja', 'zh', 'ko', 'pt', 'it', 'ar', 'ru')),
   data JSONB NOT NULL,
   status TEXT NOT NULL DEFAULT 'published'
     CHECK (status IN ('draft', 'review', 'published')),
