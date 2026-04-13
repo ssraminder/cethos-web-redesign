@@ -2,7 +2,6 @@
 
 import { useAdmin } from '@/components/admin/AdminContext';
 import Badge from '@/components/admin/Badge';
-import { createBrowserSupabaseClient } from '@/lib/supabase';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { Globe, Layers, FileText, CheckCircle2, Loader2, Download, Upload } from 'lucide-react';
@@ -79,45 +78,26 @@ export default function TranslationsPage() {
     : ALL_LOCALES;
 
   useEffect(() => {
-    async function fetchAll(
-      supabase: ReturnType<typeof createBrowserSupabaseClient>,
-      table: string,
-      select: string,
-      filter: Record<string, string>,
-    ) {
-      const allRows: Translation[] = [];
-      const pageSize = 1000;
-      let offset = 0;
-      while (true) {
-        let query = supabase!.from(table).select(select);
-        for (const [k, v] of Object.entries(filter)) {
-          query = query.eq(k, v);
-        }
-        const { data } = await query.range(offset, offset + pageSize - 1);
-        if (!data || data.length === 0) break;
-        allRows.push(...(data as Translation[]));
-        if (data.length < pageSize) break;
-        offset += pageSize;
-      }
-      return allRows;
-    }
-
     async function fetchData() {
       setLoading(true);
-      const supabase = createBrowserSupabaseClient()!;
-
-      const [nsRes, enRows, localeRows] = await Promise.all([
-        supabase.from('cethosweb_i18n_namespaces').select('*').order('name'),
-        fetchAll(supabase, 'cethosweb_i18n_translations', 'id, namespace_id, key, segment_index, locale, value, status', { locale: 'en' }),
-        fetchAll(supabase, 'cethosweb_i18n_translations', 'id, namespace_id, key, segment_index, locale, value, status', { locale: selectedLocale }),
-      ]);
-
-      if (nsRes.data) setNamespaces(nsRes.data);
-      setTranslations([...enRows, ...localeRows]);
-      setLoading(false);
+      try {
+        const res = await fetch(
+          `/api/admin/translations?locale=${selectedLocale}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok) throw new Error('Failed to fetch translations');
+        const data = await res.json();
+        setNamespaces(data.namespaces || []);
+        setTranslations(data.translations || []);
+      } catch (err) {
+        console.error('Failed to load translations:', err);
+        toast.error('Failed to load translations');
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchData();
-  }, [selectedLocale]);
+    if (token) fetchData();
+  }, [selectedLocale, token]);
 
   const stats = useMemo(() => {
     const enByNs = new Map<string, number>();
