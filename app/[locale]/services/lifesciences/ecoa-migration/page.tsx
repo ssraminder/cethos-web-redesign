@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import EcoaMigrationContent from './EcoaMigrationContent'
 
 export const metadata: Metadata = {
-  title: 'eCOA Migration Services | ePRO Platform Translation | Cethos',
+  title: 'eCOA Migration Services | ePRO Platform Translation',
   description: 'Expert eCOA migration and ePRO platform translation services. Screenshot review, audio recording, IVRS localization, and format adaptation for clinical trials.',
   keywords: ['eCOA migration', 'ePRO translation', 'electronic COA', 'IVRS translation', 'screenshot review', 'clinical trial technology'],
   openGraph: {
-    title: 'eCOA Migration Services | Cethos',
+    title: 'eCOA Migration Services',
     description: 'Professional eCOA migration and ePRO platform translation for clinical outcome assessment digitization.',
     url: 'https://cethos.com/services/lifesciences/ecoa-migration',
     siteName: 'Cethos Solutions Inc.',

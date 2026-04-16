@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import DriversLicenseContent from './DriversLicenseContent'
 
 export const metadata: Metadata = {
-  title: "Driver's License Translation Services | Alberta Registries Approved | Cethos",
-  description: "Government of Alberta approved driver's license translation services. Certified translations accepted by Service Alberta, Alberta Registries, and all provincial licensing authorities. From $65, same-day available.",
+  title: "Driver's License Translation Calgary | Service Alberta Approved | From $65",
+  description: "Government of Alberta approved driver's license translation for Service Alberta and Alberta Registries. Certified and notarized. From $65. Same-day available in Calgary.",
   keywords: [
     "driver's license translation Alberta",
     "certified translation Service Alberta",
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/services/certified/drivers-license-translation',
   },
   openGraph: {
-    title: "Driver's License Translation | Government of Alberta Approved",
-    description: 'Certified translations for Service Alberta and Alberta Registries. From $65.',
+    title: "Driver's License Translation Calgary | Service Alberta Approved | From $65",
+    description: "Government of Alberta approved driver's license translation for Service Alberta and Alberta Registries. Certified and notarized. From $65. Same-day available in Calgary.",
     url: 'https://cethos.com/services/certified/drivers-license-translation',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',

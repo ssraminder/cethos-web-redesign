@@ -2,11 +2,18 @@ import { Metadata } from 'next';
 import LocationPageTemplate from '@/components/locations/LocationPageTemplate';
 
 export const metadata: Metadata = {
-  title: 'Calgary Translation & Interpretation Services | Cethos',
-  description: 'Translation and interpretation services in Calgary. IRCC certified. Birth certificates, marriage certificates, immigration documents. 139 five-star reviews. Same-day available. From $65.',
+  title: 'Calgary Certified Translation | IRCC Accepted | From $65',
+  description: 'Certified translation in Calgary from $65. 100% IRCC accepted, Government of Alberta approved. Walk-in available at 421 7 Ave SW. 139 five-star reviews. Same-day service.',
   alternates: {
     canonical: 'https://cethos.com/locations/calgary'
-  }
+  },
+  openGraph: {
+    title: 'Calgary Certified Translation | IRCC Accepted | From $65 | Cethos',
+    description: 'Certified translation in Calgary from $65. 100% IRCC accepted, Government of Alberta approved. Walk-in available at 421 7 Ave SW. 139 five-star reviews. Same-day service.',
+    url: 'https://cethos.com/locations/calgary',
+    siteName: 'Cethos Solutions Inc.',
+    type: 'website',
+  },
 };
 
 export default function CalgaryTranslationPage() {

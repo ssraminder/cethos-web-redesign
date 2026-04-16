@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import CognitiveDebriefingContent from './CognitiveDebriefingContent'
 
 export const metadata: Metadata = {
-  title: 'Cognitive Debriefing Services | ISPOR-Compliant Patient Interviews | Cethos',
+  title: 'Cognitive Debriefing Services | ISPOR-Compliant Patient Interviews',
   description: 'Professional cognitive debriefing services with 1,000+ trained moderators in 150+ languages. ISPOR-compliant patient interviews for PRO, ClinRO, ObsRO validation. FDA & EMA accepted.',
   keywords: ['cognitive debriefing', 'linguistic validation', 'PRO validation', 'patient interviews', 'ISPOR guidelines', 'clinical outcome assessment'],
   openGraph: {
-    title: 'Cognitive Debriefing Services | Cethos',
+    title: 'Cognitive Debriefing Services',
     description: 'ISPOR-compliant cognitive debriefing with 1,000+ trained moderators in 150+ languages.',
     url: 'https://cethos.com/services/lifesciences/cognitive-debriefing',
     siteName: 'Cethos Solutions Inc.',

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/services/canadian',
   },
   openGraph: {
-    title: 'Canadian Translation Services | Cethos Solutions Inc.',
+    title: 'Canadian Translation Services | Cethos',
     description: 'Quebec French, Bill 96 compliance, Health Canada submissions, and Indigenous language services.',
     url: 'https://cethos.com/services/canadian',
   },

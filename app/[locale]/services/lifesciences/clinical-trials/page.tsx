@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import ClinicalTrialsContent from './ClinicalTrialsContent'
 
 export const metadata: Metadata = {
-  title: 'Clinical Trial Translation Services | Protocols, ICFs, CRFs | Cethos',
+  title: 'Clinical Trial Translation Services | Protocols, ICFs, CRFs',
   description: 'Specialized clinical trial document translation including protocols, ICFs, CRFs, patient materials, and site documentation. GCP-compliant with ISO 17100 compliant processes.',
   keywords: ['clinical trial translation', 'protocol translation', 'ICF translation', 'informed consent translation', 'CRF translation', 'GCP compliant'],
   openGraph: {
-    title: 'Clinical Trial Translation Services | Cethos',
+    title: 'Clinical Trial Translation Services',
     description: 'GCP-compliant clinical trial document translation for global studies across 150+ languages.',
     url: 'https://cethos.com/services/lifesciences/clinical-trials',
     siteName: 'Cethos Solutions Inc.',

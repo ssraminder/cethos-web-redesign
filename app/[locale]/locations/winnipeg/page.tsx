@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import LocationPageTemplate from '@/components/locations/LocationPageTemplate';
 
 export const metadata: Metadata = {
-  title: 'Winnipeg Translation Services | Certified IRCC Translation | Cethos',
+  title: 'Winnipeg Translation Services | Certified IRCC Translation',
   description: 'Certified translation services in Winnipeg. IRCC accepted for Manitoba PNP & immigration. Birth certificate & marriage certificate translation. 139 five-star reviews. From $65.',
   alternates: {
     canonical: 'https://cethos.com/locations/winnipeg'

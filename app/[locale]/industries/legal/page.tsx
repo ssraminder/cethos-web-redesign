@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/legal',
   },
   openGraph: {
-    title: 'Legal Translation Services | Cethos',
+    title: 'Legal Translation Services',
     description: 'Certified legal translation for contracts, court documents, patents, and litigation materials.',
     url: 'https://cethos.com/industries/legal',
   },

@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import MedicalDevicesContent from './MedicalDevicesContent'
 
 export const metadata: Metadata = {
-  title: 'Medical Device Translation | EU MDR/IVDR Compliance | Cethos',
+  title: 'Medical Device Translation | EU MDR/IVDR Compliance',
   description: 'Specialized medical device translation for EU MDR/IVDR compliance. IFUs, UDI labels, technical documentation, and clinical evaluation reports across 150+ languages.',
   keywords: ['medical device translation', 'EU MDR translation', 'IVDR translation', 'IFU translation', 'UDI label translation', 'medical device documentation'],
   openGraph: {
-    title: 'Medical Device Translation Services | Cethos',
+    title: 'Medical Device Translation Services',
     description: 'Expert medical device translation for EU MDR/IVDR compliance and global market access.',
     url: 'https://cethos.com/services/lifesciences/medical-devices',
     siteName: 'Cethos Solutions Inc.',

@@ -22,15 +22,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!category) {
     return {
-      title: 'Category Not Found | Cethos Blog',
+      title: 'Category Not Found',
     };
   }
 
   return {
-    title: `${category.name} | Cethos Blog`,
+    title: category.name,
     description: category.description || `Articles about ${category.name} from Cethos Solutions Inc.`,
     openGraph: {
-      title: `${category.name} | Cethos Blog`,
+      title: `${category.name} | Cethos`,
       description: category.description || `Articles about ${category.name}`,
       url: `https://cethos.com/blog/category/${category.slug}`,
     },

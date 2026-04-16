@@ -4,10 +4,10 @@ import { getPublishedPosts, getCategories } from '@/lib/blog-db';
 import BlogListInfinite from '@/components/blog/BlogListInfinite';
 
 export const metadata: Metadata = {
-  title: 'Translation Blog | Industry Insights & Tips | Cethos',
+  title: 'Translation Blog | Industry Insights & Tips',
   description: 'Expert insights on translation, localization, and global communication from Cethos Solutions Inc.',
   openGraph: {
-    title: 'Translation Blog | Cethos Solutions Inc.',
+    title: 'Translation Blog',
     description: 'Expert insights on translation, localization, and global communication.',
     url: 'https://cethos.com/blog',
     type: 'website',

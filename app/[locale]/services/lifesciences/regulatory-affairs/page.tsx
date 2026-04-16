@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import RegulatoryAffairsContent from './RegulatoryAffairsContent'
 
 export const metadata: Metadata = {
-  title: 'Regulatory Affairs Translation | CTD, SmPC, PIL Translation | Cethos',
+  title: 'Regulatory Affairs Translation | CTD, SmPC, PIL Translation',
   description: 'Expert regulatory translation for CTD Modules 1-5, SmPCs, PILs, and IMP labels. FDA, EMA, PMDA, Health Canada submissions. ISO 17100 compliant processes.',
   keywords: ['regulatory translation', 'CTD translation', 'SmPC translation', 'PIL translation', 'FDA submission', 'EMA submission', 'regulatory affairs'],
   openGraph: {
-    title: 'Regulatory Affairs Translation | Cethos',
+    title: 'Regulatory Affairs Translation',
     description: 'Expert translation for global regulatory submissions to FDA, EMA, PMDA, and other agencies.',
     url: 'https://cethos.com/services/lifesciences/regulatory-affairs',
     siteName: 'Cethos Solutions Inc.',

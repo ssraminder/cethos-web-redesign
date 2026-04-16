@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/gaming',
   },
   openGraph: {
-    title: 'Video Game Localization Services | Cethos',
+    title: 'Video Game Localization Services',
     description: 'Expert video game localization for AAA and indie games with culturalization and LQA.',
     url: 'https://cethos.com/industries/gaming',
   },

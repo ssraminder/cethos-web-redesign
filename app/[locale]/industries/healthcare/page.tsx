@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/healthcare',
   },
   openGraph: {
-    title: 'Healthcare Translation Services | Cethos',
+    title: 'Healthcare Translation Services',
     description: 'Expert healthcare translation for patient materials, medical records, and telehealth platforms.',
     url: 'https://cethos.com/industries/healthcare',
   },

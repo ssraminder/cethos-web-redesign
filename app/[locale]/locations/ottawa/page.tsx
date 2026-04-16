@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import LocationPageTemplate from '@/components/locations/LocationPageTemplate';
 
 export const metadata: Metadata = {
-  title: 'Ottawa Translation Services | Certified IRCC Translation | Cethos',
+  title: 'Ottawa Translation Services | Certified IRCC Translation',
   description: 'Certified translation services in Ottawa-Gatineau. IRCC accepted. Birth certificate, marriage certificate & immigration document translation. 139 five-star reviews. From $65.',
   alternates: {
     canonical: 'https://cethos.com/locations/ottawa'

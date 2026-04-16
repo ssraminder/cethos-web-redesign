@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/manufacturing',
   },
   openGraph: {
-    title: 'Manufacturing Translation Services | Cethos',
+    title: 'Manufacturing Translation Services',
     description: 'Expert manufacturing translation for technical manuals, safety documentation, and quality systems.',
     url: 'https://cethos.com/industries/manufacturing',
   },

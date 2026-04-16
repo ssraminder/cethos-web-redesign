@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import LinguisticValidationContent from './LinguisticValidationContent'
 
 export const metadata: Metadata = {
-  title: 'Linguistic Validation Services | ISPOR-Compliant COA Translation | Cethos',
+  title: 'Linguistic Validation Services | ISPOR-Compliant COA Translation',
   description: 'Expert linguistic validation services following ISPOR 9-step methodology. PRO, ClinRO, ObsRO, and PerfO instrument translation for 25+ therapeutic areas. FDA & EMA compliant.',
   keywords: ['linguistic validation', 'ISPOR guidelines', 'PRO translation', 'ClinRO validation', 'COA translation', 'clinical outcome assessment', 'back translation'],
   openGraph: {
-    title: 'Linguistic Validation Services | Cethos',
+    title: 'Linguistic Validation Services',
     description: 'ISPOR-compliant linguistic validation with 5,000+ specialized linguists across 150+ languages.',
     url: 'https://cethos.com/services/lifesciences/linguistic-validation',
     siteName: 'Cethos Solutions Inc.',

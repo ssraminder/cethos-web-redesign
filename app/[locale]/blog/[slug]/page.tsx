@@ -29,7 +29,7 @@ export async function generateMetadata({
   const description = post.meta_description || post.excerpt || 'Read this article on the Cethos blog.';
 
   return {
-    title: post.meta_title || `${post.title} | Cethos Blog`,
+    title: post.meta_title || post.title,
     description,
     openGraph: {
       title: post.meta_title || post.title,
