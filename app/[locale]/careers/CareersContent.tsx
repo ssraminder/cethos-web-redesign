@@ -1,8 +1,43 @@
 'use client'
 
 import Link from 'next/link'
-import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Building } from 'lucide-react'
+import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Building, Languages, Headphones, Headset, Mic, Stethoscope, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+
+const APPLY_URL = 'https://join.cethos.com/apply'
+
+const vendorRoles = [
+  {
+    icon: Languages,
+    title: 'Translator / Reviewer',
+    description: 'Translation, review, proofreading, and MTPE across 48 vendor-facing services.',
+    query: 'role=translator',
+  },
+  {
+    icon: Headset,
+    title: 'Interpreter',
+    description: 'Consecutive, simultaneous, OPI, VRI, sign language, and escort interpretation.',
+    query: 'role=interpreter',
+  },
+  {
+    icon: Headphones,
+    title: 'Transcriber',
+    description: 'Audio transcription for medical, legal, research, and media contexts.',
+    query: 'role=transcriber',
+  },
+  {
+    icon: Stethoscope,
+    title: 'Clinician Reviewer',
+    description: 'Clinical review for linguistic validation projects (RN, MD, PharmD, PsyD).',
+    query: 'role=clinician_reviewer',
+  },
+  {
+    icon: Mic,
+    title: 'Cognitive Debriefing Consultant',
+    description: 'COA/PRO patient interviewing and linguistic validation reporting.',
+    query: 'role=cognitive_debriefing',
+  },
+]
 
 const benefitIcons = [Globe, TrendingUp, Heart, Layers]
 
@@ -44,16 +79,16 @@ export default function CareersContent() {
             </p>
             <div className="flex flex-wrap gap-4">
               <a
-                href="#positions"
+                href="#vendor-network"
                 className="inline-flex items-center justify-center px-6 py-4 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors"
               >
-                {tHero('cta_positions')}
+                Join our vendor network
               </a>
               <a
-                href="#freelance"
+                href="#positions"
                 className="inline-flex items-center justify-center px-6 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors"
               >
-                {tHero('cta_freelance')}
+                {tHero('cta_positions')}
               </a>
             </div>
           </div>
@@ -142,10 +177,64 @@ export default function CareersContent() {
         </div>
       </section>
 
-      {/* Freelance Linguists Section */}
-      <section id="freelance" className="py-24 bg-white">
+      {/* Vendor Network — roles we're currently recruiting for */}
+      <section id="vendor-network" className="py-24 bg-white">
         <div className="max-w-[1200px] mx-auto px-8">
-          <div className="bg-gradient-to-br from-[#0C2340] to-[#1a3a5c] rounded-2xl p-12 text-center">
+          <div className="text-center mb-16">
+            <p className="text-[#06B6D4] text-sm font-semibold uppercase tracking-widest mb-3">
+              Vendor Network
+            </p>
+            <h2 className="text-[36px] font-bold text-[#0C2340] mb-4">
+              Join our global network of language professionals
+            </h2>
+            <p className="text-lg text-[#4B5563] max-w-2xl mx-auto">
+              We partner with freelance translators, interpreters, transcribers, clinician reviewers, and cognitive debriefing consultants across 130+ languages. One application for any role below.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {vendorRoles.map((role) => (
+              <a
+                key={role.title}
+                href={`${APPLY_URL}?${role.query}`}
+                className="group bg-[#F8FAFC] rounded-xl p-6 hover:shadow-lg transition-all border border-transparent hover:border-[#0891B2]"
+              >
+                <div className="w-12 h-12 bg-[#0891B2]/10 rounded-lg flex items-center justify-center mb-4">
+                  <role.icon className="w-6 h-6 text-[#0891B2]" />
+                </div>
+                <h3 className="text-xl font-semibold text-[#0C2340] mb-2">
+                  {role.title}
+                </h3>
+                <p className="text-[#4B5563] mb-4 text-sm leading-relaxed">
+                  {role.description}
+                </p>
+                <span className="inline-flex items-center gap-1 text-[#0891B2] font-semibold text-sm group-hover:gap-2 transition-all">
+                  Apply for this role
+                  <ArrowRight className="w-4 h-4" />
+                </span>
+              </a>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <a
+              href={APPLY_URL}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors"
+            >
+              Start your application
+              <ArrowRight className="w-5 h-5" />
+            </a>
+            <p className="text-sm text-[#4B5563] mt-3">
+              The full form takes ~10 minutes. Decision typically within 3–7 business days.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Freelance Linguists Section */}
+      <section id="freelance" className="py-24 bg-[#0C2340]">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="rounded-2xl p-12 text-center bg-gradient-to-br from-[#0C2340] to-[#1a3a5c]">
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <Briefcase className="w-8 h-8 text-[#06B6D4]" />
             </div>
@@ -157,10 +246,11 @@ export default function CareersContent() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="mailto:linguists@cethos.com?subject=Freelance Linguist Application"
-                className="inline-flex items-center justify-center px-8 py-4 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors"
+                href={APPLY_URL}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors"
               >
                 {tFreelance('cta')}
+                <ArrowRight className="w-5 h-5" />
               </a>
             </div>
             <p className="text-gray-400 mt-4 text-sm">
