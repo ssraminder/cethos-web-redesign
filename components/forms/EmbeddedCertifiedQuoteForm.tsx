@@ -8,6 +8,7 @@ import { compressPdfIfNeeded, needsCompression } from '@/lib/compressPdf';
 import { combineImagesToPdf } from '@/lib/combineImagesToPdf';
 import { convertDocxToPdf } from '@/lib/convertDocxToPdf';
 import { trackGenerateLead } from '@/lib/tracking';
+import { getAdTrackingPayload } from '@/lib/ad-tracking';
 
 // ===========================================================================
 // Types
@@ -802,6 +803,7 @@ export function EmbeddedCertifiedQuoteForm({
       const resolvedTargetName = isOtherSelected ? otherTargetLanguage.trim() : targetLanguageName;
 
       // 1. Create draft quote
+      const adTracking = getAdTrackingPayload();
       const { data: quote, error: quoteError } = await supabase
         .from('quotes')
         .insert({
@@ -819,6 +821,7 @@ export function EmbeddedCertifiedQuoteForm({
           tax_amount: 0,
           total: 0,
           expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          ...adTracking,
         })
         .select('id, quote_number')
         .single();
