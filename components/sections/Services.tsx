@@ -106,6 +106,17 @@ export function Services() {
             )
           })}
         </motion.div>
+
+        {/* View all services CTA — links to the /services hub for crawlability */}
+        <div className="mt-12 text-center">
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 text-[#0891B2] hover:text-[#06B6D4] font-semibold text-lg transition-colors"
+          >
+            View all translation services
+            <ArrowRight className="w-5 h-5" strokeWidth={1.5} />
+          </Link>
+        </div>
       </div>
     </section>
   )

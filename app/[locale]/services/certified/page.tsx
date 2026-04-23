@@ -2,14 +2,18 @@ import { Metadata } from 'next'
 import CertifiedTranslationContent from './CertifiedTranslationContent'
 
 export const metadata: Metadata = {
-  title: 'Certified Translation Services Across Canada | From $65 | IRCC Accepted | Cethos',
-  description: 'IRCC-certified translation services across Canada. Immigration, legal, and academic documents. Birth certificates, marriage documents, academic transcripts. Same-day service. 100% acceptance guarantee.',
+  // Title kept under ~60 chars so it isn't truncated in SERPs (prior 95-char title was
+  // getting cut, contributing to the 0.34% organic CTR at position 1.2 for Calgary queries).
+  title: 'Certified Translation Calgary | IRCC-Accepted from $65',
+  description:
+    'IRCC-accepted certified translation in Calgary — birth certificates, diplomas, marriage and immigration documents. From $65, same-day available, 100% acceptance guaranteed.',
   alternates: {
     canonical: 'https://cethos.com/services/certified',
   },
   openGraph: {
-    title: 'Certified Translation Services Across Canada | From $65 | IRCC Accepted | Cethos',
-    description: 'IRCC-certified translation services across Canada. Immigration, legal, and academic documents. Same-day service available. 100% acceptance guarantee.',
+    title: 'Certified Translation Calgary | IRCC-Accepted from $65',
+    description:
+      'IRCC-accepted certified translation in Calgary — birth certificates, diplomas, marriage and immigration documents. From $65, same-day available, 100% acceptance guaranteed.',
     url: 'https://cethos.com/services/certified',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',

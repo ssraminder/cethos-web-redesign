@@ -81,6 +81,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/services/languages', changeFrequency: 'weekly', priority: 0.8 },
 
     // Locations
+    { path: '/locations', changeFrequency: 'monthly', priority: 0.85 },
     { path: '/locations/calgary', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/locations/edmonton', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/locations/toronto', changeFrequency: 'monthly', priority: 0.8 },

@@ -18,6 +18,10 @@ import {
   ChevronRight,
   Phone,
   MessageSquare,
+  Building2,
+  Play,
+  Scale,
+  Flag,
 } from 'lucide-react'
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { useTranslations } from 'next-intl'
@@ -57,10 +61,21 @@ export default function ServicesPageContent() {
   const services = [
     { titleKey: 'lifesciences_title', descKey: 'lifesciences_desc', priceKey: 'lifesciences_price', href: '/services/lifesciences', icon: Microscope },
     { titleKey: 'certified_title', descKey: 'certified_desc', priceKey: 'certified_price', href: '/services/certified', icon: FileCheck },
-    { titleKey: 'website_title', descKey: 'website_desc', priceKey: 'website_price', href: '/services/software', icon: Globe },
+    { titleKey: 'website_title', descKey: 'website_desc', priceKey: 'website_price', href: '/services/website', icon: Globe },
     { titleKey: 'interpretation_title', descKey: 'interpretation_desc', priceKey: 'interpretation_price', href: '/services/interpretation', icon: Mic },
     { titleKey: 'transcription_title', descKey: 'transcription_desc', priceKey: 'transcription_price', href: '/services/transcription', icon: FileText },
     { titleKey: 'software_title', descKey: 'software_desc', priceKey: 'lifesciences_price', href: '/services/software', icon: Code },
+  ]
+
+  // Hardcoded extra service links (no translation keys yet — render as a flat link list for SEO).
+  // Ensures /services/business, /services/multimedia, /services/legal, /services/canadian, /services/languages
+  // are discoverable from the hub even before their translation keys exist in Supabase.
+  const additionalServices = [
+    { name: 'Business Translation', href: '/services/business', icon: Building2 },
+    { name: 'Legal Translation', href: '/services/legal', icon: Scale },
+    { name: 'Multimedia Translation', href: '/services/multimedia', icon: Play },
+    { name: 'Canadian Certified Translation', href: '/services/canadian', icon: Flag },
+    { name: 'Languages', href: '/services/languages', icon: Languages },
   ]
 
   const stats = [
@@ -154,6 +169,23 @@ export default function ServicesPageContent() {
                 </Link>
               </motion.div>
             ))}
+          </div>
+
+          {/* Additional service areas (flat link list — ensures sub-pages are crawlable from hub) */}
+          <div className="mt-12 pt-10 border-t border-slate-200">
+            <h3 className="text-lg font-semibold text-[#0C2340] mb-5 text-center">More specialized services</h3>
+            <div className="flex flex-wrap justify-center gap-3">
+              {additionalServices.map((s) => (
+                <Link
+                  key={s.href}
+                  href={s.href}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-[#0891B2]/10 text-[#0C2340] hover:text-[#0891B2] border border-slate-200 hover:border-[#0891B2] rounded-lg text-sm font-medium transition-colors"
+                >
+                  <s.icon className="w-4 h-4" strokeWidth={1.5} />
+                  {s.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </Container>
       </section>

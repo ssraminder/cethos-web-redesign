@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import ClientTestimonials from '@/components/ClientTestimonials'
 import { ServiceJsonLd } from '@/components/JsonLd'
-import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
+import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 const serviceItems = [
   { icon: Subtitles, titleKey: 'subtitling_title', descKey: 'subtitling_desc' },
@@ -60,6 +60,13 @@ export default function MultimediaPageContent() {
       {/* HERO SECTION */}
       <section className="pt-20 bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#164e63]">
         <div className="max-w-[1200px] mx-auto px-8 py-24">
+          <Breadcrumbs
+            items={[
+              { name: 'Services', url: '/services' },
+              { name: 'Multimedia Translation', url: '/services/multimedia' },
+            ]}
+            className="mb-6 text-white/60"
+          />
           <div className="max-w-4xl">
             <div className="text-sm font-semibold text-[#0891B2] uppercase tracking-widest mb-4">
               {tHero('eyebrow')}

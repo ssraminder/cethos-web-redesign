@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import ClientTestimonials from '@/components/ClientTestimonials'
 import { ServiceJsonLd } from '@/components/JsonLd'
-import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
+import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 
 export default function WebsitePageContent() {
   const tHero = useTranslations('service.website.hero')
@@ -84,6 +84,13 @@ export default function WebsitePageContent() {
       {/* HERO SECTION */}
       <section className="pt-20 bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#164e63]">
         <div className="max-w-[1200px] mx-auto px-8 py-24">
+          <Breadcrumbs
+            items={[
+              { name: 'Services', url: '/services' },
+              { name: 'Website Localization', url: '/services/website' },
+            ]}
+            className="mb-6 text-white/60"
+          />
           <div className="max-w-4xl">
             <div className="text-sm font-semibold text-[#0891B2] uppercase tracking-widest mb-4">
               {tHero('eyebrow')}
