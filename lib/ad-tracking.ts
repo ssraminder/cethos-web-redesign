@@ -39,20 +39,36 @@ function readCookie(name: string): string | null {
 }
 
 export function getAdTrackingPayload(): AdTrackingPayload {
-  const payload = Object.fromEntries(
-    COOKIE_NAMES.map((name) => [name, readCookie(name)]),
-  ) as AdTrackingPayload
+  const payload: AdTrackingPayload = {
+    gclid: readCookie('gclid'),
+    gbraid: readCookie('gbraid'),
+    wbraid: readCookie('wbraid'),
+    ad_click_time: readCookie('ad_click_time'),
+    utm_source: readCookie('utm_source'),
+    utm_medium: readCookie('utm_medium'),
+    utm_campaign: readCookie('utm_campaign'),
+    utm_content: readCookie('utm_content'),
+    utm_term: readCookie('utm_term'),
+  }
 
-  // Also honour ?gclid=... params present right now in case the middleware
-  // hasn't run yet on this session (e.g. client-side nav). URL wins over
-  // cookie since it's fresher.
+  // Honour ?gclid=... params present right now in case the middleware hasn't
+  // run yet on this session (e.g. client-side nav). URL wins over cookie
+  // since it's fresher.
   if (typeof window !== 'undefined') {
     const url = new URL(window.location.href)
-    for (const name of COOKIE_NAMES) {
-      if (name === 'ad_click_time') continue
-      const v = url.searchParams.get(name)
-      if (v) (payload as any)[name] = v
+    const urlOverride = (key: keyof AdTrackingPayload) => {
+      if (key === 'ad_click_time') return
+      const v = url.searchParams.get(key)
+      if (v) payload[key] = v
     }
+    urlOverride('gclid')
+    urlOverride('gbraid')
+    urlOverride('wbraid')
+    urlOverride('utm_source')
+    urlOverride('utm_medium')
+    urlOverride('utm_campaign')
+    urlOverride('utm_content')
+    urlOverride('utm_term')
     if (url.searchParams.has('gclid') || url.searchParams.has('gbraid') || url.searchParams.has('wbraid')) {
       payload.ad_click_time = payload.ad_click_time || new Date().toISOString()
     }
