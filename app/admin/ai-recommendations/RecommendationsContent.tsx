@@ -103,6 +103,8 @@ export default function RecommendationsContent() {
     fetchItems()
   }, [fetchItems])
 
+  const [showReviewed, setShowReviewed] = useState(false)
+
   const filtered = useMemo(() => {
     const categoryWhitelist = new Set<string>()
     Array.from(groupFilter).forEach((group) => {
@@ -113,13 +115,30 @@ export default function RecommendationsContent() {
       if (!severityFilter.has(r.severity)) return false
       if (!riskFilter.has(r.risk_tier)) return false
       if (!categoryWhitelist.has(r.category)) return false
+      // In the "Active" view, treat a rec as acted-upon (hide) if it has
+      // one or more follow-ups — the user has engaged with it. Just-refined
+      // recs stay visible so the user sees the effect of their action in
+      // this session.
+      if (
+        statusFilter === 'active' &&
+        !showReviewed &&
+        (r.follow_ups?.length || 0) > 0 &&
+        !justRefined.has(r.id)
+      ) {
+        return false
+      }
       if (q) {
         const hay = `${r.title} ${r.summary_md} ${r.expected_impact || ''} ${r.check_id}`.toLowerCase()
         if (!hay.includes(q)) return false
       }
       return true
     })
-  }, [items, severityFilter, groupFilter, riskFilter, searchQuery])
+  }, [items, severityFilter, groupFilter, riskFilter, searchQuery, statusFilter, showReviewed, justRefined])
+
+  const hiddenReviewedCount = useMemo(() => {
+    if (statusFilter !== 'active' || showReviewed) return 0
+    return items.filter((r) => r.status === 'pending' && (r.follow_ups?.length || 0) > 0 && !justRefined.has(r.id)).length
+  }, [items, statusFilter, showReviewed, justRefined])
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -376,10 +395,28 @@ export default function RecommendationsContent() {
         </div>
 
         {items.length > 0 && (
-          <p className="text-xs text-slate-500 mt-2">
-            Showing {sorted.length} of {items.length}
-            {items.length !== sorted.length && ' (filtered)'}
-          </p>
+          <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
+            <span>
+              Showing {sorted.length} of {items.length}
+              {items.length !== sorted.length && ' (filtered)'}
+            </span>
+            {hiddenReviewedCount > 0 && (
+              <button
+                onClick={() => setShowReviewed(true)}
+                className="text-amber-700 hover:text-amber-900 underline underline-offset-2 font-medium"
+              >
+                + {hiddenReviewedCount} reviewed item{hiddenReviewedCount === 1 ? '' : 's'} hidden — show
+              </button>
+            )}
+            {showReviewed && statusFilter === 'active' && (
+              <button
+                onClick={() => setShowReviewed(false)}
+                className="text-slate-500 hover:text-slate-700 underline underline-offset-2"
+              >
+                hide reviewed again
+              </button>
+            )}
+          </div>
         )}
       </div>
 
