@@ -7,6 +7,16 @@ type Status = 'pending' | 'approved' | 'rejected' | 'executed' | 'auto_executed'
 type RiskTier = 'low' | 'medium' | 'high'
 type Severity = 'critical' | 'high' | 'medium' | 'low'
 
+interface FollowUp {
+  note: string
+  refined_title: string
+  refined_summary_md: string
+  refined_impact: string
+  created_at: string
+  invoked_by?: string
+  model?: string
+}
+
 interface Recommendation {
   id: string
   audit_run_id: string | null
@@ -28,6 +38,8 @@ interface Recommendation {
   execution_result: Record<string, unknown> | null
   failure_count: number
   expires_at: string
+  follow_ups?: FollowUp[]
+  last_followup_at?: string | null
 }
 
 type StatusFilter = Status | 'all' | 'active'
@@ -47,6 +59,8 @@ export default function RecommendationsContent() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState<Set<string>>(new Set())
   const [confirmHigh, setConfirmHigh] = useState<Recommendation | null>(null)
+  const [followUpOpen, setFollowUpOpen] = useState<Recommendation | null>(null)
+  const [followUpNote, setFollowUpNote] = useState('')
 
   const fetchItems = useCallback(async () => {
     setLoading(true)
@@ -129,6 +143,35 @@ export default function RecommendationsContent() {
       const res = await fetch(`/api/admin/recommendations/${rec.id}/reject`, { method: 'POST' })
       if (!res.ok) throw new Error(`reject ${res.status}`)
       toast.success('Rejected')
+      await fetchItems()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed')
+    } finally {
+      markBusy(rec.id, false)
+    }
+  }
+
+  const submitFollowUp = async (rec: Recommendation) => {
+    if (!followUpNote.trim()) {
+      toast.error('Note is required')
+      return
+    }
+    markBusy(rec.id, true)
+    try {
+      const res = await fetch(`/api/admin/recommendations/${rec.id}/follow-up`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: followUpNote }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `follow-up ${res.status}`)
+      if (data.auto_closed) {
+        toast.success('Reviewed — auto-closed as false positive')
+      } else {
+        toast.success('Follow-up recorded — recommendation refined')
+      }
+      setFollowUpOpen(null)
+      setFollowUpNote('')
       await fetchItems()
     } catch (err: any) {
       toast.error(err.message || 'Failed')
@@ -221,13 +264,20 @@ export default function RecommendationsContent() {
                     </div>
 
                     {rec.status === 'pending' && (
-                      <div className="flex flex-col gap-1.5 flex-shrink-0">
+                      <div className="flex flex-col gap-1.5 flex-shrink-0 min-w-[110px]">
                         <button
                           onClick={() => approve(rec)}
                           disabled={isBusy}
                           className="bg-[#0891B2] hover:bg-[#06B6D4] disabled:opacity-50 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
                         >
                           {isBusy ? '…' : 'Approve'}
+                        </button>
+                        <button
+                          onClick={() => { setFollowUpOpen(rec); setFollowUpNote('') }}
+                          disabled={isBusy}
+                          className="border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-800 text-sm font-medium px-4 py-1.5 rounded-md"
+                        >
+                          Follow-up
                         </button>
                         <button
                           onClick={() => reject(rec)}
@@ -257,6 +307,32 @@ export default function RecommendationsContent() {
 
                 {isOpen && (
                   <div className="border-t border-slate-200 bg-slate-50 p-4">
+                    {rec.follow_ups && rec.follow_ups.length > 0 && (
+                      <div className="mb-4">
+                        <div className="font-semibold text-slate-700 mb-2 text-xs">Follow-up history ({rec.follow_ups.length})</div>
+                        <div className="space-y-2">
+                          {rec.follow_ups.map((f, i) => (
+                            <div key={i} className="bg-white border border-amber-200 rounded p-3 text-xs">
+                              <div className="text-slate-500 mb-1">
+                                {new Date(f.created_at).toLocaleString()}
+                                {f.invoked_by ? ` · ${f.invoked_by}` : ''}
+                                {f.model ? ` · ${f.model}` : ''}
+                              </div>
+                              <div className="mb-2">
+                                <span className="font-semibold text-slate-700">Note:</span>
+                                <div className="text-slate-600 whitespace-pre-wrap">{f.note}</div>
+                              </div>
+                              <div className="border-t border-slate-100 pt-2">
+                                <span className="font-semibold text-slate-700">Refined:</span>
+                                <div className="text-slate-600">{f.refined_title}</div>
+                                <div className="text-slate-500 mt-1">{f.refined_summary_md}</div>
+                                {f.refined_impact && <div className="text-slate-500 italic mt-1">→ {f.refined_impact}</div>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                       <div>
                         <div className="font-semibold text-slate-700 mb-1.5">Evidence</div>
@@ -284,6 +360,46 @@ export default function RecommendationsContent() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Follow-up modal */}
+      {followUpOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-xl w-full p-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">Add follow-up note</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Send context back to the agent — evidence I missed, clarification on the check&apos;s premise, steps you&apos;ve already taken, or why this is a false positive. Claude will rewrite the recommendation to account for your input. If the note shows the issue is resolved or the check was wrong, the rec will auto-close.
+            </p>
+            <div className="border border-slate-200 rounded p-3 bg-slate-50 mb-4">
+              <div className="font-semibold text-sm text-slate-900">{followUpOpen.title}</div>
+              <div className="text-xs text-slate-600 mt-1">{followUpOpen.summary_md}</div>
+            </div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">Your note</label>
+            <textarea
+              value={followUpNote}
+              onChange={(e) => setFollowUpNote(e.target.value)}
+              rows={6}
+              placeholder="e.g. The check is looking for `generate_lead` events but our real conversion event in GA4 is named `quote_lead`. Re-check against that instead."
+              className="w-full border border-slate-300 rounded-md p-2 text-sm font-mono"
+              autoFocus
+            />
+            <div className="flex gap-2 justify-end mt-4">
+              <button
+                onClick={() => { setFollowUpOpen(null); setFollowUpNote('') }}
+                className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium px-4 py-1.5 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => submitFollowUp(followUpOpen)}
+                disabled={!followUpNote.trim() || busy.has(followUpOpen.id)}
+                className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-sm font-semibold px-4 py-1.5 rounded-md"
+              >
+                {busy.has(followUpOpen.id) ? '…' : 'Send to agent'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

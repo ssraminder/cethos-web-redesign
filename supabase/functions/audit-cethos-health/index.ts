@@ -393,7 +393,10 @@ async function checkConversionDrought(supabase: any, audit_run_id: string, setti
     events[row.dimensionValues[0].value] = Number(row.metricValues[0].value);
   }
 
-  const primaryEvents = ["purchase", "generate_lead", "quote_lead"];
+  // Events that map 1:1 to a real GA4 event *name*. `generate_lead` is a
+  // dataLayer push name, not a GA4 event name, so we don't look for it here
+  // (GTM renames it to `quote_lead` before it reaches GA4 on this site).
+  const primaryEvents = ["purchase", "quote_lead"];
   const missing = primaryEvents.filter((e) => !events[e] || events[e] === 0);
   if (missing.length === 0) return recs;
 
