@@ -168,9 +168,7 @@ export function SecureUploadForm() {
       })
       if (startRes.error || !startRes.data?.success) {
         throw new Error(
-          startRes.data?.error ||
-            startRes.error?.message ||
-            'Could not start upload',
+          (await readFunctionError(startRes)) || 'Could not start upload',
         )
       }
       const { submissionId, bucket, uploads } = startRes.data as {
@@ -267,8 +265,7 @@ export function SecureUploadForm() {
       )
       if (completeRes.error || !completeRes.data?.success) {
         throw new Error(
-          completeRes.data?.error ||
-            completeRes.error?.message ||
+          (await readFunctionError(completeRes)) ||
             'Could not finalize submission',
         )
       }
@@ -528,6 +525,29 @@ function StatusIcon({ status }: { status: UploadStatus }) {
     case 'error':
       return <XCircle className="w-4 h-4 text-red-500" />
   }
+}
+
+// Pulls a useful error message out of supabase-js's FunctionsHttpError, which
+// only exposes a Response in `error.context`. Falls back to data?.error or a
+// generic message.
+async function readFunctionError(res: {
+  error?: { message?: string; context?: Response } | null
+  data?: { error?: string } | null
+}): Promise<string | null> {
+  if (res?.data?.error) return res.data.error
+  const ctx = res?.error?.context
+  if (ctx && typeof (ctx as Response).json === 'function') {
+    try {
+      const body = await (ctx as Response).clone().json()
+      if (body?.error) return body.error
+    } catch {
+      try {
+        const txt = await (ctx as Response).clone().text()
+        if (txt) return txt.slice(0, 300)
+      } catch {}
+    }
+  }
+  return res?.error?.message || null
 }
 
 function uploadWithProgress(args: {
