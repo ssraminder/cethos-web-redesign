@@ -480,8 +480,9 @@ export default function RecommendationsContent() {
                           onClick={() => approve(rec)}
                           disabled={isBusy}
                           className="bg-[#0891B2] hover:bg-[#06B6D4] disabled:opacity-50 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
+                          title={rec.action_type === 'manual' ? 'Mark this rec as handled — no automated action will run' : 'Approve and execute this rec'}
                         >
-                          {isBusy ? '…' : 'Approve'}
+                          {isBusy ? '…' : (rec.action_type === 'manual' ? 'Mark done' : 'Approve')}
                         </button>
                         <button
                           onClick={() => { setFollowUpOpen(rec); setFollowUpNote('') }}

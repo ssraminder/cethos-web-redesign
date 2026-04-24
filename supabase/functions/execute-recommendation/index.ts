@@ -216,7 +216,10 @@ Deno.serve(async (req: Request) => {
       result = await handleGithubCommit(rec.action_payload);
       break;
     case "manual":
-      result = { ok: false, result: { error: "manual action — cannot auto-execute" } };
+      // Manual actions have no automation target — approving one means "I've
+      // handled this externally, mark it done." Treat as success no-op and
+      // record that the user acknowledged it rather than a bot-driven action.
+      result = { ok: true, result: { manually_handled: true, acknowledged_by: invoker } };
       break;
     default:
       result = { ok: false, result: { error: `unknown action_type ${rec.action_type}` } };
