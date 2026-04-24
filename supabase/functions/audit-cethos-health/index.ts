@@ -366,6 +366,379 @@ async function checkUnrepliedReviews(supabase: any, audit_run_id: string, settin
   return recs;
 }
 
+/**
+ * CHECK 4: Conversion drought.
+ * No primary conversion events in the last N hours (default 72). Points to a
+ * tracking break or dead landing pages. Alert-only — not auto-fixable.
+ */
+async function checkConversionDrought(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+  const hoursBack = settings.alert_conversion_drought_h;
+  const startDate = new Date(Date.now() - hoursBack * 3600_000).toISOString().slice(0, 10);
+  const endDate = new Date().toISOString().slice(0, 10);
+
+  const res = await callGoogle("ga", "run_report", {
+    start_date: startDate,
+    end_date: endDate,
+    dimensions: ["eventName"],
+    metrics: ["eventCount"],
+    limit: 50,
+    orderBys: [{ metric: { metricName: "eventCount" }, desc: true }],
+  });
+
+  if (!res.data?.rows) return recs;
+
+  const events: Record<string, number> = {};
+  for (const row of res.data.rows) {
+    events[row.dimensionValues[0].value] = Number(row.metricValues[0].value);
+  }
+
+  const primaryEvents = ["purchase", "generate_lead", "quote_lead"];
+  const missing = primaryEvents.filter((e) => !events[e] || events[e] === 0);
+  if (missing.length === 0) return recs;
+
+  const rec = await createRecommendation(supabase, audit_run_id, {
+    check_id: "conversion_drought",
+    category: "ads_keyword", // using ads_keyword since there's no "alert" category
+    risk_tier: "high", // alerts should not auto-execute
+    severity: "critical",
+    evidence: {
+      hours_checked: hoursBack,
+      missing_events: missing,
+      all_event_counts_last_period: events,
+    },
+    action_description: `No ${missing.join(", ")} events received in the last ${hoursBack}h. Likely a tracking break — verify dataLayer pushes, GTM container publish, and landing-page consent gating.`,
+    action_type: "manual",
+    action_payload: { reason: "tracking investigation required" },
+    dedupe_key: `conversion_drought:${missing.join(",")}`,
+    model: settings.claude_narrative_model,
+  });
+  if (rec) recs.push(rec);
+  return recs;
+}
+
+/**
+ * CHECK 5: CPA spike (7d vs 30d).
+ * If a campaign's 7-day CPA exceeds 30-day CPA by a configured multiplier,
+ * alert. Could be bid-strategy misbehavior, landing-page issue, or seasonal.
+ * Alert-only — diagnosis needed before any auto-fix.
+ */
+async function checkCpaSpike(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+
+  const q = async (dateRange: string) => {
+    const res = await callGoogle("gads", "query", {
+      customer: "cethos_solutions",
+      query: `
+        SELECT campaign.id, campaign.name,
+               metrics.cost_micros, metrics.conversions
+        FROM campaign
+        WHERE campaign.status = 'ENABLED'
+          AND segments.date DURING ${dateRange}
+      `,
+    });
+    const totals: Record<string, { name: string; cost: number; conv: number }> = {};
+    if (Array.isArray(res.data)) {
+      for (const batch of res.data) {
+        for (const row of batch.results || []) {
+          const id = String(row.campaign.id);
+          totals[id] = totals[id] || { name: row.campaign.name, cost: 0, conv: 0 };
+          totals[id].cost += Number(row.metrics?.costMicros || 0) / 1e6;
+          totals[id].conv += Number(row.metrics?.conversions || 0);
+        }
+      }
+    }
+    return totals;
+  };
+
+  const last7 = await q("LAST_7_DAYS");
+  const last30 = await q("LAST_30_DAYS");
+  const multiplier = settings.alert_cpa_spike_multiplier;
+
+  for (const [id, seven] of Object.entries(last7)) {
+    const thirty = last30[id];
+    if (!thirty) continue;
+    if (seven.conv < 3 || thirty.conv < 10) continue; // not enough signal
+
+    const cpa7 = seven.cost / seven.conv;
+    const cpa30 = thirty.cost / thirty.conv;
+    if (cpa7 <= cpa30 * multiplier) continue;
+
+    const rec = await createRecommendation(supabase, audit_run_id, {
+      check_id: "cpa_spike_7d_vs_30d",
+      category: "ads_bid",
+      risk_tier: "high",
+      severity: "high",
+      evidence: {
+        campaign_id: id,
+        campaign_name: seven.name,
+        cpa_7d_cad: cpa7.toFixed(2),
+        cpa_30d_cad: cpa30.toFixed(2),
+        multiplier: (cpa7 / cpa30).toFixed(2),
+        cost_7d: seven.cost.toFixed(2),
+        conv_7d: seven.conv.toFixed(1),
+      },
+      action_description: `Investigate "${seven.name}" — 7-day CPA $${cpa7.toFixed(2)} is ${(cpa7 / cpa30).toFixed(1)}× the 30-day CPA $${cpa30.toFixed(2)}. Look for recent landing-page changes, bid-strategy drift, or competitor pressure via auction insights.`,
+      action_type: "manual",
+      action_payload: { reason: "needs human diagnosis" },
+      dedupe_key: `cpa_spike:${id}`,
+      model: settings.claude_narrative_model,
+    });
+    if (rec) recs.push(rec);
+  }
+  return recs;
+}
+
+/**
+ * CHECK 6: Search term missing as negative.
+ * Search term that spent >$20 with zero conversions in 30d. Adding it as an
+ * exact negative stops further waste. Low risk since negatives are easily
+ * removed if they turn out to be too broad.
+ */
+async function checkSearchTermNegatives(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+
+  const res = await callGoogle("gads", "query", {
+    customer: "cethos_solutions",
+    query: `
+      SELECT campaign.id, campaign.name,
+             search_term_view.search_term, search_term_view.status,
+             metrics.cost_micros, metrics.clicks, metrics.conversions
+      FROM search_term_view
+      WHERE campaign.status = 'ENABLED'
+        AND segments.date DURING LAST_30_DAYS
+      LIMIT 500
+    `,
+  });
+
+  if (!Array.isArray(res.data)) return recs;
+
+  for (const batch of res.data) {
+    for (const row of batch.results || []) {
+      const cost = Number(row.metrics?.costMicros || 0) / 1e6;
+      const conv = Number(row.metrics?.conversions || 0);
+      if (cost < 20 || conv > 0) continue;
+
+      const term = row.searchTermView?.searchTerm || "";
+      const status = row.searchTermView?.status || "";
+      // NONE = search term that matched but isn't itself a keyword. EXCLUDED = already negative.
+      if (status !== "NONE") continue;
+      // Avoid branded terms
+      if (/\bcethos\b/i.test(term)) continue;
+
+      const campId = row.campaign.id;
+      const campName = row.campaign.name;
+
+      const rec = await createRecommendation(supabase, audit_run_id, {
+        check_id: "search_term_missing_negative",
+        category: "ads_negative",
+        risk_tier: "low",
+        severity: cost > 50 ? "high" : "medium",
+        evidence: {
+          campaign_name: campName,
+          search_term: term,
+          last_30d_cost_cad: cost.toFixed(2),
+          last_30d_clicks: Number(row.metrics?.clicks || 0),
+          last_30d_conversions: conv,
+        },
+        action_description: `Add "${term}" as a phrase-match negative on "${campName}" — it consumed $${cost.toFixed(2)} with 0 conversions in 30 days and isn't itself a keyword.`,
+        action_type: "ads_mutate",
+        action_payload: {
+          resource: "campaignCriteria",
+          customer: "cethos_solutions",
+          operations: [{
+            create: {
+              campaign: `customers/6316159162/campaigns/${campId}`,
+              negative: true,
+              keyword: { text: term, matchType: "PHRASE" },
+            },
+          }],
+        },
+        dedupe_key: `search_term_negative:${campId}:${term}`,
+        model: settings.claude_narrative_model,
+      });
+      if (rec) recs.push(rec);
+    }
+  }
+  return recs;
+}
+
+/**
+ * CHECK 7: Brand-query leak into non-brand campaign.
+ * Search term containing "cethos" that showed up in a non-brand campaign.
+ * These should be captured by the Brand campaign only (lower CPC, higher CTR).
+ * Fix: add as cross-campaign negative. Low risk.
+ */
+async function checkBrandLeak(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+
+  const res = await callGoogle("gads", "query", {
+    customer: "cethos_solutions",
+    query: `
+      SELECT campaign.id, campaign.name, search_term_view.search_term,
+             metrics.cost_micros, metrics.clicks, metrics.conversions
+      FROM search_term_view
+      WHERE campaign.status = 'ENABLED'
+        AND segments.date DURING LAST_30_DAYS
+      LIMIT 500
+    `,
+  });
+
+  if (!Array.isArray(res.data)) return recs;
+
+  for (const batch of res.data) {
+    for (const row of batch.results || []) {
+      const term = (row.searchTermView?.searchTerm || "").toLowerCase();
+      if (!/\bcethos\b/.test(term)) continue;
+      const campName: string = row.campaign.name || "";
+      if (/brand/i.test(campName)) continue; // already in the Brand campaign — fine
+
+      const campId = row.campaign.id;
+      const cost = Number(row.metrics?.costMicros || 0) / 1e6;
+
+      const rec = await createRecommendation(supabase, audit_run_id, {
+        check_id: "brand_leak_non_brand_campaign",
+        category: "ads_negative",
+        risk_tier: "low",
+        severity: "medium",
+        evidence: {
+          campaign_name: campName,
+          search_term: term,
+          last_30d_cost_cad: cost.toFixed(2),
+          last_30d_clicks: Number(row.metrics?.clicks || 0),
+          last_30d_conversions: Number(row.metrics?.conversions || 0),
+        },
+        action_description: `Add "${term}" as phrase-match negative on "${campName}" — branded query leaked into a non-brand campaign where it costs more per click than the dedicated Brand campaign would pay.`,
+        action_type: "ads_mutate",
+        action_payload: {
+          resource: "campaignCriteria",
+          customer: "cethos_solutions",
+          operations: [{
+            create: {
+              campaign: `customers/6316159162/campaigns/${campId}`,
+              negative: true,
+              keyword: { text: term, matchType: "PHRASE" },
+            },
+          }],
+        },
+        dedupe_key: `brand_leak:${campId}:${term}`,
+        model: settings.claude_narrative_model,
+      });
+      if (rec) recs.push(rec);
+    }
+  }
+  return recs;
+}
+
+/**
+ * CHECK 8: Budget starvation.
+ * Campaign losing >20% of impression share due to budget AND has positive
+ * ROAS (conversions exist). Recommend +25% daily budget. Medium risk — needs
+ * a click to approve.
+ */
+async function checkBudgetStarvation(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+
+  const res = await callGoogle("gads", "query", {
+    customer: "cethos_solutions",
+    query: `
+      SELECT campaign.id, campaign.name, campaign_budget.amount_micros, campaign_budget.resource_name,
+             metrics.search_budget_lost_impression_share, metrics.cost_micros, metrics.conversions
+      FROM campaign
+      WHERE campaign.status = 'ENABLED'
+        AND segments.date DURING LAST_30_DAYS
+    `,
+  });
+
+  if (!Array.isArray(res.data)) return recs;
+
+  for (const batch of res.data) {
+    for (const row of batch.results || []) {
+      const lostIS = Number(row.metrics?.searchBudgetLostImpressionShare || 0);
+      const conv = Number(row.metrics?.conversions || 0);
+      if (lostIS <= 0.20 || conv < 5) continue;
+
+      const id = String(row.campaign.id);
+      const name = row.campaign.name;
+      const budgetMicros = Number(row.campaignBudget?.amountMicros || 0);
+      const currentBudget = budgetMicros / 1e6;
+      const newBudget = Math.round(currentBudget * 1.25 * 100) / 100;
+      const budgetResource = row.campaignBudget?.resourceName;
+      if (!budgetResource) continue;
+
+      const rec = await createRecommendation(supabase, audit_run_id, {
+        check_id: "budget_starvation",
+        category: "ads_budget",
+        risk_tier: "medium",
+        severity: lostIS > 0.40 ? "high" : "medium",
+        evidence: {
+          campaign_name: name,
+          search_budget_lost_impression_share_pct: (lostIS * 100).toFixed(1),
+          conversions_30d: conv.toFixed(1),
+          current_daily_budget_cad: currentBudget.toFixed(2),
+          proposed_daily_budget_cad: newBudget.toFixed(2),
+        },
+        action_description: `Raise "${name}" daily budget from $${currentBudget.toFixed(2)} to $${newBudget.toFixed(2)} (+25%). Campaign is losing ${(lostIS * 100).toFixed(0)}% of impressions to budget cap while converting ${conv.toFixed(1)} times in 30 days.`,
+        action_type: "ads_mutate",
+        action_payload: {
+          resource: "campaignBudgets",
+          customer: "cethos_solutions",
+          operations: [{
+            update: {
+              resourceName: budgetResource,
+              amountMicros: String(Math.round(newBudget * 1e6)),
+            },
+            updateMask: "amount_micros",
+          }],
+        },
+        dedupe_key: `budget_starvation:${id}`,
+        model: settings.claude_narrative_model,
+      });
+      if (rec) recs.push(rec);
+    }
+  }
+  return recs;
+}
+
+/**
+ * CHECK 9: GBP posts staleness.
+ * If a location's latest post is older than 30 days, recommend creating one.
+ * Manual action — AI-drafted post copy requires approval before publish.
+ */
+async function checkGbpPostsStaleness(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+  const locations = ["apostille", "translation", "interpretation"];
+  const cutoff = Date.now() - 30 * 86400_000;
+
+  for (const loc of locations) {
+    const res = await callGoogle("gbp", "get_posts", { location: loc, pageSize: 5 });
+    const posts = res.data?.localPosts || [];
+    const newest = posts[0];
+    const newestTime = newest?.updateTime ? new Date(newest.updateTime).getTime() : 0;
+
+    if (newestTime > cutoff) continue; // fresh enough
+
+    const rec = await createRecommendation(supabase, audit_run_id, {
+      check_id: "gbp_posts_stale_30d",
+      category: "gbp_post",
+      risk_tier: "medium",
+      severity: "medium",
+      evidence: {
+        location: loc,
+        latest_post_time: newest?.updateTime || "(none)",
+        days_since_last_post: newestTime ? Math.floor((Date.now() - newestTime) / 86400_000) : null,
+      },
+      action_description: `Create a new GBP post for ${loc} — last post was ${newestTime ? Math.floor((Date.now() - newestTime) / 86400_000) + " days ago" : "never"}. Active posts signal freshness to Google and bump local pack CTR.`,
+      action_type: "manual",
+      action_payload: { location_key: loc, reason: "needs human copy + CTA choice" },
+      dedupe_key: `gbp_posts_stale:${loc}`,
+      model: settings.claude_narrative_model,
+    });
+    if (rec) recs.push(rec);
+  }
+  return recs;
+}
+
 // ---------------------------------------------------------------------------
 // Auto-execute low-risk recs inline
 // ---------------------------------------------------------------------------
@@ -490,11 +863,22 @@ Deno.serve(async (req: Request) => {
   const failures: string[] = [];
   let checksRun = 0;
 
-  const allChecks = [
+  // Alert-tier checks run on both weekly + daily-alert invocations.
+  // Deep-analysis checks only on weekly (or explicit manual).
+  const alertChecks = [
+    { name: "conversion_drought", fn: checkConversionDrought },
+    { name: "cpa_spike", fn: checkCpaSpike },
+  ];
+  const deepChecks = [
     { name: "wasted_spend_keywords", fn: checkWastedSpendKeywords },
     { name: "high_imp_low_ctr", fn: checkHighImpLowCtr },
     { name: "unreplied_reviews", fn: checkUnrepliedReviews },
+    { name: "search_term_negatives", fn: checkSearchTermNegatives },
+    { name: "brand_leak", fn: checkBrandLeak },
+    { name: "budget_starvation", fn: checkBudgetStarvation },
+    { name: "gbp_posts_staleness", fn: checkGbpPostsStaleness },
   ];
+  const allChecks = checksOnly === "alerts" ? alertChecks : [...alertChecks, ...deepChecks];
 
   for (const check of allChecks) {
     checksRun++;
