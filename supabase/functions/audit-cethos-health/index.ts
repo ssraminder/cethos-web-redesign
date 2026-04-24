@@ -42,6 +42,17 @@ const corsHeaders = {
 // Helpers
 // ---------------------------------------------------------------------------
 
+// Campaigns whose final URLs point to a different brand. This audit is
+// scoped to cethos.com only — anything explicitly outside that scope is
+// excluded from Ads-level checks.
+const EXCLUDED_CAMPAIGN_NAME_PATTERNS = [
+  'Calgary Oaths',  // calgaryoaths.com — separate brand in the same Ads customer
+] as const
+
+const CAMPAIGN_SCOPE_SQL = EXCLUDED_CAMPAIGN_NAME_PATTERNS
+  .map((p) => `AND campaign.name NOT LIKE '%${p}%'`)
+  .join(" ")
+
 async function callGoogle(platform: string, action: string, params: Record<string, unknown> = {}): Promise<any> {
   const res = await fetch(GOOGLE_INTEGRATIONS_URL, {
     method: "POST",
@@ -194,6 +205,7 @@ async function checkWastedSpendKeywords(supabase: any, audit_run_id: string, set
       WHERE campaign.status = 'ENABLED'
         AND ad_group_criterion.status = 'ENABLED'
         AND segments.date DURING LAST_30_DAYS
+        ${CAMPAIGN_SCOPE_SQL}
     `,
   });
   if (!Array.isArray(res.data)) return recs;
@@ -438,6 +450,7 @@ async function checkCpaSpike(supabase: any, audit_run_id: string, settings: Audi
         FROM campaign
         WHERE campaign.status = 'ENABLED'
           AND segments.date DURING ${dateRange}
+          ${CAMPAIGN_SCOPE_SQL}
       `,
     });
     const totals: Record<string, { name: string; cost: number; conv: number }> = {};
@@ -510,6 +523,7 @@ async function checkSearchTermNegatives(supabase: any, audit_run_id: string, set
       FROM search_term_view
       WHERE campaign.status = 'ENABLED'
         AND segments.date DURING LAST_30_DAYS
+        ${CAMPAIGN_SCOPE_SQL}
       LIMIT 500
     `,
   });
@@ -583,6 +597,7 @@ async function checkBrandLeak(supabase: any, audit_run_id: string, settings: Aud
       FROM search_term_view
       WHERE campaign.status = 'ENABLED'
         AND segments.date DURING LAST_30_DAYS
+        ${CAMPAIGN_SCOPE_SQL}
       LIMIT 500
     `,
   });
@@ -650,6 +665,7 @@ async function checkBudgetStarvation(supabase: any, audit_run_id: string, settin
       FROM campaign
       WHERE campaign.status = 'ENABLED'
         AND segments.date DURING LAST_30_DAYS
+        ${CAMPAIGN_SCOPE_SQL}
     `,
   });
 
@@ -767,46 +783,160 @@ async function autoExecute(rec: CreatedRec): Promise<boolean> {
 // Digest email via Brevo
 // ---------------------------------------------------------------------------
 
+// Map recommendation category → top-level platform bucket shown in the email.
+const CATEGORY_TO_PLATFORM: Record<string, { label: string; color: string }> = {
+  ads_keyword: { label: "Google Ads", color: "#0EA5E9" },
+  ads_negative: { label: "Google Ads", color: "#0EA5E9" },
+  ads_bid: { label: "Google Ads", color: "#0EA5E9" },
+  ads_budget: { label: "Google Ads", color: "#0EA5E9" },
+  seo_meta: { label: "Search Console / SEO", color: "#10B981" },
+  seo_sitemap: { label: "Search Console / SEO", color: "#10B981" },
+  seo_jsonld: { label: "Search Console / SEO", color: "#10B981" },
+  gbp_profile: { label: "Google Business Profile", color: "#F59E0B" },
+  gbp_reply: { label: "Google Business Profile", color: "#F59E0B" },
+  gbp_post: { label: "Google Business Profile", color: "#F59E0B" },
+  site_code: { label: "Site / GA4", color: "#8B5CF6" },
+};
+
+const PLATFORM_ORDER = [
+  "Google Ads",
+  "Search Console / SEO",
+  "Google Business Profile",
+  "Site / GA4",
+];
+
+interface DigestRow {
+  title: string;
+  expected_impact: string | null;
+  severity: string;
+  risk_tier: string;
+  category: string;
+  status: string;
+  auto_executed: boolean;
+}
+
 async function sendDigest(
+  supabase: any,
   recipients: string[],
   execSummary: string,
-  recs: CreatedRec[],
+  recsThisRun: CreatedRec[],
   auditRunId: string,
   autoExecutedCount: number,
 ): Promise<void> {
   if (!BREVO_API_KEY || recipients.length === 0) return;
 
-  const pending = recs.filter((r) => !r.auto_executed);
-  const autoDone = recs.filter((r) => r.auto_executed);
+  // Fetch ALL currently-active recs (pending or auto_executed in this run)
+  // so the email shows the full platform picture, not just what changed.
+  const { data: activeRows } = await supabase
+    .from("recommendations")
+    .select("title, expected_impact, severity, risk_tier, category, status")
+    .in("status", ["pending", "auto_executed", "executed"])
+    .gt("expires_at", new Date().toISOString())
+    .order("severity", { ascending: true })
+    .limit(200);
 
-  const subject = pending.length > 0
-    ? `Cethos audit — ${pending.length} action${pending.length === 1 ? "" : "s"} need review`
+  const allRows: DigestRow[] = (activeRows || []).map((r: any) => ({
+    title: r.title,
+    expected_impact: r.expected_impact,
+    severity: r.severity,
+    risk_tier: r.risk_tier,
+    category: r.category,
+    status: r.status,
+    auto_executed: r.status === "auto_executed",
+  }));
+
+  // Split pending vs auto-done (auto-done filtered to this-run only so the
+  // "✓ Just applied" section reflects what the cron actually did right now).
+  const autoDoneThisRun = recsThisRun.filter((r) => r.auto_executed).map((r) => ({
+    title: r.title,
+    expected_impact: r.expected_impact,
+    severity: r.severity,
+    risk_tier: r.risk_tier,
+    category: r.category,
+    status: "auto_executed",
+    auto_executed: true,
+  }));
+
+  const pendingAll = allRows.filter((r) => r.status === "pending");
+
+  // Group pending by platform
+  const byPlatform = new Map<string, DigestRow[]>();
+  for (const r of pendingAll) {
+    const p = CATEGORY_TO_PLATFORM[r.category]?.label || "Other";
+    if (!byPlatform.has(p)) byPlatform.set(p, []);
+    byPlatform.get(p)!.push(r);
+  }
+
+  const sevBadge = (sev: string) => {
+    const colors: Record<string, string> = {
+      critical: "#DC2626", high: "#EA580C", medium: "#CA8A04", low: "#64748B",
+    };
+    return `<span style="display:inline-block;background:${colors[sev] || "#64748B"};color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.5px;">${escapeHtml(sev)}</span>`;
+  };
+
+  const platformSection = (platform: string, rows: DigestRow[]) => {
+    const meta = PLATFORM_ORDER.includes(platform)
+      ? { label: platform, color: Object.values(CATEGORY_TO_PLATFORM).find((p) => p.label === platform)?.color || "#64748B" }
+      : { label: platform, color: "#64748B" };
+    return `
+  <h3 style="font-size:14px;margin:20px 0 10px;padding:6px 10px;background:${meta.color}15;border-left:3px solid ${meta.color};color:${meta.color};font-weight:600;">
+    ${escapeHtml(meta.label)} · ${rows.length}
+  </h3>
+  <ul style="list-style:none;padding:0;margin:0;">
+    ${rows.map((r) => `
+    <li style="padding:8px 10px;border-bottom:1px solid #F1F5F9;font-size:13px;line-height:1.5;">
+      <div style="margin-bottom:3px;">${sevBadge(r.severity)}&nbsp;<strong style="color:#0C2340;">${escapeHtml(r.title)}</strong></div>
+      ${r.expected_impact ? `<div style="color:#6B7280;font-size:12px;">→ ${escapeHtml(r.expected_impact)}</div>` : ""}
+    </li>
+    `).join("")}
+  </ul>`;
+  };
+
+  const subject = pendingAll.length > 0
+    ? `Cethos audit — ${pendingAll.length} action${pendingAll.length === 1 ? "" : "s"} need review`
     : `Cethos audit — ${autoExecutedCount} low-risk fixes applied`;
 
-  const html = `
-<div style="font-family: -apple-system, Segoe UI, sans-serif; max-width: 680px; margin: 0 auto; padding: 24px; color: #0C2340;">
-  <h1 style="font-size: 20px; margin: 0 0 16px;">Cethos.com weekly audit</h1>
-  <p style="font-size: 14px; line-height: 1.6; color: #4B5563;">${escapeHtml(execSummary)}</p>
+  const platformSectionsHtml = PLATFORM_ORDER
+    .filter((p) => byPlatform.has(p))
+    .map((p) => platformSection(p, byPlatform.get(p)!))
+    .join("");
+  const otherPlatforms = [...byPlatform.keys()].filter((p) => !PLATFORM_ORDER.includes(p));
+  const otherHtml = otherPlatforms.map((p) => platformSection(p, byPlatform.get(p)!)).join("");
 
-  ${autoDone.length > 0 ? `
-  <h2 style="font-size: 16px; margin: 28px 0 12px; color: #059669;">✓ Auto-applied (${autoDone.length})</h2>
-  <ul style="font-size: 13px; padding-left: 20px; color: #4B5563;">
-    ${autoDone.map((r) => `<li style="margin-bottom: 6px;"><strong>${escapeHtml(r.title)}</strong><br><span style="color: #6B7280;">${escapeHtml(r.expected_impact)}</span></li>`).join("")}
+  const html = `
+<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:720px;margin:0 auto;padding:24px;color:#0C2340;">
+  <h1 style="font-size:22px;margin:0 0 16px;">Cethos.com audit · ${new Date().toISOString().slice(0, 10)}</h1>
+
+  <div style="background:#F8FAFC;border-radius:6px;padding:14px 18px;margin-bottom:24px;border-left:3px solid #0891B2;">
+    <p style="font-size:14px;line-height:1.6;color:#334155;margin:0;">${escapeHtml(execSummary)}</p>
+  </div>
+
+  ${autoDoneThisRun.length > 0 ? `
+  <h2 style="font-size:16px;margin:24px 0 10px;color:#059669;">✓ Just auto-applied (${autoDoneThisRun.length})</h2>
+  <ul style="list-style:none;padding:0;margin:0 0 24px;">
+    ${autoDoneThisRun.map((r) => `
+    <li style="padding:8px 10px;border-bottom:1px solid #F1F5F9;font-size:13px;line-height:1.5;">
+      <strong style="color:#0C2340;">${escapeHtml(r.title)}</strong>
+      ${r.expected_impact ? `<div style="color:#6B7280;font-size:12px;margin-top:2px;">→ ${escapeHtml(r.expected_impact)}</div>` : ""}
+    </li>
+    `).join("")}
   </ul>` : ""}
 
-  ${pending.length > 0 ? `
-  <h2 style="font-size: 16px; margin: 28px 0 12px; color: #DC2626;">⚠ Needs review (${pending.length})</h2>
-  <ul style="font-size: 13px; padding-left: 20px; color: #4B5563;">
-    ${pending.slice(0, 10).map((r) => `<li style="margin-bottom: 8px;"><strong>${escapeHtml(r.title)}</strong><br><span style="color: #6B7280;">[${r.severity}] ${escapeHtml(r.expected_impact)}</span></li>`).join("")}
-  </ul>
-  ${pending.length > 10 ? `<p style="font-size: 13px; color: #6B7280;">…and ${pending.length - 10} more.</p>` : ""}
+  ${pendingAll.length > 0 ? `
+  <h2 style="font-size:16px;margin:24px 0 8px;color:#DC2626;">⚠ Pending review (${pendingAll.length})</h2>
+  <p style="font-size:12px;color:#6B7280;margin:0 0 12px;">Grouped by platform. Each row shows severity and expected impact.</p>
+  ${platformSectionsHtml}
+  ${otherHtml}
 
-  <div style="margin: 28px 0;">
-    <a href="${ADMIN_RECOMMENDATIONS_URL}?run=${auditRunId}" style="background: #0891B2; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 14px;">Review &amp; approve →</a>
-  </div>` : ""}
+  <div style="margin:24px 0 12px;">
+    <a href="${ADMIN_RECOMMENDATIONS_URL}?run=${auditRunId}" style="background:#0891B2;color:white;padding:10px 20px;text-decoration:none;border-radius:6px;font-size:14px;font-weight:600;">
+      Review &amp; approve →
+    </a>
+  </div>` : `
+  <p style="font-size:14px;color:#059669;margin:24px 0;">No pending items — you are all caught up.</p>`}
 
-  <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 32px 0 16px;">
-  <p style="font-size: 11px; color: #9CA3AF;">Audit run ID: ${auditRunId}</p>
+  <hr style="border:none;border-top:1px solid #E5E7EB;margin:28px 0 12px;">
+  <p style="font-size:11px;color:#9CA3AF;">Audit run ID: ${auditRunId} · This audit is scoped to cethos.com only (Calgary Oaths and other brands are excluded)</p>
 </div>`;
 
   await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -920,9 +1050,9 @@ Deno.serve(async (req: Request) => {
     console.error("exec summary failed:", err);
   }
 
-  if (allRecs.length > 0) {
-    await sendDigest(settings.digest_recipients, execSummary, allRecs, runId, autoExecutedCount);
-  }
+  // Always send the digest — even a zero-rec run should reassure the user
+  // "all checks passed" and show current active recs across platforms.
+  await sendDigest(supabase, settings.digest_recipients, execSummary, allRecs, runId, autoExecutedCount);
 
   // Finalize audit_runs row
   await supabase

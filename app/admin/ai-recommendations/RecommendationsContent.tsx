@@ -52,15 +52,37 @@ const severityColor = (s: Severity) =>
 const riskColor = (r: RiskTier) =>
   ({ low: 'bg-green-50 text-green-700 border-green-200', medium: 'bg-yellow-50 text-yellow-800 border-yellow-200', high: 'bg-red-50 text-red-800 border-red-200' }[r])
 
+const ALL_CATEGORIES = [
+  'ads_keyword', 'ads_negative', 'ads_bid', 'ads_budget',
+  'seo_meta', 'seo_sitemap', 'seo_jsonld',
+  'gbp_profile', 'gbp_reply', 'gbp_post',
+  'site_code',
+] as const
+
+const CATEGORY_GROUPS: Record<string, string[]> = {
+  Ads: ['ads_keyword', 'ads_negative', 'ads_bid', 'ads_budget'],
+  SEO: ['seo_meta', 'seo_sitemap', 'seo_jsonld'],
+  GBP: ['gbp_profile', 'gbp_reply', 'gbp_post'],
+  Site: ['site_code'],
+}
+
+const ALL_SEVERITIES: Severity[] = ['critical', 'high', 'medium', 'low']
+const ALL_RISK_TIERS: RiskTier[] = ['low', 'medium', 'high']
+
 export default function RecommendationsContent() {
   const [items, setItems] = useState<Recommendation[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('active')
+  const [severityFilter, setSeverityFilter] = useState<Set<Severity>>(new Set(ALL_SEVERITIES))
+  const [groupFilter, setGroupFilter] = useState<Set<string>>(new Set(Object.keys(CATEGORY_GROUPS)))
+  const [riskFilter, setRiskFilter] = useState<Set<RiskTier>>(new Set(ALL_RISK_TIERS))
+  const [searchQuery, setSearchQuery] = useState('')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [busy, setBusy] = useState<Set<string>>(new Set())
   const [confirmHigh, setConfirmHigh] = useState<Recommendation | null>(null)
   const [followUpOpen, setFollowUpOpen] = useState<Recommendation | null>(null)
   const [followUpNote, setFollowUpNote] = useState('')
+  const [justRefined, setJustRefined] = useState<Set<string>>(new Set())
 
   const fetchItems = useCallback(async () => {
     setLoading(true)
@@ -81,10 +103,34 @@ export default function RecommendationsContent() {
     fetchItems()
   }, [fetchItems])
 
+  const filtered = useMemo(() => {
+    const categoryWhitelist = new Set<string>()
+    Array.from(groupFilter).forEach((group) => {
+      (CATEGORY_GROUPS[group] || []).forEach((c) => categoryWhitelist.add(c))
+    })
+    const q = searchQuery.trim().toLowerCase()
+    return items.filter((r) => {
+      if (!severityFilter.has(r.severity)) return false
+      if (!riskFilter.has(r.risk_tier)) return false
+      if (!categoryWhitelist.has(r.category)) return false
+      if (q) {
+        const hay = `${r.title} ${r.summary_md} ${r.expected_impact || ''} ${r.check_id}`.toLowerCase()
+        if (!hay.includes(q)) return false
+      }
+      return true
+    })
+  }, [items, severityFilter, groupFilter, riskFilter, searchQuery])
+
   const sorted = useMemo(() => {
-    return [...items].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       if (a.status === 'pending' && b.status !== 'pending') return -1
       if (b.status === 'pending' && a.status !== 'pending') return 1
+      // Just-refined items float to the top within pending so the user sees
+      // the effect of their follow-up immediately.
+      const aRefined = justRefined.has(a.id)
+      const bRefined = justRefined.has(b.id)
+      if (aRefined && !bRefined) return -1
+      if (bRefined && !aRefined) return 1
       const sev = SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]
       if (sev !== 0) return sev
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -166,12 +212,15 @@ export default function RecommendationsContent() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || `follow-up ${res.status}`)
       if (data.auto_closed) {
-        toast.success('Reviewed — auto-closed as false positive')
+        toast.success(`Auto-closed as false positive — "${(data.refined_title || '').slice(0, 60)}"`, { duration: 6000 })
       } else {
-        toast.success('Follow-up recorded — recommendation refined')
+        toast.success(`Refined — new title: "${(data.refined_title || '').slice(0, 60)}${(data.refined_title || '').length > 60 ? '…' : ''}"`, { duration: 6000 })
       }
       setFollowUpOpen(null)
       setFollowUpNote('')
+      // Mark as just-refined + auto-expand so the user sees Claude's update
+      setJustRefined((prev) => new Set(prev).add(rec.id))
+      setExpanded((prev) => new Set(prev).add(rec.id))
       await fetchItems()
     } catch (err: any) {
       toast.error(err.message || 'Failed')
@@ -196,34 +245,142 @@ export default function RecommendationsContent() {
 
   return (
     <div className="p-6 max-w-[1100px] mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">AI Recommendations</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Findings from the weekly audit. Low-risk items auto-execute; others need your approval.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            className="text-sm border border-slate-300 rounded-md px-3 py-1.5 bg-white"
-          >
-            <option value="active">Active (pending only)</option>
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="auto_executed">Auto-executed</option>
-            <option value="executed">Executed</option>
-            <option value="rejected">Rejected</option>
-            <option value="failed">Failed</option>
-          </select>
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">AI Recommendations</h1>
+            <p className="text-sm text-slate-500 mt-1">
+              Findings from the weekly audit. Low-risk items auto-execute; others need your approval.
+            </p>
+          </div>
           <button
             onClick={() => fetchItems()}
-            className="text-sm border border-slate-300 rounded-md px-3 py-1.5 bg-white hover:bg-slate-50"
+            className="text-sm border border-slate-300 rounded-md px-3 py-1.5 bg-white hover:bg-slate-50 shrink-0"
           >
             Refresh
           </button>
         </div>
+
+        {/* Filter toolbar */}
+        <div className="bg-white border border-slate-200 rounded-lg p-3 flex flex-wrap gap-3 text-sm">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              className="border border-slate-300 rounded-md px-2 py-1 bg-white"
+            >
+              <option value="active">Active (hides acted-upon)</option>
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="auto_executed">Auto-executed</option>
+              <option value="executed">Executed</option>
+              <option value="rejected">Rejected</option>
+              <option value="failed">Failed</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Severity</span>
+            {ALL_SEVERITIES.map((s) => {
+              const on = severityFilter.has(s)
+              return (
+                <button
+                  key={s}
+                  onClick={() => setSeverityFilter((prev) => {
+                    const n = new Set(prev)
+                    if (n.has(s)) n.delete(s)
+                    else n.add(s)
+                    return n
+                  })}
+                  className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${
+                    on ? severityColor(s) : 'bg-slate-50 text-slate-400 border border-slate-200'
+                  }`}
+                >
+                  {s}
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Platform</span>
+            {Object.keys(CATEGORY_GROUPS).map((g) => {
+              const on = groupFilter.has(g)
+              return (
+                <button
+                  key={g}
+                  onClick={() => setGroupFilter((prev) => {
+                    const n = new Set(prev)
+                    if (n.has(g)) n.delete(g)
+                    else n.add(g)
+                    return n
+                  })}
+                  className={`px-2 py-1 rounded text-xs font-semibold transition-colors border ${
+                    on ? 'bg-[#0891B2]/10 text-[#0891B2] border-[#0891B2]/30' : 'bg-slate-50 text-slate-400 border-slate-200'
+                  }`}
+                >
+                  {g}
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Risk</span>
+            {ALL_RISK_TIERS.map((r) => {
+              const on = riskFilter.has(r)
+              return (
+                <button
+                  key={r}
+                  onClick={() => setRiskFilter((prev) => {
+                    const n = new Set(prev)
+                    if (n.has(r)) n.delete(r)
+                    else n.add(r)
+                    return n
+                  })}
+                  className={`px-2 py-1 rounded text-xs font-semibold transition-colors border ${
+                    on ? riskColor(r) : 'bg-slate-50 text-slate-400 border-slate-200'
+                  }`}
+                >
+                  {r}
+                </button>
+              )
+            })}
+          </div>
+
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search title, summary, check id…"
+            className="flex-1 min-w-[180px] border border-slate-300 rounded-md px-3 py-1 bg-white text-sm"
+          />
+
+          {(severityFilter.size < ALL_SEVERITIES.length ||
+            groupFilter.size < Object.keys(CATEGORY_GROUPS).length ||
+            riskFilter.size < ALL_RISK_TIERS.length ||
+            searchQuery) && (
+            <button
+              onClick={() => {
+                setSeverityFilter(new Set(ALL_SEVERITIES))
+                setGroupFilter(new Set(Object.keys(CATEGORY_GROUPS)))
+                setRiskFilter(new Set(ALL_RISK_TIERS))
+                setSearchQuery('')
+              }}
+              className="text-xs text-slate-500 hover:text-slate-700 underline"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+
+        {items.length > 0 && (
+          <p className="text-xs text-slate-500 mt-2">
+            Showing {sorted.length} of {items.length}
+            {items.length !== sorted.length && ' (filtered)'}
+          </p>
+        )}
       </div>
 
       {loading ? (
@@ -237,12 +394,19 @@ export default function RecommendationsContent() {
           {sorted.map((rec) => {
             const isOpen = expanded.has(rec.id)
             const isBusy = busy.has(rec.id)
+            const isJustRefined = justRefined.has(rec.id)
+            const followUpCount = rec.follow_ups?.length || 0
             return (
-              <div key={rec.id} className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+              <div
+                key={rec.id}
+                className={`bg-white rounded-lg border overflow-hidden transition-colors ${
+                  isJustRefined ? 'border-amber-400 ring-2 ring-amber-200' : 'border-slate-200'
+                }`}
+              >
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${severityColor(rec.severity)}`}>
                           {rec.severity.toUpperCase()}
                         </span>
@@ -254,6 +418,16 @@ export default function RecommendationsContent() {
                         </span>
                         {rec.status !== 'pending' && (
                           <span className="text-[11px] text-slate-500 italic">· {rec.status.replace('_', ' ')}</span>
+                        )}
+                        {followUpCount > 0 && (
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+                            ✓ Refined × {followUpCount}
+                          </span>
+                        )}
+                        {isJustRefined && (
+                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-500 text-white animate-pulse">
+                            just updated
+                          </span>
                         )}
                       </div>
                       <h3 className="text-[15px] font-semibold text-slate-900 mb-1">{rec.title}</h3>
