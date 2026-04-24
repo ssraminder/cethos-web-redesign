@@ -95,9 +95,15 @@ EXPECTED IMPACT (1 sentence, concrete — e.g. "Saves ~$54/mo at current volume"
   });
 
   const parts = text.split("===").map((p) => p.trim());
-  const title = parts[0]?.replace(/^TITLE[^:]*:\s*/i, "").trim() || "Unnamed recommendation";
-  const summary = parts[1]?.replace(/^SUMMARY[^:]*:\s*/i, "").trim() || "";
-  const impact = parts[2]?.replace(/^EXPECTED IMPACT[^:]*:\s*/i, "").trim() || "";
+  // Claude sometimes emits the section labels ("TITLE:", "SUMMARY", "EXPECTED IMPACT")
+  // as the first line. Strip any such prefix line regardless of colon presence.
+  const stripLabel = (s: string, labels: string[]): string => {
+    const pattern = new RegExp(`^\\s*(${labels.join("|")})[^\\n]*[:\\n]?\\s*`, "i");
+    return s.replace(pattern, "").trim();
+  };
+  const title = stripLabel(parts[0] || "", ["TITLE"]) || "Unnamed recommendation";
+  const summary = stripLabel(parts[1] || "", ["SUMMARY"]);
+  const impact = stripLabel(parts[2] || "", ["EXPECTED IMPACT", "IMPACT"]);
 
   return { title, summary_md: summary, expected_impact: impact };
 }
