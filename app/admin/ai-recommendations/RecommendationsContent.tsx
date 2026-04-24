@@ -87,7 +87,12 @@ export default function RecommendationsContent() {
   const fetchItems = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/recommendations/list?status=${statusFilter}`)
+      // Explicit cache-bust on the client side too — belt and suspenders
+      // against Netlify's edge cache + browser HTTP cache layering.
+      const res = await fetch(
+        `/api/admin/recommendations/list?status=${statusFilter}&_=${Date.now()}`,
+        { cache: 'no-store' },
+      )
       if (!res.ok) throw new Error(`list ${res.status}`)
       const data = await res.json()
       setItems(data.recommendations || [])
