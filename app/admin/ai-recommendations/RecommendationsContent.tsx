@@ -1,0 +1,325 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
+
+type Status = 'pending' | 'approved' | 'rejected' | 'executed' | 'auto_executed' | 'failed' | 'expired' | 'superseded'
+type RiskTier = 'low' | 'medium' | 'high'
+type Severity = 'critical' | 'high' | 'medium' | 'low'
+
+interface Recommendation {
+  id: string
+  audit_run_id: string | null
+  created_at: string
+  check_id: string
+  category: string
+  risk_tier: RiskTier
+  severity: Severity
+  title: string
+  summary_md: string
+  expected_impact: string | null
+  evidence: Record<string, unknown>
+  action_type: string
+  action_payload: Record<string, unknown>
+  status: Status
+  reviewed_by: string | null
+  reviewed_at: string | null
+  executed_at: string | null
+  execution_result: Record<string, unknown> | null
+  failure_count: number
+  expires_at: string
+}
+
+type StatusFilter = Status | 'all' | 'active'
+
+const SEVERITY_ORDER: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 }
+
+const severityColor = (s: Severity) =>
+  ({ critical: 'bg-red-100 text-red-800', high: 'bg-orange-100 text-orange-800', medium: 'bg-yellow-100 text-yellow-800', low: 'bg-slate-100 text-slate-700' }[s])
+
+const riskColor = (r: RiskTier) =>
+  ({ low: 'bg-green-50 text-green-700 border-green-200', medium: 'bg-yellow-50 text-yellow-800 border-yellow-200', high: 'bg-red-50 text-red-800 border-red-200' }[r])
+
+export default function RecommendationsContent() {
+  const [items, setItems] = useState<Recommendation[]>([])
+  const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('active')
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+  const [busy, setBusy] = useState<Set<string>>(new Set())
+  const [confirmHigh, setConfirmHigh] = useState<Recommendation | null>(null)
+
+  const fetchItems = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/admin/recommendations/list?status=${statusFilter}`)
+      if (!res.ok) throw new Error(`list ${res.status}`)
+      const data = await res.json()
+      setItems(data.recommendations || [])
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to load recommendations')
+    } finally {
+      setLoading(false)
+    }
+  }, [statusFilter])
+
+  useEffect(() => {
+    fetchItems()
+  }, [fetchItems])
+
+  const sorted = useMemo(() => {
+    return [...items].sort((a, b) => {
+      if (a.status === 'pending' && b.status !== 'pending') return -1
+      if (b.status === 'pending' && a.status !== 'pending') return 1
+      const sev = SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]
+      if (sev !== 0) return sev
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+  }, [items])
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const markBusy = (id: string, on: boolean) => {
+    setBusy((prev) => {
+      const next = new Set(prev)
+      if (on) next.add(id)
+      else next.delete(id)
+      return next
+    })
+  }
+
+  const approve = async (rec: Recommendation) => {
+    if (rec.risk_tier === 'high') {
+      setConfirmHigh(rec)
+      return
+    }
+    await doApprove(rec)
+  }
+
+  const doApprove = async (rec: Recommendation) => {
+    markBusy(rec.id, true)
+    try {
+      const res = await fetch(`/api/admin/recommendations/${rec.id}/approve`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || `approve ${res.status}`)
+      if (data.ok) {
+        toast.success('Executed')
+      } else {
+        toast.error(`Execution failed: ${data.result?.error || 'unknown'}`)
+      }
+      await fetchItems()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed')
+    } finally {
+      markBusy(rec.id, false)
+      setConfirmHigh(null)
+    }
+  }
+
+  const reject = async (rec: Recommendation) => {
+    markBusy(rec.id, true)
+    try {
+      const res = await fetch(`/api/admin/recommendations/${rec.id}/reject`, { method: 'POST' })
+      if (!res.ok) throw new Error(`reject ${res.status}`)
+      toast.success('Rejected')
+      await fetchItems()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed')
+    } finally {
+      markBusy(rec.id, false)
+    }
+  }
+
+  const categoryLabels: Record<string, string> = {
+    ads_keyword: 'Ads · Keyword',
+    ads_negative: 'Ads · Negative',
+    ads_bid: 'Ads · Bid',
+    ads_budget: 'Ads · Budget',
+    seo_meta: 'SEO · Meta',
+    seo_sitemap: 'SEO · Sitemap',
+    seo_jsonld: 'SEO · Structured data',
+    gbp_profile: 'GBP · Profile',
+    gbp_reply: 'GBP · Review reply',
+    gbp_post: 'GBP · Post',
+    site_code: 'Site · Code',
+  }
+
+  return (
+    <div className="p-6 max-w-[1100px] mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">AI Recommendations</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Findings from the weekly audit. Low-risk items auto-execute; others need your approval.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+            className="text-sm border border-slate-300 rounded-md px-3 py-1.5 bg-white"
+          >
+            <option value="active">Active (pending only)</option>
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="auto_executed">Auto-executed</option>
+            <option value="executed">Executed</option>
+            <option value="rejected">Rejected</option>
+            <option value="failed">Failed</option>
+          </select>
+          <button
+            onClick={() => fetchItems()}
+            className="text-sm border border-slate-300 rounded-md px-3 py-1.5 bg-white hover:bg-slate-50"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-sm text-slate-500 py-12 text-center">Loading…</div>
+      ) : sorted.length === 0 ? (
+        <div className="text-sm text-slate-500 py-12 text-center border border-dashed border-slate-200 rounded-lg">
+          {statusFilter === 'active' ? 'No pending recommendations. You\'re all caught up.' : 'Nothing to show.'}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {sorted.map((rec) => {
+            const isOpen = expanded.has(rec.id)
+            const isBusy = busy.has(rec.id)
+            return (
+              <div key={rec.id} className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${severityColor(rec.severity)}`}>
+                          {rec.severity.toUpperCase()}
+                        </span>
+                        <span className={`text-[11px] font-semibold px-2 py-0.5 rounded border ${riskColor(rec.risk_tier)}`}>
+                          {rec.risk_tier} risk
+                        </span>
+                        <span className="text-[11px] text-slate-500">
+                          {categoryLabels[rec.category] || rec.category}
+                        </span>
+                        {rec.status !== 'pending' && (
+                          <span className="text-[11px] text-slate-500 italic">· {rec.status.replace('_', ' ')}</span>
+                        )}
+                      </div>
+                      <h3 className="text-[15px] font-semibold text-slate-900 mb-1">{rec.title}</h3>
+                      <p className="text-sm text-slate-600 leading-relaxed">{rec.summary_md}</p>
+                      {rec.expected_impact && (
+                        <p className="text-xs text-slate-500 mt-2 italic">→ {rec.expected_impact}</p>
+                      )}
+                    </div>
+
+                    {rec.status === 'pending' && (
+                      <div className="flex flex-col gap-1.5 flex-shrink-0">
+                        <button
+                          onClick={() => approve(rec)}
+                          disabled={isBusy}
+                          className="bg-[#0891B2] hover:bg-[#06B6D4] disabled:opacity-50 text-white text-sm font-medium px-4 py-1.5 rounded-md transition-colors"
+                        >
+                          {isBusy ? '…' : 'Approve'}
+                        </button>
+                        <button
+                          onClick={() => reject(rec)}
+                          disabled={isBusy}
+                          className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium px-4 py-1.5 rounded-md"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
+                    <button
+                      onClick={() => toggleExpand(rec.id)}
+                      className="hover:text-slate-700 underline-offset-2 hover:underline"
+                    >
+                      {isOpen ? 'Hide evidence' : 'Show evidence'}
+                    </button>
+                    <span>check: <code className="bg-slate-100 px-1 rounded">{rec.check_id}</code></span>
+                    <span>{new Date(rec.created_at).toLocaleString()}</span>
+                    {rec.failure_count > 0 && (
+                      <span className="text-red-600">{rec.failure_count} failed attempts</span>
+                    )}
+                  </div>
+                </div>
+
+                {isOpen && (
+                  <div className="border-t border-slate-200 bg-slate-50 p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <div className="font-semibold text-slate-700 mb-1.5">Evidence</div>
+                        <pre className="bg-white border border-slate-200 rounded p-2 overflow-x-auto text-[11px] leading-relaxed">
+                          {JSON.stringify(rec.evidence, null, 2)}
+                        </pre>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-slate-700 mb-1.5">Action ({rec.action_type})</div>
+                        <pre className="bg-white border border-slate-200 rounded p-2 overflow-x-auto text-[11px] leading-relaxed">
+                          {JSON.stringify(rec.action_payload, null, 2)}
+                        </pre>
+                        {rec.execution_result && (
+                          <>
+                            <div className="font-semibold text-slate-700 mt-3 mb-1.5">Execution result</div>
+                            <pre className="bg-white border border-slate-200 rounded p-2 overflow-x-auto text-[11px] leading-relaxed">
+                              {JSON.stringify(rec.execution_result, null, 2)}
+                            </pre>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Confirm dialog for HIGH risk */}
+      {confirmHigh && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-red-800 mb-2">Confirm high-risk change</h3>
+            <p className="text-sm text-slate-700 mb-4">
+              This recommendation is flagged <strong>high risk</strong>:
+            </p>
+            <div className="border border-slate-200 rounded p-3 bg-slate-50 mb-4">
+              <div className="font-semibold text-sm text-slate-900">{confirmHigh.title}</div>
+              <div className="text-xs text-slate-600 mt-1">{confirmHigh.summary_md}</div>
+            </div>
+            <p className="text-sm text-slate-600 mb-5">
+              Proceeding will execute this change immediately. Are you sure?
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmHigh(null)}
+                className="border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium px-4 py-1.5 rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => doApprove(confirmHigh)}
+                disabled={busy.has(confirmHigh.id)}
+                className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-1.5 rounded-md"
+              >
+                {busy.has(confirmHigh.id) ? '…' : 'Yes, execute'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
