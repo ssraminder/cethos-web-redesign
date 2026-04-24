@@ -42,8 +42,8 @@ export const publicUploadSchema = z.object({
 export type PublicUploadPayload = z.infer<typeof publicUploadSchema>
 
 // File validation constants (applied in the API route)
-export const MAX_FILES = 10
-export const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50 MB
+export const MAX_FILES = 25
+export const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100 MB
 export const ACCEPTED_MIME_TYPES: ReadonlySet<string> = new Set([
   'application/pdf',
   'image/jpeg',
