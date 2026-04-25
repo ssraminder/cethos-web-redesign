@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Upload,
   X,
@@ -11,6 +11,9 @@ import {
   Mail,
   Phone as PhoneIcon,
   ArrowLeft,
+  FolderPlus,
+  Folder,
+  Trash2,
 } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
 import { Input, Textarea } from '@/components/ui/Input'
@@ -44,12 +47,39 @@ interface LocalFile {
   error?: string
 }
 
+interface FolderGroup {
+  id: string
+  name: string
+  files: LocalFile[]
+}
+
 type Step = 'identity' | 'otp' | 'docs' | 'success'
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function newGroupId(): string {
+  return `g-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function inferMimeOk(name: string): boolean {
+  const ext = name.split('.').pop()?.toLowerCase()
+  return [
+    'pdf',
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+    'tif',
+    'tiff',
+    'heic',
+    'heif',
+    'doc',
+    'docx',
+  ].includes(ext || '')
 }
 
 export function SecureUploadForm() {
@@ -69,12 +99,12 @@ export function SecureUploadForm() {
   const [otpSending, setOtpSending] = useState(false)
   const [otpVerifying, setOtpVerifying] = useState(false)
 
-  // Step 3: docs
+  // Step 3: docs (with folder grouping)
   const [orderId, setOrderId] = useState('')
   const [message, setMessage] = useState('')
-  const [files, setFiles] = useState<LocalFile[]>([])
-  const [isDragging, setIsDragging] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [groups, setGroups] = useState<FolderGroup[]>([
+    { id: newGroupId(), name: '', files: [] },
+  ])
   const [phase, setPhase] = useState<
     'idle' | 'starting' | 'uploading' | 'finalizing' | 'error'
   >('idle')
@@ -87,14 +117,13 @@ export function SecureUploadForm() {
   const supabaseRef = useRef(createBrowserSupabaseClient())
   const supabase = supabaseRef.current
 
-  // Resend countdown ticker
   useEffect(() => {
     if (otpResendCountdown <= 0) return
     const t = setTimeout(() => setOtpResendCountdown((v) => v - 1), 1000)
     return () => clearTimeout(t)
   }, [otpResendCountdown])
 
-  // ── Step 1: identity & request OTP ──────────────────────────────────────────
+  // ── Identity / OTP step handlers ───────────────────────────────────────────
 
   const validateIdentity = (): boolean => {
     const next: Record<string, string> = {}
@@ -110,7 +139,6 @@ export function SecureUploadForm() {
   const requestOtp = async (channel: Channel) => {
     if (!validateIdentity()) return
     if (companyWebsite) {
-      // honeypot tripped — silent success path that goes nowhere
       setStep('success')
       setSuccessId('hp-dropped')
       return
@@ -147,8 +175,6 @@ export function SecureUploadForm() {
     await requestOtp(otpChannel)
   }
 
-  // ── Step 2: verify OTP ─────────────────────────────────────────────────────
-
   const verifyOtp = async () => {
     if (!otpId) {
       setErrors({ otp: 'No code requested. Please go back and request one.' })
@@ -177,7 +203,12 @@ export function SecureUploadForm() {
     }
   }
 
-  // ── Step 3: file handling + final submit ───────────────────────────────────
+  // ── Folder + file handlers ─────────────────────────────────────────────────
+
+  const totalFiles = useMemo(
+    () => groups.reduce((sum, g) => sum + g.files.length, 0),
+    [groups],
+  )
 
   const validateFile = (file: File): string | null => {
     if (!ACCEPTED_MIME_TYPES.has(file.type) && !inferMimeOk(file.name))
@@ -187,28 +218,28 @@ export function SecureUploadForm() {
     return null
   }
 
-  const addFiles = useCallback(
-    (incoming: File[]) => {
-      const next: LocalFile[] = []
+  const addFilesTo = useCallback(
+    (groupId: string, incoming: File[]) => {
       const errs: string[] = []
+      const newFiles: LocalFile[] = []
+      // Build a global de-dup set across all groups
+      const allFiles = groups.flatMap((g) => g.files)
       for (const f of incoming) {
-        if (
-          files.some((x) => x.file.name === f.name && x.file.size === f.size)
-        )
+        if (allFiles.some((x) => x.file.name === f.name && x.file.size === f.size))
           continue
         const err = validateFile(f)
         if (err) {
           errs.push(err)
           continue
         }
-        next.push({
+        newFiles.push({
           id: `${f.name}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
           file: f,
           status: 'pending',
           progress: 0,
         })
       }
-      if (files.length + next.length > MAX_FILES) {
+      if (totalFiles + newFiles.length > MAX_FILES) {
         errs.push(`At most ${MAX_FILES} files per submission`)
       }
       if (errs.length > 0) {
@@ -221,25 +252,44 @@ export function SecureUploadForm() {
           return n
         })
       }
-      if (next.length > 0) {
-        setFiles((prev) => [...prev, ...next].slice(0, MAX_FILES))
+      if (newFiles.length > 0) {
+        setGroups((prev) =>
+          prev.map((g) =>
+            g.id === groupId
+              ? { ...g, files: [...g.files, ...newFiles].slice(0, MAX_FILES) }
+              : g,
+          ),
+        )
       }
     },
-    [files],
+    [groups, totalFiles],
   )
 
-  const removeFile = (id: string) =>
-    setFiles((prev) => prev.filter((f) => f.id !== id))
+  const removeFile = (groupId: string, fileId: string) => {
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId ? { ...g, files: g.files.filter((f) => f.id !== fileId) } : g,
+      ),
+    )
+  }
 
-  const onDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      setIsDragging(false)
-      if (e.dataTransfer.files) addFiles(Array.from(e.dataTransfer.files))
-    },
-    [addFiles],
-  )
+  const addFolder = () => {
+    setGroups((prev) => [...prev, { id: newGroupId(), name: '', files: [] }])
+  }
+
+  const renameFolder = (groupId: string, name: string) => {
+    setGroups((prev) => prev.map((g) => (g.id === groupId ? { ...g, name } : g)))
+  }
+
+  const removeFolder = (groupId: string) => {
+    setGroups((prev) => {
+      // Always keep at least one group
+      if (prev.length <= 1) return prev.map((g) => ({ ...g, name: '', files: [] }))
+      return prev.filter((g) => g.id !== groupId)
+    })
+  }
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
 
   const submitDocs = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -249,7 +299,8 @@ export function SecureUploadForm() {
       phase === 'finalizing'
     )
       return
-    if (files.length === 0) {
+    const allFiles = groups.flatMap((g) => g.files)
+    if (allFiles.length === 0) {
       setErrors({ noFiles: 'Please attach at least one document' })
       return
     }
@@ -269,7 +320,7 @@ export function SecureUploadForm() {
       const startRes = await supabase.functions.invoke('upload-start', {
         body: {
           verificationToken,
-          files: files.map((f) => ({
+          files: allFiles.map((f) => ({
             name: f.file.name,
             size: f.file.size,
             type: f.file.type,
@@ -277,9 +328,7 @@ export function SecureUploadForm() {
         },
       })
       if (startRes.error || !startRes.data?.success) {
-        throw new Error(
-          (await readFunctionError(startRes)) || 'Could not start upload',
-        )
+        throw new Error((await readFunctionError(startRes)) || 'Could not start upload')
       }
       const { submissionId, bucket, uploads } = startRes.data as {
         submissionId: string
@@ -293,16 +342,43 @@ export function SecureUploadForm() {
         }>
       }
 
+      // Build a name → folder lookup so the per-file folder labels stick
+      // through the path-based round trip. originalName is unique inside one
+      // submission because addFilesTo dedupes by (name+size).
+      const folderByName = new Map<string, string>()
+      for (const g of groups) {
+        for (const f of g.files) {
+          folderByName.set(f.file.name, g.name.trim())
+        }
+      }
+
       setPhase('uploading')
       for (const u of uploads) {
-        const localFile = files.find((f) => f.file.name === u.originalName)
-        if (!localFile) continue
+        let localFile: LocalFile | undefined
+        let groupId: string | undefined
+        for (const g of groups) {
+          const found = g.files.find((f) => f.file.name === u.originalName)
+          if (found) {
+            localFile = found
+            groupId = g.id
+            break
+          }
+        }
+        if (!localFile || !groupId) continue
 
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === localFile.id
-              ? { ...f, status: 'uploading' as const, progress: 0 }
-              : f,
+        // Mark uploading on the right group
+        setGroups((prev) =>
+          prev.map((g) =>
+            g.id === groupId
+              ? {
+                  ...g,
+                  files: g.files.map((f) =>
+                    f.id === localFile!.id
+                      ? { ...f, status: 'uploading' as const, progress: 0 }
+                      : f,
+                  ),
+                }
+              : g,
           ),
         )
 
@@ -311,34 +387,55 @@ export function SecureUploadForm() {
             url: u.signedUrl,
             file: localFile.file,
             onProgress: (p) =>
-              setFiles((prev) =>
-                prev.map((f) =>
-                  f.id === localFile.id ? { ...f, progress: p } : f,
+              setGroups((prev) =>
+                prev.map((g) =>
+                  g.id === groupId
+                    ? {
+                        ...g,
+                        files: g.files.map((f) =>
+                          f.id === localFile!.id ? { ...f, progress: p } : f,
+                        ),
+                      }
+                    : g,
                 ),
               ),
           })
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === localFile.id
+          setGroups((prev) =>
+            prev.map((g) =>
+              g.id === groupId
                 ? {
-                    ...f,
-                    status: 'success' as const,
-                    progress: 100,
-                    storagePath: u.path,
+                    ...g,
+                    files: g.files.map((f) =>
+                      f.id === localFile!.id
+                        ? {
+                            ...f,
+                            status: 'success' as const,
+                            progress: 100,
+                            storagePath: u.path,
+                          }
+                        : f,
+                    ),
                   }
-                : f,
+                : g,
             ),
           )
         } catch (err) {
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === localFile.id
+          setGroups((prev) =>
+            prev.map((g) =>
+              g.id === groupId
                 ? {
-                    ...f,
-                    status: 'error' as const,
-                    error: (err as Error)?.message || 'Upload failed',
+                    ...g,
+                    files: g.files.map((f) =>
+                      f.id === localFile!.id
+                        ? {
+                            ...f,
+                            status: 'error' as const,
+                            error: (err as Error)?.message || 'Upload failed',
+                          }
+                        : f,
+                    ),
                   }
-                : f,
+                : g,
             ),
           )
           throw err
@@ -355,15 +452,26 @@ export function SecureUploadForm() {
           phone: phone.trim(),
           orderOrQuoteId: orderId.trim() || undefined,
           message: message.trim() || undefined,
-          companyWebsite, // honeypot
+          companyWebsite,
           submittedFrom: 'main_web',
           files: uploads.map((u) => {
-            const lf = files.find((f) => f.file.name === u.originalName)
+            // find the original local file for size/mime + the folder it was in
+            let lf: LocalFile | undefined
+            let folder = ''
+            for (const g of groups) {
+              const found = g.files.find((f) => f.file.name === u.originalName)
+              if (found) {
+                lf = found
+                folder = g.name.trim()
+                break
+              }
+            }
             return {
               path: u.path,
               originalName: u.originalName,
               size: lf?.file.size ?? 0,
               mimeType: lf?.file.type ?? 'application/octet-stream',
+              folder: folder || undefined,
             }
           }),
         },
@@ -416,7 +524,6 @@ export function SecureUploadForm() {
     <div>
       <Stepper step={step} />
 
-      {/* Honeypot — off-screen on every step */}
       <div
         aria-hidden="true"
         className="absolute left-[-10000px] top-auto w-[1px] h-[1px] overflow-hidden"
@@ -471,24 +578,15 @@ export function SecureUploadForm() {
         <DocsStep
           orderId={orderId}
           message={message}
-          files={files}
-          isDragging={isDragging}
+          groups={groups}
+          totalFiles={totalFiles}
           phase={phase}
           errors={errors}
-          fileInputRef={fileInputRef}
           onChange={{ setOrderId, setMessage }}
-          onDragOver={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsDragging(true)
-          }}
-          onDragLeave={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsDragging(false)
-          }}
-          onDrop={onDrop}
-          onPickFiles={(picked) => addFiles(picked)}
+          onAddFolder={addFolder}
+          onRenameFolder={renameFolder}
+          onRemoveFolder={removeFolder}
+          onAddFilesTo={addFilesTo}
           onRemoveFile={removeFile}
           onSubmit={submitDocs}
         />
@@ -683,8 +781,7 @@ function OtpStep(props: {
       </button>
 
       <p className="text-sm text-navy">
-        We sent a 6-digit code to{' '}
-        <strong>{maskedContact}</strong>
+        We sent a 6-digit code to <strong>{maskedContact}</strong>
         {channel === 'email' ? ' by email.' : ' by SMS.'}
       </p>
       <p className="text-xs text-slate-500 mt-1 mb-5">
@@ -739,41 +836,39 @@ function OtpStep(props: {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-// Step 3: Docs
+// Step 3: Docs (with folder grouping)
 // ───────────────────────────────────────────────────────────────────────────
 
 function DocsStep(props: {
   orderId: string
   message: string
-  files: LocalFile[]
-  isDragging: boolean
+  groups: FolderGroup[]
+  totalFiles: number
   phase: 'idle' | 'starting' | 'uploading' | 'finalizing' | 'error'
   errors: Record<string, string>
-  fileInputRef: React.RefObject<HTMLInputElement>
   onChange: {
     setOrderId: (v: string) => void
     setMessage: (v: string) => void
   }
-  onDragOver: (e: React.DragEvent) => void
-  onDragLeave: (e: React.DragEvent) => void
-  onDrop: (e: React.DragEvent) => void
-  onPickFiles: (files: File[]) => void
-  onRemoveFile: (id: string) => void
+  onAddFolder: () => void
+  onRenameFolder: (groupId: string, name: string) => void
+  onRemoveFolder: (groupId: string) => void
+  onAddFilesTo: (groupId: string, files: File[]) => void
+  onRemoveFile: (groupId: string, fileId: string) => void
   onSubmit: (e: React.FormEvent) => void
 }) {
   const {
     orderId,
     message,
-    files,
-    isDragging,
+    groups,
+    totalFiles,
     phase,
     errors,
-    fileInputRef,
     onChange,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-    onPickFiles,
+    onAddFolder,
+    onRenameFolder,
+    onRemoveFolder,
+    onAddFilesTo,
     onRemoveFile,
     onSubmit,
   } = props
@@ -804,98 +899,53 @@ function DocsStep(props: {
           value={message}
           onChange={(e) => onChange.setMessage(e.target.value)}
           placeholder="Anything we should know — source/target languages, deadlines, special instructions…"
-          rows={4}
+          rows={3}
           disabled={submitting}
         />
       </div>
 
+      {/* Folders */}
       <div className="mt-6">
-        <label className="block text-sm font-medium text-navy mb-1.5">
-          Documents <span className="text-red-500">*</span>
-        </label>
-        <div
-          onDragOver={onDragOver}
-          onDragEnter={onDragOver}
-          onDragLeave={onDragLeave}
-          onDrop={onDrop}
-          onClick={() => !submitting && fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
-            isDragging
-              ? 'border-teal-500 bg-teal-50'
-              : 'border-slate-300 hover:border-teal-500 hover:bg-slate-50'
-          } ${submitting ? 'pointer-events-none opacity-50' : ''}`}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={ACCEPTED_EXTENSIONS}
-            multiple
-            onChange={(e) => {
-              if (e.target.files) onPickFiles(Array.from(e.target.files))
-              e.target.value = ''
-            }}
-            className="hidden"
-            disabled={submitting}
-          />
-          <Upload className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-          <p className="text-slate-700 mb-1">
-            <span className="font-semibold text-teal-600">Click to upload</span>{' '}
-            or drag and drop
-          </p>
-          <p className="text-sm text-slate-500">
-            PDF, images, Word documents · max 100 MB each · up to {MAX_FILES}{' '}
-            files
-          </p>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-navy">
+            Documents <span className="text-red-500">*</span>
+          </label>
+          <span className="text-xs text-slate-500">
+            {totalFiles}/{MAX_FILES} files · 100 MB each max
+          </span>
         </div>
         {errors.files && (
-          <p className="text-sm text-red-600 mt-2">{errors.files}</p>
+          <p className="text-sm text-red-600 mb-2">{errors.files}</p>
         )}
         {errors.noFiles && (
-          <p className="text-sm text-red-600 mt-2">{errors.noFiles}</p>
+          <p className="text-sm text-red-600 mb-2">{errors.noFiles}</p>
         )}
 
-        {files.length > 0 && (
-          <ul className="mt-3 space-y-2">
-            {files.map((f) => (
-              <li
-                key={f.id}
-                className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg"
-              >
-                <StatusIcon status={f.status} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-navy truncate">
-                    {f.file.name}
-                  </p>
-                  <div className="text-xs text-slate-500 flex items-center gap-2">
-                    <span>{formatBytes(f.file.size)}</span>
-                    {f.status === 'uploading' && <span>{f.progress}%</span>}
-                    {f.status === 'error' && f.error && (
-                      <span className="text-red-500 truncate">{f.error}</span>
-                    )}
-                  </div>
-                  {f.status === 'uploading' && (
-                    <div className="w-full bg-slate-200 rounded-full h-1 mt-1">
-                      <div
-                        className="bg-teal-500 h-1 rounded-full transition-all duration-200"
-                        style={{ width: `${f.progress}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-                {!submitting && (
-                  <button
-                    type="button"
-                    onClick={() => onRemoveFile(f.id)}
-                    className="p-1 hover:bg-slate-200 rounded"
-                    aria-label={`Remove ${f.file.name}`}
-                  >
-                    <X className="w-4 h-4 text-slate-500" />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="space-y-3">
+          {groups.map((g, i) => (
+            <FolderCard
+              key={g.id}
+              group={g}
+              index={i}
+              isOnly={groups.length === 1}
+              submitting={submitting}
+              onRename={(name) => onRenameFolder(g.id, name)}
+              onRemove={() => onRemoveFolder(g.id)}
+              onAddFiles={(files) => onAddFilesTo(g.id, files)}
+              onRemoveFile={(fileId) => onRemoveFile(g.id, fileId)}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={onAddFolder}
+          disabled={submitting}
+          className="mt-3 inline-flex items-center gap-2 px-3 py-2 text-sm text-teal-700 border border-dashed border-teal-300 rounded-lg hover:bg-teal-50 disabled:opacity-50"
+        >
+          <FolderPlus className="w-4 h-4" />
+          Add another folder
+        </button>
       </div>
 
       <div className="mt-6 flex items-center gap-2 text-xs text-slate-500">
@@ -920,12 +970,152 @@ function DocsStep(props: {
         {(phase === 'idle' || phase === 'error') && 'Send securely'}
       </Button>
 
-      {phase === 'uploading' && files.length > 3 && (
+      {phase === 'uploading' && totalFiles > 3 && (
         <p className="text-xs text-slate-500 text-center mt-2">
           Don&apos;t close this tab — large uploads may take several minutes.
         </p>
       )}
     </form>
+  )
+}
+
+function FolderCard(props: {
+  group: FolderGroup
+  index: number
+  isOnly: boolean
+  submitting: boolean
+  onRename: (name: string) => void
+  onRemove: () => void
+  onAddFiles: (files: File[]) => void
+  onRemoveFile: (fileId: string) => void
+}) {
+  const { group, index, isOnly, submitting, onRename, onRemove, onAddFiles, onRemoveFile } =
+    props
+  const [isDragging, setIsDragging] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const showRemove = !isOnly && !submitting
+
+  return (
+    <div className="border border-slate-200 rounded-lg p-3 bg-white">
+      <div className="flex items-center gap-2 mb-2">
+        <Folder className="w-4 h-4 text-slate-400 flex-shrink-0" />
+        <input
+          type="text"
+          value={group.name}
+          onChange={(e) => onRename(e.target.value)}
+          placeholder={index === 0 ? 'Folder name (optional, e.g. Project 1)' : `Folder ${index + 1} name`}
+          disabled={submitting}
+          maxLength={80}
+          className="flex-1 px-2 py-1 text-sm border-0 border-b border-transparent focus:border-teal-500 focus:outline-none bg-transparent"
+        />
+        <span className="text-xs text-slate-400 flex-shrink-0">
+          {group.files.length} file{group.files.length === 1 ? '' : 's'}
+        </span>
+        {showRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-red-500"
+            title="Remove this folder and its files"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      <div
+        onDragOver={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsDragging(true)
+        }}
+        onDragEnter={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsDragging(true)
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsDragging(false)
+        }}
+        onDrop={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsDragging(false)
+          if (e.dataTransfer.files) onAddFiles(Array.from(e.dataTransfer.files))
+        }}
+        onClick={() => !submitting && inputRef.current?.click()}
+        className={`border-2 border-dashed rounded-md p-5 text-center cursor-pointer transition-all ${
+          isDragging
+            ? 'border-teal-500 bg-teal-50'
+            : 'border-slate-300 hover:border-teal-500 hover:bg-slate-50'
+        } ${submitting ? 'pointer-events-none opacity-50' : ''}`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPTED_EXTENSIONS}
+          multiple
+          onChange={(e) => {
+            if (e.target.files) onAddFiles(Array.from(e.target.files))
+            e.target.value = ''
+          }}
+          className="hidden"
+          disabled={submitting}
+        />
+        <Upload className="w-7 h-7 text-slate-400 mx-auto mb-1.5" />
+        <p className="text-sm text-slate-700">
+          <span className="font-semibold text-teal-600">Click to upload</span>{' '}
+          or drag and drop
+        </p>
+        <p className="text-xs text-slate-500 mt-0.5">
+          PDF, images, Word documents
+        </p>
+      </div>
+
+      {group.files.length > 0 && (
+        <ul className="mt-2 space-y-1.5">
+          {group.files.map((f) => (
+            <li
+              key={f.id}
+              className="flex items-center gap-3 p-2 bg-slate-50 rounded-md text-sm"
+            >
+              <StatusIcon status={f.status} />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-navy truncate">{f.file.name}</p>
+                <div className="text-xs text-slate-500 flex items-center gap-2">
+                  <span>{formatBytes(f.file.size)}</span>
+                  {f.status === 'uploading' && <span>{f.progress}%</span>}
+                  {f.status === 'error' && f.error && (
+                    <span className="text-red-500 truncate">{f.error}</span>
+                  )}
+                </div>
+                {f.status === 'uploading' && (
+                  <div className="w-full bg-slate-200 rounded-full h-1 mt-1">
+                    <div
+                      className="bg-teal-500 h-1 rounded-full transition-all duration-200"
+                      style={{ width: `${f.progress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+              {!submitting && (
+                <button
+                  type="button"
+                  onClick={() => onRemoveFile(f.id)}
+                  className="p-1 hover:bg-slate-200 rounded"
+                  aria-label={`Remove ${f.file.name}`}
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 
@@ -944,23 +1134,6 @@ function StatusIcon({ status }: { status: UploadStatus }) {
     case 'error':
       return <XCircle className="w-4 h-4 text-red-500" />
   }
-}
-
-function inferMimeOk(name: string): boolean {
-  const ext = name.split('.').pop()?.toLowerCase()
-  return [
-    'pdf',
-    'jpg',
-    'jpeg',
-    'png',
-    'webp',
-    'tif',
-    'tiff',
-    'heic',
-    'heif',
-    'doc',
-    'docx',
-  ].includes(ext || '')
 }
 
 async function readFunctionError(res: {
