@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   // getting cut, contributing to the 0.34% organic CTR at position 1.2 for Calgary queries).
   title: 'Certified Translation Calgary | IRCC-Accepted from $65',
   description:
-    'IRCC-accepted certified translation in Calgary — birth certificates, diplomas, marriage and immigration documents. From $65, same-day available, 100% acceptance guaranteed.',
+    'Need certified translation in Calgary? IRCC-accepted for immigration, diplomas & birth certificates. From $65, same-day available, 100% acceptance guaranteed.',
   alternates: {
     canonical: 'https://cethos.com/services/certified',
   },
