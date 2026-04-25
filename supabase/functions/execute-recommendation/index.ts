@@ -225,7 +225,7 @@ function extractCurrentMeta(fileContent: string): { title: string; description: 
  *     and we (a) resolve the file, (b) extract current title/description, (c) ask
  *     Claude Sonnet for a better pair, (d) do an inline replace, (e) commit.
  */
-async function handleGithubCommit(payload: any, evidence: any): Promise<{ ok: boolean; result: unknown }> {
+async function handleGithubCommit(payload: any, evidence: any): Promise<{ ok: boolean; result: unknown; refused?: boolean }> {
   if (!GITHUB_TOKEN) return { ok: false, result: { error: "GITHUB_TOKEN not set" } };
 
   const owner = payload.owner || GITHUB_OWNER;
@@ -280,17 +280,20 @@ async function handleGithubCommit(payload: any, evidence: any): Promise<{ ok: bo
       return { ok: false, result: { error: `Claude rewrite failed: ${(err as Error).message}` } };
     }
 
-    // Off-topic: Claude declined the rewrite. Don't commit; surface the reason
-    // so the user can reject or escalate the rec.
+    // Off-topic: Claude declined the rewrite. This isn't a server error — it's
+    // an intentional decision. Surface a `refused` result that the parent
+    // dispatcher uses to auto-transition the rec to rejected with the reason
+    // captured, so the user doesn't have to deal with it manually.
     if ("skip" in rewrite) {
       return {
         ok: false,
+        refused: true,
         result: {
-          error: "refused: query is off-topic for this page",
+          refused: true,
           reason: rewrite.reason,
           page_url: payload.page_url,
           target_query: payload.target_query,
-          suggestion: "Reject this rec — the correct action is to create or boost a dedicated sub-page for the target query, not rewrite this page's meta.",
+          suggestion: "The correct action is to create or boost a dedicated sub-page for the target query, not rewrite this page's meta.",
         },
       };
     }
@@ -435,7 +438,7 @@ Deno.serve(async (req: Request) => {
   }
 
   // Route by action type
-  let result: { ok: boolean; result: unknown };
+  let result: { ok: boolean; result: unknown; refused?: boolean };
   switch (rec.action_type) {
     case "ads_mutate":
       result = await handleAdsMutate(rec.action_payload);
@@ -460,6 +463,32 @@ Deno.serve(async (req: Request) => {
   }
 
   const now = new Date().toISOString();
+
+  // Special case: AI refused the action (e.g. off-topic meta rewrite). This
+  // isn't a failure — it's a deliberate "this rec is wrong" decision. Auto-
+  // transition the rec to rejected with the reason captured, and return 200
+  // so the UI shows a friendly "auto-rejected" toast instead of an error.
+  if (!result.ok && result.refused) {
+    await supabase
+      .from("recommendations")
+      .update({
+        status: "rejected",
+        reviewed_at: now,
+        reviewed_by: `ai-refused:${invoker}`,
+        execution_result: result.result as object,
+      })
+      .eq("id", recId);
+    return new Response(JSON.stringify({
+      rec_id: recId,
+      ok: true,
+      auto_rejected: true,
+      result: result.result,
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   if (result.ok) {
     const finalStatus = invoker === "auto-executor" ? "auto_executed" : "executed";
     await supabase

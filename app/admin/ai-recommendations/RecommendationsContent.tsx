@@ -193,7 +193,12 @@ export default function RecommendationsContent() {
       const res = await fetch(`/api/admin/recommendations/${rec.id}/approve`, { method: 'POST' })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || `approve ${res.status}`)
-      if (data.ok) {
+      if (data.auto_rejected) {
+        toast.message('Auto-rejected — agent refused this rec', {
+          description: data.result?.reason || data.result?.suggestion || 'See evidence drawer for details',
+          duration: 8000,
+        })
+      } else if (data.ok) {
         toast.success('Executed')
       } else {
         toast.error(`Execution failed: ${data.result?.error || 'unknown'}`)
