@@ -378,6 +378,45 @@ async function commitToGitHub(args: {
   const putText = await putRes.text();
   let putData: any;
   try { putData = JSON.parse(putText); } catch { putData = putText; }
+
+  // 403 / 404 with a "Resource not accessible" message almost always means the
+  // GitHub token lacks Contents: Write on this repo. Add a diagnostic that
+  // tells the user exactly what perms GitHub thinks the token has, so they
+  // can compare with what they expect.
+  if (!putRes.ok && (putRes.status === 403 || putRes.status === 404)) {
+    const diag: Record<string, unknown> = { put_status: putRes.status, put_response: putData };
+    try {
+      const userRes = await fetch("https://api.github.com/user", {
+        headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github+json" },
+      });
+      if (userRes.ok) {
+        const u = await userRes.json();
+        diag.token_user = { login: u.login, id: u.id, type: u.type };
+        diag.token_scopes_classic = userRes.headers.get("x-oauth-scopes") || "(fine-grained PAT — no x-oauth-scopes)";
+      } else {
+        diag.token_user = `GET /user failed: ${userRes.status}`;
+      }
+    } catch (e) { diag.token_user_err = (e as Error).message; }
+
+    try {
+      const repoRes = await fetch(`https://api.github.com/repos/${args.owner}/${args.repo}`, {
+        headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github+json" },
+      });
+      if (repoRes.ok) {
+        const r = await repoRes.json();
+        diag.repo_visible = true;
+        diag.repo_permissions_for_token = r.permissions || "(no permissions block returned)";
+        diag.repo_full_name = r.full_name;
+      } else {
+        diag.repo_visible = false;
+        diag.repo_get_status = repoRes.status;
+        diag.repo_hint = "Token cannot see this repo. For fine-grained PATs: ensure ssraminder/cethos-web-redesign is in the Repository access list.";
+      }
+    } catch (e) { diag.repo_err = (e as Error).message; }
+
+    return { ok: false, result: { error: "GitHub PUT 403 — token lacks Contents:Write on this repo", diagnostics: diag } };
+  }
+
   return {
     ok: putRes.ok,
     result: {
