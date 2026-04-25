@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Upload,
   X,
@@ -8,6 +8,9 @@ import {
   Loader2,
   XCircle,
   ShieldCheck,
+  Mail,
+  Phone as PhoneIcon,
+  ArrowLeft,
 } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
 import { Input, Textarea } from '@/components/ui/Input'
@@ -29,6 +32,7 @@ const ACCEPTED_MIME_TYPES = new Set([
   'application/msword',
 ])
 
+type Channel = 'email' | 'phone'
 type UploadStatus = 'pending' | 'uploading' | 'success' | 'error'
 
 interface LocalFile {
@@ -40,6 +44,8 @@ interface LocalFile {
   error?: string
 }
 
+type Step = 'identity' | 'otp' | 'docs' | 'success'
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -47,28 +53,134 @@ function formatBytes(bytes: number): string {
 }
 
 export function SecureUploadForm() {
+  // Step 1: identity
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [orderId, setOrderId] = useState('')
-  const [message, setMessage] = useState('')
   const [companyWebsite, setCompanyWebsite] = useState('') // honeypot
 
+  // Step 2: OTP
+  const [otpChannel, setOtpChannel] = useState<Channel>('email')
+  const [otpId, setOtpId] = useState<string | null>(null)
+  const [otpCode, setOtpCode] = useState('')
+  const [otpMaskedContact, setOtpMaskedContact] = useState('')
+  const [otpResendCountdown, setOtpResendCountdown] = useState(0)
+  const [verificationToken, setVerificationToken] = useState<string | null>(null)
+  const [otpSending, setOtpSending] = useState(false)
+  const [otpVerifying, setOtpVerifying] = useState(false)
+
+  // Step 3: docs
+  const [orderId, setOrderId] = useState('')
+  const [message, setMessage] = useState('')
   const [files, setFiles] = useState<LocalFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const [errors, setErrors] = useState<Record<string, string>>({})
   const [phase, setPhase] = useState<
-    'idle' | 'starting' | 'uploading' | 'finalizing' | 'success' | 'error'
+    'idle' | 'starting' | 'uploading' | 'finalizing' | 'error'
   >('idle')
+
+  // Shared
+  const [step, setStep] = useState<Step>('identity')
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [successId, setSuccessId] = useState<string | null>(null)
 
   const supabaseRef = useRef(createBrowserSupabaseClient())
   const supabase = supabaseRef.current
 
+  // Resend countdown ticker
+  useEffect(() => {
+    if (otpResendCountdown <= 0) return
+    const t = setTimeout(() => setOtpResendCountdown((v) => v - 1), 1000)
+    return () => clearTimeout(t)
+  }, [otpResendCountdown])
+
+  // ── Step 1: identity & request OTP ──────────────────────────────────────────
+
+  const validateIdentity = (): boolean => {
+    const next: Record<string, string> = {}
+    if (!fullName.trim()) next.fullName = 'Name is required'
+    if (!email.trim()) next.email = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      next.email = 'Please enter a valid email'
+    if (!phone.trim()) next.phone = 'Phone number is required'
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  const requestOtp = async (channel: Channel) => {
+    if (!validateIdentity()) return
+    if (companyWebsite) {
+      // honeypot tripped — silent success path that goes nowhere
+      setStep('success')
+      setSuccessId('hp-dropped')
+      return
+    }
+    if (!supabase) {
+      setErrors({ submit: 'Service unavailable — please try again later.' })
+      return
+    }
+    setOtpSending(true)
+    setErrors({})
+    try {
+      const contact = channel === 'email' ? email.trim() : phone.trim()
+      const res = await supabase.functions.invoke('secure-upload-otp-send', {
+        body: { channel, contact, fullName: fullName.trim() },
+      })
+      if (res.error || !res.data?.success) {
+        throw new Error((await readFunctionError(res)) || 'Could not send code')
+      }
+      setOtpChannel(channel)
+      setOtpId(res.data.otpId as string)
+      setOtpMaskedContact(res.data.contact as string)
+      setOtpCode('')
+      setOtpResendCountdown(30)
+      setStep('otp')
+    } catch (err) {
+      setErrors({ otp: (err as Error)?.message || 'Could not send code' })
+    } finally {
+      setOtpSending(false)
+    }
+  }
+
+  const resendOtp = async () => {
+    if (otpResendCountdown > 0) return
+    await requestOtp(otpChannel)
+  }
+
+  // ── Step 2: verify OTP ─────────────────────────────────────────────────────
+
+  const verifyOtp = async () => {
+    if (!otpId) {
+      setErrors({ otp: 'No code requested. Please go back and request one.' })
+      return
+    }
+    if (!/^\d{6}$/.test(otpCode.trim())) {
+      setErrors({ otp: 'Enter the 6-digit code' })
+      return
+    }
+    if (!supabase) return
+    setOtpVerifying(true)
+    setErrors({})
+    try {
+      const res = await supabase.functions.invoke('secure-upload-otp-verify', {
+        body: { otpId, code: otpCode.trim() },
+      })
+      if (res.error || !res.data?.success) {
+        throw new Error((await readFunctionError(res)) || 'Code is incorrect')
+      }
+      setVerificationToken(res.data.verificationToken as string)
+      setStep('docs')
+    } catch (err) {
+      setErrors({ otp: (err as Error)?.message || 'Code is incorrect' })
+    } finally {
+      setOtpVerifying(false)
+    }
+  }
+
+  // ── Step 3: file handling + final submit ───────────────────────────────────
+
   const validateFile = (file: File): string | null => {
-    if (!ACCEPTED_MIME_TYPES.has(file.type))
+    if (!ACCEPTED_MIME_TYPES.has(file.type) && !inferMimeOk(file.name))
       return `${file.name}: file type not allowed`
     if (file.size > MAX_FILE_SIZE) return `${file.name}: exceeds 100 MB`
     if (file.size === 0) return `${file.name}: empty file`
@@ -129,23 +241,22 @@ export function SecureUploadForm() {
     [addFiles],
   )
 
-  const validate = (): boolean => {
-    const next: Record<string, string> = {}
-    if (!fullName.trim()) next.fullName = 'Name is required'
-    if (!email.trim()) next.email = 'Email is required'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      next.email = 'Please enter a valid email'
-    if (!phone.trim()) next.phone = 'Phone number is required'
-    if (files.length === 0) next.noFiles = 'Please attach at least one document'
-    setErrors(next)
-    return Object.keys(next).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submitDocs = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (phase === 'starting' || phase === 'uploading' || phase === 'finalizing')
+    if (
+      phase === 'starting' ||
+      phase === 'uploading' ||
+      phase === 'finalizing'
+    )
       return
-    if (!validate()) return
+    if (files.length === 0) {
+      setErrors({ noFiles: 'Please attach at least one document' })
+      return
+    }
+    if (!verificationToken) {
+      setErrors({ submit: 'Verification expired — please go back and request a new code.' })
+      return
+    }
     if (!supabase) {
       setErrors({ submit: 'Service unavailable — please try again later.' })
       return
@@ -155,16 +266,15 @@ export function SecureUploadForm() {
     setErrors({})
 
     try {
-      // 1. upload-start: validate manifest, get one signed URL per file
-      const startBody = {
-        files: files.map((f) => ({
-          name: f.file.name,
-          size: f.file.size,
-          type: f.file.type,
-        })),
-      }
       const startRes = await supabase.functions.invoke('upload-start', {
-        body: startBody,
+        body: {
+          verificationToken,
+          files: files.map((f) => ({
+            name: f.file.name,
+            size: f.file.size,
+            type: f.file.type,
+          })),
+        },
       })
       if (startRes.error || !startRes.data?.success) {
         throw new Error(
@@ -183,10 +293,8 @@ export function SecureUploadForm() {
         }>
       }
 
-      // 2. Upload each file directly to Supabase via the signed URL
       setPhase('uploading')
-      for (let i = 0; i < uploads.length; i++) {
-        const u = uploads[i]
+      for (const u of uploads) {
         const localFile = files.find((f) => f.file.name === u.originalName)
         if (!localFile) continue
 
@@ -237,32 +345,29 @@ export function SecureUploadForm() {
         }
       }
 
-      // 3. upload-complete: register submission, trigger scan
       setPhase('finalizing')
-      const completePayload = {
-        submissionId,
-        bucket,
-        fullName: fullName.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        orderOrQuoteId: orderId.trim() || undefined,
-        message: message.trim() || undefined,
-        companyWebsite, // honeypot
-        submittedFrom: 'main_web',
-        files: uploads.map((u) => {
-          const lf = files.find((f) => f.file.name === u.originalName)
-          return {
-            path: u.path,
-            originalName: u.originalName,
-            size: lf?.file.size ?? 0,
-            mimeType: lf?.file.type ?? 'application/octet-stream',
-          }
-        }),
-      }
-      const completeRes = await supabase.functions.invoke(
-        'upload-complete',
-        { body: completePayload },
-      )
+      const completeRes = await supabase.functions.invoke('upload-complete', {
+        body: {
+          submissionId,
+          bucket,
+          fullName: fullName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          orderOrQuoteId: orderId.trim() || undefined,
+          message: message.trim() || undefined,
+          companyWebsite, // honeypot
+          submittedFrom: 'main_web',
+          files: uploads.map((u) => {
+            const lf = files.find((f) => f.file.name === u.originalName)
+            return {
+              path: u.path,
+              originalName: u.originalName,
+              size: lf?.file.size ?? 0,
+              mimeType: lf?.file.type ?? 'application/octet-stream',
+            }
+          }),
+        },
+      })
       if (completeRes.error || !completeRes.data?.success) {
         throw new Error(
           (await readFunctionError(completeRes)) ||
@@ -270,8 +375,8 @@ export function SecureUploadForm() {
         )
       }
 
-      setPhase('success')
       setSuccessId(submissionId)
+      setStep('success')
     } catch (err) {
       console.error('secure-upload submit error:', err)
       setErrors({
@@ -283,7 +388,9 @@ export function SecureUploadForm() {
     }
   }
 
-  if (phase === 'success' && successId) {
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  if (step === 'success' && successId) {
     return (
       <div className="text-center py-8">
         <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
@@ -296,19 +403,20 @@ export function SecureUploadForm() {
           Your documents have been uploaded securely. Our team will review your
           submission and reach out to you at <strong>{email}</strong> shortly.
         </p>
-        <p className="text-xs text-slate-500">
-          Reference ID: <code className="font-mono">{successId}</code>
-        </p>
+        {successId !== 'hp-dropped' && (
+          <p className="text-xs text-slate-500">
+            Reference ID: <code className="font-mono">{successId}</code>
+          </p>
+        )}
       </div>
     )
   }
 
-  const submitting =
-    phase === 'starting' || phase === 'uploading' || phase === 'finalizing'
-
   return (
-    <form onSubmit={handleSubmit} noValidate>
-      {/* Honeypot — off-screen */}
+    <div>
+      <Stepper step={step} />
+
+      {/* Honeypot — off-screen on every step */}
       <div
         aria-hidden="true"
         className="absolute left-[-10000px] top-auto w-[1px] h-[1px] overflow-hidden"
@@ -326,6 +434,354 @@ export function SecureUploadForm() {
         </label>
       </div>
 
+      {step === 'identity' && (
+        <IdentityStep
+          fullName={fullName}
+          email={email}
+          phone={phone}
+          errors={errors}
+          otpSending={otpSending}
+          onChange={{ setFullName, setEmail, setPhone }}
+          onSendEmail={() => requestOtp('email')}
+          onSendPhone={() => requestOtp('phone')}
+        />
+      )}
+
+      {step === 'otp' && (
+        <OtpStep
+          channel={otpChannel}
+          maskedContact={otpMaskedContact}
+          code={otpCode}
+          errors={errors}
+          verifying={otpVerifying}
+          resendCountdown={otpResendCountdown}
+          onChangeCode={setOtpCode}
+          onVerify={verifyOtp}
+          onResend={resendOtp}
+          onChangeContact={() => {
+            setStep('identity')
+            setOtpId(null)
+            setOtpCode('')
+            setErrors({})
+          }}
+        />
+      )}
+
+      {step === 'docs' && (
+        <DocsStep
+          orderId={orderId}
+          message={message}
+          files={files}
+          isDragging={isDragging}
+          phase={phase}
+          errors={errors}
+          fileInputRef={fileInputRef}
+          onChange={{ setOrderId, setMessage }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsDragging(true)
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsDragging(false)
+          }}
+          onDrop={onDrop}
+          onPickFiles={(picked) => addFiles(picked)}
+          onRemoveFile={removeFile}
+          onSubmit={submitDocs}
+        />
+      )}
+    </div>
+  )
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Stepper
+// ───────────────────────────────────────────────────────────────────────────
+
+function Stepper({ step }: { step: Step }) {
+  const items: Array<{ key: Step; label: string }> = [
+    { key: 'identity', label: 'Your details' },
+    { key: 'otp', label: 'Verify' },
+    { key: 'docs', label: 'Upload' },
+  ]
+  const idx = items.findIndex((i) => i.key === step)
+  return (
+    <div className="flex items-center gap-2 mb-6 text-xs">
+      {items.map((it, i) => {
+        const active = i === idx
+        const done = i < idx
+        return (
+          <div key={it.key} className="flex items-center gap-2">
+            <span
+              className={`w-6 h-6 rounded-full flex items-center justify-center font-semibold ${
+                active
+                  ? 'bg-teal-600 text-white'
+                  : done
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-slate-100 text-slate-400'
+              }`}
+            >
+              {done ? '\u2713' : i + 1}
+            </span>
+            <span
+              className={
+                active
+                  ? 'font-semibold text-navy'
+                  : done
+                    ? 'text-slate-600'
+                    : 'text-slate-400'
+              }
+            >
+              {it.label}
+            </span>
+            {i < items.length - 1 && (
+              <span className="w-8 h-px bg-slate-200" aria-hidden="true" />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Step 1: Identity
+// ───────────────────────────────────────────────────────────────────────────
+
+function IdentityStep(props: {
+  fullName: string
+  email: string
+  phone: string
+  errors: Record<string, string>
+  otpSending: boolean
+  onChange: {
+    setFullName: (v: string) => void
+    setEmail: (v: string) => void
+    setPhone: (v: string) => void
+  }
+  onSendEmail: () => void
+  onSendPhone: () => void
+}) {
+  const { fullName, email, phone, errors, otpSending, onChange } = props
+  return (
+    <div>
+      {errors.otp && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {errors.otp}
+        </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input
+          label="Full name"
+          required
+          value={fullName}
+          onChange={(e) => onChange.setFullName(e.target.value)}
+          error={errors.fullName}
+          autoComplete="name"
+          disabled={otpSending}
+        />
+        <div className="hidden sm:block" />
+        <Input
+          label="Email"
+          required
+          type="email"
+          value={email}
+          onChange={(e) => onChange.setEmail(e.target.value)}
+          error={errors.email}
+          autoComplete="email"
+          disabled={otpSending}
+          helperText="Used for the verification code (option 1)"
+        />
+        <Input
+          label="Phone"
+          required
+          type="tel"
+          value={phone}
+          onChange={(e) => onChange.setPhone(e.target.value)}
+          error={errors.phone}
+          autoComplete="tel"
+          disabled={otpSending}
+          helperText="International format works best (e.g. +1...)"
+        />
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Button
+          type="button"
+          variant="primary"
+          size="lg"
+          isLoading={otpSending}
+          disabled={otpSending}
+          icon={<Mail className="w-5 h-5" />}
+          onClick={props.onSendEmail}
+          className="w-full"
+        >
+          Send code by email
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          size="lg"
+          isLoading={otpSending}
+          disabled={otpSending}
+          icon={<PhoneIcon className="w-5 h-5" />}
+          onClick={props.onSendPhone}
+          className="w-full"
+        >
+          Send code by SMS
+        </Button>
+      </div>
+
+      <p className="text-xs text-slate-500 mt-3">
+        We&apos;ll send a 6-digit code to verify it&apos;s really you before you
+        upload anything.
+      </p>
+    </div>
+  )
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Step 2: OTP
+// ───────────────────────────────────────────────────────────────────────────
+
+function OtpStep(props: {
+  channel: Channel
+  maskedContact: string
+  code: string
+  errors: Record<string, string>
+  verifying: boolean
+  resendCountdown: number
+  onChangeCode: (v: string) => void
+  onVerify: () => void
+  onResend: () => void
+  onChangeContact: () => void
+}) {
+  const {
+    channel,
+    maskedContact,
+    code,
+    errors,
+    verifying,
+    resendCountdown,
+    onChangeCode,
+    onVerify,
+    onResend,
+    onChangeContact,
+  } = props
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onChangeContact}
+        className="text-sm text-slate-500 hover:text-navy inline-flex items-center gap-1 mb-3"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Change contact details
+      </button>
+
+      <p className="text-sm text-navy">
+        We sent a 6-digit code to{' '}
+        <strong>{maskedContact}</strong>
+        {channel === 'email' ? ' by email.' : ' by SMS.'}
+      </p>
+      <p className="text-xs text-slate-500 mt-1 mb-5">
+        It expires in 10 minutes. Check your spam folder if you don&apos;t see
+        it.
+      </p>
+
+      {errors.otp && (
+        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          {errors.otp}
+        </div>
+      )}
+
+      <Input
+        label="6-digit code"
+        type="text"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        maxLength={6}
+        value={code}
+        onChange={(e) => onChangeCode(e.target.value.replace(/\D/g, ''))}
+        placeholder="000000"
+        disabled={verifying}
+      />
+
+      <Button
+        type="button"
+        variant="primary"
+        size="lg"
+        isLoading={verifying}
+        disabled={verifying || code.length !== 6}
+        onClick={onVerify}
+        className="w-full mt-4"
+      >
+        Verify and continue
+      </Button>
+
+      <div className="mt-3 text-center">
+        <button
+          type="button"
+          onClick={onResend}
+          disabled={resendCountdown > 0 || verifying}
+          className="text-sm text-teal-600 hover:underline disabled:text-slate-400 disabled:no-underline disabled:cursor-not-allowed"
+        >
+          {resendCountdown > 0
+            ? `Resend code in ${resendCountdown}s`
+            : 'Resend code'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Step 3: Docs
+// ───────────────────────────────────────────────────────────────────────────
+
+function DocsStep(props: {
+  orderId: string
+  message: string
+  files: LocalFile[]
+  isDragging: boolean
+  phase: 'idle' | 'starting' | 'uploading' | 'finalizing' | 'error'
+  errors: Record<string, string>
+  fileInputRef: React.RefObject<HTMLInputElement>
+  onChange: {
+    setOrderId: (v: string) => void
+    setMessage: (v: string) => void
+  }
+  onDragOver: (e: React.DragEvent) => void
+  onDragLeave: (e: React.DragEvent) => void
+  onDrop: (e: React.DragEvent) => void
+  onPickFiles: (files: File[]) => void
+  onRemoveFile: (id: string) => void
+  onSubmit: (e: React.FormEvent) => void
+}) {
+  const {
+    orderId,
+    message,
+    files,
+    isDragging,
+    phase,
+    errors,
+    fileInputRef,
+    onChange,
+    onDragOver,
+    onDragLeave,
+    onDrop,
+    onPickFiles,
+    onRemoveFile,
+    onSubmit,
+  } = props
+  const submitting =
+    phase === 'starting' || phase === 'uploading' || phase === 'finalizing'
+
+  return (
+    <form onSubmit={onSubmit} noValidate>
       {errors.submit && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           {errors.submit}
@@ -334,38 +790,9 @@ export function SecureUploadForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Input
-          label="Full name"
-          required
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          error={errors.fullName}
-          autoComplete="name"
-          disabled={submitting}
-        />
-        <Input
-          label="Email"
-          required
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={errors.email}
-          autoComplete="email"
-          disabled={submitting}
-        />
-        <Input
-          label="Phone"
-          required
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          error={errors.phone}
-          autoComplete="tel"
-          disabled={submitting}
-        />
-        <Input
           label="Order or Quote ID (optional)"
           value={orderId}
-          onChange={(e) => setOrderId(e.target.value)}
+          onChange={(e) => onChange.setOrderId(e.target.value)}
           placeholder="If you already have one"
           disabled={submitting}
         />
@@ -375,7 +802,7 @@ export function SecureUploadForm() {
         <Textarea
           label="Message (optional)"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => onChange.setMessage(e.target.value)}
           placeholder="Anything we should know — source/target languages, deadlines, special instructions…"
           rows={4}
           disabled={submitting}
@@ -387,21 +814,9 @@ export function SecureUploadForm() {
           Documents <span className="text-red-500">*</span>
         </label>
         <div
-          onDragOver={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsDragging(true)
-          }}
-          onDragEnter={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsDragging(true)
-          }}
-          onDragLeave={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            setIsDragging(false)
-          }}
+          onDragOver={onDragOver}
+          onDragEnter={onDragOver}
+          onDragLeave={onDragLeave}
           onDrop={onDrop}
           onClick={() => !submitting && fileInputRef.current?.click()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all ${
@@ -416,7 +831,7 @@ export function SecureUploadForm() {
             accept={ACCEPTED_EXTENSIONS}
             multiple
             onChange={(e) => {
-              if (e.target.files) addFiles(Array.from(e.target.files))
+              if (e.target.files) onPickFiles(Array.from(e.target.files))
               e.target.value = ''
             }}
             className="hidden"
@@ -470,7 +885,7 @@ export function SecureUploadForm() {
                 {!submitting && (
                   <button
                     type="button"
-                    onClick={() => removeFile(f.id)}
+                    onClick={() => onRemoveFile(f.id)}
                     className="p-1 hover:bg-slate-200 rounded"
                     aria-label={`Remove ${f.file.name}`}
                   >
@@ -514,6 +929,10 @@ export function SecureUploadForm() {
   )
 }
 
+// ───────────────────────────────────────────────────────────────────────────
+// Helpers
+// ───────────────────────────────────────────────────────────────────────────
+
 function StatusIcon({ status }: { status: UploadStatus }) {
   switch (status) {
     case 'pending':
@@ -527,9 +946,23 @@ function StatusIcon({ status }: { status: UploadStatus }) {
   }
 }
 
-// Pulls a useful error message out of supabase-js's FunctionsHttpError, which
-// only exposes a Response in `error.context`. Falls back to data?.error or a
-// generic message.
+function inferMimeOk(name: string): boolean {
+  const ext = name.split('.').pop()?.toLowerCase()
+  return [
+    'pdf',
+    'jpg',
+    'jpeg',
+    'png',
+    'webp',
+    'tif',
+    'tiff',
+    'heic',
+    'heif',
+    'doc',
+    'docx',
+  ].includes(ext || '')
+}
+
 async function readFunctionError(res: {
   error?: { message?: string; context?: Response } | null
   data?: { error?: string } | null
