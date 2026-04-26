@@ -9,7 +9,12 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Redirects for clean URLs
+# Redirects
+[[redirects]]
+  from = "/quote"
+  to = "/get-quote"
+  status = 301
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
