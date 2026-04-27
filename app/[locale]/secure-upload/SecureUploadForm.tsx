@@ -607,7 +607,7 @@ function Stepper({ step }: { step: Step }) {
   ]
   const idx = items.findIndex((i) => i.key === step)
   return (
-    <div className="flex items-center gap-2 mb-6 text-xs">
+    <div className="flex items-center justify-center gap-2 mb-6 text-xs">
       {items.map((it, i) => {
         const active = i === idx
         const done = i < idx
@@ -671,17 +671,16 @@ function IdentityStep(props: {
           {errors.otp}
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label="Full name"
-          required
-          value={fullName}
-          onChange={(e) => onChange.setFullName(e.target.value)}
-          error={errors.fullName}
-          autoComplete="name"
-          disabled={otpSending}
-        />
-        <div className="hidden sm:block" />
+      <Input
+        label="Full name"
+        required
+        value={fullName}
+        onChange={(e) => onChange.setFullName(e.target.value)}
+        error={errors.fullName}
+        autoComplete="name"
+        disabled={otpSending}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <Input
           label="Email"
           required
@@ -710,10 +709,10 @@ function IdentityStep(props: {
         <Button
           type="button"
           variant="primary"
-          size="lg"
+          size="md"
           isLoading={otpSending}
           disabled={otpSending}
-          icon={<Mail className="w-5 h-5" />}
+          icon={<Mail className="w-4 h-4" />}
           onClick={props.onSendEmail}
           className="w-full"
         >
@@ -722,10 +721,10 @@ function IdentityStep(props: {
         <Button
           type="button"
           variant="secondary"
-          size="lg"
+          size="md"
           isLoading={otpSending}
           disabled={otpSending}
-          icon={<PhoneIcon className="w-5 h-5" />}
+          icon={<PhoneIcon className="w-4 h-4" />}
           onClick={props.onSendPhone}
           className="w-full"
         >
