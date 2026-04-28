@@ -9,11 +9,13 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Redirects for clean URLs
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# NOTE: The @netlify/plugin-nextjs plugin auto-generates all routing
+# (static, SSR, and /_next/image). A wildcard SPA-fallback redirect like
+# `from = "/*" to = "/index.html"` was previously here and silently broke
+# Next.js image optimization — every /_next/image request matched the
+# wildcard, bypassed the optimizer, and returned the original Supabase
+# upstream image unchanged (1.76 MB instead of the requested 256w/640w
+# variant). Don't add SPA-fallback rewrites in this file.
 
 # Cache static assets
 [[headers]]
