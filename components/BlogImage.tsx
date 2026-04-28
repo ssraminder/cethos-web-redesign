@@ -11,6 +11,7 @@ interface BlogImageProps {
   height?: number;
   className?: string;
   priority?: boolean;
+  sizes?: string;
 }
 
 const PLACEHOLDER_IMAGE = '/images/blog-placeholder.svg';
@@ -23,6 +24,7 @@ export default function BlogImage({
   height,
   className = '',
   priority = false,
+  sizes,
 }: BlogImageProps) {
   const [hasError, setHasError] = useState(false);
 
@@ -66,6 +68,7 @@ export default function BlogImage({
       src={imageSrc}
       alt={alt}
       fill
+      sizes={sizes || '100vw'}
       className={className}
       priority={priority}
       onError={handleError}
@@ -76,6 +79,7 @@ export default function BlogImage({
       alt={alt}
       width={width || 1200}
       height={height || 630}
+      sizes={sizes}
       className={className}
       priority={priority}
       onError={handleError}

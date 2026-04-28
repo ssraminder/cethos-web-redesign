@@ -188,6 +188,7 @@ export default async function BlogPostPage({
               alt={post.featured_image_alt || post.title}
               width={1200}
               height={630}
+              sizes="(max-width: 1024px) 100vw, 1024px"
               className="w-full h-auto rounded-xl shadow-2xl"
               priority
             />
@@ -390,6 +391,7 @@ export default async function BlogPostPage({
                         src={relatedPost.featured_image}
                         alt={relatedPost.title}
                         fill
+                        sizes="(max-width: 768px) 50vw, 25vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
