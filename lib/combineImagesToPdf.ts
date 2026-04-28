@@ -1,8 +1,9 @@
-import { PDFDocument } from 'pdf-lib';
-
 /**
  * Combines multiple image files (JPEG/PNG) into a single multi-page PDF.
  * Each image becomes a full-size page preserving its original dimensions.
+ *
+ * pdf-lib is dynamically imported so it isn't pulled into the public bundle
+ * for routes that mount the host form without ever combining images.
  */
 export async function combineImagesToPdf(
   images: File[],
@@ -12,6 +13,7 @@ export async function combineImagesToPdf(
     throw new Error('No images to combine');
   }
 
+  const { PDFDocument } = await import('pdf-lib');
   const pdfDoc = await PDFDocument.create();
   let successCount = 0;
 

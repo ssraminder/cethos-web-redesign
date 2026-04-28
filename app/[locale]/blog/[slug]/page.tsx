@@ -274,6 +274,26 @@ export default async function BlogPostPage({
                 hr: () => (
                   <hr className="my-8 border-t border-gray-200" />
                 ),
+                img: ({ src, alt, title }) => {
+                  if (!src) return null
+                  let optimized = src
+                  if (src.includes('/storage/v1/object/public/')) {
+                    optimized = src
+                      .replace('/storage/v1/object/public/', '/storage/v1/render/image/public/')
+                      + (src.includes('?') ? '&' : '?')
+                      + 'width=1200&quality=75&resize=contain'
+                  }
+                  return (
+                    <img
+                      src={optimized}
+                      alt={alt || ''}
+                      title={title}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-auto rounded-lg my-6"
+                    />
+                  )
+                },
               }}
             >
               {post.content}

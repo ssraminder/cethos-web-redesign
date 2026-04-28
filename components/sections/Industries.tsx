@@ -67,8 +67,8 @@ export function Industries() {
               variants={itemVariants}
               className="group cursor-pointer"
             >
-              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-slate-100 hover:border-teal-200 hover:shadow-soft transition-all duration-300">
-                <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 mb-4 group-hover:scale-110 group-hover:bg-teal-100 transition-all duration-300">
+              <div className="flex flex-col items-center text-center p-6 rounded-2xl bg-white border border-slate-100 hover:border-teal-200 hover:shadow-soft transition-[border-color,box-shadow] duration-300">
+                <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center text-teal-600 mb-4 group-hover:scale-110 group-hover:bg-teal-100 transition-[transform,background-color] duration-300">
                   <industry.icon size={32} />
                 </div>
                 <h3 className="font-semibold text-navy mb-2">{t(industry.nameKey)}</h3>

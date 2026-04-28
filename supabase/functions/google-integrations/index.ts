@@ -409,6 +409,85 @@ async function handleGAds(action: string, params: any): Promise<any> {
   }
 }
 
+// --- PageSpeed Insights (lab + CrUX field via PSI v5) ---
+async function handlePSI(action: string, params: any): Promise<any> {
+  const apiKey = Deno.env.get("GOOGLE_API_KEY") || Deno.env.get("PSI_API_KEY") || "";
+  if (action !== "run") return { status: 400, data: { error: `Unknown PSI action: ${action}` } };
+  const url = params.url;
+  if (!url) return { status: 400, data: { error: "Missing url" } };
+  const strategy = params.strategy || "mobile";
+  const cats: string[] = params.categories || ["performance"];
+  const qs = new URLSearchParams({ url, strategy });
+  for (const c of cats) qs.append("category", c);
+  if (apiKey) qs.set("key", apiKey);
+  if (params.locale) qs.set("locale", params.locale);
+  const res = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${qs}`);
+  const text = await res.text();
+  let parsed: any;
+  try { parsed = JSON.parse(text); } catch { parsed = text; }
+  if (!res.ok) return { status: res.status, data: parsed };
+  const lhr = parsed.lighthouseResult || {};
+  const audits = lhr.audits || {};
+  const num = (k: string) => audits[k]?.numericValue ?? null;
+  const auditSummary = (id: string) => {
+    const a = audits[id];
+    if (!a) return null;
+    return { id, title: a.title, score: a.score, displayValue: a.displayValue, savings_ms: a.numericValue ?? null };
+  };
+  const fieldOf = (le: any) => {
+    const m = le?.metrics || {};
+    const get = (k: string) => m[k] ? { p75: m[k].percentile, category: m[k].category } : null;
+    return {
+      overall_category: le?.overall_category || null,
+      lcp: get("LARGEST_CONTENTFUL_PAINT_MS"),
+      inp: get("INTERACTION_TO_NEXT_PAINT"),
+      cls: get("CUMULATIVE_LAYOUT_SHIFT_SCORE"),
+      fcp: get("FIRST_CONTENTFUL_PAINT_MS"),
+      ttfb: get("EXPERIMENTAL_TIME_TO_FIRST_BYTE"),
+    };
+  };
+  const oppIds = ["render-blocking-resources","uses-text-compression","uses-optimized-images","modern-image-formats","unused-javascript","unused-css-rules","uses-rel-preconnect","third-party-summary","largest-contentful-paint-element","layout-shift-elements","long-tasks","non-composited-animations","unminified-javascript","unminified-css","duplicated-javascript","legacy-javascript","prioritize-lcp-image","total-byte-weight","mainthread-work-breakdown","bootup-time","dom-size","critical-request-chains","redirects","server-response-time","uses-responsive-images","efficient-animated-content","offscreen-images","preload-lcp-image"];
+  const auditList = oppIds.map(auditSummary).filter((a): a is NonNullable<typeof a> => a !== null && (a.score === null || (a.score ?? 1) < 0.9));
+  return { status: 200, data: {
+    score: lhr.categories?.performance?.score ?? null,
+    lab: {
+      lcp_ms: num("largest-contentful-paint"),
+      cls: num("cumulative-layout-shift"),
+      tbt_ms: num("total-blocking-time"),
+      inp_ms: num("interaction-to-next-paint"),
+      fcp_ms: num("first-contentful-paint"),
+      ttfb_ms: num("server-response-time"),
+      speed_index_ms: num("speed-index"),
+    },
+    field_url: fieldOf(parsed.loadingExperience),
+    field_origin: fieldOf(parsed.originLoadingExperience),
+    flagged_audits: auditList,
+    analysisUTCTimestamp: lhr.analysisUTCTimestamp || null,
+  } };
+}
+
+// --- CrUX (28-day rolling field data) ---
+async function handleCrUX(action: string, params: any): Promise<any> {
+  const apiKey = Deno.env.get("GOOGLE_API_KEY") || Deno.env.get("CRUX_API_KEY") || "";
+  if (!apiKey) return { status: 400, data: { error: "GOOGLE_API_KEY required for CrUX API" } };
+  if (action !== "query" && action !== "query_history") {
+    return { status: 400, data: { error: `Unknown CrUX action: ${action}` } };
+  }
+  const endpoint = action === "query_history" ? "queryHistoryRecord" : "queryRecord";
+  const body: any = { formFactor: params.form_factor || "PHONE" };
+  if (params.url) body.url = params.url;
+  else if (params.origin) body.origin = params.origin;
+  else return { status: 400, data: { error: "Missing url or origin" } };
+  if (params.metrics) body.metrics = params.metrics;
+  const res = await fetch(`https://chromeuxreport.googleapis.com/v1/records:${endpoint}?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  try { return { status: res.status, data: JSON.parse(text) }; } catch { return { status: res.status, data: text }; }
+}
+
 // --- Google Tag Manager ---
 async function handleGTM(action: string, params: any): Promise<any> {
   const base = "https://tagmanager.googleapis.com/tagmanager/v2";
@@ -516,7 +595,7 @@ Deno.serve(async (req: Request) => {
           status: "ok",
           version: 2,
           project: "cethos-main-web",
-          platforms: ["gbp", "ga", "gsc", "gads", "gtm", "diag"],
+          platforms: ["gbp", "ga", "gsc", "gads", "gtm", "psi", "crux", "diag"],
           ads_version: GADS_API_VERSION,
           ga_property: GA_PROPERTY_CETHOS,
           gsc_site: GSC_SITE_CETHOS,
@@ -577,6 +656,12 @@ Deno.serve(async (req: Request) => {
         break;
       case "gtm":
         result = await handleGTM(action, params);
+        break;
+      case "psi":
+        result = await handlePSI(action, params);
+        break;
+      case "crux":
+        result = await handleCrUX(action, params);
         break;
       default:
         result = { status: 400, data: { error: `Unknown platform: ${platform}` } };

@@ -76,7 +76,7 @@
   /* Card styles - Figma matched */
   .card {
     @apply bg-white rounded-lg p-8 border border-[#E5E7EB] shadow-card
-           hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300;
+           hover:shadow-card-hover hover:-translate-y-1 transition-[transform,box-shadow] duration-300;
   }
 
   /* Icon container */
@@ -120,10 +120,10 @@
            focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/20 focus:outline-none;
   }
 
-  /* Link with arrow */
+  /* Link with arrow — gap transition removed (non-composited; caused layout thrash) */
   .link-arrow {
     @apply text-sm text-[#0891B2] font-medium inline-flex items-center gap-1
-           hover:gap-2 transition-all duration-200;
+           transition-colors duration-200;
   }
 
   /* Gradient backgrounds */
