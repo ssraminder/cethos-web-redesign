@@ -32,7 +32,7 @@ const sizes: Record<ButtonSize, string> = {
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', href, icon, showArrow, isLoading, children, className = '', disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
+    const baseStyles = 'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-[background-color,color,border-color,box-shadow,transform,opacity] duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
     const classes = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`
 
     const content = (

@@ -79,7 +79,7 @@ export function Services() {
             return (
               <motion.div key={service.titleKey} variants={itemVariants}>
                 <Link href={service.href} className="block h-full group">
-                  <div className="bg-white rounded-lg p-8 border border-[#E5E7EB] shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 h-full flex flex-col cursor-pointer">
+                  <div className="bg-white rounded-lg p-8 border border-[#E5E7EB] shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-[transform,box-shadow] duration-300 h-full flex flex-col cursor-pointer">
                     {/* Icon */}
                     <div className="w-12 h-12 text-[#0891B2] mb-6">
                       <Icon className="w-12 h-12" strokeWidth={1.5} />
@@ -96,7 +96,7 @@ export function Services() {
                     </p>
 
                     {/* Learn More link */}
-                    <div className="flex items-center gap-1 text-sm text-[#0891B2] font-medium group-hover:gap-2 transition-all">
+                    <div className="flex items-center gap-1 text-sm text-[#0891B2] font-medium">
                       <span>{t('learn_more')}</span>
                       <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
                     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 declare global {
   namespace JSX {
@@ -96,38 +96,57 @@ export function CethosHeader({ currentSite, hideCta, theme, ctaType = 'login', l
 
 export function CethosFooter({ minimal, hideIndustries, locale }: CethosFooterProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const placeholderRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    // Check if already loaded
+    // Header already loaded the script — reuse it
     if (customElements.get('cethos-footer')) {
       setIsLoaded(true);
       return;
     }
 
-    // Check if script already exists
-    const existingScript = document.querySelector('script[src*="cethos-components.js"]');
-    if (existingScript) {
-      if (customElements.get('cethos-footer')) {
-        setIsLoaded(true);
-      } else {
-        existingScript.addEventListener('load', () => setIsLoaded(true));
+    const loadScript = () => {
+      const existingScript = document.querySelector('script[src*="cethos-components.js"]');
+      if (existingScript) {
+        if (customElements.get('cethos-footer')) {
+          setIsLoaded(true);
+        } else {
+          existingScript.addEventListener('load', () => setIsLoaded(true));
+        }
+        return;
       }
-      return;
+      const script = document.createElement('script');
+      script.src = '/embed/cethos-components.js';
+      script.async = true;
+      script.onload = () => setIsLoaded(true);
+      document.head.appendChild(script);
+    };
+
+    // Defer load until the footer placeholder is near the viewport.
+    // Falls back to a 2s deferred load if IntersectionObserver isn't available.
+    if (typeof IntersectionObserver === 'undefined' || !placeholderRef.current) {
+      const t = window.setTimeout(loadScript, 2000);
+      return () => window.clearTimeout(t);
     }
 
-    // Load the script
-    const script = document.createElement('script');
-    script.src = '/embed/cethos-components.js';
-    script.async = true;
-    script.onload = () => setIsLoaded(true);
-    document.head.appendChild(script);
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          loadScript();
+        }
+      },
+      { rootMargin: '600px' },
+    );
+    io.observe(placeholderRef.current);
+    return () => io.disconnect();
   }, []);
 
   // Show placeholder during SSR and initial load
   if (!isLoaded) {
     if (minimal) {
       return (
-        <footer className="bg-[#0C2340] py-6">
+        <footer ref={placeholderRef} className="bg-[#0C2340] py-6">
           <div className="max-w-[1200px] mx-auto px-8 flex items-center justify-between">
             <div className="animate-pulse bg-gray-700 h-4 w-48 rounded" />
             <div className="flex gap-4">
@@ -140,7 +159,7 @@ export function CethosFooter({ minimal, hideIndustries, locale }: CethosFooterPr
     }
 
     return (
-      <footer className="bg-[#0C2340] py-16">
+      <footer ref={placeholderRef} className="bg-[#0C2340] py-16">
         <div className="max-w-[1200px] mx-auto px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div className="lg:col-span-1">

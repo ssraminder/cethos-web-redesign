@@ -25,7 +25,7 @@ const variants = {
 
 export function Card({ children, className = '', hover = false, padding = 'md', variant = 'default' }: CardProps) {
   const baseStyles = 'rounded-2xl'
-  const hoverStyles = hover ? 'transition-all duration-300 hover:-translate-y-1 hover:shadow-medium' : ''
+  const hoverStyles = hover ? 'transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-medium' : ''
   const classes = `${baseStyles} ${paddings[padding]} ${variants[variant]} ${hoverStyles} ${className}`
 
   if (hover) {
