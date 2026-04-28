@@ -1,4 +1,6 @@
-import { PDFDocument } from 'pdf-lib';
+// pdf-lib + pdfjs-dist are loaded lazily inside compressPdfIfNeeded so they
+// don't ship in the public bundle for routes that mount this file's host
+// component (the certified quote form) without ever calling the function.
 
 const COMPRESSION_THRESHOLD_BYTES = 3 * 1024 * 1024; // 3MB
 const JPEG_QUALITY = 0.80;
@@ -12,8 +14,12 @@ export async function compressPdfIfNeeded(file: File): Promise<File> {
   try {
     console.log(`Compressing ${file.name} (${(file.size / 1024 / 1024).toFixed(1)}MB)...`);
 
-    // Dynamic import to avoid SSR issues (pdfjs-dist uses DOMMatrix which doesn't exist in Node.js)
-    const pdfjsLib = await import('pdfjs-dist');
+    // Dynamic imports keep pdf-lib (~371 KiB) and pdfjs-dist (~394 KiB) out of
+    // the main client bundle until the user actually uploads a >3 MB PDF.
+    const [{ PDFDocument }, pdfjsLib] = await Promise.all([
+      import('pdf-lib'),
+      import('pdfjs-dist'),
+    ]);
     pdfjsLib.GlobalWorkerOptions.workerSrc =
       'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
