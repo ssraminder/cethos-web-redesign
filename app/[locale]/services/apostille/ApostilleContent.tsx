@@ -401,7 +401,7 @@ export default function ApostilleContent() {
             ))}
           </div>
           <p className="text-center text-slate-600 text-sm max-w-2xl mx-auto">
-            For non-Hague Convention countries, we provide full embassy legalization services through Global Affairs Canada and the destination country's consulate.
+            For non-Hague Convention countries, we provide full embassy legalization services through Global Affairs Canada and the destination country&apos;s consulate.
           </p>
         </Container>
       </section>
