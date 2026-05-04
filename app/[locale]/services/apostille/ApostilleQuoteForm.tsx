@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, AlertCircle, Loader2, Phone, Mail } from 'lucide-react'
+import { CheckCircle, AlertCircle, Loader2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { getAdTrackingPayload } from '@/lib/ad-tracking'
 import { trackGenerateLead } from '@/lib/tracking'
 
@@ -44,17 +44,30 @@ const PROVINCES = [
   { value: 'unsure', label: 'Not sure' },
 ]
 
+const STEPS = [
+  { num: 1, label: 'Documents' },
+  { num: 2, label: 'Shipping' },
+  { num: 3, label: 'Contact' },
+]
+
 export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: ApostilleQuoteFormProps) {
+  const [currentStep, setCurrentStep] = useState(1)
+
+  // Step 1
+  const [documentTypes, setDocumentTypes] = useState<string[]>([])
+  const [issuingProvince, setIssuingProvince] = useState('')
+  const [numDocuments, setNumDocuments] = useState('1')
+  const [destinationCountry, setDestinationCountry] = useState('')
+
+  // Step 2
+  const [dropoffMode, setDropoffMode] = useState<'calgary_office' | 'courier' | ''>('')
+  const [needsNotarization, setNeedsNotarization] = useState(false)
+  const [needsTranslation, setNeedsTranslation] = useState(false)
+
+  // Step 3
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [documentTypes, setDocumentTypes] = useState<string[]>([])
-  const [issuingProvince, setIssuingProvince] = useState('')
-  const [destinationCountry, setDestinationCountry] = useState('')
-  const [numDocuments, setNumDocuments] = useState('1')
-  const [needsNotarization, setNeedsNotarization] = useState(false)
-  const [needsTranslation, setNeedsTranslation] = useState(false)
-  const [dropoffMode, setDropoffMode] = useState<'calgary_office' | 'courier' | ''>('')
   const [additionalNotes, setAdditionalNotes] = useState('')
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -70,21 +83,45 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
     })
   }, [])
 
-  const validate = (): boolean => {
+  const validateStep1 = (): boolean => {
     const next: Record<string, string> = {}
-    if (!fullName.trim()) next.fullName = 'Please enter your name.'
-    if (!email.trim()) next.email = 'Please enter your email.'
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = 'Please enter a valid email.'
-    if (!phone.trim()) next.phone = 'Please enter your phone number.'
     if (documentTypes.length === 0) next.documentTypes = 'Select at least one document type.'
     if (!issuingProvince) next.issuingProvince = 'Select the issuing province or authority.'
     setErrors(next)
     return Object.keys(next).length === 0
   }
 
+  const validateStep2 = (): boolean => {
+    const next: Record<string, string> = {}
+    if (!dropoffMode) next.dropoffMode = 'Choose drop-off or courier.'
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  const validateStep3 = (): boolean => {
+    const next: Record<string, string> = {}
+    if (!fullName.trim()) next.fullName = 'Please enter your name.'
+    if (!email.trim()) next.email = 'Please enter your email.'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = 'Please enter a valid email.'
+    if (!phone.trim()) next.phone = 'Please enter your phone number.'
+    setErrors(next)
+    return Object.keys(next).length === 0
+  }
+
+  const goNext = () => {
+    if (currentStep === 1 && !validateStep1()) return
+    if (currentStep === 2 && !validateStep2()) return
+    setCurrentStep((s) => Math.min(3, s + 1))
+  }
+
+  const goBack = () => {
+    setErrors({})
+    setCurrentStep((s) => Math.max(1, s - 1))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!validate() || isSubmitting) return
+    if (!validateStep3() || isSubmitting) return
 
     setIsSubmitting(true)
     setErrors({})
@@ -156,9 +193,48 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
   return (
     <form onSubmit={handleSubmit}>
       <h3 className="text-xl font-bold text-[#0C2340] mb-1">Get Your Apostille Quote</h3>
-      <p className="text-gray-600 text-sm mb-6">
-        Tell us about your documents and we&apos;ll confirm scope, turnaround, and exact price within one business day.
+      <p className="text-gray-600 text-sm mb-5">
+        Three quick steps. We&apos;ll confirm scope, turnaround, and exact price within one business day.
       </p>
+
+      {/* Step indicator */}
+      <div className="flex items-center justify-between mb-6">
+        {STEPS.map((step, idx) => {
+          const isActive = currentStep === step.num
+          const isComplete = currentStep > step.num
+          return (
+            <div key={step.num} className="flex items-center flex-1">
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                    isComplete
+                      ? 'bg-green-500 text-white'
+                      : isActive
+                      ? 'bg-[#0891B2] text-white'
+                      : 'bg-slate-200 text-slate-500'
+                  }`}
+                >
+                  {isComplete ? <CheckCircle className="w-4 h-4" /> : step.num}
+                </div>
+                <span
+                  className={`text-xs mt-1 font-medium ${
+                    isActive ? 'text-[#0891B2]' : isComplete ? 'text-green-600' : 'text-slate-400'
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </div>
+              {idx < STEPS.length - 1 && (
+                <div
+                  className={`flex-1 h-0.5 mx-2 mb-5 transition-colors ${
+                    isComplete ? 'bg-green-500' : 'bg-slate-200'
+                  }`}
+                />
+              )}
+            </div>
+          )
+        })}
+      </div>
 
       <AnimatePresence>
         {errors.submit && (
@@ -174,214 +250,315 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
         )}
       </AnimatePresence>
 
-      {/* Contact */}
-      <div className="space-y-3 mb-5">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            Full Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            disabled={isSubmitting}
-            className={`w-full px-3 py-2.5 border rounded-lg text-[16px] sm:text-sm ${
-              errors.fullName ? 'border-red-300' : 'border-slate-300'
-            } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
-            autoComplete="name"
-          />
-          {errors.fullName && <p className="text-xs text-red-600 mt-1">{errors.fullName}</p>}
-        </div>
+      {/* STEP 1: DOCUMENTS */}
+      <AnimatePresence mode="wait">
+        {currentStep === 1 && (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Document Type(s) <span className="text-red-500">*</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {DOCUMENT_TYPES.map((type) => {
+                  const selected = documentTypes.includes(type)
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => toggleDocumentType(type)}
+                      className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                        selected
+                          ? 'bg-[#0891B2] text-white border-[#0891B2]'
+                          : 'bg-white text-slate-700 border-slate-300 hover:border-[#0891B2]'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  )
+                })}
+              </div>
+              {errors.documentTypes && <p className="text-xs text-red-600 mt-1">{errors.documentTypes}</p>}
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isSubmitting}
-              className={`w-full px-3 py-2.5 border rounded-lg text-[16px] sm:text-sm ${
-                errors.email ? 'border-red-300' : 'border-slate-300'
-              } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
-              autoComplete="email"
-            />
-            {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Phone <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              disabled={isSubmitting}
-              className={`w-full px-3 py-2.5 border rounded-lg text-[16px] sm:text-sm ${
-                errors.phone ? 'border-red-300' : 'border-slate-300'
-              } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
-              autoComplete="tel"
-            />
-            {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
-          </div>
-        </div>
-      </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Issuing Province / Authority <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={issuingProvince}
+                  onChange={(e) => {
+                    setIssuingProvince(e.target.value)
+                    setErrors((prev) => {
+                      const next = { ...prev }
+                      delete next.issuingProvince
+                      return next
+                    })
+                  }}
+                  className={`w-full px-3 py-2.5 border rounded-lg bg-white text-[16px] sm:text-sm ${
+                    errors.issuingProvince ? 'border-red-300' : 'border-slate-300'
+                  } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
+                >
+                  {PROVINCES.map((p) => (
+                    <option key={p.value} value={p.value}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.issuingProvince && <p className="text-xs text-red-600 mt-1">{errors.issuingProvince}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Number of Documents</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={numDocuments}
+                  onChange={(e) => setNumDocuments(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[16px] sm:text-sm focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10"
+                />
+              </div>
+            </div>
 
-      {/* Document Types */}
-      <div className="mb-5">
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">
-          Document Type(s) <span className="text-red-500">*</span>
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {DOCUMENT_TYPES.map((type) => {
-            const selected = documentTypes.includes(type)
-            return (
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Destination Country</label>
+              <input
+                type="text"
+                value={destinationCountry}
+                onChange={(e) => setDestinationCountry(e.target.value)}
+                placeholder="e.g. Germany, India, UAE"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[16px] sm:text-sm focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10"
+              />
+            </div>
+
+            <div className="flex justify-end">
               <button
-                key={type}
                 type="button"
-                onClick={() => toggleDocumentType(type)}
-                disabled={isSubmitting}
-                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                  selected
-                    ? 'bg-[#0891B2] text-white border-[#0891B2]'
-                    : 'bg-white text-slate-700 border-slate-300 hover:border-[#0891B2]'
-                } ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={goNext}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold transition-colors"
               >
-                {type}
+                Next: Shipping <ArrowRight className="w-4 h-4" />
               </button>
-            )
-          })}
-        </div>
-        {errors.documentTypes && <p className="text-xs text-red-600 mt-1">{errors.documentTypes}</p>}
-      </div>
-
-      {/* Issuing Province + Destination + Count */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">
-            Issuing Province / Authority <span className="text-red-500">*</span>
-          </label>
-          <select
-            value={issuingProvince}
-            onChange={(e) => setIssuingProvince(e.target.value)}
-            disabled={isSubmitting}
-            className={`w-full px-3 py-2.5 border rounded-lg bg-white text-[16px] sm:text-sm ${
-              errors.issuingProvince ? 'border-red-300' : 'border-slate-300'
-            } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
-          >
-            {PROVINCES.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-          {errors.issuingProvince && <p className="text-xs text-red-600 mt-1">{errors.issuingProvince}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Destination Country</label>
-          <input
-            type="text"
-            value={destinationCountry}
-            onChange={(e) => setDestinationCountry(e.target.value)}
-            disabled={isSubmitting}
-            placeholder="e.g. Germany, India, UAE"
-            className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[16px] sm:text-sm focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Number of Documents</label>
-          <input
-            type="number"
-            min={1}
-            value={numDocuments}
-            onChange={(e) => setNumDocuments(e.target.value)}
-            disabled={isSubmitting}
-            className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[16px] sm:text-sm focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Drop-off / Courier</label>
-          <select
-            value={dropoffMode}
-            onChange={(e) => setDropoffMode(e.target.value as 'calgary_office' | 'courier' | '')}
-            disabled={isSubmitting}
-            className="w-full px-3 py-2.5 border border-slate-300 rounded-lg bg-white text-[16px] sm:text-sm focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10"
-          >
-            <option value="">Select…</option>
-            <option value="calgary_office">Calgary drop-off (in person)</option>
-            <option value="courier">Prepaid courier from my city</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Add-ons */}
-      <div className="mb-5 space-y-2">
-        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={needsNotarization}
-            onChange={(e) => setNeedsNotarization(e.target.checked)}
-            disabled={isSubmitting}
-            className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
-          />
-          I need notarization before apostille
-        </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={needsTranslation}
-            onChange={(e) => setNeedsTranslation(e.target.checked)}
-            disabled={isSubmitting}
-            className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
-          />
-          I also need certified translation
-        </label>
-      </div>
-
-      {/* Notes */}
-      <div className="mb-5">
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Additional Notes (optional)</label>
-        <textarea
-          value={additionalNotes}
-          onChange={(e) => setAdditionalNotes(e.target.value)}
-          disabled={isSubmitting}
-          rows={3}
-          placeholder="Deadline, special instructions, embassy requirements…"
-          className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[16px] sm:text-sm focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10 resize-y"
-        />
-      </div>
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={`w-full py-4 rounded-lg font-semibold text-white transition-all flex items-center justify-center gap-2 ${
-          isSubmitting ? 'bg-slate-300 cursor-not-allowed' : 'bg-[#0891B2] hover:bg-[#06B6D4]'
-        }`}
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Submitting…
-          </>
-        ) : (
-          <>
-            Get Apostille Quote<span className="text-lg">→</span>
-          </>
+            </div>
+          </motion.div>
         )}
-      </button>
 
-      <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-600">
+        {/* STEP 2: SHIPPING */}
+        {currentStep === 2 && (
+          <motion.div
+            key="step2"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                How will you send your documents? <span className="text-red-500">*</span>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDropoffMode('calgary_office')
+                    setErrors((prev) => {
+                      const next = { ...prev }
+                      delete next.dropoffMode
+                      return next
+                    })
+                  }}
+                  className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                    dropoffMode === 'calgary_office'
+                      ? 'border-[#0891B2] bg-[#E0F2FE]'
+                      : 'border-slate-200 hover:border-[#0891B2]'
+                  }`}
+                >
+                  <p className="font-semibold text-[#0C2340]">Calgary drop-off</p>
+                  <p className="text-xs text-slate-600 mt-1">421 7 Avenue SW, Floor 30. Saves the inbound courier cost.</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDropoffMode('courier')
+                    setErrors((prev) => {
+                      const next = { ...prev }
+                      delete next.dropoffMode
+                      return next
+                    })
+                  }}
+                  className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                    dropoffMode === 'courier'
+                      ? 'border-[#0891B2] bg-[#E0F2FE]'
+                      : 'border-slate-200 hover:border-[#0891B2]'
+                  }`}
+                >
+                  <p className="font-semibold text-[#0C2340]">Prepaid courier from my city</p>
+                  <p className="text-xs text-slate-600 mt-1">We email you a Purolator label. Drop at any counter, fully tracked.</p>
+                </button>
+              </div>
+              {errors.dropoffMode && <p className="text-xs text-red-600 mt-1">{errors.dropoffMode}</p>}
+            </div>
+
+            <div className="mb-5 space-y-2">
+              <p className="text-sm font-medium text-slate-700 mb-1">Add-ons (optional)</p>
+              <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={needsNotarization}
+                  onChange={(e) => setNeedsNotarization(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
+                />
+                I need notarization before apostille
+              </label>
+              <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={needsTranslation}
+                  onChange={(e) => setNeedsTranslation(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-300 text-[#0891B2] focus:ring-[#0891B2]"
+                />
+                I also need certified translation
+              </label>
+            </div>
+
+            <div className="flex justify-between">
+              <button
+                type="button"
+                onClick={goBack}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold transition-colors"
+              >
+                Next: Contact <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* STEP 3: CONTACT */}
+        {currentStep === 3 && (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="space-y-3 mb-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  disabled={isSubmitting}
+                  className={`w-full px-3 py-2.5 border rounded-lg text-[16px] sm:text-sm ${
+                    errors.fullName ? 'border-red-300' : 'border-slate-300'
+                  } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
+                  autoComplete="name"
+                />
+                {errors.fullName && <p className="text-xs text-red-600 mt-1">{errors.fullName}</p>}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isSubmitting}
+                    className={`w-full px-3 py-2.5 border rounded-lg text-[16px] sm:text-sm ${
+                      errors.email ? 'border-red-300' : 'border-slate-300'
+                    } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
+                    autoComplete="email"
+                  />
+                  {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    Phone <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={isSubmitting}
+                    className={`w-full px-3 py-2.5 border rounded-lg text-[16px] sm:text-sm ${
+                      errors.phone ? 'border-red-300' : 'border-slate-300'
+                    } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
+                    autoComplete="tel"
+                  />
+                  {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Additional Notes (optional)</label>
+              <textarea
+                value={additionalNotes}
+                onChange={(e) => setAdditionalNotes(e.target.value)}
+                disabled={isSubmitting}
+                rows={3}
+                placeholder="Deadline, special instructions, embassy requirements…"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-[16px] sm:text-sm focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10 resize-y"
+              />
+            </div>
+
+            <div className="flex justify-between gap-3">
+              <button
+                type="button"
+                onClick={goBack}
+                disabled={isSubmitting}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-colors ${
+                  isSubmitting ? 'bg-slate-300 cursor-not-allowed' : 'bg-[#0891B2] hover:bg-[#06B6D4]'
+                }`}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Submitting…
+                  </>
+                ) : (
+                  <>
+                    Get My Apostille Quote <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-600">
         <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />Hague Convention</span>
         <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />Tracked courier both ways</span>
         <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />From $149</span>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-slate-200 text-center">
+      <div className="mt-5 pt-4 border-t border-slate-200 text-center">
         <p className="text-sm text-slate-600">
           Prefer to talk?{' '}
           <a href="tel:5876000786" className="text-[#0891B2] font-medium hover:underline">(587) 600-0786</a>{' '}

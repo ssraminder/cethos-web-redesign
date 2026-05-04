@@ -628,6 +628,10 @@ export default function CertifiedTranslationContent() {
       <section className="py-12 bg-slate-50 border-t border-slate-200">
         <Container>
           <div className="flex flex-wrap justify-center gap-6 text-sm">
+            <Link href="/services/apostille" className="text-[#0891B2] font-medium hover:underline">
+              Apostille Services
+            </Link>
+            <span className="text-slate-300 hidden md:inline">|</span>
             <Link href="/services/interpretation" className="text-[#0891B2] font-medium hover:underline">
               {tCta('related_interpreter')}
             </Link>

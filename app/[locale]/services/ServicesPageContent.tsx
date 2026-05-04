@@ -22,6 +22,7 @@ import {
   Play,
   Scale,
   Flag,
+  Stamp,
 } from 'lucide-react'
 import { Container, Card, SectionHeading } from '@/components/ui'
 import { useTranslations } from 'next-intl'
@@ -71,6 +72,7 @@ export default function ServicesPageContent() {
   // Ensures /services/business, /services/multimedia, /services/legal, /services/canadian, /services/languages
   // are discoverable from the hub even before their translation keys exist in Supabase.
   const additionalServices = [
+    { name: 'Apostille Services', href: '/services/apostille', icon: Stamp },
     { name: 'Business Translation', href: '/services/business', icon: Building2 },
     { name: 'Legal Translation', href: '/services/legal', icon: Scale },
     { name: 'Multimedia Translation', href: '/services/multimedia', icon: Play },

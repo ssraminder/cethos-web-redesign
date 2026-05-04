@@ -12,6 +12,7 @@ import {
   Mic,
   Languages,
   ArrowRight,
+  Stamp,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -39,9 +40,10 @@ const itemVariants = {
 export function Services() {
   const t = useTranslations('homepage.services')
 
-  const services = [
+  const services: Array<{ titleKey?: string; descKey?: string; title?: string; desc?: string; icon: typeof FlaskConical; href: string }> = [
     { titleKey: 'lifesciences_title', descKey: 'lifesciences_desc', icon: FlaskConical, href: '/services/lifesciences' },
     { titleKey: 'certified_title', descKey: 'certified_desc', icon: FileCheck, href: '/services/certified' },
+    { title: 'Apostille Services', desc: 'Hague Convention authentication for Canadian documents — we handle GAC and provincial submissions. Tracked courier both ways.', icon: Stamp, href: '/services/apostille' },
     { titleKey: 'interpretation_title', descKey: 'interpretation_desc', icon: Mic, href: '/services/interpretation' },
     { titleKey: 'languages_title', descKey: 'languages_desc', icon: Languages, href: '/services/languages' },
     { titleKey: 'business_title', descKey: 'business_desc', icon: Building2, href: '/services/business' },
@@ -77,7 +79,7 @@ export function Services() {
           {services.map((service) => {
             const Icon = service.icon
             return (
-              <motion.div key={service.titleKey} variants={itemVariants}>
+              <motion.div key={service.href} variants={itemVariants}>
                 <Link href={service.href} className="block h-full group">
                   <div className="bg-white rounded-lg p-8 border border-[#E5E7EB] shadow-[0_4px_6px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_25px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-[transform,box-shadow] duration-300 h-full flex flex-col cursor-pointer">
                     {/* Icon */}
@@ -87,12 +89,12 @@ export function Services() {
 
                     {/* Title */}
                     <h3 className="text-xl font-semibold text-[#0C2340] mb-3">
-                      {t(service.titleKey)}
+                      {service.titleKey ? t(service.titleKey) : service.title}
                     </h3>
 
                     {/* Description */}
                     <p className="text-[#4B5563] mb-6 flex-grow">
-                      {t(service.descKey)}
+                      {service.descKey ? t(service.descKey) : service.desc}
                     </p>
 
                     {/* Learn More link */}

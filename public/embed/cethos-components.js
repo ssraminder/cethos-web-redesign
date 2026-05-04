@@ -51,6 +51,7 @@
     services: [
       { label: 'Life Sciences Translation', href: '/services/lifesciences', description: 'Clinical trials, regulatory, pharmaceutical' },
       { label: 'Certified Translation', href: '/services/certified', description: 'Immigration, legal documents' },
+      { label: 'Apostille Services', href: '/services/apostille', description: 'Hague Convention authentication, Canada-wide' },
       { label: 'Business Translation', href: '/services/business', description: 'Corporate and commercial documents' },
       { label: 'Software Localization', href: '/services/software', description: 'Apps, websites, and software' },
       { label: 'Multimedia Translation', href: '/services/multimedia', description: 'Video, audio, and subtitles' },
@@ -78,6 +79,7 @@
       services: [
         { label: 'Life Sciences', href: '/services/lifesciences' },
         { label: 'Certified Translation', href: '/services/certified' },
+        { label: 'Apostille Services', href: '/services/apostille' },
         { label: 'Business', href: '/services/business' },
         { label: 'Software', href: '/services/software' },
         { label: 'Multimedia', href: '/services/multimedia' },
