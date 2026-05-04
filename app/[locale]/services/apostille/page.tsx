@@ -3,7 +3,7 @@ import ApostilleContent from './ApostilleContent'
 
 export const metadata: Metadata = {
   title: 'Apostille Services Canada | Hague Convention Authentication | Cethos',
-  description: "Canada-wide apostille services for documents used abroad. Hague Apostille Convention authentication for Canadian birth certificates, marriage certificates, education credentials, police checks, and corporate documents. Fast turnaround, all provinces.",
+  description: "Canada-wide apostille concierge. We collect, notarize, submit to Global Affairs Canada or the correct provincial Competent Authority, and return your authenticated documents — tracked courier both ways. From any province. From $149.",
   keywords: [
     'apostille canada',
     'apostille services canada',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Apostille Services Canada | Hague Convention Authentication',
-    description: 'Canada-wide apostille services. Hague Convention authentication for Canadian documents used abroad. Fast turnaround, all provinces.',
+    description: 'Canada-wide apostille concierge. We submit to Global Affairs Canada or the correct provincial authority on your behalf. Tracked courier both ways. From $149.',
     url: 'https://cethos.com/services/apostille',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',
@@ -60,7 +60,7 @@ export default function ApostillePage() {
             serviceType: 'Document Apostille and Authentication',
             offers: {
               '@type': 'Offer',
-              price: '99.00',
+              price: '149.00',
               priceCurrency: 'CAD',
               priceSpecification: {
                 '@type': 'PriceSpecification',

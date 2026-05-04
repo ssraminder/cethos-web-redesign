@@ -21,6 +21,8 @@ import {
   Heart,
   Briefcase,
   FileSignature,
+  Truck,
+  Landmark,
 } from 'lucide-react'
 import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
@@ -41,23 +43,23 @@ export default function ApostilleContent() {
   const whyChooseUs = [
     {
       icon: Globe,
-      title: 'Canada-Wide Service',
-      description: 'Apostille authentication for documents from any Canadian province. Mail-in or drop-off—we handle the rest.',
+      title: 'Any Province in Canada',
+      description: 'Send your documents from any city in Canada. We email you a prepaid Purolator label — drop at any counter, tracked end-to-end.',
     },
     {
       icon: Clock,
-      title: 'Fast Turnaround',
-      description: 'Standard 5–10 business days. Rush service available. Same-day pickup option for Calgary clients.',
+      title: 'Realistic Turnaround',
+      description: 'Total time depends on the issuing authority: ~2–3 weeks for Alberta or Saskatchewan documents, ~4 weeks for Ontario, ~4–5 weeks for federal documents through Global Affairs Canada.',
     },
     {
       icon: Award,
-      title: 'Hague Convention Approved',
+      title: 'Hague Convention',
       description: 'Canada joined the Hague Apostille Convention in January 2024. Our apostilles are recognized in 120+ countries.',
     },
     {
       icon: Shield,
-      title: 'Secure Document Handling',
-      description: 'Tracked courier service, secure document storage, and confidential handling from intake to return delivery.',
+      title: 'We Handle the Government',
+      description: 'We submit to Global Affairs Canada or the correct provincial authority on your behalf. You never deal with government desks, paperwork, or queues.',
     },
   ]
 
@@ -109,40 +111,55 @@ export default function ApostilleContent() {
     {
       step: 1,
       icon: Upload,
-      title: 'Send Your Documents',
-      description: 'Upload digital copies or mail originals to our Calgary office. We accept documents from any Canadian province.',
+      title: 'Get Your Quote (60 seconds)',
+      description: 'Upload digital copies. We confirm scope, document type, issuing province, destination country, and exact price.',
     },
     {
       step: 2,
-      icon: FileSignature,
-      title: 'Notarize (If Needed)',
-      description: "Many documents need notarization before apostille. We coordinate notarization in-house if it's not already done.",
+      icon: Truck,
+      title: 'We Send a Prepaid Courier Label',
+      description: 'Emailed the same day. Drop your originals at any Purolator counter in Canada. Calgary clients can walk in to 421 7 Avenue SW, Floor 30.',
     },
     {
       step: 3,
-      icon: Stamp,
-      title: 'Apostille Authentication',
-      description: 'We submit to Global Affairs Canada or the relevant provincial authority. The apostille certificate is affixed to your document.',
+      icon: FileSignature,
+      title: 'We Notarize & Route to the Right Authority',
+      description: 'In-house notarization if needed. We then submit to Global Affairs Canada (federal docs) or the correct provincial authority — Ontario, Alberta, BC, Quebec, or Saskatchewan.',
     },
     {
       step: 4,
+      icon: Stamp,
+      title: 'The Authority Issues the Apostille',
+      description: 'Processing time depends on the authority (typical range: 1.5–4 weeks). Government processing time is fixed and we cannot shortcut it — be wary of any service claiming same-day.',
+    },
+    {
+      step: 5,
       icon: Download,
-      title: 'Document Returned',
-      description: 'Tracked courier delivery anywhere in Canada or internationally. Pickup available for Calgary clients.',
+      title: 'Tracked Courier Back to You',
+      description: 'Authenticated documents return to our Calgary office, then to your address via Purolator (FedEx International for overseas). Tracking link emailed at every step.',
     },
   ]
 
   const pricingTable = [
-    { service: 'Single Document Apostille', price: 'From $99', turnaround: '5–10 business days' },
-    { service: 'Rush Apostille (3–5 days)', price: 'From $179', turnaround: '3–5 business days' },
-    { service: 'Same-Day Pickup (Calgary only)', price: 'From $249', turnaround: 'Same day' },
-    { service: 'Notarization Add-On', price: 'From $35', turnaround: 'Included in turnaround' },
-    { service: 'Translation + Apostille Bundle', price: 'From $149', turnaround: '5–10 business days' },
+    { service: 'Apostille (out-of-Calgary, courier both ways included)', price: 'From $149', turnaround: 'Province-dependent (see turnaround guide)' },
+    { service: 'Apostille (Calgary drop-off, no inbound courier)', price: 'From $99', turnaround: 'Province-dependent (see turnaround guide)' },
+    { service: 'Notarization Add-On', price: 'From $35', turnaround: 'Built into turnaround' },
+    { service: 'Translation + Apostille Bundle', price: 'From $199', turnaround: 'Same as apostille turnaround' },
     { service: 'Multi-Document (5+ docs)', price: '10% off per doc', turnaround: 'Varies by volume' },
-    { service: 'Embassy Legalization (non-Hague)', price: 'Quote on request', turnaround: '2–6 weeks' },
+    { service: 'International Return Courier', price: 'Quote on request', turnaround: 'Adds 2–7 days' },
+    { service: 'Embassy Legalization (non-Hague)', price: 'Quote on request', turnaround: '4–8 weeks' },
   ]
 
-  const pricingFooter = 'Prices exclude government fees, courier charges, and embassy fees (where applicable). Get an exact quote in 60 seconds.'
+  const pricingFooter = 'Prices include domestic tracked courier both ways for Canadian addresses. Government fees and embassy fees (where applicable) are billed at cost. Get an exact quote in 60 seconds.'
+
+  const turnaroundTable = [
+    { path: 'Alberta-issued (AB authority)', calgary: '2–2.5 weeks', other: '2.5–3.5 weeks' },
+    { path: 'Saskatchewan-issued (SK authority)', calgary: '1.5–2 weeks', other: '2–3 weeks' },
+    { path: 'Ontario-issued (ODS Toronto, mail-in)', calgary: '3.5–4 weeks', other: '4–4.5 weeks' },
+    { path: 'BC-issued (BC authority)', calgary: '3–5 weeks', other: '3.5–5.5 weeks' },
+    { path: 'Quebec-issued (notarial path)', calgary: '6–8 weeks', other: '6.5–8.5 weeks' },
+    { path: 'Federal / GAC (RCMP, IRCC, federal docs)', calgary: '4–5 weeks', other: '4.5–5.5 weeks' },
+  ]
 
   const faqs = [
     {
@@ -151,24 +168,34 @@ export default function ApostilleContent() {
         'An apostille is a certificate that authenticates the origin of a public document so it can be used in another country that is part of the Hague Apostille Convention. Canada joined the convention in January 2024. The apostille verifies the signature, capacity of the signer, and identity of any seal or stamp on the document.',
     },
     {
+      question: 'Who actually issues the apostille?',
+      answer:
+        "The Competent Authority for your document — Global Affairs Canada for federal documents, or your province's Authentication Office (Ontario, Alberta, BC, Quebec, or Saskatchewan) for provincial documents and notarized documents from those provinces. Cethos is your end-to-end concierge: we collect, notarize if needed, submit on your behalf, track the process, and courier the authenticated documents back. You never deal with government desks.",
+    },
+    {
+      question: 'How long does the apostille process take?',
+      answer:
+        'It depends on which authority issues the apostille. Alberta and Saskatchewan are the fastest at 1.5–2 weeks. Ontario is around 3 weeks for mail-in. British Columbia is 2–4 weeks. Federal documents through Global Affairs Canada take 3–4 weeks. Quebec notarized documents take longest, 5–7 weeks total. Add 2–6 days for courier transit. Same-day apostille is not possible — be wary of any service that claims it.',
+    },
+    {
+      question: 'I am in Toronto, Vancouver, or Montreal — how do I send my documents?',
+      answer:
+        'We email you a prepaid Purolator label after you book. Drop your originals at any Purolator counter, or schedule a free home pickup. The package is tracked from the moment it leaves your hands until it reaches our Calgary office. Then we manage everything until the apostilled documents come back to you.',
+    },
+    {
+      question: 'Is the courier cost included?',
+      answer:
+        'Yes. Our pricing is all-inclusive of domestic tracked courier both ways for orders shipping within Canada. International return courier is quoted separately because rates vary by destination country.',
+    },
+    {
       question: 'Do I need an apostille or a translation (or both)?',
       answer:
-        'It depends on the destination country. If the receiving country requires the document in a different language, you typically need a certified translation first, then apostille. We offer both services and bundle them together to save you time. Tell us where you\'re sending the document and we\'ll advise on the right path.',
+        "It depends on the destination country. If the receiving country requires the document in a different language, you typically need a certified translation first, then apostille. We offer both services and bundle them together to save you time. Tell us where you're sending the document and we'll advise on the right path.",
     },
     {
       question: 'Which Canadian documents can be apostilled?',
       answer:
         'Most public documents issued in Canada: birth/marriage/divorce certificates, education credentials, RCMP clearances, court documents, notarized affidavits, articles of incorporation, and powers of attorney. Some private documents must be notarized first before they can be apostilled.',
-    },
-    {
-      question: 'Do you serve clients outside of Calgary?',
-      answer:
-        'Yes — we serve clients in every Canadian province. Mail or courier your documents to our Calgary office, and we return them by tracked courier to anywhere in Canada or internationally. We also coordinate provincial-level apostille for documents that require Alberta, Ontario, BC, Quebec, or other provincial authentication.',
-    },
-    {
-      question: 'How long does the apostille process take?',
-      answer:
-        'Standard turnaround is 5–10 business days from receipt of documents. Rush service (3–5 days) and same-day pickup (Calgary only) are available for an additional fee. Embassy legalization for non-Hague countries takes 2–6 weeks depending on the consulate.',
     },
     {
       question: "What if my destination country isn't in the Hague Convention?",
@@ -182,12 +209,12 @@ export default function ApostilleContent() {
     },
   ]
 
-  const heroBadge = 'Hague Convention Approved · Canada-Wide'
-  const heroHeading = 'Apostille Services in Canada — Hague Convention Authentication'
+  const heroBadge = 'Hague Convention · Canada-Wide Concierge'
+  const heroHeading = 'Apostille Services Canada — We Handle the Whole Process'
   const heroDesc =
-    "Canada-wide apostille and authentication services for documents used abroad. We handle birth certificates, marriage certificates, education credentials, RCMP clearances, corporate documents, and more. Recognized in 120+ Hague Convention countries."
-  const priceBadge = 'From $99'
-  const priceUnit = 'per document'
+    'Canada-wide concierge service for Hague Convention apostille. We collect your documents, handle notarization, submit to the right Competent Authority on your behalf, and return your authenticated documents. From any province in Canada — tracked courier both ways.'
+  const priceBadge = 'From $149'
+  const priceUnit = 'all-inclusive · domestic courier both ways'
 
   return (
     <>
@@ -272,8 +299,8 @@ export default function ApostilleContent() {
                     Recognized in 120+ Hague countries
                   </span>
                   <span className="flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-[#0891B2]" />
-                    100% acceptance guarantee
+                    <Truck className="w-5 h-5 text-[#0891B2]" />
+                    Tracked courier both ways
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
@@ -282,8 +309,8 @@ export default function ApostilleContent() {
                     139 Five-Star Reviews
                   </span>
                   <span className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-[#0891B2]" />
-                    Rush service available
+                    <Landmark className="w-5 h-5 text-[#0891B2]" />
+                    We submit on your behalf
                   </span>
                 </div>
               </motion.div>
@@ -308,7 +335,7 @@ export default function ApostilleContent() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Why Cethos for Canadian Apostille</h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
-              Calgary-based, Canada-wide service. We coordinate with Global Affairs Canada and every provincial apostille authority.
+              Calgary-based, Canada-wide concierge. We route documents to Global Affairs Canada or the correct provincial authority on your behalf.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -411,9 +438,9 @@ export default function ApostilleContent() {
         <Container>
           <h2 className="text-3xl font-bold text-white text-center mb-4">How Apostille Works</h2>
           <p className="text-white/70 text-center mb-12 max-w-2xl mx-auto">
-            From document intake to international delivery — we manage the entire authentication process.
+            From quote to delivery — we manage the entire authentication process across every Canadian province.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {howItWorks.map((item, index) => (
               <motion.div
                 key={item.step}
@@ -437,12 +464,59 @@ export default function ApostilleContent() {
         </Container>
       </section>
 
-      {/* PRICING */}
+      {/* HOW IT WORKS FOR CLIENTS ACROSS CANADA */}
       <section className="py-16 bg-white">
+        <Container>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">How It Works for Clients Across Canada</h2>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-4 text-slate-700 leading-relaxed">
+            <p>
+              Whether you are in Toronto, Vancouver, Montreal, Halifax, or anywhere else in Canada, the process is the same: we email you a prepaid Purolator label, you drop your documents at any counter, we route them to the correct issuing authority, and we courier the authenticated documents back. All tracked, all included in the price.
+            </p>
+            <p>
+              <strong>Calgary clients:</strong> drop off in person at 421 7 Avenue SW, Floor 30 to save the inbound courier cost.
+            </p>
+            <p>
+              <strong>Sending the apostille internationally?</strong> We use FedEx International with full tracking, quoted separately based on destination country.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto mt-10">
+            <h3 className="text-xl font-semibold text-[#0C2340] mb-4 text-center">Turnaround by Issuing Authority</h3>
+            <Card className="overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-[#0C2340]">Document path</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-[#0C2340]">Calgary drop-off</th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold text-[#0C2340]">Out-of-Calgary (courier in + out)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {turnaroundTable.map((row, index) => (
+                    <tr key={index} className={index > 0 ? 'border-t border-slate-200' : ''}>
+                      <td className="px-6 py-4 text-slate-700">{row.path}</td>
+                      <td className="px-6 py-4 text-center font-semibold text-[#0891B2]">{row.calgary}</td>
+                      <td className="px-6 py-4 text-right text-slate-700">{row.other}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+            <p className="text-center text-sm text-slate-500 mt-4">
+              Government processing time is fixed and we cannot shortcut it. Total time includes 1–3 days inbound courier and 1–3 days outbound courier where applicable.
+            </p>
+          </div>
+        </Container>
+      </section>
+
+      {/* PRICING */}
+      <section className="py-16 bg-slate-50">
         <Container>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Apostille Pricing</h2>
-            <p className="text-slate-600">Transparent pricing. Get an exact quote in 60 seconds.</p>
+            <p className="text-slate-600">All-inclusive pricing. Domestic courier both ways included. Get an exact quote in 60 seconds.</p>
           </div>
           <div className="max-w-2xl mx-auto">
             <Card className="overflow-hidden">
@@ -471,7 +545,7 @@ export default function ApostilleContent() {
       </section>
 
       {/* FAQ */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-white">
         <Container>
           <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-12">Apostille FAQ</h2>
           <div className="max-w-3xl mx-auto space-y-6">
@@ -518,15 +592,15 @@ export default function ApostilleContent() {
             <div className="flex flex-wrap justify-center gap-6 text-white/70 text-sm">
               <span className="flex items-center gap-2">
                 <BadgeCheck className="w-4 h-4" />
-                Hague Convention Approved
+                Hague Convention
               </span>
               <span className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                100% Acceptance Guarantee
+                <Truck className="w-4 h-4" />
+                Tracked Courier Both Ways
               </span>
               <span className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />
-                Canada-Wide Service
+                Canada-Wide Concierge
               </span>
             </div>
           </div>
@@ -538,7 +612,7 @@ export default function ApostilleContent() {
         <Container>
           <h2 className="text-3xl font-bold text-[#0C2340] text-center mb-4">Apostille Services Across Canada</h2>
           <p className="text-slate-600 text-center mb-8">
-            Send your documents to our Calgary office from any Canadian city. Tracked courier return service available nationwide.
+            Send your documents to our Calgary office from any Canadian city via prepaid Purolator label. Tracked return courier included.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             {[
