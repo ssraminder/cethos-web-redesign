@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle, AlertCircle, Loader2, ArrowRight, ArrowLeft } from 'lucide-react'
+import { CheckCircle, AlertCircle, Loader2, ArrowRight, ArrowLeft, ChevronDown, X } from 'lucide-react'
 import { getAdTrackingPayload } from '@/lib/ad-tracking'
 import { trackGenerateLead } from '@/lib/tracking'
 
@@ -22,8 +22,8 @@ const DOCUMENT_TYPES = [
   'Power of Attorney',
   'Notarized Affidavit',
   'Court Order / Judgment',
-  'Other',
 ]
+const OTHER_OPTION = 'Other'
 
 const PROVINCES = [
   { value: '', label: 'Select…' },
@@ -55,9 +55,26 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
 
   // Step 1
   const [documentTypes, setDocumentTypes] = useState<string[]>([])
+  const [otherDocumentType, setOtherDocumentType] = useState('')
+  const [docDropdownOpen, setDocDropdownOpen] = useState(false)
+  const docDropdownRef = useRef<HTMLDivElement>(null)
   const [issuingProvince, setIssuingProvince] = useState('')
   const [numDocuments, setNumDocuments] = useState('1')
   const [destinationCountry, setDestinationCountry] = useState('')
+
+  // Close doc-type dropdown on outside click
+  useEffect(() => {
+    if (!docDropdownOpen) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (docDropdownRef.current && !docDropdownRef.current.contains(e.target as Node)) {
+        setDocDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [docDropdownOpen])
+
+  const otherSelected = documentTypes.includes(OTHER_OPTION)
 
   // Step 2
   const [dropoffMode, setDropoffMode] = useState<'calgary_office' | 'courier' | ''>('')
@@ -86,6 +103,7 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
   const validateStep1 = (): boolean => {
     const next: Record<string, string> = {}
     if (documentTypes.length === 0) next.documentTypes = 'Select at least one document type.'
+    if (otherSelected && !otherDocumentType.trim()) next.otherDocumentType = 'Please specify the document type.'
     if (!issuingProvince) next.issuingProvince = 'Select the issuing province or authority.'
     setErrors(next)
     return Object.keys(next).length === 0
@@ -128,6 +146,9 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
 
     try {
       const adTracking = getAdTrackingPayload()
+      const resolvedDocTypes = otherSelected
+        ? [...documentTypes.filter((t) => t !== OTHER_OPTION), `Other: ${otherDocumentType.trim()}`]
+        : documentTypes
       const res = await fetch('/api/apostille-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,7 +156,7 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
           full_name: fullName.trim(),
           email: email.trim(),
           phone: phone.trim(),
-          document_types: documentTypes,
+          document_types: resolvedDocTypes,
           issuing_province: issuingProvince,
           destination_country: destinationCountry.trim() || null,
           num_documents: numDocuments ? Number(numDocuments) : null,
@@ -264,26 +285,118 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
               <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Document Type(s) <span className="text-red-500">*</span>
               </label>
-              <div className="flex flex-wrap gap-2">
-                {DOCUMENT_TYPES.map((type) => {
-                  const selected = documentTypes.includes(type)
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => toggleDocumentType(type)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                        selected
-                          ? 'bg-[#0891B2] text-white border-[#0891B2]'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-[#0891B2]'
-                      }`}
+              <div ref={docDropdownRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setDocDropdownOpen((v) => !v)}
+                  className={`w-full px-3 py-2.5 border rounded-lg bg-white flex items-center justify-between gap-2 text-[16px] sm:text-sm text-left transition ${
+                    errors.documentTypes ? 'border-red-300' : 'border-slate-300'
+                  } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
+                >
+                  <span className={`truncate ${documentTypes.length === 0 ? 'text-slate-400' : 'text-slate-900'}`}>
+                    {documentTypes.length === 0
+                      ? 'Select document types…'
+                      : documentTypes.length <= 2
+                      ? documentTypes.join(', ')
+                      : `${documentTypes.length} selected: ${documentTypes.slice(0, 2).join(', ')} +${documentTypes.length - 2}`}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 flex-shrink-0 transition-transform ${docDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {docDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute z-50 mt-1 left-0 right-0 bg-white border border-slate-200 rounded-lg shadow-lg max-h-[280px] overflow-y-auto"
                     >
-                      {type}
-                    </button>
-                  )
-                })}
+                      {[...DOCUMENT_TYPES, OTHER_OPTION].map((type) => {
+                        const selected = documentTypes.includes(type)
+                        return (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => toggleDocumentType(type)}
+                            className="w-full text-left px-3 py-2.5 text-[16px] sm:text-sm hover:bg-slate-50 active:bg-slate-100 flex items-center gap-2 transition-colors"
+                          >
+                            <span
+                              className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                                selected ? 'bg-[#0891B2] border-[#0891B2]' : 'border-slate-300 bg-white'
+                              }`}
+                            >
+                              {selected && (
+                                <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3 text-white">
+                                  <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              )}
+                            </span>
+                            <span className={selected ? 'text-[#0891B2] font-medium' : 'text-slate-700'}>{type}</span>
+                          </button>
+                        )
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+
+              {documentTypes.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {documentTypes.map((t) => (
+                    <span
+                      key={t}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-[#E0F2FE] text-[#0891B2] border border-[#0891B2]/20"
+                    >
+                      {t}
+                      <button
+                        type="button"
+                        onClick={() => toggleDocumentType(t)}
+                        className="hover:bg-[#0891B2]/10 rounded-full p-0.5"
+                        aria-label={`Remove ${t}`}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
               {errors.documentTypes && <p className="text-xs text-red-600 mt-1">{errors.documentTypes}</p>}
+
+              <AnimatePresence>
+                {otherSelected && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="mt-3 overflow-hidden"
+                  >
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                      Specify document type <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={otherDocumentType}
+                      onChange={(e) => {
+                        setOtherDocumentType(e.target.value)
+                        setErrors((prev) => {
+                          const next = { ...prev }
+                          delete next.otherDocumentType
+                          return next
+                        })
+                      }}
+                      placeholder="e.g. Passport, Adoption Decree, Trade License…"
+                      className={`w-full px-3 py-2.5 border rounded-lg text-[16px] sm:text-sm ${
+                        errors.otherDocumentType ? 'border-red-300' : 'border-slate-300'
+                      } focus:border-[#0891B2] focus:ring-2 focus:ring-[#0891B2]/10`}
+                      autoComplete="off"
+                    />
+                    {errors.otherDocumentType && <p className="text-xs text-red-600 mt-1">{errors.otherDocumentType}</p>}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
