@@ -71,6 +71,7 @@ export async function POST(req: Request) {
 
     // Extract additional info
     const additionalInfo = body.additional_info || {}
+    const adTracking = body.ad_tracking || {}
 
     // Prepare database record
     const dbData = {
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
       deadline: additionalInfo.turnaround || 'standard',
       additional_notes: additionalInfo.additional_notes || null,
       file_urls: [],
-      service_data: additionalInfo,
+      service_data: { ...additionalInfo, ad_tracking: adTracking },
     }
 
     // Save to database

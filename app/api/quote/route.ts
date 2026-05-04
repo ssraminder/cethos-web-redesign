@@ -141,6 +141,13 @@ export async function POST(req: Request) {
 
     const validatedData = validationResult.data
 
+    // Parse ad tracking data
+    let adTracking = {}
+    try {
+      const adTrackingRaw = formData.get('ad_tracking') as string
+      if (adTrackingRaw) adTracking = JSON.parse(adTrackingRaw)
+    } catch {}
+
     // Prepare database record
     const dbData = {
       service_type: 'life-sciences',
@@ -160,6 +167,7 @@ export async function POST(req: Request) {
         studyPhase: validatedData.studyPhase || null,
         instrumentType: validatedData.instrumentType || null,
         regulatoryPathway: validatedData.regulatoryPathway || null,
+        ad_tracking: adTracking,
       },
     }
 

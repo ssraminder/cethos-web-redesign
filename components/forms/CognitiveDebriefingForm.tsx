@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
-import { trackQuoteSubmission } from '@/lib/tracking'
+import { trackGenerateLead } from '@/lib/tracking'
+import { getAdTrackingPayload } from '@/lib/ad-tracking'
 
 const supabase = (() => {
   try { return createBrowserSupabaseClient() } catch { return null }
@@ -202,6 +203,9 @@ export function CognitiveDebriefingForm() {
         submitData.append('files', file)
       })
 
+      // Ad tracking
+      submitData.append('ad_tracking', JSON.stringify(getAdTrackingPayload()))
+
       const response = await fetch('/api/quote', {
         method: 'POST',
         body: submitData,
@@ -213,7 +217,7 @@ export function CognitiveDebriefingForm() {
       }
 
       setIsSuccess(true)
-      trackQuoteSubmission('cognitive-debriefing', 'landing-page')
+      trackGenerateLead('quote', 'Cognitive Debriefing Quote Submitted')
     } catch (err: any) {
       console.error('Form submission error:', err)
       setError(err.message || 'Something went wrong. Please try again.')

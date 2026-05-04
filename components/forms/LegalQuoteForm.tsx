@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { trackGenerateLead } from '@/lib/tracking'
+import { getAdTrackingPayload } from '@/lib/ad-tracking'
 
 const DOCUMENT_TYPES = [
   { value: 'contracts', label: 'Contracts & Agreements' },
@@ -118,11 +119,13 @@ export default function LegalQuoteForm() {
     setErrorMessage('')
 
     try {
+      const adTracking = getAdTrackingPayload()
       const response = await fetch('/api/general-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_type: 'legal-translation',
+          ad_tracking: adTracking,
           source_language: formData.sourceLanguage,
           target_languages: formData.targetLanguages.split(',').map(l => l.trim()),
           full_name: formData.fullName,

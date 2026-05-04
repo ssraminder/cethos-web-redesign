@@ -5,18 +5,6 @@ declare global {
   }
 }
 
-export function trackQuoteSubmission(serviceType: string, formLocation: string) {
-  if (typeof window === 'undefined') return
-
-  // GTM dataLayer push
-  window.dataLayer = window.dataLayer || []
-  window.dataLayer.push({
-    event: 'quote_submitted',
-    service_type: serviceType,
-    form_location: formLocation,
-  })
-}
-
 export function trackGenerateLead(formType: 'quote' | 'contact', formLabel: string) {
   if (typeof window === 'undefined') return
 
@@ -26,7 +14,7 @@ export function trackGenerateLead(formType: 'quote' | 'contact', formLabel: stri
       event_category: formType === 'quote' ? 'Quote Form' : 'Contact Form',
       event_label: formLabel,
       value: 1,
-      currency: 'USD',
+      currency: 'CAD',
     })
   }
 

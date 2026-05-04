@@ -116,13 +116,20 @@ export async function POST(req: Request) {
       )
     }
 
+    // Parse ad tracking data
+    let adTracking = {}
+    try {
+      const adTrackingRaw = formData.get('ad_tracking') as string
+      if (adTrackingRaw) adTracking = JSON.parse(adTrackingRaw)
+    } catch {}
+
     // Prepare database record
     const dbData = {
       service_type: rawData.serviceType,
       full_name: rawData.fullName,
       email: rawData.email,
       phone: rawData.phone,
-      company_name: null, // Not collected in certified form
+      company_name: null,
       job_title: null,
       source_language: rawData.sourceLanguageLabel || rawData.sourceLanguage,
       target_languages: [rawData.targetLanguageLabel || rawData.targetLanguage],
@@ -137,6 +144,7 @@ export async function POST(req: Request) {
         numberOfPages: rawData.numberOfPages,
         purpose: rawData.purpose,
         serviceSpeed: rawData.serviceSpeed,
+        ad_tracking: adTracking,
       },
     }
 

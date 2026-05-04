@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, AlertCircle, ArrowLeft, ArrowRight, Calendar, Clock, MapPin, X } from 'lucide-react'
 import { trackGenerateLead } from '@/lib/tracking'
+import { getAdTrackingPayload } from '@/lib/ad-tracking'
 
 interface LocaleOption {
   id: string
@@ -243,6 +244,9 @@ export function InterpretationQuoteForm({ formLocation, defaultServiceType }: In
         return locale?.label || t
       })
       submitData.append('targetLanguageLabels', JSON.stringify(targetLabels))
+
+      // Ad tracking
+      submitData.append('ad_tracking', JSON.stringify(getAdTrackingPayload()))
 
       const response = await fetch('/api/interpretation-quote', {
         method: 'POST',

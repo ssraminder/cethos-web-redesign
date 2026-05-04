@@ -63,6 +63,7 @@ export async function POST(req: Request) {
 
     // Extract additional info
     const additionalInfo = body.additional_info || {}
+    const adTracking = body.ad_tracking || {}
 
     // Prepare database record
     const dbData = {
@@ -74,10 +75,10 @@ export async function POST(req: Request) {
       job_title: body.job_title || null,
       source_language: body.source_language,
       target_languages: body.target_languages || [],
-      word_count: null, // Not applicable for transcription - duration is used instead
-      deadline: additionalInfo.turnaround || 'standard', // Map turnaround to deadline field
+      word_count: null,
+      deadline: additionalInfo.turnaround || 'standard',
       additional_notes: additionalInfo.additional_details || null,
-      file_urls: [], // Files are mentioned in service_data, not uploaded directly
+      file_urls: [],
       service_data: {
         transcription_type: additionalInfo.transcription_type,
         legal_sub_type: additionalInfo.legal_sub_type || null,
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
         needs_translation: additionalInfo.needs_translation || false,
         file_count: additionalInfo.file_count || 0,
         file_names: additionalInfo.file_names || [],
+        ad_tracking: adTracking,
       },
     }
 

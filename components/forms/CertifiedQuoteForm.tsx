@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, CheckCircle, AlertCircle, ArrowLeft, ArrowRight, X, FileText } from 'lucide-react'
 import { trackGenerateLead } from '@/lib/tracking'
+import { getAdTrackingPayload } from '@/lib/ad-tracking'
 
 interface DropdownOption {
   id: string
@@ -277,6 +278,9 @@ export function CertifiedQuoteForm({ defaultDocumentType, formLocation }: Certif
       const targetLocale = locales.find(l => l.value === formData.targetLanguage)
       submitData.append('sourceLanguageLabel', sourceLocale?.label || formData.sourceLanguage)
       submitData.append('targetLanguageLabel', targetLocale?.label || formData.targetLanguage)
+
+      // Ad tracking
+      submitData.append('ad_tracking', JSON.stringify(getAdTrackingPayload()))
 
       // Add files
       formData.files.forEach((file) => {

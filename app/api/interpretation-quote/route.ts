@@ -94,6 +94,13 @@ export async function POST(req: Request) {
       )
     }
 
+    // Parse ad tracking data
+    let adTracking = {}
+    try {
+      const adTrackingRaw = formData.get('ad_tracking') as string
+      if (adTrackingRaw) adTracking = JSON.parse(adTrackingRaw)
+    } catch {}
+
     // Prepare database record
     const dbData = {
       service_type: 'interpretation',
@@ -101,13 +108,13 @@ export async function POST(req: Request) {
       email: rawData.email,
       phone: rawData.phone,
       company_name: rawData.companyName || null,
-      job_title: null, // Not collected for interpretation
+      job_title: null,
       source_language: rawData.sourceLanguage,
       target_languages: rawData.targetLanguages,
-      word_count: null, // Not applicable for interpretation
-      deadline: rawData.eventDate || 'flexible', // Use event date as deadline
+      word_count: null,
+      deadline: rawData.eventDate || 'flexible',
       additional_notes: rawData.additionalNotes || null,
-      file_urls: [], // No file uploads for interpretation quotes
+      file_urls: [],
       service_data: {
         formLocation: rawData.formLocation,
         interpretationType: rawData.interpretationType,
@@ -118,6 +125,7 @@ export async function POST(req: Request) {
         eventLocation: rawData.eventLocation || null,
         isRemote: rawData.isRemote,
         platform: rawData.platform || null,
+        ad_tracking: adTracking,
       },
     }
 

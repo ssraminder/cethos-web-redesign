@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { trackGenerateLead } from '@/lib/tracking'
+import { getAdTrackingPayload } from '@/lib/ad-tracking'
 
 const WEBSITE_TYPES = [
   { value: 'corporate', label: 'Corporate Website' },
@@ -119,11 +120,13 @@ export default function WebsiteQuoteForm() {
     setErrorMessage('')
 
     try {
+      const adTracking = getAdTrackingPayload()
       const response = await fetch('/api/general-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_type: 'website-localization',
+          ad_tracking: adTracking,
           source_language: formData.sourceLanguage,
           target_languages: formData.targetLanguages.split(',').map(l => l.trim()),
           full_name: formData.fullName,

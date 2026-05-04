@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { trackGenerateLead } from '@/lib/tracking'
+import { getAdTrackingPayload } from '@/lib/ad-tracking'
 
 const PROJECT_TYPES = [
   { value: 'mobile-app', label: 'Mobile App' },
@@ -118,11 +119,13 @@ export default function SoftwareQuoteForm() {
     setErrorMessage('')
 
     try {
+      const adTracking = getAdTrackingPayload()
       const response = await fetch('/api/general-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_type: 'software-localization',
+          ad_tracking: adTracking,
           source_language: formData.sourceLanguage,
           target_languages: formData.targetLanguages.split(',').map(l => l.trim()),
           full_name: formData.fullName,

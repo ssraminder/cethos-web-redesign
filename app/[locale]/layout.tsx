@@ -8,6 +8,7 @@ import { routing } from '@/i18n/routing'
 import { CethosHeader, CethosFooter } from '@/components/layout'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLdServer'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
+import TrackingPixels from '@/components/TrackingPixels'
 import { getSettingServer } from '@/lib/settings-server'
 import { isValidLocale, type Locale } from '@/lib/i18n'
 
@@ -112,6 +113,7 @@ export default async function LocaleLayout({
       <WebSiteJsonLd />
       <Toaster position="top-right" richColors closeButton />
       <GoogleTagManager />
+      <TrackingPixels />
       <NextIntlClientProvider messages={messages}>
         <CethosHeader ctaType="login" locale={locale} />
         <main>{children}</main>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { trackQuoteSubmission, trackGenerateLead } from '@/lib/tracking';
+import { trackGenerateLead } from '@/lib/tracking';
+import { getAdTrackingPayload } from '@/lib/ad-tracking';
 
 // Service types with their configurations
 const SERVICE_TYPES = [
@@ -145,11 +146,13 @@ export default function TranscriptionQuoteForm() {
       const fileNames = formData.files ? Array.from(formData.files).map(f => f.name) : [];
 
       // Submit to existing transcription-quote API with JSON format
+      const adTracking = getAdTrackingPayload()
       const response = await fetch('/api/transcription-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           service_type: 'transcription',
+          ad_tracking: adTracking,
           source_language: formData.sourceLanguage,
           target_languages: formData.includeTranslation && formData.targetLanguage
             ? [formData.targetLanguage]
@@ -178,8 +181,6 @@ export default function TranscriptionQuoteForm() {
         throw new Error(errorData.error || 'Failed to submit quote request');
       }
 
-      // Track successful submission
-      trackQuoteSubmission('transcription', formData.serviceType);
       trackGenerateLead('quote', 'Transcription Quote Submitted');
 
       setSubmitStatus('success');

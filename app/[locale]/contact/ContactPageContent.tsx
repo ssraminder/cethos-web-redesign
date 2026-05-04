@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { Phone, Mail, FileText, MapPin, Clock, CheckCircle, Send, ArrowRight } from 'lucide-react'
 import { Container, Card, Button, Input, Textarea, Select } from '@/components/ui'
 import { trackGenerateLead } from '@/lib/tracking'
+import { getAdTrackingPayload } from '@/lib/ad-tracking'
 
 const serviceOptions = [
   { value: 'general-inquiry', label: 'General Inquiry' },
@@ -138,6 +139,9 @@ export default function ContactPageContent() {
       submitData.append('targetLanguages', JSON.stringify(['To be determined']))
       submitData.append('timeline', 'flexible')
       submitData.append('projectDescription', formData.message)
+
+      // Ad tracking
+      submitData.append('ad_tracking', JSON.stringify(getAdTrackingPayload()))
 
       const response = await fetch('/api/quote', { method: 'POST', body: submitData })
 
