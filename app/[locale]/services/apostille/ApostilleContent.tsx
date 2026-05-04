@@ -28,7 +28,7 @@ import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
 import { StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
-import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
+import { ApostilleQuoteForm } from './ApostilleQuoteForm'
 
 export default function ApostilleContent() {
   const breadcrumbItems = [
@@ -323,7 +323,7 @@ export default function ApostilleContent() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
-              <EmbeddedCertifiedQuoteForm formLocation="apostille-services" />
+              <ApostilleQuoteForm formLocation="apostille-services" />
             </motion.div>
           </div>
         </div>
