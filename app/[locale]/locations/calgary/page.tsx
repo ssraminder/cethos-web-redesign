@@ -3,7 +3,7 @@ import LocationPageTemplate from '@/components/locations/LocationPageTemplate';
 
 export const metadata: Metadata = {
   title: 'Calgary Translation & Interpretation Services | Cethos',
-  description: 'Translation and interpretation services in Calgary. IRCC certified. Birth certificates, marriage certificates, immigration documents. 139 five-star reviews. Same-day available. From $65.',
+  description: 'Translation and interpretation services in Calgary. IRCC certified. Birth certificates, marriage certificates, immigration documents. 139 five-star reviews. Same-day available. From $55.',
   alternates: {
     canonical: 'https://cethos.com/locations/calgary'
   }
@@ -43,7 +43,7 @@ export default function CalgaryTranslationPage() {
         },
         {
           question: 'How much does certified translation cost in Calgary?',
-          answer: 'Certified translation starts from $65 per document. This includes translation, certification, and notarization. Get a free instant quote online.'
+          answer: 'Certified translation starts from $55 per document (limited-time pricing). This includes translation, certification, and notarization. Get a free instant quote online.'
         },
         {
           question: 'What languages do you translate in Calgary?',

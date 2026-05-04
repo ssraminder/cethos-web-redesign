@@ -3,7 +3,7 @@ import LocationsIndexContent from './LocationsIndexContent';
 
 export const metadata: Metadata = {
   title: 'Translation Services Across Canada | Cethos Locations',
-  description: 'Certified IRCC translation services across Canada. Serving Calgary, Edmonton, Toronto, Vancouver, Ottawa, Montreal, Winnipeg, Halifax, and Saskatoon. From $65.',
+  description: 'Certified IRCC translation services across Canada. Serving Calgary, Edmonton, Toronto, Vancouver, Ottawa, Montreal, Winnipeg, Halifax, and Saskatoon. From $55.',
   alternates: {
     canonical: 'https://cethos.com/locations'
   }

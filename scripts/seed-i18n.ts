@@ -245,7 +245,7 @@ const translations: TranslationSeed[] = [
   { namespace: 'services.list', key: 'lifesciences_price', value: 'Custom pricing' },
   { namespace: 'services.list', key: 'certified_title', value: 'Certified Translation' },
   { namespace: 'services.list', key: 'certified_desc', value: 'IRCC-approved certified translations for immigration documents. Government of Alberta approved. Same-day service available.' },
-  { namespace: 'services.list', key: 'certified_price', value: 'From $65' },
+  { namespace: 'services.list', key: 'certified_price', value: 'From $55' },
   { namespace: 'services.list', key: 'website_title', value: 'Website Localization' },
   { namespace: 'services.list', key: 'website_desc', value: 'E-commerce, SaaS, and corporate website translation with international SEO optimization. CMS integration included.' },
   { namespace: 'services.list', key: 'website_price', value: 'From $0.12/word' },

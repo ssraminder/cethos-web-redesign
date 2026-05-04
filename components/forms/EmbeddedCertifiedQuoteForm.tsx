@@ -1315,7 +1315,7 @@ export function EmbeddedCertifiedQuoteForm({
       <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-600">
         <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />IRCC Accepted</span>
         <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />Same-Day Available</span>
-        <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />From $65</span>
+        <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />From $55</span>
       </div>
 
       {/* ── Contact Alternative ──────────────────────────────────────────── */}

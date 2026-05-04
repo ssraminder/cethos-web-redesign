@@ -156,7 +156,7 @@ skip: <one-sentence reason>
 
 Step 3 — if ON-TOPIC, write new meta:
   - Title: 50–60 characters, lead with the target query naturally, brand suffix "| Cethos" only if it fits
-  - Description: 140–160 characters, action-oriented, include target query or close variant, concrete value prop (e.g. IRCC-accepted, from $65, same-day, 100% acceptance)
+  - Description: 140–160 characters, action-oriented, include target query or close variant, concrete value prop (e.g. IRCC-accepted, from $55, same-day, 100% acceptance)
   - Must be factually accurate to the current page content
   - No ALL CAPS, no emoji, no quotes around the whole string
 

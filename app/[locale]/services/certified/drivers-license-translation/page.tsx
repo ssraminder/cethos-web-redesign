@@ -3,7 +3,7 @@ import DriversLicenseContent from './DriversLicenseContent'
 
 export const metadata: Metadata = {
   title: "Driver's License Translation Services | Alberta Registries Approved | Cethos",
-  description: "Government of Alberta approved driver's license translation services. Certified translations accepted by Service Alberta, Alberta Registries, and all provincial licensing authorities. From $65, same-day available.",
+  description: "Government of Alberta approved driver's license translation services. Certified translations accepted by Service Alberta, Alberta Registries, and all provincial licensing authorities. From $55, same-day available.",
   keywords: [
     "driver's license translation Alberta",
     "certified translation Service Alberta",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Driver's License Translation | Government of Alberta Approved",
-    description: 'Certified translations for Service Alberta and Alberta Registries. From $65.',
+    description: 'Certified translations for Service Alberta and Alberta Registries. From $55.',
     url: 'https://cethos.com/services/certified/drivers-license-translation',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',
@@ -56,11 +56,11 @@ export default function DriversLicenseTranslationPage() {
             serviceType: 'Certified Translation',
             offers: {
               '@type': 'Offer',
-              price: '65.00',
+              price: '55.00',
               priceCurrency: 'CAD',
               priceSpecification: {
                 '@type': 'PriceSpecification',
-                minPrice: '65.00',
+                minPrice: '55.00',
                 priceCurrency: 'CAD',
               },
             },

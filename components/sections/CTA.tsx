@@ -11,7 +11,7 @@ interface CTAProps {
 
 export function CTA({
   headline = "Get Your Translation Project Started Today",
-  subtext = "Upload your documents and receive a free quote in minutes. Certified translations start at $65."
+  subtext = "Upload your documents and receive a free quote in minutes. Certified translations start at $55."
 }: CTAProps) {
   return (
     <section className="relative py-24 overflow-hidden bg-gradient-to-r from-[#0C2340] via-[#1A365D] to-[#0891B2]">

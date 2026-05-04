@@ -3,7 +3,7 @@ import LocationPageTemplate from '@/components/locations/LocationPageTemplate';
 
 export const metadata: Metadata = {
   title: 'Saskatoon Translation Services | Certified IRCC Translation | Cethos',
-  description: 'Certified translation services in Saskatoon & Saskatchewan. IRCC accepted. Birth certificate, marriage certificate & immigration document translation. 139 five-star reviews. From $65.',
+  description: 'Certified translation services in Saskatoon & Saskatchewan. IRCC accepted. Birth certificate, marriage certificate & immigration document translation. 139 five-star reviews. From $55.',
   alternates: {
     canonical: 'https://cethos.com/locations/saskatoon'
   }
