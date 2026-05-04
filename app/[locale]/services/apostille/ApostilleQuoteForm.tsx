@@ -117,7 +117,7 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
         throw new Error(data?.error || data?.message || 'Submission failed.')
       }
 
-      trackGenerateLead('apostille_quote', 'Apostille Quote Submitted')
+      trackGenerateLead('quote', 'Apostille Quote Submitted')
       setSubmitSuccess(true)
     } catch (err: any) {
       setErrors({ submit: err?.message || 'Something went wrong. Please try again.' })
