@@ -758,6 +758,165 @@ async function checkGbpPostsStaleness(supabase: any, audit_run_id: string, setti
   return recs;
 }
 
+/**
+ * CHECK 10: SpyFu — keywords that fell off rankings.
+ * Pull lost-rankings list for cethos.com (CA market). Anything we used to
+ * rank for that's now off page 1+ becomes a manual SEO rec.
+ */
+async function checkSpyfuLostRankings(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+  const res = await callGoogle("spyfu", "lost_rankings", {
+    domain: "cethos.com",
+    country_code: "CA",
+    page_size: 25,
+  });
+  const rows = res.data?.results || [];
+  if (!rows.length) return recs;
+
+  // Score by lost organic value: prior search volume × prior rank quality
+  const scored = rows
+    .filter((r: any) => r.searchVolume && r.searchVolume >= 30) // ignore tiny terms
+    .sort((a: any, b: any) => (b.searchVolume || 0) - (a.searchVolume || 0))
+    .slice(0, 5); // top 5 only — don't flood the digest
+
+  for (const row of scored) {
+    const keyword = row.keyword;
+    const volume = row.searchVolume;
+    const rec = await createRecommendation(supabase, audit_run_id, {
+      check_id: "spyfu_lost_rankings",
+      category: "seo_meta",
+      risk_tier: "medium",
+      severity: volume > 200 ? "high" : "medium",
+      evidence: {
+        keyword,
+        prior_search_volume: volume,
+        keyword_difficulty: row.keywordDifficulty,
+        country: "CA",
+        source: "spyfu",
+      },
+      action_description: `Cethos lost organic rankings for "${keyword}" (${volume}/mo CA searches, KD ${row.keywordDifficulty ?? "?"}). Investigate page-level cause: indexing, content depth, internal links, or competitor takeover. Consider refreshing the targeting page or building a new one.`,
+      action_type: "manual",
+      action_payload: { kind: "lost_ranking_review", keyword, country: "CA" },
+      dedupe_key: `spyfu_lost:${keyword}`,
+      model: settings.claude_narrative_model,
+    });
+    if (rec) recs.push(rec);
+  }
+  return recs;
+}
+
+/**
+ * CHECK 11: BrightLocal — fresh negative reviews across managed locations.
+ * Pulls latest reviews from the BrightLocal Reputation Manager report and
+ * flags any 1-2 star review from the last 14 days as a manual rec so the
+ * team can triage outside Google's GBP API.
+ */
+async function checkBrightlocalNegativeReviews(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+  const reportsRes = await callGoogle("brightlocal", "reputation_reports", {});
+  const reports = reportsRes.data?.reports || [];
+  if (!reports.length) return recs;
+
+  const cutoff = Date.now() - 14 * 86400_000;
+
+  for (const report of reports) {
+    const reportId = report.report_id;
+    const reviewsRes = await callGoogle("brightlocal", "reviews", { report_id: reportId });
+    const reviews = reviewsRes.data?.reviews || reviewsRes.data?.results || [];
+    for (const r of reviews) {
+      const stars = Number(r.rating || r.star_rating || 0);
+      if (!stars || stars > 2) continue;
+      const reviewDate = r.published_date || r.review_date || r.created_at;
+      const reviewTime = reviewDate ? new Date(reviewDate).getTime() : 0;
+      if (!reviewTime || reviewTime < cutoff) continue;
+
+      const reviewId = r.review_id || r.id || `${reviewTime}`;
+      const directory = r.directory || r.source || "unknown";
+      const reviewer = r.reviewer || r.author || "Customer";
+      const comment = r.review || r.comment || "(no comment)";
+
+      const rec = await createRecommendation(supabase, audit_run_id, {
+        check_id: "brightlocal_negative_review",
+        category: "gbp_reply",
+        risk_tier: "medium",
+        severity: stars === 1 ? "high" : "medium",
+        evidence: {
+          report_id: reportId,
+          location_name: report.report_name,
+          directory,
+          stars,
+          reviewer,
+          comment: comment.slice(0, 500),
+          posted_at: reviewDate,
+          source: "brightlocal",
+        },
+        action_description: `New ${stars}-star review on ${directory} for ${report.report_name}: "${comment.slice(0, 200)}${comment.length > 200 ? "…" : ""}". Triage and reply within 24h — negative reviews compound on local pack ranking.`,
+        action_type: "manual",
+        action_payload: { kind: "negative_review_triage", review_id: reviewId, directory, report_id: reportId },
+        dedupe_key: `bl_neg_review:${directory}:${reviewId}`,
+        model: settings.claude_narrative_model,
+      });
+      if (rec) recs.push(rec);
+    }
+  }
+  return recs;
+}
+
+/**
+ * CHECK 12: PostHog — quote-funnel completion rate.
+ * Counts pageviews on /quote vs the quote_submitted event over 7 days. If
+ * conversion drops below 0.5% (a deliberately conservative floor) we surface
+ * it for review so the team can investigate broken JS, form regressions, or
+ * traffic-quality shifts.
+ */
+async function checkPostHogQuoteFunnel(supabase: any, audit_run_id: string, settings: AuditSettings): Promise<CreatedRec[]> {
+  const recs: CreatedRec[] = [];
+  const res = await callGoogle("posthog", "quote_funnel", { days: 7 });
+  if (!res.data) return recs;
+
+  // Handler returns either { steps: [...] } or raw HogQL rows depending on
+  // implementation — accept both shapes.
+  const data = res.data.results || res.data;
+  let pageviews = 0;
+  let submissions = 0;
+
+  if (Array.isArray(data)) {
+    for (const row of data) {
+      if (row.step === "pageview" || row.event === "$pageview") pageviews = row.count ?? row.value ?? pageviews;
+      if (row.step === "submit" || row.event === "quote_submitted") submissions = row.count ?? row.value ?? submissions;
+    }
+  } else if (typeof data === "object") {
+    pageviews = data.quote_pageviews || data.pageviews || 0;
+    submissions = data.quote_submissions || data.submissions || 0;
+  }
+
+  if (pageviews < 50) return recs; // not enough volume to draw conclusions
+  const rate = submissions / pageviews;
+  if (rate >= 0.005) return recs; // ≥ 0.5% is fine
+
+  const rec = await createRecommendation(supabase, audit_run_id, {
+    check_id: "posthog_quote_funnel_low",
+    category: "site_code",
+    risk_tier: "high",
+    severity: rate < 0.001 ? "critical" : "high",
+    evidence: {
+      window_days: 7,
+      quote_pageviews: pageviews,
+      quote_submissions: submissions,
+      conversion_rate_pct: (rate * 100).toFixed(3),
+      threshold_pct: "0.5",
+      source: "posthog",
+    },
+    action_description: `Quote funnel converting ${(rate * 100).toFixed(2)}% (${submissions}/${pageviews}) over the last 7 days — below 0.5% floor. Check PostHog session recordings for /quote, verify form submit handler, and confirm GA4/Ads conversion tags still fire.`,
+    action_type: "manual",
+    action_payload: { kind: "funnel_investigation", page: "/quote" },
+    dedupe_key: `posthog_quote_funnel:${new Date().toISOString().slice(0, 10)}`,
+    model: settings.claude_narrative_model,
+  });
+  if (rec) recs.push(rec);
+  return recs;
+}
+
 // ---------------------------------------------------------------------------
 // Auto-execute low-risk recs inline
 // ---------------------------------------------------------------------------
@@ -1010,6 +1169,9 @@ Deno.serve(async (req: Request) => {
     { name: "brand_leak", fn: checkBrandLeak },
     { name: "budget_starvation", fn: checkBudgetStarvation },
     { name: "gbp_posts_staleness", fn: checkGbpPostsStaleness },
+    { name: "spyfu_lost_rankings", fn: checkSpyfuLostRankings },
+    { name: "brightlocal_negative_reviews", fn: checkBrightlocalNegativeReviews },
+    { name: "posthog_quote_funnel", fn: checkPostHogQuoteFunnel },
   ];
   const allChecks = checksOnly === "alerts" ? alertChecks : [...alertChecks, ...deepChecks];
 
