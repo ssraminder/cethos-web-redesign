@@ -27,6 +27,15 @@ const GADS_CUSTOMERS: Record<string, string> = {
   cethos_inc: GADS_CUSTOMER_CETHOS_INC,
 };
 
+const POSTHOG_API_KEY = Deno.env.get("POSTHOG_API_KEY") || "";
+const POSTHOG_PROJECT_ID = Deno.env.get("POSTHOG_PROJECT_ID") || "";
+const POSTHOG_HOST = Deno.env.get("POSTHOG_HOST") || "https://us.posthog.com";
+
+const BRIGHTLOCAL_API_KEY = Deno.env.get("BRIGHTLOCAL_API_KEY") || "";
+const BRIGHTLOCAL_API_SECRET = Deno.env.get("BRIGHTLOCAL_API_SECRET") || "";
+const BRIGHTLOCAL_LOCATION_IDS: number[] = (Deno.env.get("BRIGHTLOCAL_LOCATION_IDS") || "")
+  .split(",").map((s) => parseInt(s.trim())).filter((n) => !isNaN(n));
+
 function toUpperSnake(s: string): string {
   if (s === s.toUpperCase() && s.includes("_")) return s;
   return s.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase();
@@ -591,6 +600,328 @@ function mask(s: string): string {
   return s.substring(0, 6) + "..." + s.substring(s.length - 4);
 }
 
+// --- PostHog ---
+async function handlePostHog(action: string, params: any): Promise<any> {
+  const projectId = params.project_id || POSTHOG_PROJECT_ID;
+  const host = params.host || POSTHOG_HOST;
+  const baseUrl = `${host}/api/projects/${projectId}`;
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${POSTHOG_API_KEY}`,
+    "Content-Type": "application/json",
+  };
+
+  const doFetch = async (url: string, opts: RequestInit = {}) => {
+    const res = await fetch(url, { ...opts, headers: { ...headers, ...(opts.headers as Record<string, string> || {}) } });
+    const text = await res.text();
+    try { return { status: res.status, data: JSON.parse(text) }; }
+    catch { return { status: res.status, data: text }; }
+  };
+
+  // Build HogQL date filter
+  const dateFilter = (dr: any): string => {
+    if (!dr) return "timestamp >= now() - interval 7 day";
+    if (typeof dr === "string") {
+      const map: Record<string, string> = {
+        today: "toStartOfDay(now())",
+        yesterday: "toStartOfDay(now()) - interval 1 day",
+        last_7_days: "now() - interval 7 day",
+        last_30_days: "now() - interval 30 day",
+      };
+      return `timestamp >= ${map[dr] || map["last_7_days"]}`;
+    }
+    if (dr.start_date && dr.end_date) return `timestamp >= '${dr.start_date}' AND timestamp <= '${dr.end_date} 23:59:59'`;
+    return "timestamp >= now() - interval 7 day";
+  };
+
+  switch (action) {
+    // Raw HogQL query — full flexibility
+    case "query":
+      return doFetch(`${baseUrl}/query`, {
+        method: "POST",
+        body: JSON.stringify({ query: { kind: "HogQLQuery", query: params.query } }),
+      });
+
+    // Pageviews by URL, session count, unique users
+    case "pageviews":
+      return doFetch(`${baseUrl}/query`, {
+        method: "POST",
+        body: JSON.stringify({
+          query: {
+            kind: "HogQLQuery",
+            query: `
+              SELECT
+                properties.$current_url AS url,
+                count() AS pageviews,
+                count(DISTINCT person_id) AS unique_users
+              FROM events
+              WHERE event = '$pageview'
+                AND ${dateFilter(params.date_range)}
+              GROUP BY url
+              ORDER BY pageviews DESC
+              LIMIT ${params.limit || 20}
+            `,
+          },
+        }),
+      });
+
+    // Sessions overview: sessions, unique users, avg duration
+    case "sessions":
+      return doFetch(`${baseUrl}/query`, {
+        method: "POST",
+        body: JSON.stringify({
+          query: {
+            kind: "HogQLQuery",
+            query: `
+              SELECT
+                count(DISTINCT $session_id) AS sessions,
+                count(DISTINCT person_id) AS unique_users,
+                round(avg(session.$session_duration), 0) AS avg_duration_sec
+              FROM events
+              WHERE event = '$pageview'
+                AND ${dateFilter(params.date_range)}
+            `,
+          },
+        }),
+      });
+
+    // Top events by count
+    case "events":
+      return doFetch(`${baseUrl}/query`, {
+        method: "POST",
+        body: JSON.stringify({
+          query: {
+            kind: "HogQLQuery",
+            query: `
+              SELECT
+                event,
+                count() AS total,
+                count(DISTINCT person_id) AS unique_users
+              FROM events
+              WHERE event NOT IN ('$pageview', '$pageleave', '$autocapture')
+                AND ${dateFilter(params.date_range)}
+              GROUP BY event
+              ORDER BY total DESC
+              LIMIT ${params.limit || 20}
+            `,
+          },
+        }),
+      });
+
+    // Quote funnel: pageview → quote_started → quote_submitted
+    case "quote_funnel":
+      return doFetch(`${baseUrl}/query`, {
+        method: "POST",
+        body: JSON.stringify({
+          query: {
+            kind: "HogQLQuery",
+            query: `
+              SELECT
+                countIf(event = '$pageview') AS site_visits,
+                countIf(event = 'quote_started') AS quote_started,
+                countIf(event = 'quote_submitted') AS quote_submitted,
+                round(countIf(event = 'quote_started') / countIf(event = '$pageview') * 100, 1) AS start_rate_pct,
+                round(countIf(event = 'quote_submitted') / nullIf(countIf(event = 'quote_started'), 0) * 100, 1) AS submit_rate_pct
+              FROM events
+              WHERE ${dateFilter(params.date_range)}
+            `,
+          },
+        }),
+      });
+
+    // Daily trend for a metric (pageviews or custom event)
+    case "trend":
+      return doFetch(`${baseUrl}/query`, {
+        method: "POST",
+        body: JSON.stringify({
+          query: {
+            kind: "HogQLQuery",
+            query: `
+              SELECT
+                toDate(timestamp) AS date,
+                count() AS total,
+                count(DISTINCT person_id) AS unique_users
+              FROM events
+              WHERE event = '${params.event || "$pageview"}'
+                AND ${dateFilter(params.date_range)}
+              GROUP BY date
+              ORDER BY date ASC
+            `,
+          },
+        }),
+      });
+
+    // Live: active users in last 5 minutes
+    case "live":
+      return doFetch(`${baseUrl}/query`, {
+        method: "POST",
+        body: JSON.stringify({
+          query: {
+            kind: "HogQLQuery",
+            query: `
+              SELECT
+                properties.$current_url AS url,
+                count(DISTINCT person_id) AS active_users
+              FROM events
+              WHERE event = '$pageview'
+                AND timestamp >= now() - interval 5 minute
+              GROUP BY url
+              ORDER BY active_users DESC
+              LIMIT 10
+            `,
+          },
+        }),
+      });
+
+    // Recent session recordings list
+    case "recordings":
+      return doFetch(
+        `${baseUrl}/session_recordings?limit=${params.limit || 10}${params.person_id ? `&person_uuid=${params.person_id}` : ""}`,
+      );
+
+    // Persons / identified users list
+    case "persons":
+      return doFetch(
+        `${baseUrl}/persons?limit=${params.limit || 20}${params.search ? `&search=${encodeURIComponent(params.search)}` : ""}`,
+      );
+
+    default:
+      return { status: 400, data: { error: `Unknown PostHog action: ${action}` } };
+  }
+}
+
+// --- BrightLocal ---
+// Auth: api-key, plus optional HMAC-SHA1 sig+expires when API_SECRET is set.
+// The apiSecret was deprecated by BrightLocal; newer accounts use api-key only.
+async function blAuthParams(): Promise<Record<string, string>> {
+  const base: Record<string, string> = { "api-key": BRIGHTLOCAL_API_KEY };
+  if (!BRIGHTLOCAL_API_SECRET) return base;
+  const expires = Math.floor(Date.now() / 1000) + 1800;
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(BRIGHTLOCAL_API_SECRET),
+    { name: "HMAC", hash: "SHA-1" },
+    false,
+    ["sign"],
+  );
+  const raw = await crypto.subtle.sign("HMAC", key, enc.encode(BRIGHTLOCAL_API_KEY + expires));
+  const sig = btoa(String.fromCharCode(...new Uint8Array(raw)));
+  return { ...base, sig, expires: String(expires) };
+}
+
+async function handleBrightLocal(action: string, params: any): Promise<any> {
+  const baseUrl = "https://tools.brightlocal.com/seo-tools/api";
+  const locationIds: number[] = params.location_ids
+    ? (Array.isArray(params.location_ids) ? params.location_ids : [params.location_ids])
+    : BRIGHTLOCAL_LOCATION_IDS;
+
+  // GET — auth params in query string
+  const doGet = async (path: string, extra?: Record<string, any>) => {
+    const auth = await blAuthParams();
+    const qp = new URLSearchParams({
+      ...auth,
+      ...Object.fromEntries(Object.entries(extra || {}).map(([k, v]) => [k, String(v)])),
+    });
+    const res = await fetch(`${baseUrl}${path}?${qp}`);
+    const text = await res.text();
+    try { return { status: res.status, data: JSON.parse(text) }; }
+    catch { return { status: res.status, data: text }; }
+  };
+
+  // POST — auth params in form body
+  const doPost = async (path: string, body?: Record<string, any>) => {
+    const auth = await blAuthParams();
+    const form = new URLSearchParams({
+      ...auth,
+      ...Object.fromEntries(Object.entries(body || {}).map(([k, v]) => [k, String(v)])),
+    });
+    const res = await fetch(`${baseUrl}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form,
+    });
+    const text = await res.text();
+    try { return { status: res.status, data: JSON.parse(text) }; }
+    catch { return { status: res.status, data: text }; }
+  };
+
+  switch (action) {
+    // Raw debug — test any path/method manually
+    case "_raw": {
+      const method = (params.method || "GET").toUpperCase();
+      if (method === "GET") return doGet(params.path, params.query || {});
+      return doPost(params.path, params.body || {});
+    }
+
+    // GET single location details
+    case "location": {
+      const id = params.location_id || locationIds[0];
+      return doGet(`/v2/clients-and-locations/locations/${id}`);
+    }
+
+    // GET all configured locations
+    case "locations": {
+      const results = await Promise.all(
+        locationIds.map(async (id) => {
+          const r = await doGet(`/v2/clients-and-locations/locations/${id}`);
+          return { location_id: id, ...r.data };
+        })
+      );
+      return { status: 200, data: results };
+    }
+
+    // GET all rank-checker campaigns (reports)
+    case "lsrc_reports":
+      return doGet("/v2/lsrc/get-all");
+
+    // GET rank-checker results for a campaign
+    case "rankings": {
+      const campaignId = params.campaign_id;
+      if (!campaignId) return { status: 400, data: { error: "campaign_id required" } };
+      return doGet("/v2/lsrc/results/get", { "campaign-id": campaignId });
+    }
+
+    // GET all reputation-manager (review) reports
+    case "reputation_reports":
+      return doGet("/v4/rf/");
+
+    // GET reviews for a specific reputation report
+    case "reviews": {
+      const reportId = params.report_id;
+      if (!reportId) return { status: 400, data: { error: "report_id required" } };
+      return doGet(`/v4/rf/${reportId}/reviews`, {
+        ...(params.star_rating ? { "star-rating": params.star_rating } : {}),
+        ...(params.directory ? { directory: params.directory } : {}),
+      });
+    }
+
+    // GET all citation-tracker reports
+    case "citation_reports":
+      return doGet("/v2/ct/get-all");
+
+    // GET citation-tracker results for a report
+    case "citations": {
+      const reportId = params.report_id;
+      if (!reportId) return { status: 400, data: { error: "report_id required" } };
+      return doGet("/v2/ct/get-results", { "report-id": reportId });
+    }
+
+    // POST create a batch (needed for async review-fetch jobs)
+    case "create_batch":
+      return doPost("/v4/batch", { "stop-on-job-error": "0" });
+
+    // GET batch results
+    case "batch_results": {
+      const batchId = params.batch_id;
+      if (!batchId) return { status: 400, data: { error: "batch_id required" } };
+      return doGet("/v4/batch", { "batch-id": batchId });
+    }
+
+    default:
+      return { status: 400, data: { error: `Unknown BrightLocal action: ${action}` } };
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
@@ -667,6 +998,12 @@ Deno.serve(async (req: Request) => {
         break;
       case "crux":
         result = await handleCrUX(action, params);
+        break;
+      case "posthog":
+        result = await handlePostHog(action, params);
+        break;
+      case "brightlocal":
+        result = await handleBrightLocal(action, params);
         break;
       default:
         result = { status: 400, data: { error: `Unknown platform: ${platform}` } };
