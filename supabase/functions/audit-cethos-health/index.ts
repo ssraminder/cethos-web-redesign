@@ -1096,61 +1096,90 @@ async function gatherWeeklyMetrics(_supabase: any): Promise<WeeklyMetrics | null
     };
 
     // ---------- Google Ads ----------
-    const adsScope = `AND campaign.name NOT LIKE '%Calgary Oaths%'`;
-    const adsSelect = `
-      metrics.cost_micros,
-      metrics.clicks,
-      metrics.impressions,
-      metrics.conversions,
-      metrics.conversions_value,
-      metrics.search_impression_share,
-      metrics.search_top_impression_share,
-      metrics.search_absolute_top_impression_share,
-      metrics.search_budget_lost_impression_share,
-      metrics.search_rank_lost_impression_share`;
-
-    const adsQuery = (start: Date, end: Date) =>
-      `SELECT ${adsSelect}
-       FROM customer
-       WHERE segments.date BETWEEN '${fmtDate(start)}' AND '${fmtDate(end)}'`;
+    // Two queries:
+    //   1. customer-level totals for spend/clicks/impr/conv (scalar metrics)
+    //   2. campaign-level for impression share metrics (top/abs-top IS only
+    //      compatible with campaign resource), then weight-average by
+    //      impressions to produce a single account-level number.
+    const adsScopeSql = `AND campaign.name NOT LIKE '%Calgary Oaths%'`;
+    void adsScopeSql; // kept for future per-campaign extensions
 
     const adsAgg = async (start: Date, end: Date) => {
-      const r = await callGoogle("gads", "query", {
+      // Query 1: scalar totals at customer level
+      const totalsRes = await callGoogle("gads", "query", {
         customer: "cethos_solutions",
-        query: adsQuery(start, end),
+        query: `
+          SELECT
+            metrics.cost_micros,
+            metrics.clicks,
+            metrics.impressions,
+            metrics.conversions,
+            metrics.conversions_value
+          FROM customer
+          WHERE segments.date BETWEEN '${fmtDate(start)}' AND '${fmtDate(end)}'
+        `,
       });
-      // searchStream returns an array of batches, each with .results.
-      // GAQL also doesn't include zero-impression dates, so we sum what's there.
-      const rows: any[] = [];
-      const batches = Array.isArray(r.data) ? r.data : [];
-      for (const batch of batches) for (const row of batch.results || []) rows.push(row);
       let cost = 0, clicks = 0, impressions = 0, conv = 0, convVal = 0;
-      let isSum = 0, isTopSum = 0, isAbsTopSum = 0, lostBudgetSum = 0, lostRankSum = 0, isCount = 0;
-      for (const row of rows) {
-        const m = row.metrics || {};
-        cost += num(m.costMicros) / 1e6;
-        clicks += num(m.clicks);
-        impressions += num(m.impressions);
-        conv += num(m.conversions);
-        convVal += num(m.conversionsValue);
-        if (m.searchImpressionShare !== undefined && m.searchImpressionShare !== null) {
-          isSum += num(m.searchImpressionShare);
-          isTopSum += num(m.searchTopImpressionShare);
-          isAbsTopSum += num(m.searchAbsoluteTopImpressionShare);
-          lostBudgetSum += num(m.searchBudgetLostImpressionShare);
-          lostRankSum += num(m.searchRankLostImpressionShare);
-          isCount++;
+      const totalsBatches = Array.isArray(totalsRes.data) ? totalsRes.data : [];
+      for (const batch of totalsBatches) {
+        for (const row of batch.results || []) {
+          const m = row.metrics || {};
+          cost += num(m.costMicros) / 1e6;
+          clicks += num(m.clicks);
+          impressions += num(m.impressions);
+          conv += num(m.conversions);
+          convVal += num(m.conversionsValue);
         }
       }
+
+      // Query 2: campaign-level for IS metrics (weight by impressions)
+      const isRes = await callGoogle("gads", "query", {
+        customer: "cethos_solutions",
+        query: `
+          SELECT
+            campaign.id,
+            metrics.impressions,
+            metrics.search_impression_share,
+            metrics.search_top_impression_share,
+            metrics.search_absolute_top_impression_share,
+            metrics.search_budget_lost_impression_share,
+            metrics.search_rank_lost_impression_share
+          FROM campaign
+          WHERE segments.date BETWEEN '${fmtDate(start)}' AND '${fmtDate(end)}'
+            AND campaign.advertising_channel_type = 'SEARCH'
+            AND campaign.name NOT LIKE '%Calgary Oaths%'
+        `,
+      });
+      let isWSum = 0, isTopWSum = 0, isAbsTopWSum = 0, lostBudgetWSum = 0, lostRankWSum = 0, weight = 0;
+      const isBatches = Array.isArray(isRes.data) ? isRes.data : [];
+      for (const batch of isBatches) {
+        for (const row of batch.results || []) {
+          const m = row.metrics || {};
+          const w = num(m.impressions);
+          if (w <= 0) continue;
+          // IS values come back as 0..1. Some accounts return -1 or values >1
+          // for "below threshold"; clamp to 0..1.
+          const cap = (v: any) => Math.max(0, Math.min(1, num(v)));
+          if (m.searchImpressionShare !== undefined && m.searchImpressionShare !== null) {
+            isWSum += cap(m.searchImpressionShare) * w;
+            isTopWSum += cap(m.searchTopImpressionShare) * w;
+            isAbsTopWSum += cap(m.searchAbsoluteTopImpressionShare) * w;
+            lostBudgetWSum += cap(m.searchBudgetLostImpressionShare) * w;
+            lostRankWSum += cap(m.searchRankLostImpressionShare) * w;
+            weight += w;
+          }
+        }
+      }
+      const wAvgPct = (s: number) => (weight > 0 ? (s / weight) * 100 : 0);
+
       const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
       const avgCpc = clicks > 0 ? cost / clicks : 0;
       const cpa = conv > 0 ? cost / conv : 0;
       const convRate = clicks > 0 ? (conv / clicks) * 100 : 0;
-      const avgIs = (s: number) => (isCount > 0 ? (s / isCount) * 100 : 0);
       return {
         cost, clicks, impressions, conv, convVal, ctr, avgCpc, cpa, convRate,
-        is: avgIs(isSum), isTop: avgIs(isTopSum), isAbsTop: avgIs(isAbsTopSum),
-        lostBudget: avgIs(lostBudgetSum), lostRank: avgIs(lostRankSum),
+        is: wAvgPct(isWSum), isTop: wAvgPct(isTopWSum), isAbsTop: wAvgPct(isAbsTopWSum),
+        lostBudget: wAvgPct(lostBudgetWSum), lostRank: wAvgPct(lostRankWSum),
       };
     };
 
