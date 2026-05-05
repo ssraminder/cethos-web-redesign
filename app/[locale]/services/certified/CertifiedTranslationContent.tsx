@@ -325,6 +325,39 @@ export default function CertifiedTranslationContent() {
                   </span>
                 </div>
               </motion.div>
+
+              {/* Transparent Pricing — Quality Score lift + competitive parity with talberta.ca */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+                className="mt-6 inline-block bg-white border border-slate-200 rounded-xl p-4 shadow-sm"
+              >
+                <div className="text-xs font-semibold uppercase tracking-wide text-[#0891B2] mb-2">
+                  Limited-Time Pricing
+                </div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-[#0C2340]">$55</span>
+                    <span className="text-[#4B5563]">/ page</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-[#0C2340]">5%</span>
+                    <span className="text-[#4B5563]">off 2-page orders</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-[#0C2340]">10%</span>
+                    <span className="text-[#4B5563]">off 3+ page orders</span>
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-base font-bold text-[#0C2340]">FREE</span>
+                    <span className="text-[#4B5563]">scanned copy</span>
+                  </div>
+                </div>
+                <div className="text-xs text-[#4B5563] mt-2">
+                  Notarization included · IRCC, WES & IQAS accepted · Same-day available
+                </div>
+              </motion.div>
             </div>
 
             {/* Quote Form */}
