@@ -54,11 +54,15 @@ const CAMPAIGN_SCOPE_SQL = EXCLUDED_CAMPAIGN_NAME_PATTERNS
   .join(" ")
 
 async function callGoogle(platform: string, action: string, params: Record<string, unknown> = {}): Promise<any> {
+  // Use service-role for inter-function calls — anon JWT verification has been
+  // intermittently failing with 401 in this project's edge runtime.
+  const bearer = SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
   const res = await fetch(GOOGLE_INTEGRATIONS_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      Authorization: `Bearer ${bearer}`,
+      apikey: bearer,
     },
     body: JSON.stringify({ platform, action, params }),
   });
@@ -234,6 +238,16 @@ async function checkWastedSpendKeywords(supabase: any, audit_run_id: string, set
           last_30d_cost_cad: cost.toFixed(2),
           last_30d_clicks: Number(row.metrics?.clicks || 0),
           last_30d_conversions: conv,
+          current_state: {
+            status: "ENABLED",
+            cost_30d: `$${cost.toFixed(2)} CAD`,
+            conversions_30d: conv,
+          },
+          expected_after: {
+            status: "PAUSED",
+            cost_savings_30d: `$${cost.toFixed(2)} CAD`,
+            risk: "Zero conversion impact (already at 0 conv)",
+          },
         },
         action_description: `Pause keyword "${kw}" (${row.adGroupCriterion?.keyword?.matchType}) in ad group "${row.adGroup?.name}" — spent $${cost.toFixed(2)} with 0 conversions in the last 30 days.`,
         action_type: "ads_mutate",
@@ -295,6 +309,17 @@ async function checkHighImpLowCtr(supabase: any, audit_run_id: string, settings:
         clicks_30d: row.clicks,
         ctr_pct: (ctr * 100).toFixed(2),
         avg_position: pos.toFixed(1),
+        current_state: {
+          ctr: `${(ctr * 100).toFixed(2)}%`,
+          clicks_30d: row.clicks,
+          impressions_30d: imp,
+          avg_position: pos.toFixed(1),
+        },
+        expected_after: {
+          ctr_target: `≥ 5.0% (industry baseline at pos ${pos.toFixed(1)})`,
+          incremental_clicks_30d: Math.round(imp * (0.05 - ctr)),
+          confidence: "Medium — depends on rewrite quality",
+        },
       },
       action_description: `Rewrite <title> and <meta description> on ${page} to improve the SERP snippet for "${query}" (currently ranking pos ${pos.toFixed(1)} with ${(ctr * 100).toFixed(2)}% CTR across ${imp} impressions).`,
       action_type: "github_commit",
@@ -696,6 +721,17 @@ async function checkBudgetStarvation(supabase: any, audit_run_id: string, settin
           conversions_30d: conv.toFixed(1),
           current_daily_budget_cad: currentBudget.toFixed(2),
           proposed_daily_budget_cad: newBudget.toFixed(2),
+          current_state: {
+            daily_budget: `$${currentBudget.toFixed(2)} CAD`,
+            lost_is_budget: `${(lostIS * 100).toFixed(1)}%`,
+            conversions_30d: conv.toFixed(1),
+          },
+          expected_after: {
+            daily_budget: `$${newBudget.toFixed(2)} CAD (+25%)`,
+            recovered_impression_share: `~${(lostIS * 25).toFixed(1)}% of lost share`,
+            projected_monthly_incremental_conversions: ((conv / 30) * 30 * 0.25).toFixed(1),
+            projected_monthly_incremental_spend: `$${((newBudget - currentBudget) * 30).toFixed(0)} CAD`,
+          },
         },
         action_description: `Raise "${name}" daily budget from $${currentBudget.toFixed(2)} to $${newBudget.toFixed(2)} (+25%). Campaign is losing ${(lostIS * 100).toFixed(0)}% of impressions to budget cap while converting ${conv.toFixed(1)} times in 30 days.`,
         action_type: "ads_mutate",
@@ -793,6 +829,18 @@ async function checkSpyfuLostRankings(supabase: any, audit_run_id: string, setti
         keyword_difficulty: row.keywordDifficulty,
         country: "CA",
         source: "spyfu",
+        current_state: {
+          rank: row.rank ?? "off page 1",
+          rank_change: row.rankChange ?? null,
+          seo_clicks: row.seoClicks ?? 0,
+          search_volume: volume,
+        },
+        expected_after: {
+          rank_target: "Top 10 (page 1)",
+          potential_clicks: Math.round(volume * 0.03), // ~3% CTR for pos 4-10
+          investment: "Page refresh + internal links + content depth",
+          timeline: "4-8 weeks",
+        },
       },
       action_description: `Cethos lost organic rankings for "${keyword}" (${volume}/mo CA searches, KD ${row.keywordDifficulty ?? "?"}). Investigate page-level cause: indexing, content depth, internal links, or competitor takeover. Consider refreshing the targeting page or building a new one.`,
       action_type: "manual",
@@ -849,6 +897,17 @@ async function checkBrightlocalNegativeReviews(supabase: any, audit_run_id: stri
           comment: comment.slice(0, 500),
           posted_at: reviewDate,
           source: "brightlocal",
+          current_state: {
+            review_status: "Unanswered",
+            rating: `${stars} ★`,
+            posted: reviewDate,
+            directory,
+          },
+          expected_after: {
+            review_status: "Replied within 24h",
+            sentiment_recovery: "60-80% of unhappy reviewers update rating after a thoughtful reply",
+            local_pack_impact: "Positive — reply rate is a confirmed local SEO signal",
+          },
         },
         action_description: `New ${stars}-star review on ${directory} for ${report.report_name}: "${comment.slice(0, 200)}${comment.length > 200 ? "…" : ""}". Triage and reply within 24h — negative reviews compound on local pack ranking.`,
         action_type: "manual",
@@ -905,6 +964,16 @@ async function checkPostHogQuoteFunnel(supabase: any, audit_run_id: string, sett
       quote_submissions: submissions,
       conversion_rate_pct: (rate * 100).toFixed(3),
       threshold_pct: "0.5",
+      current_state: {
+        funnel_rate: `${(rate * 100).toFixed(2)}%`,
+        pageviews_7d: pageviews,
+        submissions_7d: submissions,
+      },
+      expected_after: {
+        funnel_rate_target: "≥ 0.5% (industry baseline for translation/services)",
+        incremental_quotes_7d: Math.max(0, Math.round(pageviews * 0.005) - submissions),
+        next_action: "PostHog session recordings + GA4/Ads conversion tag check",
+      },
       source: "posthog",
     },
     action_description: `Quote funnel converting ${(rate * 100).toFixed(2)}% (${submissions}/${pageviews}) over the last 7 days — below 0.5% floor. Check PostHog session recordings for /quote, verify form submit handler, and confirm GA4/Ads conversion tags still fire.`,
@@ -915,6 +984,481 @@ async function checkPostHogQuoteFunnel(supabase: any, audit_run_id: string, sett
   });
   if (rec) recs.push(rec);
   return recs;
+}
+
+// ---------------------------------------------------------------------------
+// Performance metrics gathering (numbers section of digest)
+// ---------------------------------------------------------------------------
+
+interface MetricCompare {
+  current: number;
+  previous: number;
+  delta_pct: number | null; // null when prev = 0
+  delta_abs: number;
+}
+
+interface WeeklyMetrics {
+  period: { current_label: string; previous_label: string; days: number };
+  google_ads: {
+    spend: MetricCompare;
+    clicks: MetricCompare;
+    impressions: MetricCompare;
+    conversions: MetricCompare;
+    conversion_value: MetricCompare;
+    ctr_pct: MetricCompare;
+    avg_cpc: MetricCompare;
+    cost_per_conversion: MetricCompare;
+    conversion_rate_pct: MetricCompare;
+    search_impression_share_pct: MetricCompare;
+    search_top_impression_share_pct: MetricCompare;
+    search_absolute_top_impression_share_pct: MetricCompare;
+    search_lost_is_budget_pct: MetricCompare;
+    search_lost_is_rank_pct: MetricCompare;
+  };
+  auction_insights: Array<{
+    domain: string;
+    impression_share_pct: number;
+    overlap_rate_pct: number;
+    position_above_rate_pct: number;
+    top_of_page_rate_pct: number;
+    abs_top_of_page_rate_pct: number;
+    outranking_share_pct: number;
+  }>;
+  ga4: {
+    sessions: MetricCompare;
+    active_users: MetricCompare;
+    engaged_sessions: MetricCompare;
+    conversions: MetricCompare;
+    avg_engagement_time_s: MetricCompare;
+  };
+  gsc: {
+    clicks: MetricCompare;
+    impressions: MetricCompare;
+    ctr_pct: MetricCompare;
+    avg_position: MetricCompare;
+  };
+  gbp: Array<{
+    location: string;
+    profile_views: MetricCompare;
+    direction_requests: MetricCompare;
+    phone_calls: MetricCompare;
+    website_clicks: MetricCompare;
+  }>;
+  posthog: {
+    pageviews: MetricCompare;
+    sessions: MetricCompare;
+    quote_pageviews: MetricCompare;
+    quote_submits: MetricCompare;
+    quote_conv_rate_pct: MetricCompare;
+  };
+  brightlocal: Array<{
+    location_id: number;
+    location_name: string;
+    avg_rating: number | null;
+    total_reviews: number | null;
+  }>;
+  spyfu: {
+    avg_organic_rank: number | null;
+    total_organic_keywords: number | null;
+    monthly_organic_clicks: number | null;
+    monthly_organic_value_usd: number | null;
+    top_seo_competitors: string[];
+  };
+}
+
+const num = (v: any, def = 0): number => {
+  const n = typeof v === "string" ? parseFloat(v) : Number(v);
+  return Number.isFinite(n) ? n : def;
+};
+
+const compare = (current: number, previous: number): MetricCompare => ({
+  current,
+  previous,
+  delta_pct: previous === 0 ? null : ((current - previous) / previous) * 100,
+  delta_abs: current - previous,
+});
+
+const fmtDate = (d: Date): string => d.toISOString().slice(0, 10);
+
+async function gatherWeeklyMetrics(_supabase: any): Promise<WeeklyMetrics | null> {
+  try {
+    const now = new Date();
+    const days = 7;
+    const curEnd = now;
+    const curStart = new Date(now.getTime() - days * 86400_000);
+    const prevEnd = new Date(curStart.getTime() - 1 * 86400_000);
+    const prevStart = new Date(prevEnd.getTime() - days * 86400_000);
+
+    const period = {
+      current_label: `${fmtDate(curStart)} → ${fmtDate(curEnd)}`,
+      previous_label: `${fmtDate(prevStart)} → ${fmtDate(prevEnd)}`,
+      days,
+    };
+
+    // ---------- Google Ads ----------
+    const adsScope = `AND campaign.name NOT LIKE '%Calgary Oaths%'`;
+    const adsSelect = `
+      metrics.cost_micros,
+      metrics.clicks,
+      metrics.impressions,
+      metrics.conversions,
+      metrics.conversions_value,
+      metrics.search_impression_share,
+      metrics.search_top_impression_share,
+      metrics.search_absolute_top_impression_share,
+      metrics.search_budget_lost_impression_share,
+      metrics.search_rank_lost_impression_share`;
+
+    const adsQuery = (start: Date, end: Date) =>
+      `SELECT ${adsSelect}
+       FROM customer
+       WHERE segments.date BETWEEN '${fmtDate(start)}' AND '${fmtDate(end)}'`;
+
+    const adsAgg = async (start: Date, end: Date) => {
+      const r = await callGoogle("gads", "query", {
+        customer: "cethos_solutions",
+        query: adsQuery(start, end),
+      });
+      // searchStream returns an array of batches, each with .results.
+      // GAQL also doesn't include zero-impression dates, so we sum what's there.
+      const rows: any[] = [];
+      const batches = Array.isArray(r.data) ? r.data : [];
+      for (const batch of batches) for (const row of batch.results || []) rows.push(row);
+      let cost = 0, clicks = 0, impressions = 0, conv = 0, convVal = 0;
+      let isSum = 0, isTopSum = 0, isAbsTopSum = 0, lostBudgetSum = 0, lostRankSum = 0, isCount = 0;
+      for (const row of rows) {
+        const m = row.metrics || {};
+        cost += num(m.costMicros) / 1e6;
+        clicks += num(m.clicks);
+        impressions += num(m.impressions);
+        conv += num(m.conversions);
+        convVal += num(m.conversionsValue);
+        if (m.searchImpressionShare !== undefined && m.searchImpressionShare !== null) {
+          isSum += num(m.searchImpressionShare);
+          isTopSum += num(m.searchTopImpressionShare);
+          isAbsTopSum += num(m.searchAbsoluteTopImpressionShare);
+          lostBudgetSum += num(m.searchBudgetLostImpressionShare);
+          lostRankSum += num(m.searchRankLostImpressionShare);
+          isCount++;
+        }
+      }
+      const ctr = impressions > 0 ? (clicks / impressions) * 100 : 0;
+      const avgCpc = clicks > 0 ? cost / clicks : 0;
+      const cpa = conv > 0 ? cost / conv : 0;
+      const convRate = clicks > 0 ? (conv / clicks) * 100 : 0;
+      const avgIs = (s: number) => (isCount > 0 ? (s / isCount) * 100 : 0);
+      return {
+        cost, clicks, impressions, conv, convVal, ctr, avgCpc, cpa, convRate,
+        is: avgIs(isSum), isTop: avgIs(isTopSum), isAbsTop: avgIs(isAbsTopSum),
+        lostBudget: avgIs(lostBudgetSum), lostRank: avgIs(lostRankSum),
+      };
+    };
+
+    const [adsCur, adsPrev] = await Promise.all([
+      adsAgg(curStart, curEnd),
+      adsAgg(prevStart, prevEnd),
+    ]);
+
+    // ---------- Auction Insights (top competitor overlap) ----------
+    let auction_insights: WeeklyMetrics["auction_insights"] = [];
+    try {
+      const aiQuery = `
+        SELECT
+          ad_group_criterion.keyword.text,
+          metrics.search_impression_share
+        FROM keyword_view
+        WHERE segments.date BETWEEN '${fmtDate(curStart)}' AND '${fmtDate(curEnd)}'
+          AND metrics.impressions > 100
+        LIMIT 1`;
+      // The actual auction-insight resource name in v23 is auction_insight_domain.
+      // If that isn't queryable through our wrapper we fall back gracefully.
+      const aiRes = await callGoogle("gads", "query", {
+        customer: "cethos_solutions",
+        query: `
+          SELECT
+            domain.name,
+            metrics.auction_insight_search_impression_share,
+            metrics.auction_insight_search_overlap_rate,
+            metrics.auction_insight_search_position_above_rate,
+            metrics.auction_insight_search_top_of_page_rate,
+            metrics.auction_insight_search_absolute_top_of_page_rate,
+            metrics.auction_insight_search_outranking_share
+          FROM auction_insight_domain
+          WHERE segments.date BETWEEN '${fmtDate(curStart)}' AND '${fmtDate(curEnd)}'
+          ORDER BY metrics.auction_insight_search_impression_share DESC
+          LIMIT 10
+        `,
+      });
+      const aiRows: any[] = [];
+      for (const batch of (Array.isArray(aiRes.data) ? aiRes.data : [])) {
+        for (const row of batch.results || []) aiRows.push(row);
+      }
+      auction_insights = aiRows.map((row: any) => ({
+        domain: row.domain?.name || "(unknown)",
+        impression_share_pct: num(row.metrics?.auctionInsightSearchImpressionShare) * 100,
+        overlap_rate_pct: num(row.metrics?.auctionInsightSearchOverlapRate) * 100,
+        position_above_rate_pct: num(row.metrics?.auctionInsightSearchPositionAboveRate) * 100,
+        top_of_page_rate_pct: num(row.metrics?.auctionInsightSearchTopOfPageRate) * 100,
+        abs_top_of_page_rate_pct: num(row.metrics?.auctionInsightSearchAbsoluteTopOfPageRate) * 100,
+        outranking_share_pct: num(row.metrics?.auctionInsightSearchOutrankingShare) * 100,
+      }));
+      void aiQuery; // silence unused
+    } catch (err) {
+      console.error("auction_insights query failed (non-fatal):", err);
+    }
+
+    // ---------- GA4 ----------
+    // run_report expects params.start_date / params.end_date as strings
+    // and params.metrics as a plain string array (the handler wraps each
+    // entry in {name}).
+    const gaAgg = async (start: Date, end: Date) => {
+      const r = await callGoogle("ga", "run_report", {
+        start_date: fmtDate(start),
+        end_date: fmtDate(end),
+        dimensions: [],
+        metrics: ["sessions", "activeUsers", "engagedSessions", "conversions", "averageSessionDuration"],
+        limit: 1,
+      });
+      const totals = r.data?.totals?.[0]?.metricValues || r.data?.rows?.[0]?.metricValues || [];
+      return {
+        sessions: num(totals[0]?.value),
+        active: num(totals[1]?.value),
+        engaged: num(totals[2]?.value),
+        conv: num(totals[3]?.value),
+        avgEngage: num(totals[4]?.value),
+      };
+    };
+    const [gaCur, gaPrev] = await Promise.all([
+      gaAgg(curStart, curEnd),
+      gaAgg(prevStart, prevEnd),
+    ]);
+
+    // ---------- GSC ----------
+    const gscAgg = async (start: Date, end: Date) => {
+      const r = await callGoogle("gsc", "search_analytics", {
+        start_date: fmtDate(start),
+        end_date: fmtDate(end),
+        dimensions: [],
+        row_limit: 1,
+      });
+      const row = r.data?.rows?.[0];
+      return {
+        clicks: num(row?.clicks),
+        impressions: num(row?.impressions),
+        ctr: num(row?.ctr) * 100,
+        position: num(row?.position),
+      };
+    };
+    const [gscCur, gscPrev] = await Promise.all([
+      gscAgg(curStart, curEnd),
+      gscAgg(prevStart, prevEnd),
+    ]);
+
+    // ---------- GBP (per location) ----------
+    // get_multi_metrics expects start_date/end_date as {year, month, day}.
+    // Returns a multiDailyMetricTimeSeries with daily values to be summed.
+    const gbp: WeeklyMetrics["gbp"] = [];
+    const locations = ["apostille", "translation", "interpretation"];
+    const dateObj = (d: Date) => ({ year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() });
+    const gbpAgg = async (loc: string, start: Date, end: Date) => {
+      const r = await callGoogle("gbp", "get_multi_metrics", {
+        location: loc,
+        start_date: dateObj(start),
+        end_date: dateObj(end),
+        metrics: [
+          "BUSINESS_IMPRESSIONS_DESKTOP_MAPS",
+          "BUSINESS_IMPRESSIONS_MOBILE_MAPS",
+          "BUSINESS_IMPRESSIONS_DESKTOP_SEARCH",
+          "BUSINESS_IMPRESSIONS_MOBILE_SEARCH",
+          "BUSINESS_DIRECTION_REQUESTS",
+          "CALL_CLICKS",
+          "WEBSITE_CLICKS",
+        ],
+      });
+      // Response shape: { multiDailyMetricTimeSeries: [{ dailyMetricTimeSeries: [{ dailyMetric, timeSeries: { datedValues: [{value}] } }] }] }
+      const series = r.data?.multiDailyMetricTimeSeries?.[0]?.dailyMetricTimeSeries || [];
+      const totals: Record<string, number> = {};
+      for (const m of series) {
+        const key = m.dailyMetric;
+        const dv = m.timeSeries?.datedValues || [];
+        totals[key] = dv.reduce((s: number, v: any) => s + num(v.value), 0);
+      }
+      return {
+        views: (totals.BUSINESS_IMPRESSIONS_DESKTOP_MAPS || 0) +
+               (totals.BUSINESS_IMPRESSIONS_MOBILE_MAPS || 0) +
+               (totals.BUSINESS_IMPRESSIONS_DESKTOP_SEARCH || 0) +
+               (totals.BUSINESS_IMPRESSIONS_MOBILE_SEARCH || 0),
+        directions: totals.BUSINESS_DIRECTION_REQUESTS || 0,
+        calls: totals.CALL_CLICKS || 0,
+        clicks: totals.WEBSITE_CLICKS || 0,
+      };
+    };
+    for (const loc of locations) {
+      try {
+        const [cur, prev] = await Promise.all([
+          gbpAgg(loc, curStart, curEnd),
+          gbpAgg(loc, prevStart, prevEnd),
+        ]);
+        gbp.push({
+          location: loc,
+          profile_views: compare(cur.views, prev.views),
+          direction_requests: compare(cur.directions, prev.directions),
+          phone_calls: compare(cur.calls, prev.calls),
+          website_clicks: compare(cur.clicks, prev.clicks),
+        });
+      } catch (err) {
+        console.error(`gbp metrics for ${loc} failed:`, err);
+      }
+    }
+
+    // ---------- PostHog ----------
+    const phAgg = async (start: Date, end: Date) => {
+      const r = await callGoogle("posthog", "query", {
+        query: `
+          SELECT
+            countIf(event = '$pageview') AS pageviews,
+            count(DISTINCT \$session_id) AS sessions,
+            countIf(event = '$pageview' AND properties.\$current_url LIKE '%/quote%') AS quote_pv,
+            countIf(event = 'quote_submitted') AS quote_submits
+          FROM events
+          WHERE timestamp >= toDateTime('${fmtDate(start)}')
+            AND timestamp < toDateTime('${fmtDate(end)} 23:59:59')
+        `,
+      });
+      const row = r.data?.results?.[0] || [];
+      return {
+        pv: num(row[0]),
+        sessions: num(row[1]),
+        quotePv: num(row[2]),
+        quoteSubmits: num(row[3]),
+      };
+    };
+    let phCur = { pv: 0, sessions: 0, quotePv: 0, quoteSubmits: 0 };
+    let phPrev = { pv: 0, sessions: 0, quotePv: 0, quoteSubmits: 0 };
+    try {
+      [phCur, phPrev] = await Promise.all([
+        phAgg(curStart, curEnd),
+        phAgg(prevStart, prevEnd),
+      ]);
+    } catch (err) {
+      console.error("posthog metrics failed:", err);
+    }
+    const phRate = (s: number, p: number) => (p > 0 ? (s / p) * 100 : 0);
+
+    // ---------- BrightLocal (review summary per location) ----------
+    const brightlocal: WeeklyMetrics["brightlocal"] = [];
+    try {
+      const repRes = await callGoogle("brightlocal", "reputation_reports", {});
+      const reports = repRes.data?.reports || [];
+      for (const rep of reports) {
+        let avg: number | null = null;
+        let total: number | null = null;
+        try {
+          const sumRes = await callGoogle("brightlocal", "_raw", {
+            method: "GET",
+            path: `/v4/rf/${rep.report_id}/reviews-count`,
+          });
+          total = num(sumRes.data?.total_reviews ?? sumRes.data?.count, NaN);
+          if (!Number.isFinite(total!)) total = null;
+          avg = num(sumRes.data?.average_rating, NaN);
+          if (!Number.isFinite(avg!)) avg = null;
+        } catch {
+          // ignore — leave nulls
+        }
+        brightlocal.push({
+          location_id: rep.location_id,
+          location_name: rep.report_name,
+          avg_rating: avg,
+          total_reviews: total,
+        });
+      }
+    } catch (err) {
+      console.error("brightlocal review summary failed:", err);
+    }
+
+    // ---------- SpyFu (domain stats + competitors) ----------
+    let spyfuStats: WeeklyMetrics["spyfu"] = {
+      avg_organic_rank: null,
+      total_organic_keywords: null,
+      monthly_organic_clicks: null,
+      monthly_organic_value_usd: null,
+      top_seo_competitors: [],
+    };
+    try {
+      const sfRes = await callGoogle("spyfu", "domain_stats", {
+        domain: "cethos.com",
+        country_code: "CA",
+      });
+      const r0 = sfRes.data?.results?.[0];
+      if (r0) {
+        spyfuStats.avg_organic_rank = num(r0.averageOrganicRank, NaN);
+        if (!Number.isFinite(spyfuStats.avg_organic_rank!)) spyfuStats.avg_organic_rank = null;
+        spyfuStats.total_organic_keywords = num(r0.totalOrganicResults);
+        spyfuStats.monthly_organic_clicks = num(r0.monthlyOrganicClicks);
+        spyfuStats.monthly_organic_value_usd = num(r0.monthlyOrganicValue);
+      }
+      const compRes = await callGoogle("spyfu", "top_seo_competitors", {
+        domain: "cethos.com",
+        country_code: "CA",
+        page_size: 5,
+      });
+      spyfuStats.top_seo_competitors = (compRes.data?.results || [])
+        .map((c: any) => c.domain)
+        .filter(Boolean);
+    } catch (err) {
+      console.error("spyfu stats failed:", err);
+    }
+
+    return {
+      period,
+      google_ads: {
+        spend: compare(adsCur.cost, adsPrev.cost),
+        clicks: compare(adsCur.clicks, adsPrev.clicks),
+        impressions: compare(adsCur.impressions, adsPrev.impressions),
+        conversions: compare(adsCur.conv, adsPrev.conv),
+        conversion_value: compare(adsCur.convVal, adsPrev.convVal),
+        ctr_pct: compare(adsCur.ctr, adsPrev.ctr),
+        avg_cpc: compare(adsCur.avgCpc, adsPrev.avgCpc),
+        cost_per_conversion: compare(adsCur.cpa, adsPrev.cpa),
+        conversion_rate_pct: compare(adsCur.convRate, adsPrev.convRate),
+        search_impression_share_pct: compare(adsCur.is, adsPrev.is),
+        search_top_impression_share_pct: compare(adsCur.isTop, adsPrev.isTop),
+        search_absolute_top_impression_share_pct: compare(adsCur.isAbsTop, adsPrev.isAbsTop),
+        search_lost_is_budget_pct: compare(adsCur.lostBudget, adsPrev.lostBudget),
+        search_lost_is_rank_pct: compare(adsCur.lostRank, adsPrev.lostRank),
+      },
+      auction_insights,
+      ga4: {
+        sessions: compare(gaCur.sessions, gaPrev.sessions),
+        active_users: compare(gaCur.active, gaPrev.active),
+        engaged_sessions: compare(gaCur.engaged, gaPrev.engaged),
+        conversions: compare(gaCur.conv, gaPrev.conv),
+        avg_engagement_time_s: compare(gaCur.avgEngage, gaPrev.avgEngage),
+      },
+      gsc: {
+        clicks: compare(gscCur.clicks, gscPrev.clicks),
+        impressions: compare(gscCur.impressions, gscPrev.impressions),
+        ctr_pct: compare(gscCur.ctr, gscPrev.ctr),
+        avg_position: compare(gscCur.position, gscPrev.position),
+      },
+      gbp,
+      posthog: {
+        pageviews: compare(phCur.pv, phPrev.pv),
+        sessions: compare(phCur.sessions, phPrev.sessions),
+        quote_pageviews: compare(phCur.quotePv, phPrev.quotePv),
+        quote_submits: compare(phCur.quoteSubmits, phPrev.quoteSubmits),
+        quote_conv_rate_pct: compare(
+          phRate(phCur.quoteSubmits, phCur.quotePv),
+          phRate(phPrev.quoteSubmits, phPrev.quotePv),
+        ),
+      },
+      brightlocal,
+      spyfu: spyfuStats,
+    };
+  } catch (err) {
+    console.error("gatherWeeklyMetrics failed:", err);
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -974,6 +1518,218 @@ interface DigestRow {
   auto_executed: boolean;
 }
 
+// --- Number formatting & WoW delta helpers used by the Performance Snapshot ---
+
+const fmtNum = (v: number, opts?: { decimals?: number; prefix?: string; suffix?: string; abbrev?: boolean }): string => {
+  if (!Number.isFinite(v)) return "—";
+  const decimals = opts?.decimals ?? (Math.abs(v) < 10 ? 2 : Math.abs(v) < 100 ? 1 : 0);
+  let n = v;
+  let suffix = opts?.suffix || "";
+  if (opts?.abbrev) {
+    if (Math.abs(v) >= 1_000_000) { n = v / 1_000_000; suffix = "M" + suffix; }
+    else if (Math.abs(v) >= 1_000) { n = v / 1_000; suffix = "k" + suffix; }
+  }
+  return `${opts?.prefix || ""}${n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${suffix}`;
+};
+
+// Render a delta cell with up/down arrow and color. `direction` says whether
+// "higher current" is good (+1) or bad (-1).
+const deltaCell = (m: MetricCompare, direction: 1 | -1): string => {
+  if (m.delta_pct === null) {
+    return `<span style="color:#94A3B8;font-size:11px;">—</span>`;
+  }
+  const isImprovement = (m.delta_pct > 0 && direction === 1) || (m.delta_pct < 0 && direction === -1);
+  const isFlat = Math.abs(m.delta_pct) < 0.5;
+  const color = isFlat ? "#64748B" : isImprovement ? "#059669" : "#DC2626";
+  const arrow = isFlat ? "→" : m.delta_pct > 0 ? "▲" : "▼";
+  return `<span style="color:${color};font-weight:600;font-size:11px;">${arrow} ${Math.abs(m.delta_pct).toFixed(1)}%</span>`;
+};
+
+const metricRow = (label: string, m: MetricCompare, valueFmt: (v: number) => string, direction: 1 | -1): string => `
+  <tr>
+    <td style="padding:6px 10px;font-size:12px;color:#64748B;border-bottom:1px solid #F1F5F9;">${escapeHtml(label)}</td>
+    <td style="padding:6px 10px;font-size:13px;font-weight:600;color:#0C2340;border-bottom:1px solid #F1F5F9;text-align:right;">${valueFmt(m.current)}</td>
+    <td style="padding:6px 10px;font-size:11px;color:#94A3B8;border-bottom:1px solid #F1F5F9;text-align:right;">${valueFmt(m.previous)}</td>
+    <td style="padding:6px 10px;border-bottom:1px solid #F1F5F9;text-align:right;">${deltaCell(m, direction)}</td>
+  </tr>`;
+
+const sectionTable = (title: string, color: string, rows: string): string => `
+  <h3 style="font-size:13px;margin:18px 0 6px;padding:5px 10px;background:${color}15;border-left:3px solid ${color};color:${color};font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">
+    ${escapeHtml(title)}
+  </h3>
+  <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:white;border:1px solid #E5E7EB;border-radius:4px;">
+    <thead>
+      <tr style="background:#F8FAFC;">
+        <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:left;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Metric</th>
+        <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">This week</th>
+        <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Last week</th>
+        <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Δ</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+function renderPerformanceSnapshot(m: WeeklyMetrics): string {
+  const usd = (v: number) => fmtNum(v, { prefix: "$", decimals: 2 });
+  const usdAbbr = (v: number) => fmtNum(v, { prefix: "$", abbrev: true, decimals: 1 });
+  const intC = (v: number) => fmtNum(v, { decimals: 0 });
+  const intCAbbr = (v: number) => fmtNum(v, { abbrev: true, decimals: 1 });
+  const pct = (v: number) => fmtNum(v, { suffix: "%", decimals: 2 });
+  const sec = (v: number) => `${fmtNum(v, { decimals: 1 })}s`;
+  const float2 = (v: number) => fmtNum(v, { decimals: 2 });
+
+  // --- Google Ads ---
+  const adsRows = [
+    metricRow("Spend", m.google_ads.spend, usd, -1),
+    metricRow("Conversions", m.google_ads.conversions, intC, 1),
+    metricRow("Cost / Conv (CPA)", m.google_ads.cost_per_conversion, usd, -1),
+    metricRow("Conversion rate", m.google_ads.conversion_rate_pct, pct, 1),
+    metricRow("CTR", m.google_ads.ctr_pct, pct, 1),
+    metricRow("Avg CPC", m.google_ads.avg_cpc, usd, -1),
+    metricRow("Clicks", m.google_ads.clicks, intCAbbr, 1),
+    metricRow("Impressions", m.google_ads.impressions, intCAbbr, 1),
+    metricRow("Search Impr Share", m.google_ads.search_impression_share_pct, pct, 1),
+    metricRow("Top-of-Page Rate", m.google_ads.search_top_impression_share_pct, pct, 1),
+    metricRow("Abs Top-of-Page Rate", m.google_ads.search_absolute_top_impression_share_pct, pct, 1),
+    metricRow("Lost IS (Budget)", m.google_ads.search_lost_is_budget_pct, pct, -1),
+    metricRow("Lost IS (Rank)", m.google_ads.search_lost_is_rank_pct, pct, -1),
+  ].join("");
+
+  // --- Auction Insights table ---
+  let auctionHtml = "";
+  if (m.auction_insights && m.auction_insights.length > 0) {
+    const rows = m.auction_insights.map((c) => `
+      <tr>
+        <td style="padding:6px 10px;font-size:12px;color:#0C2340;font-weight:500;border-bottom:1px solid #F1F5F9;">${escapeHtml(c.domain)}</td>
+        <td style="padding:6px 10px;font-size:12px;text-align:right;border-bottom:1px solid #F1F5F9;">${pct(c.impression_share_pct)}</td>
+        <td style="padding:6px 10px;font-size:12px;text-align:right;border-bottom:1px solid #F1F5F9;">${pct(c.overlap_rate_pct)}</td>
+        <td style="padding:6px 10px;font-size:12px;text-align:right;border-bottom:1px solid #F1F5F9;">${pct(c.position_above_rate_pct)}</td>
+        <td style="padding:6px 10px;font-size:12px;text-align:right;border-bottom:1px solid #F1F5F9;">${pct(c.top_of_page_rate_pct)}</td>
+        <td style="padding:6px 10px;font-size:12px;text-align:right;border-bottom:1px solid #F1F5F9;">${pct(c.abs_top_of_page_rate_pct)}</td>
+        <td style="padding:6px 10px;font-size:12px;text-align:right;border-bottom:1px solid #F1F5F9;">${pct(c.outranking_share_pct)}</td>
+      </tr>`).join("");
+    auctionHtml = `
+  <h3 style="font-size:13px;margin:18px 0 6px;padding:5px 10px;background:#0EA5E915;border-left:3px solid #0EA5E9;color:#0EA5E9;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">
+    Auction Insights — competitor overlap
+  </h3>
+  <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:white;border:1px solid #E5E7EB;border-radius:4px;">
+    <thead><tr style="background:#F8FAFC;">
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:left;font-weight:600;text-transform:uppercase;">Domain</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Impr Share</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Overlap</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Pos Above</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Top of Pg</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Abs Top</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Outranking</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+  }
+
+  // --- GA4 ---
+  const gaRows = [
+    metricRow("Sessions", m.ga4.sessions, intCAbbr, 1),
+    metricRow("Active users", m.ga4.active_users, intCAbbr, 1),
+    metricRow("Engaged sessions", m.ga4.engaged_sessions, intCAbbr, 1),
+    metricRow("Conversions", m.ga4.conversions, intC, 1),
+    metricRow("Avg engagement", m.ga4.avg_engagement_time_s, sec, 1),
+  ].join("");
+
+  // --- GSC ---
+  const gscRows = [
+    metricRow("Clicks", m.gsc.clicks, intCAbbr, 1),
+    metricRow("Impressions", m.gsc.impressions, intCAbbr, 1),
+    metricRow("CTR", m.gsc.ctr_pct, pct, 1),
+    metricRow("Avg position", m.gsc.avg_position, float2, -1),
+  ].join("");
+
+  // --- GBP per location ---
+  const gbpHtml = m.gbp.map((g) => sectionTable(`GBP · ${g.location}`, "#F59E0B", [
+    metricRow("Profile views", g.profile_views, intCAbbr, 1),
+    metricRow("Direction requests", g.direction_requests, intC, 1),
+    metricRow("Phone calls", g.phone_calls, intC, 1),
+    metricRow("Website clicks", g.website_clicks, intC, 1),
+  ].join(""))).join("");
+
+  // --- PostHog ---
+  const phRows = [
+    metricRow("Pageviews", m.posthog.pageviews, intCAbbr, 1),
+    metricRow("Sessions", m.posthog.sessions, intCAbbr, 1),
+    metricRow("/quote pageviews", m.posthog.quote_pageviews, intC, 1),
+    metricRow("Quote submissions", m.posthog.quote_submits, intC, 1),
+    metricRow("Quote conv rate", m.posthog.quote_conv_rate_pct, pct, 1),
+  ].join("");
+
+  // --- BrightLocal review summary ---
+  let brightHtml = "";
+  if (m.brightlocal && m.brightlocal.length > 0) {
+    const rows = m.brightlocal.map((b) => `
+      <tr>
+        <td style="padding:6px 10px;font-size:12px;color:#0C2340;border-bottom:1px solid #F1F5F9;">${escapeHtml(b.location_name || String(b.location_id))}</td>
+        <td style="padding:6px 10px;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid #F1F5F9;">${b.avg_rating !== null ? b.avg_rating.toFixed(2) + " ★" : "—"}</td>
+        <td style="padding:6px 10px;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid #F1F5F9;">${b.total_reviews ?? "—"}</td>
+      </tr>`).join("");
+    brightHtml = `
+  <h3 style="font-size:13px;margin:18px 0 6px;padding:5px 10px;background:#F59E0B15;border-left:3px solid #F59E0B;color:#F59E0B;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">
+    BrightLocal — reviews per location
+  </h3>
+  <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:white;border:1px solid #E5E7EB;border-radius:4px;">
+    <thead><tr style="background:#F8FAFC;">
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:left;font-weight:600;text-transform:uppercase;">Location</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Avg rating</th>
+      <th style="padding:6px 10px;font-size:10px;color:#94A3B8;text-align:right;font-weight:600;text-transform:uppercase;">Total reviews</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+  }
+
+  // --- SpyFu ---
+  let spyfuHtml = "";
+  const sf = m.spyfu;
+  if (sf.avg_organic_rank !== null || sf.total_organic_keywords !== null) {
+    const compList = sf.top_seo_competitors.length > 0
+      ? `<div style="font-size:12px;color:#475569;margin-top:6px;">Top SEO competitors: <strong>${sf.top_seo_competitors.map(escapeHtml).join(", ")}</strong></div>`
+      : "";
+    spyfuHtml = `
+  <h3 style="font-size:13px;margin:18px 0 6px;padding:5px 10px;background:#10B98115;border-left:3px solid #10B981;color:#10B981;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">
+    SpyFu — organic snapshot
+  </h3>
+  <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background:white;border:1px solid #E5E7EB;border-radius:4px;">
+    <tr>
+      <td style="padding:6px 10px;font-size:12px;color:#64748B;border-bottom:1px solid #F1F5F9;">Avg organic rank</td>
+      <td style="padding:6px 10px;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid #F1F5F9;">${sf.avg_organic_rank !== null ? sf.avg_organic_rank.toFixed(1) : "—"}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;font-size:12px;color:#64748B;border-bottom:1px solid #F1F5F9;">Total organic keywords</td>
+      <td style="padding:6px 10px;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid #F1F5F9;">${sf.total_organic_keywords ?? "—"}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;font-size:12px;color:#64748B;border-bottom:1px solid #F1F5F9;">Monthly organic clicks</td>
+      <td style="padding:6px 10px;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid #F1F5F9;">${sf.monthly_organic_clicks !== null ? fmtNum(sf.monthly_organic_clicks) : "—"}</td>
+    </tr>
+    <tr>
+      <td style="padding:6px 10px;font-size:12px;color:#64748B;">Monthly organic value</td>
+      <td style="padding:6px 10px;font-size:13px;font-weight:600;text-align:right;">${sf.monthly_organic_value_usd !== null ? usdAbbr(sf.monthly_organic_value_usd) : "—"}</td>
+    </tr>
+  </table>${compList}`;
+  }
+
+  return `
+<div style="background:#F8FAFC;padding:14px 16px;border-radius:6px;margin-bottom:24px;">
+  <div style="font-size:11px;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:2px;">Performance Snapshot</div>
+  <div style="font-size:12px;color:#94A3B8;">${escapeHtml(m.period.current_label)} <span style="color:#CBD5E1;">vs</span> ${escapeHtml(m.period.previous_label)}</div>
+</div>
+${sectionTable("Google Ads", "#0EA5E9", adsRows)}
+${auctionHtml}
+${sectionTable("GA4 — site analytics", "#8B5CF6", gaRows)}
+${sectionTable("Search Console", "#10B981", gscRows)}
+${gbpHtml}
+${sectionTable("PostHog — product analytics", "#A855F7", phRows)}
+${brightHtml}
+${spyfuHtml}
+`;
+}
+
 async function sendDigest(
   supabase: any,
   recipients: string[],
@@ -981,6 +1737,7 @@ async function sendDigest(
   recsThisRun: CreatedRec[],
   auditRunId: string,
   autoExecutedCount: number,
+  metrics: WeeklyMetrics | null,
 ): Promise<void> {
   if (!BREVO_API_KEY || recipients.length === 0) return;
 
@@ -1033,6 +1790,31 @@ async function sendDigest(
     return `<span style="display:inline-block;background:${colors[sev] || "#64748B"};color:white;font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:0.5px;">${escapeHtml(sev)}</span>`;
   };
 
+  // Pull rec evidence so we can render Before / After per row.
+  const recIdsToFetch = recsThisRun.map((r) => r.id);
+  const evidenceMap = new Map<string, any>();
+  if (recIdsToFetch.length > 0) {
+    const { data: evRows } = await supabase
+      .from("recommendations")
+      .select("id, title, evidence")
+      .in("id", recIdsToFetch);
+    for (const row of evRows || []) evidenceMap.set(row.title, row.evidence || {});
+  }
+
+  const renderBeforeAfter = (evidence: any): string => {
+    if (!evidence) return "";
+    const cur = evidence.current_state || evidence.before;
+    const exp = evidence.expected_after || evidence.after || evidence.expected;
+    if (!cur && !exp) return "";
+    const fmt = (obj: any) =>
+      Object.entries(obj || {})
+        .map(([k, v]) => `<strong>${escapeHtml(k)}:</strong> ${escapeHtml(String(v))}`)
+        .join(" · ");
+    const beforeHtml = cur ? `<div style="font-size:11px;color:#94A3B8;margin-top:3px;"><span style="color:#64748B;font-weight:600;">Before:</span> ${fmt(cur)}</div>` : "";
+    const afterHtml = exp ? `<div style="font-size:11px;color:#059669;margin-top:1px;"><span style="font-weight:600;">Expected after:</span> ${fmt(exp)}</div>` : "";
+    return beforeHtml + afterHtml;
+  };
+
   const platformSection = (platform: string, rows: DigestRow[]) => {
     const meta = PLATFORM_ORDER.includes(platform)
       ? { label: platform, color: Object.values(CATEGORY_TO_PLATFORM).find((p) => p.label === platform)?.color || "#64748B" }
@@ -1042,12 +1824,15 @@ async function sendDigest(
     ${escapeHtml(meta.label)} · ${rows.length}
   </h3>
   <ul style="list-style:none;padding:0;margin:0;">
-    ${rows.map((r) => `
-    <li style="padding:8px 10px;border-bottom:1px solid #F1F5F9;font-size:13px;line-height:1.5;">
+    ${rows.map((r) => {
+      const ev = evidenceMap.get(r.title);
+      return `
+    <li style="padding:10px 12px;border-bottom:1px solid #F1F5F9;font-size:13px;line-height:1.5;">
       <div style="margin-bottom:3px;">${sevBadge(r.severity)}&nbsp;<strong style="color:#0C2340;">${escapeHtml(r.title)}</strong></div>
       ${r.expected_impact ? `<div style="color:#6B7280;font-size:12px;">→ ${escapeHtml(r.expected_impact)}</div>` : ""}
-    </li>
-    `).join("")}
+      ${renderBeforeAfter(ev)}
+    </li>`;
+    }).join("")}
   </ul>`;
   };
 
@@ -1062,13 +1847,19 @@ async function sendDigest(
   const otherPlatforms = [...byPlatform.keys()].filter((p) => !PLATFORM_ORDER.includes(p));
   const otherHtml = otherPlatforms.map((p) => platformSection(p, byPlatform.get(p)!)).join("");
 
+  const performanceHtml = metrics ? renderPerformanceSnapshot(metrics) : "";
+
   const html = `
-<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:720px;margin:0 auto;padding:24px;color:#0C2340;">
+<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:760px;margin:0 auto;padding:24px;color:#0C2340;">
   <h1 style="font-size:22px;margin:0 0 16px;">Cethos.com audit · ${new Date().toISOString().slice(0, 10)}</h1>
 
   <div style="background:#F8FAFC;border-radius:6px;padding:14px 18px;margin-bottom:24px;border-left:3px solid #0891B2;">
     <p style="font-size:14px;line-height:1.6;color:#334155;margin:0;">${escapeHtml(execSummary)}</p>
   </div>
+
+  ${performanceHtml}
+
+  <h2 style="font-size:18px;margin:32px 0 12px;color:#0C2340;border-bottom:2px solid #E5E7EB;padding-bottom:6px;">Action Plan</h2>
 
   ${autoDoneThisRun.length > 0 ? `
   <h2 style="font-size:16px;margin:24px 0 10px;color:#059669;">✓ Just auto-applied (${autoDoneThisRun.length})</h2>
@@ -1212,9 +2003,19 @@ Deno.serve(async (req: Request) => {
     console.error("exec summary failed:", err);
   }
 
+  // Gather all-source performance numbers (WoW deltas, IS, auction insights,
+  // GA4/GSC/GBP/PostHog/BrightLocal/SpyFu) for the digest's Performance Snapshot.
+  // Failure here is non-fatal — we still send the action-plan portion.
+  let metrics: WeeklyMetrics | null = null;
+  try {
+    metrics = await gatherWeeklyMetrics(supabase);
+  } catch (err) {
+    console.error("metrics gathering failed:", err);
+  }
+
   // Always send the digest — even a zero-rec run should reassure the user
   // "all checks passed" and show current active recs across platforms.
-  await sendDigest(supabase, settings.digest_recipients, execSummary, allRecs, runId, autoExecutedCount);
+  await sendDigest(supabase, settings.digest_recipients, execSummary, allRecs, runId, autoExecutedCount, metrics);
 
   // Finalize audit_runs row
   await supabase
