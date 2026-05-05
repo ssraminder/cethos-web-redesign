@@ -2,7 +2,8 @@
 
 **Audience:** Sales / customer support / staff-quote operators
 **Author:** Engineering, 2026-05-04
-**Status:** Live (matches `process-quote-documents` v1.7 + `recalculate_quote_from_groups` SQL)
+**Status:** Live (matches `process-quote-documents` v1.9 + `recalculate-quote-pricing` v11 + `create-fast-quote` v3)
+**Verified:** End-to-end on production through Stripe checkout (QT26-10421 through QT26-10424) on 2026-05-04.
 
 > **YES — pricing is fundamentally based on _billable pages_.** Word count is converted to billable pages first, and everything downstream multiplies that number. This document walks through exactly how, with every multiplier, override, and edge case.
 
@@ -173,7 +174,74 @@ Append new entries here (ordered by `minPages` DESC) to add additional tiers.
 
 ---
 
-## 5. Document-type minimums
+## 5. Human-in-the-loop (HITL) review triggers (NEW — 2026-05-04)
+
+When a quote is flagged for review, `quotes.processing_status = 'review_required'` and `quotes.review_required_reasons` holds an array of reason codes. The customer is shown the friendly explanation on `/quote/confirmation?reason=<code>`; staff sees the engineering description in admin.
+
+### Active triggers
+
+| Reason code | Threshold | Default | Configurable via | Customer message |
+|---|---|---|---|---|
+| `high_billable_ratio` | `billable_pages / page_count > X` | **1.5×** | `app_settings.billable_page_ratio_threshold` | "One or more documents have an unusually high text density…" |
+| `low_billable_ratio` | `billable_pages / page_count < X` | **0.35** (35%) | `app_settings.low_billable_ratio_threshold` | "One or more of your documents has many pages with little or no translatable text…" |
+| `high_value_order` | `quote.total > $X` | **$500** | `app_settings.high_order_value_threshold` | "Because your order total exceeds $500, our team is reviewing it personally…" |
+| `multi_language_document` | secondary language ≥ 20% | (per-doc) | KB `skip_multi_language_review` override | "One of your documents contains multiple languages…" |
+| `unsupported_format` | non-PDF/image/docx file | n/a | n/a | "One of your files is in a format we need to convert manually…" |
+| `low_ocr_confidence` | OCR confidence < threshold | 0.85 | `OCR_CONFIDENCE_THRESHOLD` constant | "Some text was difficult to read clearly." |
+| `low_ai_confidence` | AI classification confidence < threshold | 0.85 | `AI_CONFIDENCE_THRESHOLD` constant | "We need to verify the language/document type." |
+| `processing_error` | exception during processing | n/a | n/a | "We encountered a technical issue while processing." |
+| `timeout` | OCR or AI step timed out | n/a | n/a | "Our system took longer than expected to analyze your documents." |
+
+### Trigger details
+
+#### `high_billable_ratio` (per-file)
+Fires when a single document's billable pages exceed the configured ratio of physical pages. Catches **word-count inflation** from watermarks, repeated headers, or dense OCR noise.
+
+Example: a 1-page scan that produces 6 billable pages → ratio 6.0 → flagged.
+
+#### `low_billable_ratio` (per-file, NEW)
+Fires when a single document's billable pages fall **below** the configured ratio of physical pages. Catches **sparse documents** where customer may expect every page translated.
+
+Example: a 12-page PDF with only 80 translatable words → 1.0 billable / 12 physical = 8.3% < 35% → flagged.
+
+Verified: QT26-10422 (12 physical pages, 79 words → review with reason `low_billable_ratio`).
+
+#### `high_value_order` (quote-level, NEW)
+Fires when the **final total** (after volume discount, tax, etc.) exceeds the threshold. Runs **after** SQL recalc so the post-discount number is what's checked.
+
+Example: 10.8 billable pages × $55 with 10% volume discount = $561.33 final → > $500 → flagged.
+
+Verified: QT26-10421 (10.8 billable, total $561.33 → review with reasons `high_value_order` + `high_billable_ratio`).
+
+### Customer-facing display
+
+Customer reaches `/quote/confirmation?quote_id=<id>&reason=<code>` and sees:
+
+- A green checkmark + "Your Quote is Being Reviewed" headline
+- A "Why manual review?" callout with the friendly message for the reason code
+- The quote number
+- An ETA: "Our team will review your documents and email you a detailed quote at <email> within 4 business hours"
+
+The map lives in [`QuoteConfirmationPage.tsx:73-101`](portal/cethos_app_figma_design_v1/client/pages/quote/QuoteConfirmationPage.tsx).
+
+### Admin display
+
+`AdminQuoteDetail` renders a "Review Required" banner with one card per reason. Each card shows the engineering label + description.
+
+The map lives in [`AdminQuoteDetail.tsx:421-481`](portal/cethos_app_figma_design_v1/client/pages/admin/AdminQuoteDetail.tsx).
+
+### Where each trigger fires (engineering)
+
+| Trigger | File | Line range (approx) |
+|---|---|---|
+| `high_billable_ratio` | `process-quote-documents/index.ts` | 1157–1170 |
+| `low_billable_ratio` | `process-quote-documents/index.ts` | 1171–1184 |
+| `high_value_order` | `process-quote-documents/index.ts` | 1357–1376 (Phase 5, post-recalc) |
+| All — final write-back | `process-quote-documents/index.ts` | 1404–1418 |
+
+---
+
+## 6. Document-type minimums
 
 Some doc types have a floor charge that overrides the formula when it would produce a lower total.
 
@@ -194,7 +262,7 @@ So a 50-word WhatsApp chat ($55 calc) gets **floored to $80**.
 
 ---
 
-## 6. Knowledge-base (KB) overrides
+## 7. Knowledge-base (KB) overrides
 
 The `ai_knowledge_base` table can override pricing at the document-type level. Two override fields are pricing-relevant:
 
@@ -214,7 +282,7 @@ Not pricing per se, but it bypasses the "multi-language document → review_requ
 
 ---
 
-## 7. Partner pricing override
+## 8. Partner pricing override
 
 If `quotes.base_rate_override` is set (e.g., for a partner agreement), the engine uses **that value** instead of `app_settings.base_rate`. The override:
 - Bypasses the standard $55 rate
@@ -225,7 +293,7 @@ Example: A partner with negotiated $42/page rate has `base_rate_override = 42.00
 
 ---
 
-## 8. Worked examples (full quote calculations)
+## 9. Worked examples (full quote calculations)
 
 ### Example A — Single birth certificate (Spanish → English)
 
@@ -320,7 +388,7 @@ Example: A partner with negotiated $42/page rate has `base_rate_override = 42.00
 
 ---
 
-## 9. Add-ons
+## 10. Add-ons
 
 ### Certification fees
 
@@ -363,7 +431,7 @@ Read from `delivery_options` table — typically:
 
 ---
 
-## 10. Tax
+## 11. Tax
 
 | Province | Default rate | Source |
 |---|---|---|
@@ -374,7 +442,7 @@ Tax is applied **to the pre-tax total** (subtotal + rush + delivery + surcharges
 
 ---
 
-## 11. Quick-reference cheat sheet
+## 12. Quick-reference cheat sheet
 
 For staff handling phone/email quotes:
 
@@ -393,7 +461,7 @@ For staff handling phone/email quotes:
 
 ---
 
-## 12. Where the numbers live (engineering reference)
+## 13. Where the numbers live (engineering reference)
 
 | Setting | Table | Column | Current value |
 |---|---|---|---|
@@ -402,7 +470,9 @@ For staff handling phone/email quotes:
 | Min billable pages | `app_settings` | `setting_value` WHERE `setting_key = 'min_billable_pages'` | 1.0 |
 | Rush multiplier | `app_settings` | `setting_value` WHERE `setting_key = 'rush_multiplier'` | 0.30 |
 | Same-day multiplier | `app_settings` | `setting_value` WHERE `setting_key = 'same_day_multiplier'` | 2.00 |
-| Billable ratio threshold | `app_settings` | `setting_value` WHERE `setting_key = 'billable_page_ratio_threshold'` | 1.5 |
+| Billable ratio threshold (high) | `app_settings` | `setting_value` WHERE `setting_key = 'billable_page_ratio_threshold'` | 1.5 |
+| Billable ratio threshold (low, NEW) | `app_settings` | `setting_value` WHERE `setting_key = 'low_billable_ratio_threshold'` | 0.35 |
+| High-order-value threshold (NEW) | `app_settings` | `setting_value` WHERE `setting_key = 'high_order_value_threshold'` | 500.00 |
 | Chat screenshot rate | `app_settings` | `setting_value` WHERE `setting_key = 'screenshot_rate'` | 12.00 |
 | Chat screenshot quote min | `app_settings` | `setting_value` WHERE `setting_key = 'screenshot_quote_minimum'` | 120.00 |
 | Language multipliers | `languages` | `multiplier` (or `price_multiplier`) per language | varies |
@@ -412,7 +482,7 @@ For staff handling phone/email quotes:
 
 ---
 
-## 13. What sales/CSR should NOT promise
+## 14. What sales/CSR should NOT promise
 
 - **Don't promise the volume discount on premium-language quotes.** Korean, Japanese, etc. don't qualify (multiplier > 1.0).
 - **Don't promise the discount stacks on partner pricing.** Partners get their own rate; auto-discount is suppressed.
@@ -422,7 +492,7 @@ For staff handling phone/email quotes:
 
 ---
 
-## 14. Change log
+## 15. Change log
 
 | Date | Change | Source |
 |---|---|---|
@@ -430,7 +500,25 @@ For staff handling phone/email quotes:
 | 2026-05-04 | i18n strings updated $65 → $55 across 68 rows | `cethosweb_i18n_translations` |
 | 2026-05-04 | Multi-page bundle launched: 2 pages = $95 (fixed) | `process-quote-documents` v1.7 |
 | 2026-05-04 | Switched to percentage tiers: 2 pg → 5%, 3+ pg → 10%; rolled out to all 3 quote-creation paths | `process-quote-documents` v1.8, `recalculate-quote-pricing` v11, `create-fast-quote` v3 |
+| 2026-05-04 | New HITL triggers: `low_billable_ratio` (default <35%) + `high_value_order` (default >$500); customer + admin friendly messages added | `process-quote-documents` v1.9, `QuoteConfirmationPage.tsx`, `AdminQuoteDetail.tsx` |
 | 2026-05-04 | Free scanned copy positioning added (vs talberta's $10) | LP copy + this doc |
+
+---
+
+## Appendix A — Production verification log (2026-05-04)
+
+End-to-end tests run on production through the public web form (`cethos.com/services/certified` → `portal.cethos.com/quote` → Stripe live checkout):
+
+| Quote | Test | Billable / Phys | Subtotal | Discount | Total | Triggers fired | Result |
+|---|---|---|---|---|---|---|---|
+| QT26-10421 | High-value (Spanish, ~2,400 words, dense) | 10.8 / 5 | $594.00 | `auto_multi_page_pct_10` -$59.40 | $561.33 | `high_billable_ratio` + `high_value_order` | ✅ review_required |
+| QT26-10422 | Low-ratio (Spanish, 79 words, 12 phys pages) | 1.0 / 12 | $55.00 | — | $57.75 | `low_billable_ratio` (8.3% < 35%) | ✅ review_required |
+| QT26-10423 | 2-page volume (Spanish, 487 words, 2 phys pages) | 2.5 / 2 | $137.50 | `auto_multi_page_pct_5` -$6.88 | $137.15 | none | ✅ quote_ready |
+| QT26-10424 | 3-page volume (Spanish, 728 words, 3 phys pages) | 3.8 / 3 | $209.00 | `auto_multi_page_pct_10` -$20.90 | $197.51 | none | ✅ quote_ready |
+
+Customer-facing display verified at `/quote/confirmation?reason=<code>` for both `high_value_order` and `low_billable_ratio` reasons. Admin-facing labels verified at `/admin/quotes/<id>` for both quotes.
+
+Test PDFs generated by `.tmp_test_pdfs/gen_review_pdfs.py` and `.tmp_test_pdfs/gen_volume_pdfs.py` (gitignored — regenerate locally if needed).
 
 ---
 
