@@ -523,37 +523,6 @@ export default function CertifiedTranslationContent() {
       </section>
 
       {/* ===================================================================== */}
-      {/* LANGUAGES */}
-      {/* ===================================================================== */}
-      <section className="py-16 bg-slate-50">
-        <Container>
-          <SectionHeading
-            title={tLangs('heading')}
-            subtitle={tLangs('description')}
-            className="mb-12"
-          />
-
-          <div className="flex flex-wrap justify-center gap-3">
-            {languages.map((lang, index) => (
-              <motion.span
-                key={lang}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: index * 0.02 }}
-                className="px-4 py-2 bg-white rounded-full text-sm font-medium text-[#0C2340] border border-slate-200 hover:border-[#0891B2] hover:text-[#0891B2] transition-colors"
-              >
-                {lang}
-              </motion.span>
-            ))}
-            <span className="px-4 py-2 bg-[#0891B2] text-white rounded-full text-sm font-medium">
-              {tLangs('overflow')}
-            </span>
-          </div>
-        </Container>
-      </section>
-
-      {/* ===================================================================== */}
       {/* HOW IT WORKS */}
       {/* ===================================================================== */}
       <section className="py-16 bg-[#0C2340]">

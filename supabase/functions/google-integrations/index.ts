@@ -404,6 +404,11 @@ async function handleGAds(action: string, params: any): Promise<any> {
           validateOnly: params.validate_only ?? false,
         }),
       });
+    case "apply_recommendations":
+      return doFetch(`${baseUrl}/recommendations:apply`, {
+        method: "POST",
+        body: JSON.stringify({ operations: params.operations, partialFailure: params.partial_failure ?? true }),
+      });
     default:
       return { status: 400, data: { error: `Unknown GAds action: ${action}` } };
   }
