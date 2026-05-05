@@ -36,6 +36,11 @@ const BRIGHTLOCAL_API_SECRET = Deno.env.get("BRIGHTLOCAL_API_SECRET") || "";
 const BRIGHTLOCAL_LOCATION_IDS: number[] = (Deno.env.get("BRIGHTLOCAL_LOCATION_IDS") || "")
   .split(",").map((s) => parseInt(s.trim())).filter((n) => !isNaN(n));
 
+const SPYFU_APP_ID = Deno.env.get("SPYFU_APP_ID") || "";
+const SPYFU_SECRET = Deno.env.get("SPYFU_SECRET") || "";
+const SPYFU_BASE_64_KEY = Deno.env.get("SPYFU_BASE_64_KEY") || "";
+const SPYFU_DEFAULT_DOMAIN = Deno.env.get("SPYFU_DEFAULT_DOMAIN") || "cethos.com";
+
 function toUpperSnake(s: string): string {
   if (s === s.toUpperCase() && s.includes("_")) return s;
   return s.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toUpperCase();
@@ -922,6 +927,117 @@ async function handleBrightLocal(action: string, params: any): Promise<any> {
   }
 }
 
+// --- SpyFu ---
+// Auth: HTTP Basic with base64(APP_ID:SECRET). Prefer pre-computed SPYFU_BASE_64_KEY
+// when set; otherwise encode APP_ID:SECRET on the fly.
+function spyfuAuthHeader(): string {
+  const token = SPYFU_BASE_64_KEY || btoa(`${SPYFU_APP_ID}:${SPYFU_SECRET}`);
+  return `Basic ${token}`;
+}
+
+async function handleSpyFu(action: string, params: any): Promise<any> {
+  const baseUrl = "https://api.spyfu.com/apis";
+  const domain = params.domain || SPYFU_DEFAULT_DOMAIN;
+  const countryCode = params.country_code || params.countryCode || "US";
+  const pageSize = params.page_size || params.pageSize;
+
+  const doGet = async (path: string, query: Record<string, any> = {}) => {
+    const filtered = Object.fromEntries(
+      Object.entries(query)
+        .filter(([, v]) => v !== undefined && v !== null && v !== "")
+        .map(([k, v]) => [k, String(v)]),
+    );
+    const qs = new URLSearchParams(filtered);
+    const url = `${baseUrl}${path}${qs.toString() ? `?${qs}` : ""}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: spyfuAuthHeader(), Accept: "application/json" },
+    });
+    const text = await res.text();
+    try { return { status: res.status, data: JSON.parse(text) }; }
+    catch { return { status: res.status, data: text }; }
+  };
+
+  switch (action) {
+    // Raw debug — call any path with arbitrary query params
+    case "_raw":
+      return doGet(params.path, params.query || {});
+
+    // === Domain Stats ===
+    // Latest snapshot of organic + paid stats for a domain
+    case "domain_stats":
+    case "latest_domain_stats":
+      return doGet("/domain_stats_api/v2/getLatestDomainStats", { domain, countryCode });
+
+    // Full historical time-series
+    case "all_domain_stats":
+      return doGet("/domain_stats_api/v2/getAllDomainStats", { domain, countryCode });
+
+    // === SEO Keywords ===
+    // SpyFu's SERP keyword endpoints use `query` (domain | URL | subdomain | path),
+    // not `domain` — pass either via params.query or fall back to the domain.
+    // Highest-value organic keywords the domain ranks for
+    case "most_valuable_keywords":
+    case "top_seo_keywords":
+      return doGet("/serp_api/v2/seo/getMostValuableKeywords", { query: params.query || domain, countryCode, pageSize });
+
+    // Keywords the domain just started ranking for
+    case "newly_ranked_keywords":
+      return doGet("/serp_api/v2/seo/getNewlyRanked", { query: params.query || domain, countryCode, pageSize });
+
+    // Keywords that just hit page 1
+    case "just_made_first_page":
+      return doGet("/serp_api/v2/seo/getJustMadeFirstPage", { query: params.query || domain, countryCode, pageSize });
+
+    // Keywords lost from rankings
+    case "lost_rankings":
+      return doGet("/serp_api/v2/seo/getLostRankings", { query: params.query || domain, countryCode, pageSize });
+
+    // Top SERP competitors for a specific keyword
+    case "serp_analysis":
+      if (!params.keyword) return { status: 400, data: { error: "keyword required" } };
+      return doGet("/serp_api/v2/seo/getSerpAnalysisKeywords", {
+        keyword: params.keyword,
+        countryCode,
+        pageSize,
+      });
+
+    // === PPC Keywords ===
+    case "top_ppc_keywords":
+    case "most_successful_ppc":
+      return doGet("/serp_api/v2/ppc/getMostSuccessful", { query: params.query || domain, countryCode, pageSize });
+
+    case "newly_purchased_ppc":
+      return doGet("/serp_api/v2/ppc/getNewlyPurchased", { query: params.query || domain, countryCode, pageSize });
+
+    // === Competitors ===
+    case "top_seo_competitors":
+      return doGet("/competitors_api/v2/seo/getTopCompetitors", { domain, countryCode, pageSize });
+
+    case "top_ppc_competitors":
+      return doGet("/competitors_api/v2/ppc/getTopCompetitors", { domain, countryCode, pageSize });
+
+    // === Keyword Research ===
+    case "related_keywords":
+      if (!params.keyword) return { status: 400, data: { error: "keyword required" } };
+      return doGet("/keyword_api/v2/related/getRelatedKeywords", {
+        keyword: params.keyword,
+        countryCode,
+        pageSize,
+      });
+
+    case "keyword_overview":
+      if (!params.keyword) return { status: 400, data: { error: "keyword required" } };
+      return doGet("/keyword_api/v2/related/getKeywordOverview", {
+        keyword: params.keyword,
+        countryCode,
+      });
+
+    default:
+      return { status: 400, data: { error: `Unknown SpyFu action: ${action}` } };
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
@@ -931,7 +1047,7 @@ Deno.serve(async (req: Request) => {
           status: "ok",
           version: 2,
           project: "cethos-main-web",
-          platforms: ["gbp", "ga", "gsc", "gads", "gtm", "psi", "crux", "diag"],
+          platforms: ["gbp", "ga", "gsc", "gads", "gtm", "psi", "crux", "posthog", "brightlocal", "spyfu", "diag"],
           ads_version: GADS_API_VERSION,
           ga_property: GA_PROPERTY_CETHOS,
           gsc_site: GSC_SITE_CETHOS,
@@ -1004,6 +1120,9 @@ Deno.serve(async (req: Request) => {
         break;
       case "brightlocal":
         result = await handleBrightLocal(action, params);
+        break;
+      case "spyfu":
+        result = await handleSpyFu(action, params);
         break;
       default:
         result = { status: 400, data: { error: `Unknown platform: ${platform}` } };
