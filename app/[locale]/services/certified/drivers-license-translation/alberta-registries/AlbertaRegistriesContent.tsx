@@ -152,7 +152,7 @@ export default function AlbertaRegistriesContent() {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="text-[36px] md:text-[44px] font-bold text-[#0C2340] leading-[1.1] mb-4"
               >
-                Driver's License Translation for Alberta Registries
+                Driver&apos;s License Translation for Alberta Registries
               </motion.h1>
 
               <motion.p
@@ -337,8 +337,8 @@ export default function AlbertaRegistriesContent() {
               Serving Drivers in Calgary, Lethbridge & Edmonton
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
-              Whether you're a new Albertan exchanging an international license or a temporary
-              resident driving in the province, we've got you covered in all three major markets.
+              Whether you&apos;re a new Albertan exchanging an international license or a temporary
+              resident driving in the province, we&apos;ve got you covered in all three major markets.
             </p>
           </div>
 
@@ -357,13 +357,13 @@ export default function AlbertaRegistriesContent() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-[#0C2340] mb-2">
-                      Calgary — Driver's License Translation
+                      Calgary — Driver&apos;s License Translation
                     </h3>
                     <p className="text-slate-600 mb-4">
-                      Calgary has over 30 Alberta Registries agent locations. Whether you're in the
+                      Calgary has over 30 Alberta Registries agent locations. Whether you&apos;re in the
                       NE, NW, SE, or SW, our certified translations are accepted at every one of
-                      them. As Calgary's most-reviewed translation service, we help hundreds of new
-                      Calgarians get their Alberta license each year — across the city's diverse,
+                      them. As Calgary&apos;s most-reviewed translation service, we help hundreds of new
+                      Calgarians get their Alberta license each year — across the city&apos;s diverse,
                       internationally-educated population.
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -395,7 +395,7 @@ export default function AlbertaRegistriesContent() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-[#0C2340] mb-2">
-                      Lethbridge — Driver's License Translation
+                      Lethbridge — Driver&apos;s License Translation
                     </h3>
                     <p className="text-slate-600 mb-4">
                       Lethbridge is home to a growing immigrant and international student community
@@ -428,11 +428,11 @@ export default function AlbertaRegistriesContent() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-[#0C2340] mb-2">
-                      Edmonton — Driver's License Translation
+                      Edmonton — Driver&apos;s License Translation
                     </h3>
                     <p className="text-slate-600 mb-4">
-                      Edmonton is one of Canada's most ethnically diverse cities and sees high
-                      demand for driver's license translation — particularly from newcomers arriving
+                      Edmonton is one of Canada&apos;s most ethnically diverse cities and sees high
+                      demand for driver&apos;s license translation — particularly from newcomers arriving
                       through the Edmonton Region Immigrant Employment Council (ERIEC) and
                       settlement agencies. Our translations are accepted at all Edmonton-area
                       Alberta Registries locations and are formatted to meet the specific
@@ -618,7 +618,7 @@ export default function AlbertaRegistriesContent() {
               href="/services/certified/drivers-license-translation"
               className="flex items-center gap-1 text-[#0891B2] hover:underline"
             >
-              Driver's License Translation (Canada-wide)
+              Driver&apos;s License Translation (Canada-wide)
               <ArrowRight className="w-3 h-3" />
             </Link>
             <span className="text-slate-300">•</span>
