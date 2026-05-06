@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import ClinicianReviewContent from './ClinicianReviewContent'
 
 export const metadata: Metadata = {
-  title: 'Clinician Review Services | Medical Expert Translation Review | Cethos',
+  title: 'Clinician Review Services | Medical Expert Translation Review',
   description: 'Expert clinical review by 300+ board-certified physicians, PharmDs, and specialist nurses. Medical accuracy verification for PRO instruments, protocols, ICFs, and regulatory documents.',
   keywords: ['clinician review', 'medical review', 'physician review', 'clinical translation review', 'PRO review', 'medical expert review'],
   openGraph: {
-    title: 'Clinician Review Services | Cethos',
+    title: 'Clinician Review Services',
     description: 'Expert medical review by 300+ board-certified physicians and healthcare professionals.',
     url: 'https://cethos.com/services/lifesciences/clinician-review',
     siteName: 'Cethos Solutions Inc.',

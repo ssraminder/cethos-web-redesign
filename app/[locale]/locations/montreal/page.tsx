@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import LocationPageTemplate from '@/components/locations/LocationPageTemplate';
 
 export const metadata: Metadata = {
-  title: "Montreal Translation Services | Services de traduction a Montreal | Cethos",
+  title: "Montreal Translation Services | Services de traduction a Montreal",
   description: "Services de traduction certifiee a Montreal. Accepte par IRCC. Traduction d'actes de naissance, certificats de mariage et documents d'immigration. 139 avis 5 etoiles. A partir de 65$.",
   alternates: {
     canonical: 'https://cethos.com/locations/montreal'

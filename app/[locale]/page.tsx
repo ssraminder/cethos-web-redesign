@@ -7,12 +7,12 @@ import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
-  title: "Cethos | Certified Translation & Life Sciences",
-  description: 'Professional translation services: life sciences, certified translations & enterprise solutions. ISO 17100 compliant. Canada, Dubai & India.',
+  title: { absolute: "Cethos | Certified Translation & Life Sciences" },
+  description: 'Certified translator & life sciences translation services. ISO 17100 compliant. Enterprise solutions across Canada, Dubai & India.',
   alternates: { canonical: 'https://cethos.com' },
   openGraph: {
     title: "Cethos | Certified Translation & Life Sciences",
-    description: 'Professional translation services: life sciences, certified translations & enterprise solutions. ISO 17100 compliant. Canada, Dubai & India.',
+    description: 'Certified translator & life sciences translation services. ISO 17100 compliant. Enterprise solutions across Canada, Dubai & India.',
     url: 'https://cethos.com',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',

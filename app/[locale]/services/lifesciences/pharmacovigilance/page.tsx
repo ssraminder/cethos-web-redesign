@@ -3,11 +3,11 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import PharmacovigilanceContent from './PharmacovigilanceContent'
 
 export const metadata: Metadata = {
-  title: 'Pharmacovigilance Translation Services | ICSRs, PSURs, DSURs | Cethos',
+  title: 'Pharmacovigilance Translation Services | ICSRs, PSURs, DSURs',
   description: 'Specialized pharmacovigilance translation for ICSRs, SAE reports, PSURs, DSURs, and PBRERs. Rapid turnaround for regulatory compliance. 24/7 availability.',
   keywords: ['pharmacovigilance translation', 'ICSR translation', 'PSUR translation', 'DSUR translation', 'SAE report translation', 'drug safety translation'],
   openGraph: {
-    title: 'Pharmacovigilance Translation Services | Cethos',
+    title: 'Pharmacovigilance Translation Services',
     description: 'Rapid pharmacovigilance translation for adverse event reporting and aggregate safety reports.',
     url: 'https://cethos.com/services/lifesciences/pharmacovigilance',
     siteName: 'Cethos Solutions Inc.',

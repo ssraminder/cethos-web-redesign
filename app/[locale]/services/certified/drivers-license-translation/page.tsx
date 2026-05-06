@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import DriversLicenseContent from './DriversLicenseContent'
 
 export const metadata: Metadata = {
-  title: "Driver's License Translation Services | Alberta Registries Approved | Cethos",
+  title: "Driver's License Translation Services | Alberta Registries Approved",
   description: "Government of Alberta approved driver's license translation services. Certified translations accepted by Service Alberta, Alberta Registries, and all provincial licensing authorities. From $55, same-day available.",
   keywords: [
     "driver's license translation Alberta",

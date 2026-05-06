@@ -78,14 +78,9 @@ export function OrganizationJsonLd() {
       'Regulatory Translation',
       'Medical Device Translation',
       'Interpretation Services',
+      'Localization Services',
     ],
     areaServed: 'Worldwide',
-    serviceType: [
-      'Translation Services',
-      'Interpretation Services',
-      'Localization Services',
-      'Linguistic Validation',
-    ],
   }
 
   return (
