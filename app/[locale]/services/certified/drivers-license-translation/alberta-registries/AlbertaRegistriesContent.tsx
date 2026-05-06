@@ -23,31 +23,32 @@ import { FAQJsonLd } from '@/components/JsonLd'
 import { StickyMobileCTA } from '@/components/landing'
 import { EmbeddedCertifiedQuoteForm } from '@/components/forms/EmbeddedCertifiedQuoteForm'
 
-// ─── REGISTRY PARTNERS ────────────────────────────────────────────────────────
-// TODO: Replace placeholder names with actual partner registry names before publishing.
-// Get explicit permission from each registry before using their name publicly.
 const REGISTRY_PARTNERS = [
   {
     city: 'Calgary',
     registries: [
-      { name: 'Registry Partner — Calgary NE', note: 'Replace with actual registry name' },
-      { name: 'Registry Partner — Calgary SW', note: 'Replace with actual registry name' },
+      { name: 'North Hill Centre Registry Express Inc.', url: 'https://registryexpressinc.ca/' },
     ],
   },
   {
     city: 'Lethbridge',
     registries: [
-      { name: 'Registry Partner — Lethbridge', note: 'Replace with actual registry name' },
+      { name: 'Schwartz Reliance Insurance & Registry Services', url: 'https://schwartzrelianceinsurance.com/' },
     ],
   },
   {
     city: 'Edmonton',
     registries: [
-      { name: 'Registry Partner — Edmonton', note: 'Replace with actual registry name' },
+      { name: 'Accu-Search', url: 'https://www.accu-search.com/' },
+    ],
+  },
+  {
+    city: 'Central Alberta',
+    registries: [
+      { name: 'Mayerthorpe Registries', url: 'https://mayerthorperegistries.ca/' },
     ],
   },
 ]
-// ─────────────────────────────────────────────────────────────────────────────
 
 const breadcrumbItems = [
   { name: 'Services', url: '/services' },
@@ -260,7 +261,7 @@ export default function AlbertaRegistriesContent() {
               <MapPin className="w-8 h-8 text-[#0891B2] flex-shrink-0" />
               <div>
                 <p className="text-white font-semibold">Calgary · Lethbridge · Edmonton</p>
-                <p className="text-white/60 text-sm">Registry partners across Alberta</p>
+                <p className="text-white/60 text-sm">Partners in Calgary, Lethbridge, Edmonton & more</p>
               </div>
             </div>
           </div>
@@ -275,12 +276,14 @@ export default function AlbertaRegistriesContent() {
               Trusted by Alberta Registries Across the Province
             </h2>
             <p className="text-slate-600 max-w-2xl mx-auto">
-              Cethos has established partnerships with registry offices in Calgary, Lethbridge, and
-              Edmonton. Registry staff know our format and accept our translations with confidence.
+              Cethos has established working relationships with registry offices across Alberta —
+              including Registry Express in Calgary, Schwartz Reliance in Lethbridge, Accu-Search in
+              Edmonton, and Mayerthorpe Registries in central Alberta. Registry staff know our format
+              and accept our translations with confidence.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {REGISTRY_PARTNERS.map((cityGroup, i) => (
               <motion.div
                 key={cityGroup.city}
@@ -294,13 +297,20 @@ export default function AlbertaRegistriesContent() {
                     <div className="w-10 h-10 rounded-lg bg-[#0891B2]/10 flex items-center justify-center">
                       <MapPin className="w-5 h-5 text-[#0891B2]" />
                     </div>
-                    <h3 className="font-bold text-[#0C2340] text-lg">{cityGroup.city}</h3>
+                    <h3 className="font-bold text-[#0C2340] text-base">{cityGroup.city}</h3>
                   </div>
                   <ul className="space-y-3">
                     {cityGroup.registries.map((reg, j) => (
                       <li key={j} className="flex items-start gap-2">
                         <Building2 className="w-4 h-4 text-[#0891B2] flex-shrink-0 mt-0.5" />
-                        <span className="text-slate-700 text-sm">{reg.name}</span>
+                        <a
+                          href={reg.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#0891B2] text-sm hover:underline"
+                        >
+                          {reg.name}
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -309,10 +319,13 @@ export default function AlbertaRegistriesContent() {
             ))}
           </div>
 
-          <p className="text-center text-slate-500 text-sm mt-8">
-            Our certified translations are also accepted at all other Alberta Registries locations
-            province-wide — not just our partner offices.
-          </p>
+          <div className="mt-10 max-w-2xl mx-auto text-center bg-[#0891B2]/5 border border-[#0891B2]/20 rounded-xl px-6 py-4">
+            <p className="text-slate-700 text-sm">
+              <span className="font-semibold text-[#0C2340]">Valid at every Alberta Registries location.</span>{' '}
+              Our certified translations are accepted province-wide — not limited to our partner offices.
+              Walk into any authorized registry agent in Alberta with confidence.
+            </p>
+          </div>
         </Container>
       </section>
 
