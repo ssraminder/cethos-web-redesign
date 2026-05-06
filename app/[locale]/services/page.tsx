@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import ServicesPageContent from './ServicesPageContent'
 
 export const metadata: Metadata = {
-  title: 'Professional Translation Services | 200+ Languages | Cethos',
+  title: 'Professional Translation Services | 200+ Languages',
   description: 'Life sciences, certified, website, software, and legal translation services in 200+ languages. ISO 17100 compliant. Same-day available.',
   keywords: ['translation services', 'localization services', 'life sciences translation', 'linguistic validation', 'certified translation', 'software localization', 'interpretation services', 'transcription services'],
   alternates: {

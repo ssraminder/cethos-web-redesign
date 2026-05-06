@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import LocationPageTemplate from '@/components/locations/LocationPageTemplate';
 
 export const metadata: Metadata = {
-  title: 'Calgary Translation & Interpretation Services | Cethos',
-  description: 'Translation and interpretation services in Calgary. IRCC certified. Birth certificates, marriage certificates, immigration documents. 139 five-star reviews. Same-day available. From $55.',
+  title: 'Certified Translator Calgary | Translation & Interpretation',
+  description: 'Certified translator in Calgary — IRCC-accepted translation & interpretation services. Birth certificates, marriage certificates, immigration documents. 146 five-star reviews. Same-day available. From $55.',
   alternates: {
     canonical: 'https://cethos.com/locations/calgary'
   }
@@ -15,7 +15,7 @@ export default function CalgaryTranslationPage() {
       city="Calgary"
       province="Alberta"
       provinceCode="AB"
-      h1="Translation & Interpretation Services in Calgary"
+      h1="Certified Translator & Interpretation Services in Calgary"
       hasSameDay={true}
       pnpProgram="Alberta Advantage Immigration Program (AAIP)"
       pnpName="Alberta Advantage Immigration Program"

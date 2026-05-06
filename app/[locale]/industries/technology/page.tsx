@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/technology',
   },
   openGraph: {
-    title: 'Technology Translation & Software Localization | Cethos',
+    title: 'Technology Translation & Software Localization',
     description: 'Expert technology translation and software localization for apps, documentation, and technical content.',
     url: 'https://cethos.com/industries/technology',
   },

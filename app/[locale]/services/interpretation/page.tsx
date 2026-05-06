@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import InterpretationPageContent from './InterpretationPageContent'
 
 export const metadata: Metadata = {
-  title: 'Interpretation Services Across Canada | In-Person, Phone & Video | Cethos',
+  title: 'Interpretation Services Across Canada | In-Person, Phone & Video',
   description: 'Professional interpretation services across Canada. On-site, over-the-phone (OPI), and video remote interpretation (VRI) in 200+ languages. 24/7 availability. HIPAA compliant medical, certified legal, and conference interpreters.',
   keywords: [
     'interpretation services Canada',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/services/interpretation',
   },
   openGraph: {
-    title: 'Interpretation Services Across Canada | In-Person, Phone & Video | Cethos',
+    title: 'Interpretation Services Across Canada | In-Person, Phone & Video',
     description: 'Professional interpretation services across Canada. On-site, OPI, and VRI in 200+ languages. 24/7 availability with certified interpreters.',
     url: 'https://cethos.com/services/interpretation',
     siteName: 'Cethos Solutions Inc.',

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/finance',
   },
   openGraph: {
-    title: 'Financial Translation Services | Cethos',
+    title: 'Financial Translation Services',
     description: 'Expert financial translation for banking, investment, insurance, and fintech.',
     url: 'https://cethos.com/industries/finance',
   },

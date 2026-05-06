@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/ecommerce',
   },
   openGraph: {
-    title: 'E-commerce Translation & Localization | Cethos',
+    title: 'E-commerce Translation & Localization',
     description: 'E-commerce translation for product listings, customer service, and marketing with multilingual SEO.',
     url: 'https://cethos.com/industries/ecommerce',
   },

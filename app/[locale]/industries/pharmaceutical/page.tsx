@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     canonical: 'https://cethos.com/industries/pharmaceutical',
   },
   openGraph: {
-    title: 'Pharmaceutical Translation Services | Cethos',
+    title: 'Pharmaceutical Translation Services',
     description: 'FDA, EMA & PMDA compliant pharmaceutical translation services for global clinical trials and regulatory submissions.',
     url: 'https://cethos.com/industries/pharmaceutical',
   },

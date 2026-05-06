@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import ApostilleContent from './ApostilleContent'
 
 export const metadata: Metadata = {
-  title: 'Apostille Services Canada | Hague Convention Authentication | Cethos',
+  title: 'Apostille Services Canada | Hague Convention Authentication',
   description: "Canada-wide apostille concierge. We collect, notarize, submit to Global Affairs Canada or the correct provincial Competent Authority, and return your authenticated documents — tracked courier both ways. From any province. From $149.",
   keywords: [
     'apostille canada',
