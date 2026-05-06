@@ -16,3 +16,24 @@ This repository has a project-local memory system at `/memory/`:
 **Before every `git commit`:** update the relevant memory file(s) with anything new from this session — new decisions, preferences confirmed, people introduced, or shifts in the user's context. Stage the memory updates as part of the same commit so context is version-controlled with the code.
 
 If a memory file is stale or contradicts current reality, fix it rather than just appending.
+
+## Marketing data integrations
+
+This codebase doubles as the operational marketing engine. All Google Ads, GBP, GA4, GSC, GTM, PSI, PostHog, BrightLocal, and SpyFu calls route through a single Supabase edge function:
+
+- **Endpoint:** `https://lmzoyezvsjgsxveoakdr.supabase.co/functions/v1/google-integrations`
+- **Source:** `supabase/functions/google-integrations/index.ts`
+- **Body shape:** `{ "platform": "<gads|gbp|ga4|gsc|gtm|psi|posthog|brightlocal|spyfu>", "action": "<action_name>", "customer": "<gads_customer_alias>" (gads only), "params": { ...action_specific_args } }`
+- **Auth:** `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>` (in `.env.local`)
+
+Critical gotcha: action-specific arguments must be nested under `params`, not at the top level. SpyFu actions (`keyword_overview`, `related_keywords`, `serp_analysis`) silently return `{"error":"keyword required"}` if the keyword is at the top level.
+
+Google Ads customer aliases:
+- `cethos_solutions` → 6316159162 (primary translation campaigns)
+- `cethos_inc` → 5680605007
+
+When the user asks performance questions ("why is my CPC high?", "where are competitors ranking?"), pull real data from this function before answering — don't reach for generic PPC/SEO advice.
+
+## Landing page inventory before recommending new pages
+
+The `/services/certified/*` directory has 20+ keyword-specific landing pages already built (birth/marriage/divorce certificate, immigration, drivers license, IQAS, WES, express entry, language-specific pages, etc.). Before recommending net-new pages, run `ls app/[locale]/services/certified/` and confirm the gap is real.
