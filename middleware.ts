@@ -68,6 +68,6 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match all paths except: _next, embed, api, admin, static files
-  matcher: ['/((?!_next|embed|api|admin|favicon|.*\\..*).*)'],
+  // Match all paths except: _next, embed, api, admin, ingest (PostHog proxy), static files
+  matcher: ['/((?!_next|embed|api|admin|ingest|favicon|.*\\..*).*)'],
 }
