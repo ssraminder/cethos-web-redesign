@@ -469,11 +469,35 @@ export default function DriversLicenseContent() {
         </Container>
       </section>
 
+      {/* ALBERTA REGISTRIES CTA */}
+      <section className="py-10 bg-[#0891B2]/5 border-t border-[#0891B2]/20">
+        <Container>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-[#0891B2] mb-1">Visiting an Alberta Registry?</p>
+              <p className="text-[#0C2340] font-medium">
+                We have dedicated service for Alberta Registries — trusted partners in Calgary, Lethbridge, Edmonton & more.
+              </p>
+            </div>
+            <Link
+              href="/services/certified/drivers-license-translation/alberta-registries"
+              className="flex-shrink-0 px-5 py-2.5 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors text-sm whitespace-nowrap"
+            >
+              See Alberta Registries page →
+            </Link>
+          </div>
+        </Container>
+      </section>
+
       {/* RELATED LINKS */}
       <section className="py-12 bg-white border-t">
         <Container>
           <h3 className="text-lg font-semibold text-[#0C2340] mb-4">{t('related_heading')}</h3>
           <div className="flex flex-wrap gap-3">
+            <Link href="/services/certified/drivers-license-translation/alberta-registries" className="text-[#0891B2] hover:underline font-medium">
+              Driver&apos;s License Translation — Alberta Registries
+            </Link>
+            <span className="text-slate-300">•</span>
             <Link href="/services/certified/immigration-translation-services" className="text-[#0891B2] hover:underline">
               {t('related_immigration')}
             </Link>
