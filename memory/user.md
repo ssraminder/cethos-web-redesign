@@ -24,4 +24,13 @@ Primary user of this codebase: who they are, their role, what they're responsibl
 - Concise updates preferred. State the finding, the action, and what's next — no recap paragraphs.
 
 ## Active focus
-- 2026-05: Bringing Google Ads CPC down for translation keywords (current $9-18, target ~$4 competitor benchmark). Root cause identified: all translation ads point to one generic URL despite 20+ specific landing pages existing. Mid-implementation of keyword-level Final URL remapping via Google Ads API.
+- **2026-05 (marketing):** Bringing Google Ads CPC down for translation keywords (current $9-18, target ~$4 competitor benchmark). Keyword-level Final URL remapping via Google Ads API implemented.
+- **2026-05 (product):** Vendor assignment workflow — admin portal (`portal.cethos.com`, repo `cethos_app_figma_design_v1`) and vendor portal (`vendor.cethos.com`, repo `cethosvendorportal`). Core loop: PM finds vendors → offers/assigns steps → vendor accepts → delivers → PM approves. Multiple E2E bugs fixed across two sessions (see decisions.md).
+
+## Parking lot / pending issues
+- **Populate `vendor_rates` for Editing and Proofreading** — currently empty; find-matching-vendors falls back to showing all language-matched vendors without rate info. PM must set rates manually at assignment.
+- **Customer name on vendor job cards** — `orders.customer_name` doesn't exist. If PMs want their name visible to vendors, need a join to `profiles` or `customers` table in `vendor-get-jobs`.
+- **Merge open PRs:** portal [#523](https://github.com/ssraminder/cethos_app_figma_design_v1/pull/523) and vendor [#53](https://github.com/ssraminder/cethosvendorportal/pull/53).
+- **QMS gating mode** — `update-workflow-step` v23 is deployed with QMS checks in `warn` mode (writes audit rows, never blocks). Decision needed on when to flip to `block` mode.
+- **Initial search uses UUID for language filter** — Find Vendor dialog fires `doSearch` on open before `loadOptions` resolves UUIDs to ISO codes. The edge function handles it, but the first search technically sends UUIDs. Negligible in practice but worth noting.
+- **Sentry CETHOS-PORTAL-CLIENT-2** (stale env from old Netlify deploy referencing `kwwbyczqtjduscjupknf`) — will self-resolve once old deployment expires.

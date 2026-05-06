@@ -18,6 +18,25 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 
 ## Decisions
 
+### 2026-05-05 — Vendor workflow: language IDs are UUIDs in DB but ISO codes in vendor tables
+- **Decision:** Treat the UUID ↔ ISO code mismatch as a permanent schema quirk to work around in edge functions and UI, not something to fix at the schema level.
+- **Rationale:** `order_workflow_steps.source_language`/`target_language` store UUID foreign keys to the `languages` table. `vendor_language_pairs` stores uppercase ISO codes ("EN", "ES-419"). Changing either side would require a migration touching thousands of rows and multiple functions. The UUID_RE regex (`/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`) + a `languages` table lookup is the established resolution pattern.
+- **Alternatives considered:** Migrate `order_workflow_steps` to store ISO codes — deferred, high blast radius.
+- **Status:** active
+- **Affects:** `find-matching-vendors` (v36+), `vendor-get-jobs` (v36+), `OrderWorkflowSection.tsx` (language filter + resolved lang state)
+
+### 2026-05-05 — `orders` table has no `customer_name` column
+- **Decision:** Query `orders` as `select("id, order_number")` only. Never include `customer_name`.
+- **Rationale:** The column doesn't exist — PostgREST returns an error silently, making the entire `orders` response null, which causes `order_number` to be null everywhere. Customer identity (if needed) must come from a join to `profiles` or `customers`.
+- **Status:** active
+- **Affects:** `vendor-get-jobs`, any other function that queries `orders`
+
+### 2026-05-05 — Service rate filter fallback in find-matching-vendors
+- **Decision:** If `vendor_rates` has no rows for the given `service_id` and no `max_rate` filter is set, skip the rate filter and return all language-matched vendors.
+- **Rationale:** New services (Editing, Proofreading) have no rates in `vendor_rates` yet. Without the fallback, the endpoint returns 0 vendors for these services, blocking PM assignment even when qualified vendors exist. PMs can still set rates manually at assignment time.
+- **Status:** active
+- **Affects:** `find-matching-vendors` (v37+)
+
 ### 2026-05-05 — Map Google Ads keywords to existing keyword-specific landing pages
 - **Decision:** Set keyword-level Final URLs in Google Ads to route each keyword to its matching existing landing page (e.g. `marriage certificate translation` → `/services/certified/marriage-certificate-translation`), rather than the generic `/services/certified` hub everyone currently lands on.
 - **Rationale:** Audit of past 12 months of cethos_solutions Google Ads data showed every translation-campaign ad sends 100% of traffic to `https://cethos.com/services/certified` — the generic hub. Quality Scores on core keywords sit at 4-5 ("certified translator", "translation services near me", "canadian certified translator", "marriage certificate translation") with "Below Average" predicted CTR, driving CPCs of $9-18 vs the $4 competitor benchmark. The site already has 20+ specific landing pages built under `/services/certified/*` — they just weren't connected to the ads.

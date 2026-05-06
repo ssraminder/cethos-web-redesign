@@ -33,6 +33,12 @@ How the user wants you to approach work in this project. Add any time the user c
   - **Why:** When auto mode is active the user has explicitly opted into autonomous execution. Asking permission for routine, low-risk steps wastes their time.
   - **How to apply:** Make reasonable assumptions and proceed for code edits, data queries, file writes, edge-function reads. Still ask for: destructive operations, force-pushes, deletions, financial commitments, sending external messages.
 
+## Tooling & workflow (continued)
+
+- **Git pushes directly to `main` are blocked by a session hook**
+  - **Why:** A permission rule prevents `git push origin main` during sessions. Discovered 2026-05-05 when pushing vendor workflow fixes.
+  - **How to apply:** Always create a feature branch (`git checkout -b fix/...`), push the branch, then open a PR via `gh pr create`. Never attempt direct main push.
+
 ## Things to avoid
 
 - **Don't propose a 3-option plan when one option is clearly right**

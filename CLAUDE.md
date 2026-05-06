@@ -34,6 +34,27 @@ Google Ads customer aliases:
 
 When the user asks performance questions ("why is my CPC high?", "where are competitors ranking?"), pull real data from this function before answering — don't reach for generic PPC/SEO advice.
 
+## Connected systems (different repos, same Supabase project)
+
+The Cethos ecosystem spans three repos sharing one Supabase project (`lmzoyezvsjgsxveoakdr`):
+
+| Repo | URL | Purpose |
+|------|-----|---------|
+| `cethos_app_figma_design_v1` (portal) | `portal.cethos.com` | Admin/PM portal — order management, vendor assignment |
+| `cethosvendorportal` (vendor) | `vendor.cethos.com` | Vendor-facing portal — job board, file delivery |
+| `main_web` (this repo) | `cethos.com` | Public marketing site + marketing edge functions |
+
+### Vendor assignment workflow — key gotchas
+- `order_workflow_steps.source_language` / `target_language` are **UUID** foreign keys to the `languages` table. `vendor_language_pairs` stores **uppercase ISO codes** ("EN", "ES-419"). Any function crossing these tables must resolve UUIDs via a `languages` lookup. UUID_RE: `/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`
+- `orders` table has **no `customer_name` column** — querying it causes a PostgREST silent error that nulls the entire response. Only select `id, order_number` (and optionally `customer_id`).
+- `find-matching-vendors` v37+: falls back to showing all language-matched vendors when `vendor_rates` has no rows for a given `service_id` (Editing/Proofreading not yet set up in rates table).
+
+### Parking lot / pending (as of 2026-05-05)
+- Merge portal PR [#523](https://github.com/ssraminder/cethos_app_figma_design_v1/pull/523) and vendor PR [#53](https://github.com/ssraminder/cethosvendorportal/pull/53)
+- Populate `vendor_rates` for Editing and Proofreading services
+- Decide when to flip QMS gating from `warn` → `block` in `update-workflow-step`
+- Customer name on vendor job cards (needs join to `profiles`/`customers`)
+
 ## Landing page inventory before recommending new pages
 
 The `/services/certified/*` directory has 20+ keyword-specific landing pages already built (birth/marriage/divorce certificate, immigration, drivers license, IQAS, WES, express entry, language-specific pages, etc.). Before recommending net-new pages, run `ls app/[locale]/services/certified/` and confirm the gap is real.
