@@ -172,7 +172,7 @@ export default function AlbertaRegistriesContent() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-[#0891B2]/10 rounded-full mb-6"
               >
-                <span className="text-[#0891B2] font-bold text-lg">From $35</span>
+                <span className="text-[#0891B2] font-bold text-lg">From $55</span>
                 <span className="text-slate-600">per document · same-day available</span>
               </motion.div>
 
