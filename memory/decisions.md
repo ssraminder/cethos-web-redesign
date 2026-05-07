@@ -18,6 +18,21 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 
 ## Decisions
 
+### 2026-05-07 — Restructure "Cethos Translation Services" Google Ads campaign: ad-group-per-landing-page + new /documents hub
+- **Decision:** Split the 41-keyword "Certified Translation Services" catch-all ad group into themed ad groups, each pointing to its dedicated landing page. Built a new conversion-focused hub page at `/services/certified/documents` and a corresponding "Certified Translated Document" ad group as the landing zone for the high-converting "certified translated document" keyword. Created 5 new language ad groups (French, Hindi, Mandarin, Punjabi, Spanish) and 5 new doc-type ad groups (Divorce Certificate, Police Clearance, IQAS, WES, Express Entry) to cover existing landing pages that previously had no ads.
+- **Rationale:** "certified translated document" (phrase) had a 43% conversion rate at $9.68 CPC ($22.59 CPA) — best performer in the campaign — but was buried in the 41-keyword catch-all with no bid differentiation. Meanwhile "certified translation services" (phrase) was eating $248/week at $17.78 CPC and $62 CPA. Splitting groups by intent boosts Quality Score (ad/page relevance) so smart bidding (campaign uses MAXIMIZE_CONVERSION_VALUE) has cleaner signals to optimize on. Tightened the broad "certified translation services" from phrase → exact at the same time. Also added 6 negative keywords (admiral, everest, association of translators, polish translator, bilingual translation, spanish to english) and confirmed Calgary-only geo (23 postal codes T2A–T3K + 11 neighborhoods).
+- **Alternatives considered:**
+  - Single bid override on the winning keyword inside the catch-all: rejected — leaves the QS-dragging mismatch between keywords and the generic landing page in place.
+  - Skip the hub page, point "certified translated document" at `/services/certified`: rejected — the landing-page-relevance lift is the main lever for lowering CPC; reusing the generic hub would limit it.
+- **Status:** active
+- **Affects:** Campaign 21865659820 ("Cethos Translation Services") on customer 6316159162. New ad groups: Certified Translated Document (195620056785), French/Hindi/Mandarin/Punjabi/Spanish Translation Calgary (195960519243/283/323/483/523), Divorce Certificate Translation (195003082303), Police Clearance Translation (195003082463), IQAS Alberta (195003082503), WES Evaluation (195003082543), Express Entry (195003082703). New code: `app/[locale]/services/certified/documents/`. IRCC Immigration Translation ad group un-paused.
+
+### 2026-05-07 — Path1/path2 in Google Ads RSAs is capped at 15 chars
+- **Decision:** Keep RSA path components ≤ 15 characters. "police-clearance" (16 chars) fails validation with `STRING_LENGTH_TOO_LONG` even though the dest URL is `/services/certified/police-clearance-translation`.
+- **Rationale:** Hit during the Phase 3 RSA batch — the police clearance ad creation failed with `Too long.` on `path1`. Used `police` instead.
+- **Status:** active
+- **Affects:** Future Google Ads RSA creation via `google-integrations` mutate.
+
 ### 2026-05-05 — Vendor workflow: language IDs are UUIDs in DB but ISO codes in vendor tables
 - **Decision:** Treat the UUID ↔ ISO code mismatch as a permanent schema quirk to work around in edge functions and UI, not something to fix at the schema level.
 - **Rationale:** `order_workflow_steps.source_language`/`target_language` store UUID foreign keys to the `languages` table. `vendor_language_pairs` stores uppercase ISO codes ("EN", "ES-419"). Changing either side would require a migration touching thousands of rows and multiple functions. The UUID_RE regex (`/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i`) + a `languages` table lookup is the established resolution pattern.
