@@ -1,13 +1,19 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, AlertCircle, Loader2, ArrowRight, ArrowLeft, ChevronDown, X } from 'lucide-react'
 import { getAdTrackingPayload } from '@/lib/ad-tracking'
-import { trackGenerateLead } from '@/lib/tracking'
+import { trackGenerateLead, trackConsultEvent, type ConsultPlacement } from '@/lib/tracking'
+import { ApostilleConsultEmbed } from './ApostilleConsultEmbed'
+
+export type ApostilleFormMode = 'quote' | 'consult'
 
 interface ApostilleQuoteFormProps {
   formLocation?: string
+  mode?: ApostilleFormMode
+  consultPlacement?: ConsultPlacement
+  onModeChange?: (mode: ApostilleFormMode) => void
 }
 
 const DOCUMENT_TYPES = [
@@ -50,7 +56,12 @@ const STEPS = [
   { num: 3, label: 'Contact' },
 ]
 
-export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: ApostilleQuoteFormProps) {
+export function ApostilleQuoteForm({
+  formLocation = 'apostille-services',
+  mode = 'quote',
+  consultPlacement = 'form_toggle',
+  onModeChange,
+}: ApostilleQuoteFormProps) {
   const [currentStep, setCurrentStep] = useState(1)
 
   // Step 1
@@ -111,7 +122,8 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
 
   const validateStep2 = (): boolean => {
     const next: Record<string, string> = {}
-    if (!dropoffMode) next.dropoffMode = 'Choose drop-off or courier.'
+    // In consult mode, shipping is informational — don't block.
+    if (mode === 'quote' && !dropoffMode) next.dropoffMode = 'Choose drop-off or courier.'
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -167,6 +179,7 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
           ad_tracking: adTracking,
           source_url: typeof window !== 'undefined' ? window.location.href : '',
           form_location: formLocation,
+          lead_type: mode,
         }),
       })
 
@@ -175,7 +188,11 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
         throw new Error(data?.error || data?.message || 'Submission failed.')
       }
 
-      trackGenerateLead('quote', 'Apostille Quote Submitted')
+      trackGenerateLead(
+        'quote',
+        mode === 'consult' ? 'Apostille Consult Lead' : 'Apostille Quote Submitted',
+        mode === 'consult' ? 'apostille_consult' : 'apostille_quote',
+      )
       setSubmitSuccess(true)
     } catch (err: any) {
       setErrors({ submit: err?.message || 'Something went wrong. Please try again.' })
@@ -184,6 +201,33 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
   }
 
   if (submitSuccess) {
+    if (mode === 'consult') {
+      const provinceLabel = PROVINCES.find((p) => p.value === issuingProvince)?.label || issuingProvince
+      const resolvedDocs = otherSelected
+        ? [...documentTypes.filter((t) => t !== OTHER_OPTION), otherDocumentType.trim() ? `Other: ${otherDocumentType.trim()}` : 'Other']
+        : documentTypes
+      return (
+        <ApostilleConsultEmbed
+          fullName={fullName.trim()}
+          email={email.trim()}
+          phone={phone.trim()}
+          documentTypes={resolvedDocs}
+          issuingProvinceLabel={provinceLabel}
+          destinationCountry={destinationCountry.trim()}
+          numDocuments={numDocuments}
+          needsNotarization={needsNotarization}
+          needsTranslation={needsTranslation}
+          additionalNotes={additionalNotes.trim()}
+          placement={consultPlacement}
+          onBookingToQuoteClick={() => {
+            // Switch the form back to quote mode so user can request a written quote.
+            setSubmitSuccess(false)
+            setCurrentStep(3)
+            onModeChange?.('quote')
+          }}
+        />
+      )
+    }
     return (
       <div className="text-center py-6">
         <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
@@ -211,20 +255,45 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
     )
   }
 
+  const isConsult = mode === 'consult'
+
   return (
     <form onSubmit={handleSubmit}>
-      <h3 className="text-xl font-bold text-[#0C2340] mb-1">Get Your Apostille Quote</h3>
+      {isConsult && (
+        <div className="mb-4 p-3 rounded-lg bg-[#E0F2FE] border border-[#0891B2]/20 flex items-start gap-2">
+          <CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" />
+          <div className="text-sm">
+            <p className="font-semibold text-[#0C2340]">Free 15-min consultation</p>
+            <p className="text-slate-600">
+              Tell us about your situation in 3 quick steps — then pick a time. No quote needed.{' '}
+              <button
+                type="button"
+                onClick={() => onModeChange?.('quote')}
+                className="text-[#0891B2] underline hover:no-underline font-medium"
+              >
+                Switch to quote mode
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
+
+      <h3 className="text-xl font-bold text-[#0C2340] mb-1">
+        {isConsult ? 'Tell Us About Your Apostille Case' : 'Get Your Apostille Quote'}
+      </h3>
       <p className="text-gray-600 text-sm mb-5">
-        Three quick steps. We&apos;ll confirm scope, turnaround, and exact price within one business day.
+        {isConsult
+          ? 'Three quick steps, then pick a time for your free 15-minute call.'
+          : "Three quick steps. We'll confirm scope, turnaround, and exact price within one business day."}
       </p>
 
       {/* Step indicator */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-center mb-6">
         {STEPS.map((step, idx) => {
           const isActive = currentStep === step.num
           const isComplete = currentStep > step.num
           return (
-            <div key={step.num} className="flex items-center flex-1">
+            <Fragment key={step.num}>
               <div className="flex flex-col items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
@@ -247,12 +316,12 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
               </div>
               {idx < STEPS.length - 1 && (
                 <div
-                  className={`flex-1 h-0.5 mx-2 mb-5 transition-colors ${
+                  className={`w-16 sm:w-24 h-0.5 mx-3 mb-5 transition-colors ${
                     isComplete ? 'bg-green-500' : 'bg-slate-200'
                   }`}
                 />
               )}
-            </div>
+            </Fragment>
           )
         })}
       </div>
@@ -656,7 +725,7 @@ export function ApostilleQuoteForm({ formLocation = 'apostille-services' }: Apos
                   </>
                 ) : (
                   <>
-                    Get My Apostille Quote <ArrowRight className="w-4 h-4" />
+                    {isConsult ? 'Continue to Booking' : 'Get My Apostille Quote'} <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>

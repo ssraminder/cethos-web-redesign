@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
@@ -23,12 +24,16 @@ import {
   FileSignature,
   Truck,
   Landmark,
+  Calendar,
 } from 'lucide-react'
 import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
-import { StickyMobileCTA, LandingLocalBusinessJsonLd } from '@/components/landing'
-import { ApostilleQuoteForm } from './ApostilleQuoteForm'
+import { LandingLocalBusinessJsonLd } from '@/components/landing'
+import { ApostilleQuoteForm, type ApostilleFormMode } from './ApostilleQuoteForm'
+import { ApostilleStickyConsultBar } from './ApostilleStickyConsultBar'
+import { ApostilleExitIntent } from './ApostilleExitIntent'
+import { trackConsultEvent, type ConsultPlacement } from '@/lib/tracking'
 
 export default function ApostilleContent() {
   const breadcrumbItems = [
@@ -36,8 +41,44 @@ export default function ApostilleContent() {
     { name: 'Apostille Services', url: '/services/apostille' },
   ]
 
+  const [formMode, setFormMode] = useState<ApostilleFormMode>('quote')
+  const [consultPlacement, setConsultPlacement] = useState<ConsultPlacement>('form_toggle')
+  const [hasInteracted, setHasInteracted] = useState(false)
+
+  // Pick a stable A/B variant for placement B headline (persists per visitor).
+  const [sectionVariant, setSectionVariant] = useState<'A' | 'B'>('A')
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const KEY = 'cethos_apostille_consult_section_variant'
+    const existing = localStorage.getItem(KEY)
+    if (existing === 'A' || existing === 'B') {
+      setSectionVariant(existing)
+    } else {
+      const v = Math.random() < 0.5 ? 'A' : 'B'
+      localStorage.setItem(KEY, v)
+      setSectionVariant(v)
+    }
+  }, [])
+
   const scrollToForm = () => {
     document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })
+    setHasInteracted(true)
+  }
+
+  const openConsult = (placement: ConsultPlacement) => {
+    setHasInteracted(true)
+    setConsultPlacement(placement)
+    setFormMode('consult')
+    trackConsultEvent('free_consult_cta_clicked', { placement, variant: placement === 'section' ? sectionVariant : undefined })
+    // Wait for state-driven re-render before scroll, so the consult banner is visible.
+    requestAnimationFrame(() => {
+      document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })
+    })
+  }
+
+  const switchToQuote = () => {
+    setFormMode('quote')
+    setConsultPlacement('form_toggle')
   }
 
   const whyChooseUs = [
@@ -108,12 +149,21 @@ export default function ApostilleContent() {
   ]
 
   const howItWorks = [
-    {
-      step: 1,
-      icon: Upload,
-      title: 'Get Your Quote (60 seconds)',
-      description: 'Upload digital copies. We confirm scope, document type, issuing province, destination country, and exact price.',
-    },
+    formMode === 'consult'
+      ? {
+          step: 1,
+          icon: Calendar,
+          title: 'Book a Free 15-Min Consultation',
+          description:
+            'Tell us about your case in three quick steps, then pick a time. A specialist confirms scope, the right authority, and turnaround on the call — no commitment.',
+        }
+      : {
+          step: 1,
+          icon: Upload,
+          title: 'Get Your Quote (60 seconds)',
+          description:
+            'Upload digital copies. We confirm scope, document type, issuing province, destination country, and exact price.',
+        },
     {
       step: 2,
       icon: Truck,
@@ -123,14 +173,14 @@ export default function ApostilleContent() {
     {
       step: 3,
       icon: FileSignature,
-      title: 'We Notarize & Route to the Right Authority',
-      description: 'In-house notarization if needed. We then submit to Global Affairs Canada (federal docs) or the correct provincial authority — Ontario, Alberta, BC, Quebec, or Saskatchewan.',
+      title: 'Document Prep & Notarization (If Needed)',
+      description: 'Public documents (birth certs, RCMP checks, court orders) go straight through. Private documents (POAs, affidavits, ID copies) get notarized in-house first. Certified true copies prepared where the destination requires them.',
     },
     {
       step: 4,
       icon: Stamp,
-      title: 'The Authority Issues the Apostille',
-      description: 'Processing time depends on the authority (typical range: 1.5–4 weeks). Government processing time is fixed and we cannot shortcut it — be wary of any service claiming same-day.',
+      title: 'Apostille — or Authentication + Embassy Legalization',
+      description: 'Hague country? The Competent Authority issues a single apostille — done. Non-Hague country (UAE, Egypt, Saudi Arabia)? We add embassy legalization at the destination consulate. Government processing time is fixed: 1.5–4 weeks for apostille, plus 2–6 weeks at the embassy when applicable.',
     },
     {
       step: 5,
@@ -271,10 +321,14 @@ export default function ApostilleContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.25 }}
-                className="flex flex-wrap gap-3 mb-8"
+                className="flex flex-wrap gap-3 mb-3"
               >
                 <button
-                  onClick={scrollToForm}
+                  onClick={() => {
+                    setFormMode('quote')
+                    setConsultPlacement('form_toggle')
+                    scrollToForm()
+                  }}
                   className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
                 >
                   Get Apostille Quote
@@ -285,6 +339,22 @@ export default function ApostilleContent() {
                 >
                   <Phone className="w-5 h-5" /> (587) 600-0786
                 </a>
+              </motion.div>
+
+              {/* Placement A — hero secondary consult CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.28 }}
+                className="mb-8"
+              >
+                <button
+                  type="button"
+                  onClick={() => openConsult('hero')}
+                  className="text-sm text-[#0891B2] hover:text-[#06B6D4] underline-offset-2 hover:underline font-medium inline-flex items-center gap-1.5"
+                >
+                  Not sure what you need? Book a free 15-min consultation →
+                </button>
               </motion.div>
 
               <motion.div
@@ -323,7 +393,15 @@ export default function ApostilleContent() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
-              <ApostilleQuoteForm formLocation="apostille-services" />
+              <ApostilleQuoteForm
+                formLocation="apostille-services"
+                mode={formMode}
+                consultPlacement={consultPlacement}
+                onModeChange={(m) => {
+                  setFormMode(m)
+                  if (m === 'quote') setConsultPlacement('form_toggle')
+                }}
+              />
             </motion.div>
           </div>
         </div>
@@ -438,7 +516,9 @@ export default function ApostilleContent() {
         <Container>
           <h2 className="text-3xl font-bold text-white text-center mb-4">How Apostille Works</h2>
           <p className="text-white/70 text-center mb-12 max-w-2xl mx-auto">
-            From quote to delivery — we manage the entire authentication process across every Canadian province.
+            {formMode === 'consult'
+              ? 'From your free 15-minute call to delivery — we manage the entire authentication process across every Canadian province.'
+              : 'From quote to delivery — we manage the entire authentication process across every Canadian province.'}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {howItWorks.map((item, index) => (
@@ -511,6 +591,228 @@ export default function ApostilleContent() {
         </Container>
       </section>
 
+      {/* THE FULL AUTHENTICATION PROCESS — DETAILED */}
+      <section className="py-16 bg-white">
+        <Container>
+          <div className="text-center mb-12 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">
+              The Full Apostille &amp; Authentication Process
+            </h2>
+            <p className="text-slate-600">
+              Apostille isn&apos;t just &quot;notarize and send.&quot; Canadian authentication has a specific chain — federal vs provincial routing, conditional notarization, Hague vs non-Hague paths, translation sequencing. Here&apos;s exactly what happens at every stage.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-6">
+            <Card className="p-6 md:p-8">
+              <h3 className="text-xl font-bold text-[#0C2340] mb-3">1. Document Vetting &amp; Path Determination</h3>
+              <p className="text-slate-700 mb-4">
+                Before anything goes to a government desk, we review every document to determine the right path:
+              </p>
+              <ul className="space-y-2 text-slate-700">
+                <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" /> Is it a public document, or a private document that needs notarization first?</li>
+                <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" /> Is the destination country a Hague Convention signatory? (Determines apostille-only vs apostille + embassy legalization.)</li>
+                <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" /> Which Canadian Competent Authority handles it — federal Global Affairs Canada or the issuing province?</li>
+                <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" /> Does it need a certified true copy first? (Common for school transcripts and ID copies.)</li>
+                <li className="flex gap-2"><CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" /> Does the destination country require translation — and does the translation also need authentication?</li>
+              </ul>
+              <p className="text-slate-700 mt-4">
+                We confirm all of this in writing — and lock in price + timeline — before you ship anything.
+              </p>
+            </Card>
+
+            <Card className="p-6 md:p-8">
+              <h3 className="text-xl font-bold text-[#0C2340] mb-3">2. Notarization (When It&apos;s Required)</h3>
+              <p className="text-slate-700 mb-4">
+                Public documents (issued by a Canadian government body) can go straight to the Competent Authority. Private documents must be notarized first by a Canadian notary public or commissioner of oaths in the right province.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-semibold text-[#0C2340] mb-2">Need notarization first</h4>
+                  <ul className="space-y-1.5 text-sm text-slate-700">
+                    <li>• Photocopies of passports, IDs, driver&apos;s licenses</li>
+                    <li>• Affidavits and statutory declarations</li>
+                    <li>• Power of attorney</li>
+                    <li>• Letters or statements (&quot;to whom it may concern&quot;)</li>
+                    <li>• Educational documents from private institutions</li>
+                    <li>• Certified translations (translator&apos;s affidavit gets notarized)</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-[#0C2340] mb-2">Don&apos;t need notarization (already public)</h4>
+                  <ul className="space-y-1.5 text-sm text-slate-700">
+                    <li>• Provincial long-form vital statistics certificates</li>
+                    <li>• RCMP / provincial police criminal record checks</li>
+                    <li>• Court orders &amp; judgments (with court seal)</li>
+                    <li>• Articles of incorporation (with corporate registry seal)</li>
+                    <li>• Diplomas / transcripts with the registrar&apos;s seal (varies by province)</li>
+                  </ul>
+                </div>
+              </div>
+              <p className="text-slate-700 mt-4">
+                Cethos has in-house Alberta notary services for documents that need them.
+              </p>
+            </Card>
+
+            <Card className="p-6 md:p-8">
+              <h3 className="text-xl font-bold text-[#0C2340] mb-3">3. The Competent Authority Layer</h3>
+              <p className="text-slate-700 mb-4">
+                Under the Hague Apostille Convention, each country designates &quot;Competent Authorities&quot; that can issue apostilles. Canada has two layers — federal and provincial — and getting routing wrong is the #1 cause of rejected applications.
+              </p>
+              <div className="space-y-4">
+                <div className="border-l-4 border-[#0891B2] pl-4">
+                  <h4 className="font-semibold text-[#0C2340] mb-1">Federal — Global Affairs Canada (Ottawa)</h4>
+                  <p className="text-sm text-slate-700">RCMP background checks, IRCC immigration documents, Federal Court orders, federal articles of incorporation, all federal department documents — plus any document from a province without its own Authentication Office.</p>
+                </div>
+                <div className="border-l-4 border-[#0891B2] pl-4">
+                  <h4 className="font-semibold text-[#0C2340] mb-1">Provincial — Authentication Offices</h4>
+                  <ul className="text-sm text-slate-700 space-y-1">
+                    <li>• <strong>Alberta:</strong> Justice &amp; Solicitor General Authentication Office (Edmonton)</li>
+                    <li>• <strong>Ontario:</strong> ODS — Ontario Document Services (Toronto)</li>
+                    <li>• <strong>British Columbia:</strong> Order in Council Administration Office (Victoria)</li>
+                    <li>• <strong>Saskatchewan:</strong> Authentications &amp; Legalizations Unit</li>
+                    <li>• <strong>Quebec:</strong> Notarial certification path (see step 6 below)</li>
+                  </ul>
+                  <p className="text-xs text-slate-500 mt-2">Manitoba, New Brunswick, Newfoundland &amp; Labrador, Nova Scotia, PEI, and the territories don&apos;t operate their own Authentication Office — those documents go to Global Affairs Canada federally.</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 md:p-8">
+              <h3 className="text-xl font-bold text-[#0C2340] mb-3">4. Apostille vs Authentication &amp; Legalization</h3>
+              <p className="text-slate-700 mb-4">
+                What gets issued depends on whether your destination country is a Hague Convention signatory.
+              </p>
+              <div className="overflow-x-auto -mx-2 sm:mx-0">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold text-[#0C2340]"></th>
+                      <th className="px-3 py-2 text-left font-semibold text-[#0C2340]">Hague country</th>
+                      <th className="px-3 py-2 text-left font-semibold text-[#0C2340]">Non-Hague country</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-700">
+                    <tr className="border-t border-slate-200">
+                      <td className="px-3 py-2.5 font-medium">What&apos;s issued</td>
+                      <td className="px-3 py-2.5">Apostille certificate</td>
+                      <td className="px-3 py-2.5">Authentication + embassy legalization</td>
+                    </tr>
+                    <tr className="border-t border-slate-200">
+                      <td className="px-3 py-2.5 font-medium">Steps</td>
+                      <td className="px-3 py-2.5">1 — Competent Authority only</td>
+                      <td className="px-3 py-2.5">2 — Competent Authority + destination embassy</td>
+                    </tr>
+                    <tr className="border-t border-slate-200">
+                      <td className="px-3 py-2.5 font-medium">Example destinations</td>
+                      <td className="px-3 py-2.5">US, UK, EU, India, Mexico, Brazil, Australia, Japan, China</td>
+                      <td className="px-3 py-2.5">UAE, Egypt, Saudi Arabia, Qatar, Iran, Cuba</td>
+                    </tr>
+                    <tr className="border-t border-slate-200">
+                      <td className="px-3 py-2.5 font-medium">Embassy fees</td>
+                      <td className="px-3 py-2.5">None</td>
+                      <td className="px-3 py-2.5">$25–$300+ per document, varies by country</td>
+                    </tr>
+                    <tr className="border-t border-slate-200">
+                      <td className="px-3 py-2.5 font-medium">Total turnaround</td>
+                      <td className="px-3 py-2.5">1.5–5 weeks</td>
+                      <td className="px-3 py-2.5">4–8 weeks</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">Hague Convention status as of 2026 — Canada joined January 2024, Vietnam joined April 2025. Ask us if your destination is borderline.</p>
+            </Card>
+
+            <Card className="p-6 md:p-8">
+              <h3 className="text-xl font-bold text-[#0C2340] mb-3">5. Translation — Before, After, or Both?</h3>
+              <p className="text-slate-700 mb-4">
+                Translation timing depends on the destination country&apos;s rules. Get this wrong and the document is rejected at the destination.
+              </p>
+              <ul className="space-y-3 text-slate-700">
+                <li>
+                  <strong>Translate first, then apostille:</strong> Most EU countries, Germany, Italy, Spain, Mexico, Brazil. The certified translator&apos;s affidavit is notarized; the apostille covers the translated package.
+                </li>
+                <li>
+                  <strong>Apostille first, then translate:</strong> US, UK, Australia, India in many cases. The original is apostilled and a certified translation is provided alongside.
+                </li>
+                <li>
+                  <strong>Both, with embassy legalization on the translation:</strong> UAE, Egypt, several Gulf states. The translation itself goes through embassy legalization, sometimes with a sworn translator at the consulate.
+                </li>
+              </ul>
+              <p className="text-slate-700 mt-4">
+                We bundle <Link href="/services/certified" className="text-[#0891B2] hover:underline">certified translation</Link> + apostille as a single package and sequence the timing for your destination.
+              </p>
+            </Card>
+
+            <Card className="p-6 md:p-8">
+              <h3 className="text-xl font-bold text-[#0C2340] mb-3">6. Quebec — The Notarial Path</h3>
+              <p className="text-slate-700 mb-4">
+                Quebec uses civil law and treats notaries as legal officers, not just witnesses to signatures. Quebec-issued documents follow a different path than the rest of Canada:
+              </p>
+              <ol className="space-y-2 text-slate-700 list-decimal pl-5">
+                <li>A Quebec notary issues a <em>notarial certification</em> (acte notarié) attesting to the document.</li>
+                <li>The notarized document is submitted to the Quebec Ministry of Justice for the apostille.</li>
+              </ol>
+              <p className="text-slate-700 mt-4">
+                Total time: 6–8 weeks (the longest of any Canadian province). Cethos coordinates with Quebec notaries on your behalf — you don&apos;t need a Quebec contact.
+              </p>
+            </Card>
+
+            <Card className="p-6 md:p-8">
+              <h3 className="text-xl font-bold text-[#0C2340] mb-3">7. Common Document → Authority Mapping</h3>
+              <p className="text-slate-700 mb-4">
+                The most common Canadian documents and exactly where they go:
+              </p>
+              <div className="overflow-x-auto -mx-2 sm:mx-0">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold text-[#0C2340]">Document</th>
+                      <th className="px-3 py-2 text-left font-semibold text-[#0C2340]">Notary first?</th>
+                      <th className="px-3 py-2 text-left font-semibold text-[#0C2340]">Routes to</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-slate-700">
+                    {[
+                      { doc: 'Long-form birth / marriage / death certificate (provincial)', notary: 'No', auth: 'Issuing province’s Authentication Office' },
+                      { doc: 'RCMP criminal record check', notary: 'No', auth: 'Global Affairs Canada' },
+                      { doc: 'IRCC document (PR card, citizenship, status confirmation)', notary: 'No', auth: 'Global Affairs Canada' },
+                      { doc: 'Federal Court order or judgment', notary: 'No', auth: 'Global Affairs Canada' },
+                      { doc: 'Federal articles of incorporation', notary: 'No', auth: 'Global Affairs Canada' },
+                      { doc: 'Provincial corporate documents (e.g. AB Corporate Registry)', notary: 'No', auth: 'Issuing province’s Authentication Office' },
+                      { doc: 'Power of attorney', notary: 'Yes', auth: 'Province where notarized' },
+                      { doc: 'Notarized affidavit / statutory declaration', notary: 'Yes', auth: 'Province where notarized' },
+                      { doc: 'University transcript (most provinces, with registrar seal)', notary: 'Sometimes', auth: 'Province of the institution' },
+                      { doc: 'Quebec-issued document', notary: 'Yes (notarial certification)', auth: 'Quebec Ministry of Justice' },
+                      { doc: 'Driver’s license / passport copy', notary: 'Yes (true-copy notarization)', auth: 'Province where notarized' },
+                      { doc: 'US-issued document (FBI check, US birth certificate)', notary: '—', auth: 'Not handled in Canada — refer to a US apostille service' },
+                    ].map((row, i) => (
+                      <tr key={i} className="border-t border-slate-200">
+                        <td className="px-3 py-2.5">{row.doc}</td>
+                        <td className="px-3 py-2.5">{row.notary}</td>
+                        <td className="px-3 py-2.5">{row.auth}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-slate-500 mt-3">
+                Not sure which path applies to your document?{' '}
+                <button
+                  type="button"
+                  onClick={() => openConsult('section')}
+                  className="text-[#0891B2] hover:underline font-medium"
+                >
+                  Book a free 15-min consultation
+                </button>{' '}
+                and we&apos;ll confirm the routing before you ship anything.
+              </p>
+            </Card>
+          </div>
+        </Container>
+      </section>
+
       {/* PRICING */}
       <section className="py-16 bg-slate-50">
         <Container>
@@ -563,6 +865,46 @@ export default function ApostilleContent() {
                 </Card>
               </motion.div>
             ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* PLACEMENT B — DEDICATED CONSULT SECTION */}
+      <section id="apostille-consult-section" className="py-16 bg-slate-50">
+        <Container>
+          <div className="max-w-3xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-full mb-4">
+              <Calendar className="w-4 h-4 text-[#0891B2]" />
+              <span className="text-sm font-semibold text-[#0C2340]">Free 15-Min Consultation</span>
+            </div>
+            <h2 className="text-3xl font-bold text-[#0C2340] mb-4">
+              {sectionVariant === 'A'
+                ? 'Complex case? Get clarity in 15 minutes — free.'
+                : 'Talk to a Cethos apostille specialist — free, 15 minutes, no commitment.'}
+            </h2>
+            <p className="text-slate-600 mb-6">
+              Quebec-issued document? Tight deadline? Multi-country use? Apostille vs. authentication confusion? Book a free 15-minute call with a Cethos apostille specialist. No quote needed. Just real answers.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-8">
+              {['15 minutes', 'Real specialist', 'Zero commitment'].map((pill) => (
+                <span
+                  key={pill}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-sm text-[#0C2340] font-medium"
+                >
+                  <CheckCircle className="w-4 h-4 text-[#0891B2]" />
+                  {pill}
+                </span>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => openConsult('section')}
+              className="px-8 py-4 bg-[#0C2340] hover:bg-[#0C2340]/90 text-white rounded-lg font-semibold transition-colors"
+              data-variant={sectionVariant}
+            >
+              Book My Free Consultation
+            </button>
+            <p className="mt-3 text-sm text-slate-500">Calls available Mon–Fri, 9–5 Mountain Time</p>
           </div>
         </Container>
       </section>
@@ -662,7 +1004,21 @@ export default function ApostilleContent() {
         </Container>
       </section>
 
-      <StickyMobileCTA />
+      {/* Placement C — sticky mobile bar */}
+      <ApostilleStickyConsultBar
+        onConsultClick={() => openConsult('sticky')}
+        onQuoteClick={() => {
+          setFormMode('quote')
+          setConsultPlacement('form_toggle')
+          scrollToForm()
+        }}
+      />
+
+      {/* Placement D — exit-intent (desktop) */}
+      <ApostilleExitIntent
+        hasInteracted={hasInteracted}
+        onConsultClick={() => openConsult('exit_intent')}
+      />
     </>
   )
 }
