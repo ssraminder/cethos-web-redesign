@@ -71,6 +71,7 @@ export async function POST(req: Request) {
     }
 
     const adTracking = body.ad_tracking || {}
+    const leadType: 'quote' | 'consult' = body.lead_type === 'consult' ? 'consult' : 'quote'
 
     const apostilleData = {
       document_types: body.document_types,
@@ -81,6 +82,7 @@ export async function POST(req: Request) {
       needs_translation: !!body.needs_translation,
       dropoff_mode: body.dropoff_mode || null,
       additional_notes: body.additional_notes || null,
+      lead_type: leadType,
     }
 
     const dbData = {
@@ -126,7 +128,8 @@ export async function POST(req: Request) {
         <head><meta charset="utf-8"><title>New Apostille Quote Request</title></head>
         <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #0C2340 0%, #0891B2 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: #fff; margin: 0; font-size: 24px;">New Apostille Quote Request</h1>
+            <h1 style="color: #fff; margin: 0; font-size: 24px;">${leadType === 'consult' ? 'New Free Consult Lead (Apostille)' : 'New Apostille Quote Request'}</h1>
+            ${leadType === 'consult' ? '<p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 14px;">Lead has booked (or is booking) a 15-min apostille consultation via Cal.com.</p>' : ''}
           </div>
           <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
@@ -168,7 +171,10 @@ export async function POST(req: Request) {
       `
 
       const sendSmtpEmail = new Brevo.SendSmtpEmail()
-      sendSmtpEmail.subject = `New Apostille Quote - ${body.full_name}`
+      sendSmtpEmail.subject =
+        leadType === 'consult'
+          ? `[Consult] Apostille - ${body.full_name}`
+          : `New Apostille Quote - ${body.full_name}`
       sendSmtpEmail.htmlContent = htmlContent
       sendSmtpEmail.sender = { name: 'Cethos Website', email: 'noreply@cethos.com' }
       sendSmtpEmail.to = emailRecipients.map((email: string) => ({ email: email.trim() }))

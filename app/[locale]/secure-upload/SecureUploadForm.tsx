@@ -89,6 +89,25 @@ export function SecureUploadForm() {
   const [phone, setPhone] = useState('')
   const [companyWebsite, setCompanyWebsite] = useState('') // honeypot
 
+  // Optional context — when arriving from a Cethos confirmation email
+  // (e.g. apostille consultation), we pre-fill identity fields and tag
+  // the upload so it can be linked back to the booking.
+  const [contextKey, setContextKey] = useState<string | null>(null)
+  const [consultUid, setConsultUid] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const sp = new URLSearchParams(window.location.search)
+    const ctx = sp.get('context')
+    const uid = sp.get('uid')
+    const e = sp.get('email')
+    const n = sp.get('name')
+    if (ctx) setContextKey(ctx)
+    if (uid) setConsultUid(uid)
+    if (e) setEmail((prev) => prev || e)
+    if (n) setFullName((prev) => prev || n)
+  }, [])
+
   // Step 2: OTP
   const [otpChannel, setOtpChannel] = useState<Channel>('email')
   const [otpId, setOtpId] = useState<string | null>(null)
@@ -443,6 +462,12 @@ export function SecureUploadForm() {
       }
 
       setPhase('finalizing')
+      // Tack on consult-context metadata so apostille consult uploads can be
+      // tied back to the Cal.com booking on the server.
+      const consultContextSuffix =
+        contextKey === 'apostille-consult' && consultUid
+          ? `\n\n[Apostille consult upload — booking ${consultUid}]`
+          : ''
       const completeRes = await supabase.functions.invoke('upload-complete', {
         body: {
           submissionId,
@@ -450,8 +475,10 @@ export function SecureUploadForm() {
           fullName: fullName.trim(),
           email: email.trim(),
           phone: phone.trim(),
-          orderOrQuoteId: orderId.trim() || undefined,
-          message: message.trim() || undefined,
+          orderOrQuoteId: orderId.trim() || consultUid || undefined,
+          message: (message.trim() ? message.trim() : '') + consultContextSuffix || undefined,
+          context: contextKey || undefined,
+          consultUid: consultUid || undefined,
           companyWebsite,
           submittedFrom: 'main_web',
           files: uploads.map((u) => {
@@ -522,6 +549,24 @@ export function SecureUploadForm() {
 
   return (
     <div>
+      {contextKey === 'apostille-consult' && (
+        <div className="mb-6 rounded-xl border border-cyan-200 bg-cyan-50 p-4">
+          <div className="flex items-start gap-3">
+            <ShieldCheck className="w-5 h-5 text-cyan-700 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-slate-700">
+              <p className="font-semibold text-cyan-900 mb-1">
+                Pre-uploading documents for your apostille consultation
+              </p>
+              <p>
+                Send a clear photo or scan of every document you want apostilled. Having these on hand turns
+                the call into 15 minutes of real answers — instead of 15 minutes of context-gathering.
+                {consultUid ? ` Your booking reference: ${consultUid}.` : ''}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Stepper step={step} />
 
       <div

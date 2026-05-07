@@ -272,6 +272,47 @@ async function handleGA(action: string, params: any): Promise<any> {
       return googleFetch(`${adminUrl}/properties/${propertyId}`);
     case "list_data_streams":
       return googleFetch(`${adminUrl}/properties/${propertyId}/dataStreams`);
+    case "send_event": {
+      // GA4 Measurement Protocol — server-side event firing.
+      // Required env: GA_MEASUREMENT_ID (e.g. "G-XXXXXXXXXX") and GA_API_SECRET.
+      // Required params: client_id (string), events (array of {name, params}).
+      const measurementId = params.measurement_id || Deno.env.get("GA_MEASUREMENT_ID") || "";
+      const apiSecret = params.api_secret || Deno.env.get("GA_API_SECRET") || "";
+      if (!measurementId || !apiSecret) {
+        return { status: 500, data: { error: "Missing GA_MEASUREMENT_ID or GA_API_SECRET" } };
+      }
+      const clientId = params.client_id || crypto.randomUUID();
+      const events = Array.isArray(params.events) ? params.events : [];
+      if (events.length === 0) {
+        return { status: 400, data: { error: "events array is required" } };
+      }
+      const body: any = {
+        client_id: clientId,
+        events,
+        non_personalized_ads: false,
+      };
+      if (params.user_id) body.user_id = params.user_id;
+      if (params.user_properties) body.user_properties = params.user_properties;
+      const debug = params.debug === true;
+      const url =
+        `https://www.google-analytics.com/${debug ? "debug/" : ""}mp/collect` +
+        `?measurement_id=${encodeURIComponent(measurementId)}&api_secret=${encodeURIComponent(apiSecret)}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const text = await res.text();
+      return {
+        status: res.status,
+        data: {
+          ok: res.ok,
+          measurement_id: measurementId,
+          client_id: clientId,
+          ...(text ? { response: text } : {}),
+        },
+      };
+    }
     default:
       return { status: 400, data: { error: `Unknown GA action: ${action}` } };
   }
