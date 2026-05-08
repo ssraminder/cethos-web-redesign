@@ -288,7 +288,7 @@ export function ApostilleQuoteForm({
 
   return (
     <form onSubmit={handleSubmit}>
-      {isConsult && (
+      {isConsult ? (
         <div className="mb-4 p-3 rounded-lg bg-[#E0F2FE] border border-[#0891B2]/20 flex items-start gap-2">
           <CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" />
           <div className="text-sm">
@@ -305,6 +305,21 @@ export function ApostilleQuoteForm({
             </p>
           </div>
         </div>
+      ) : (
+        <div className="mb-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-sm flex items-start gap-2">
+          <CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" />
+          <p className="text-slate-700">
+            Want help figuring out the right path first?{' '}
+            <button
+              type="button"
+              onClick={() => onModeChange?.('consult')}
+              className="text-[#0891B2] underline hover:no-underline font-semibold"
+            >
+              Book a free 15-min consultation instead
+            </button>
+            {' '}— no commitment.
+          </p>
+        </div>
       )}
 
       <h3 className="text-xl font-bold text-[#0C2340] mb-1">
@@ -313,7 +328,7 @@ export function ApostilleQuoteForm({
       <p className="text-gray-600 text-sm mb-5">
         {isConsult
           ? 'Three quick steps, then pick a time for your free 15-minute call.'
-          : "Three quick steps. We'll confirm scope, turnaround, and exact price within one business day."}
+          : "Three quick steps for an exact price within one business day — or book a free 15-min call to talk it through first."}
       </p>
 
       {/* Step indicator */}
