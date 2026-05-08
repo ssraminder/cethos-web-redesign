@@ -18,14 +18,19 @@
 //      Body shape: { action: "list_event_types" | "list_bookings" | ..., params }
 //      Auth: Bearer <SUPABASE_SERVICE_ROLE_KEY> on the Authorization header.
 //
-// Required env:
+// Required env (cal.com + email only — Google config lives in
+// google-integrations and is NOT read here):
 //   - SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 //   - CAL_API_KEY (from Cal.com Settings → Developer → API Keys)
 //   - CAL_WEBHOOK_SECRET (the secret you set when creating the webhook)
-//   - GA_MEASUREMENT_ID, GA_API_SECRET (for server-side GA4 events)
-//   - GADS_CONSULT_CONVERSION_ACTION (full resource name, e.g.
-//     "customers/6316159162/conversionActions/12345678")
-//   - GADS_CONSULT_VALUE_CAD (default conversion value for free consult, e.g. "20")
+//   - BREVO_API_KEY (already in Supabase project secrets)
+//
+// All Google touchpoints (GA4 Measurement Protocol, Google Ads offline
+// conversion enqueue) are delegated to the google-integrations edge function,
+// which owns its own GA_MEASUREMENT_ID/GA_API_SECRET/GAds customer +
+// conversion-action config. cal-integrations sends only the per-booking
+// payload (gclid, customer alias, lead type) and lets google-integrations
+// resolve resource names and credentials.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -37,18 +42,11 @@ const CAL_API_KEY = Deno.env.get("CAL_API_KEY") || "";
 const CAL_WEBHOOK_SECRET = Deno.env.get("CAL_WEBHOOK_SECRET") || "";
 const CAL_API_BASE = Deno.env.get("CAL_API_BASE") || "https://api.cal.com/v2";
 
-const GA_MEASUREMENT_ID = Deno.env.get("GA_MEASUREMENT_ID") || "";
-const GA_API_SECRET = Deno.env.get("GA_API_SECRET") || "";
-
-const GADS_CONSULT_CONVERSION_ACTION = Deno.env.get("GADS_CONSULT_CONVERSION_ACTION") || "";
-const GADS_CONSULT_CUSTOMER_ID = Deno.env.get("GADS_CONSULT_CUSTOMER_ID") || "6316159162";
-const GADS_CONSULT_VALUE_CAD = parseFloat(Deno.env.get("GADS_CONSULT_VALUE_CAD") || "20");
-
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY") || "";
-const SITE_BASE = Deno.env.get("SITE_BASE_URL") || "https://cethos.com";
-const FROM_EMAIL = Deno.env.get("CONFIRM_FROM_EMAIL") || "info@cethos.com";
-const FROM_NAME = Deno.env.get("CONFIRM_FROM_NAME") || "Cethos Translation Services";
-const SUPPORT_PHONE = Deno.env.get("SUPPORT_PHONE") || "+1 (587) 600-0786";
+const SITE_BASE = "https://cethos.com";
+const FROM_EMAIL = "info@cethos.com";
+const FROM_NAME = "Cethos Translation Services";
+const SUPPORT_PHONE = "+1 (587) 600-0786";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -107,13 +105,11 @@ async function calFetch(path: string, init: RequestInit = {}): Promise<{ status:
 }
 
 // ---------------------------------------------------------------------------
-// Forward a server-side event to GA4 via the google-integrations function
-// (avoids duplicating the Measurement Protocol implementation here).
+// Delegate to google-integrations for any Google API touchpoint.
+// google-integrations resolves its own GA_MEASUREMENT_ID/GA_API_SECRET/GAds
+// customer + conversion-action config; we don't read those here.
 // ---------------------------------------------------------------------------
-async function sendGA4Event(eventName: string, params: Record<string, any>, clientId: string) {
-  if (!GA_MEASUREMENT_ID || !GA_API_SECRET) {
-    return { skipped: true, reason: "GA_MEASUREMENT_ID/GA_API_SECRET not set" };
-  }
+async function callGoogleIntegrations(platform: string, action: string, params: Record<string, any>) {
   const url = `${SUPABASE_URL}/functions/v1/google-integrations`;
   const res = await fetch(url, {
     method: "POST",
@@ -121,16 +117,22 @@ async function sendGA4Event(eventName: string, params: Record<string, any>, clie
       "Content-Type": "application/json",
       Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
     },
-    body: JSON.stringify({
-      platform: "ga4",
-      action: "send_event",
-      params: {
-        client_id: clientId,
-        events: [{ name: eventName, params }],
-      },
-    }),
+    body: JSON.stringify({ platform, action, params }),
   });
-  return { ok: res.ok, status: res.status };
+  let body: any;
+  try {
+    body = await res.json();
+  } catch {
+    body = await res.text().catch(() => "");
+  }
+  return { ok: res.ok, status: res.status, body };
+}
+
+async function sendGA4Event(eventName: string, params: Record<string, any>, clientId: string) {
+  return callGoogleIntegrations("ga4", "send_event", {
+    client_id: clientId,
+    events: [{ name: eventName, params }],
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -320,17 +322,18 @@ async function handleBookingCreated(payload: any) {
     clientId,
   );
 
-  // Queue an offline conversion for Google Ads if we have a gclid.
-  if (gclid && GADS_CONSULT_CONVERSION_ACTION && GADS_CONSULT_VALUE_CAD > 0) {
-    await supabase.from("ads_offline_conversions").insert({
-      order_id: null,
-      quote_id: null,
-      gclid,
-      customer_id: GADS_CONSULT_CUSTOMER_ID,
-      conversion_action: GADS_CONSULT_CONVERSION_ACTION,
+  // Queue an offline conversion for Google Ads if we have a click identifier.
+  // Delegated to google-integrations, which resolves the customer alias and
+  // conversion-action resource name from its own config (the actual values
+  // never leave google-integrations).
+  if (gclid || meta.gbraid || meta.wbraid) {
+    await callGoogleIntegrations("gads", "queue_offline_conversion", {
+      lead_type: "apostille_consult",
+      customer_alias: "cethos_solutions",
+      gclid: gclid || undefined,
+      gbraid: meta.gbraid || undefined,
+      wbraid: meta.wbraid || undefined,
       conversion_date_time: new Date().toISOString(),
-      conversion_value: GADS_CONSULT_VALUE_CAD,
-      currency_code: "CAD",
       order_id_for_upload: calBookingUid || null,
     });
   }

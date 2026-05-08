@@ -1,4 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID") || "";
 const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET") || "";
@@ -40,6 +41,38 @@ const SPYFU_APP_ID = Deno.env.get("SPYFU_APP_ID") || "";
 const SPYFU_SECRET = Deno.env.get("SPYFU_SECRET") || "";
 const SPYFU_BASE_64_KEY = Deno.env.get("SPYFU_BASE_64_KEY") || "";
 const SPYFU_DEFAULT_DOMAIN = Deno.env.get("SPYFU_DEFAULT_DOMAIN") || "cethos.com";
+
+// Lead type → Google Ads conversion action mapping. Owned here so callers
+// (cal-integrations, etc.) only pass the lead_type string. Override per-action
+// values via env if you want to tune without redeploying.
+//   GADS_CONVERSION_ACTION_APOSTILLE_QUOTE   default: 7586548300 (existing apostille purchase action)
+//   GADS_CONVERSION_VALUE_APOSTILLE_QUOTE    default: 50 CAD
+//   GADS_CONVERSION_ACTION_APOSTILLE_CONSULT must be set after creating the new action
+//   GADS_CONVERSION_VALUE_APOSTILLE_CONSULT  default: 20 CAD
+const LEAD_TYPE_CONVERSIONS: Record<
+  string,
+  { action_id: string; value_cad: number; customer_alias: string }
+> = {
+  apostille_quote: {
+    action_id: Deno.env.get("GADS_CONVERSION_ACTION_APOSTILLE_QUOTE") || "7586548300",
+    value_cad: parseFloat(Deno.env.get("GADS_CONVERSION_VALUE_APOSTILLE_QUOTE") || "50"),
+    customer_alias: "cethos_solutions",
+  },
+  apostille_consult: {
+    action_id: Deno.env.get("GADS_CONVERSION_ACTION_APOSTILLE_CONSULT") || "",
+    value_cad: parseFloat(Deno.env.get("GADS_CONVERSION_VALUE_APOSTILLE_CONSULT") || "20"),
+    customer_alias: "cethos_solutions",
+  },
+};
+
+let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
+function getSupabaseAdmin() {
+  if (_supabaseAdmin) return _supabaseAdmin;
+  const url = Deno.env.get("SUPABASE_URL") || "";
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  _supabaseAdmin = createClient(url, key);
+  return _supabaseAdmin;
+}
 
 function toUpperSnake(s: string): string {
   if (s === s.toUpperCase() && s.includes("_")) return s;
@@ -464,6 +497,44 @@ async function handleGAds(action: string, params: any): Promise<any> {
         method: "POST",
         body: JSON.stringify({ operations: params.operations, partialFailure: params.partial_failure ?? true }),
       });
+    case "queue_offline_conversion": {
+      // Enqueue an Offline Conversion Import row for push-ads-conversions to
+      // upload on its next cron tick. Resolves customer_id + conversion_action
+      // resource name + default value from this function's config based on the
+      // lead_type — callers (cal-integrations, etc.) only pass the per-lead
+      // payload (gclid, lead_type, customer_alias).
+      const { lead_type, customer_alias, gclid, gbraid, wbraid, conversion_date_time, order_id_for_upload } = params || {};
+      if (!lead_type) return { status: 400, data: { error: "lead_type required" } };
+      if (!gclid && !gbraid && !wbraid) return { status: 400, data: { error: "one of gclid/gbraid/wbraid required" } };
+
+      const conversionAction = LEAD_TYPE_CONVERSIONS[lead_type as keyof typeof LEAD_TYPE_CONVERSIONS];
+      if (!conversionAction) {
+        return { status: 400, data: { error: `Unknown lead_type: ${lead_type}` } };
+      }
+      const cid = GADS_CUSTOMERS[(customer_alias as string) || conversionAction.customer_alias] ||
+        GADS_CUSTOMERS.cethos_solutions;
+
+      const supabase = getSupabaseAdmin();
+      const { data, error } = await supabase
+        .from("ads_offline_conversions")
+        .insert({
+          order_id: null,
+          quote_id: null,
+          gclid: gclid || null,
+          gbraid: gbraid || null,
+          wbraid: wbraid || null,
+          customer_id: cid,
+          conversion_action: `customers/${cid}/conversionActions/${conversionAction.action_id}`,
+          conversion_date_time: conversion_date_time || new Date().toISOString(),
+          conversion_value: conversionAction.value_cad,
+          currency_code: "CAD",
+          order_id_for_upload: order_id_for_upload || null,
+        })
+        .select("id")
+        .single();
+      if (error) return { status: 500, data: { error: error.message } };
+      return { status: 200, data: { ok: true, id: data?.id, conversion_action: conversionAction, customer_id: cid } };
+    }
     default:
       return { status: 400, data: { error: `Unknown GAds action: ${action}` } };
   }
