@@ -263,6 +263,8 @@ export default function ApostilleContent() {
   const heroHeading = 'Apostille Services Canada — We Handle the Whole Process'
   const heroDesc =
     'Canada-wide concierge service for Hague Convention apostille. We collect your documents, handle notarization, submit to the right Competent Authority on your behalf, and return your authenticated documents. From any province in Canada — tracked courier both ways.'
+  const heroDescConsult =
+    'Not sure where to start? Book a free 15-minute call with a Cethos apostille specialist to discuss your situation — no commitment, no quote needed.'
   const priceBadge = 'From $149'
   const priceUnit = 'all-inclusive · domestic courier both ways'
 
@@ -302,9 +304,17 @@ export default function ApostilleContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.15 }}
-                className="text-lg text-[#4B5563] leading-relaxed mb-6"
+                className="text-lg text-[#4B5563] leading-relaxed mb-3"
               >
                 {heroDesc}
+              </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.18 }}
+                className="text-base text-[#0C2340] leading-relaxed mb-6 font-medium"
+              >
+                {heroDescConsult}
               </motion.p>
 
               <motion.div
@@ -321,7 +331,7 @@ export default function ApostilleContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.25 }}
-                className="flex flex-wrap gap-3 mb-3"
+                className="flex flex-wrap gap-3 mb-4"
               >
                 <button
                   onClick={() => {
@@ -333,28 +343,27 @@ export default function ApostilleContent() {
                 >
                   Get Apostille Quote
                 </button>
-                <a
-                  href="tel:5876000786"
-                  className="px-6 py-3 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
+                <button
+                  type="button"
+                  onClick={() => openConsult('hero')}
+                  className="px-6 py-3 bg-white text-[#0891B2] border-2 border-[#0891B2] rounded-lg font-semibold hover:bg-[#E0F2FE] transition-colors flex items-center gap-2"
                 >
-                  <Phone className="w-5 h-5" /> (587) 600-0786
-                </a>
+                  <Calendar className="w-5 h-5" /> Book Free 15-Min Call
+                </button>
               </motion.div>
 
-              {/* Placement A — hero secondary consult CTA */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.28 }}
                 className="mb-8"
               >
-                <button
-                  type="button"
-                  onClick={() => openConsult('hero')}
-                  className="text-sm text-[#0891B2] hover:text-[#06B6D4] underline-offset-2 hover:underline font-medium inline-flex items-center gap-1.5"
+                <a
+                  href="tel:5876000786"
+                  className="text-sm text-[#0C2340] hover:text-[#0891B2] inline-flex items-center gap-2 font-medium"
                 >
-                  Not sure what you need? Book a free 15-min consultation →
-                </button>
+                  <Phone className="w-4 h-4" /> Or call (587) 600-0786
+                </a>
               </motion.div>
 
               <motion.div
