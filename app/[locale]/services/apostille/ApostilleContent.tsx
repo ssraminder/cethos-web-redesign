@@ -253,6 +253,98 @@ export default function ApostilleContent() {
       answer:
         "We specialize in Canadian-issued documents. For US-issued documents (birth certificates, FBI background checks, etc.) you'll need a US apostille service that handles the relevant US Secretary of State or US Department of State. We can refer you to trusted partners.",
     },
+    {
+      question: 'What is the difference between apostille, authentication, and legalization?',
+      answer: `These terms are often used interchangeably, but they refer to different processes.\n\nApostille — A single certificate issued by a designated Canadian authority that is recognized by all member countries of the Hague Apostille Convention. No further consular step is required.\n\nAuthentication — A verification step performed by a Canadian government authority. Used for countries that are not members of the Hague Apostille Convention.\n\nLegalization — A second verification performed by the destination country's embassy or consulate, after authentication, for non-Hague countries.\n\nCanada joined the Hague Apostille Convention in January 2024. For most destination countries, apostille alone is now sufficient and replaces the older authentication-plus-legalization process.`,
+    },
+    {
+      question: 'How do I know whether my destination country needs apostille or legalization?',
+      answer: `If your destination country is a member of the Hague Apostille Convention, you need apostille only. If it is not a member, you need authentication followed by consular legalization at the destination country's embassy or consulate.\n\nAlways confirm the requirement directly with the institution requesting your document — the foreign employer, university, embassy, or government office — because the same country can have different requirements for different document types or use cases.`,
+    },
+    {
+      question: 'Can the apostille process be expedited or rushed?',
+      answer: `In most cases, no. The processing time is set by the issuing government authority, not by the service provider managing your file. A service provider's role is to prepare your file correctly, submit it to the right authority on the first try, and track it through to delivery — not to move documents through the queue any faster than the government office allows.\n\nStandard government processing times typically range from a few days to several weeks depending on the jurisdiction and current volumes. Some provinces offer paid expedited service; most do not.\n\nIf you have a hard deadline (visa appointment, employment start date, school enrollment), tell us as early as possible. We can advise honestly whether your timeline is realistic and, where possible, parallel-process steps that can be done in advance.`,
+    },
+    {
+      question: 'Does the apostille need to be done on my original document, or can it be done on a copy?',
+      answer: `It depends on the document type and the issuing authority's policy. There are typically three accepted formats: the original document itself; a certified true copy issued directly by the authority that originally issued the document (for example, your university issuing a sealed certified copy of your diploma); or a notarized copy of the original, certified by a Canadian notary public or commissioner for oaths.\n\nMost clients prefer to apostille a certified copy rather than the original. The reason is practical: the apostille is physically attached to the document with a ribbon or seal and cannot be removed. If you apostille your only original, that document becomes locked to one specific use case and cannot easily be reused for other purposes.`,
+    },
+    {
+      question: 'Why do you recommend apostilling a certified copy instead of the original?',
+      answer: `Once an apostille is attached to a document, it stays attached. The certificate is physically bound to the document — usually with a metal grommet, ribbon, or tamper-evident seal — and cannot be detached without destroying the certification.\n\nIf you apostille your only original diploma, birth certificate, or marriage certificate, that document is now permanently associated with the apostille and the destination country it was prepared for. You may have difficulty using it for any other purpose later.\n\nBy apostilling a certified copy, you keep your original document free for future use and can request additional certified copies if needed.`,
+    },
+    {
+      question: 'Can my issuing institution send the certified copy directly to your office?',
+      answer: `Yes, and this is often the cleanest workflow. Universities, vital statistics offices, and many other issuing authorities can send a sealed certified copy directly to a receiving address by mail. This avoids the risk and cost of you receiving the document, then forwarding it onward.\n\nWhen you place your order with the issuing institution, simply provide our office address as the delivery destination. We will receive the certified copy directly, prepare your apostille submission package, and submit it to the appropriate provincial or federal authority.\n\nThis approach is especially valuable for international clients, who would otherwise pay courier fees twice — once to receive the document at home, then again to send it back to Canada.`,
+    },
+    {
+      question: 'Do I need to have my document notarized before apostille?',
+      answer: `Not always. Notarization is required only when the apostille authority cannot directly verify the document's signature or seal.\n\nA certified copy issued by a recognized institution (university, vital statistics office) usually does not need notarization, because the issuing authority's signature is already on file with the apostille office. A photocopy of an original document does need notarization — a Canadian notary public or commissioner for oaths must certify the photocopy as a true copy of the original before it can be apostilled. Some private or self-prepared documents (affidavits, declarations, letters) require notarization as part of their creation, before any apostille.\n\nIf notarization is required for your specific document, we offer commissioner for oaths and notary public services at our Calgary office and can coordinate the entire workflow under one roof.`,
+    },
+    {
+      question: 'How does the apostille get physically attached to my document?',
+      answer: `The apostille is a separate single-page certificate that is bound to your document — typically by stapling, ribboning, or eyeleting — in a way that cannot be undone without visible tampering. This physical binding is part of how the apostille's authenticity is verified.\n\nOnce attached, the apostille and the document are treated as one unit. You should not attempt to separate them, photocopy them in pieces, or modify the binding in any way. Doing so may invalidate the certification.`,
+    },
+    {
+      question: 'Does my document need to be translated for use in another country?',
+      answer: `It depends on the destination country's requirements and the language your document is written in.\n\nIf your document is in English or French and the destination country accepts those languages for the specific purpose (visa, university enrollment, employment), no translation is needed. If the destination country requires the document in its national language (or in English where your document is in French only, or vice versa), you will need a certified translation. Some destination authorities require translations to be performed by a sworn or government-registered translator in their own country. Others accept certified translations from a recognized Canadian translator.\n\nAlways confirm the language requirement with the institution requesting your document before paying for a translation that may not be accepted.`,
+    },
+    {
+      question: 'Can I translate the document myself?',
+      answer: `No. For any official use, the translation must be a certified translation prepared by a qualified, accredited translator. Self-translations and machine translations (Google Translate, AI tools, etc.) are not accepted by foreign governments, embassies, universities, or employers.\n\nCertified translations include the translator's signed statement of accuracy, their accreditation details, and often a notarial or company seal. We provide certified translations in over 100 languages and can bundle translation with your apostille service.`,
+    },
+    {
+      question: 'Should the translation be apostilled too?',
+      answer: `Frequently, yes — but it depends on the destination country and the specific authority requesting the document.\n\nIn many cases, the workflow is: apostille the original document first, have the apostilled document translated by a certified translator, notarize the translator's certification, then apostille the notarized translation. The original apostille and the translation apostille travel together as a single package.\n\nIn other cases, only the original document needs apostille, and a plain certified translation is sufficient. The destination authority's instructions are the source of truth.`,
+    },
+    {
+      question: 'Should I get my document in multiple languages now to save on future translation costs?',
+      answer: `If your document is one that the issuing institution can produce in multiple languages (some universities issue diplomas in both English and French, for example), it can be worth requesting both versions while you are already engaging with the institution.\n\nHowever, do not over-prepare. Translations and apostilles for documents you may never use are a sunk cost. Focus your spending on what your immediate destination authority actually requires, and address future use cases as they arise.\n\nIf you are relocating to a country with a long-term residence plan (work, studies, citizenship), you will likely need certified translation into the local language for downstream administrative tasks (driver's license, bank account, residency registration). That translation can usually be done after you arrive at lower cost than handling everything from Canada.`,
+    },
+    {
+      question: 'What is the difference between handling the apostille myself and using your service?',
+      answer: `Both options lead to the same end result — an apostilled document that meets your destination country's requirements. The differences are in time, cost, and effort.\n\nDoing it yourself: You pay only the government's official fees and any direct courier costs. You handle all coordination — identifying the correct authority, completing forms, tracking submission, managing courier logistics, troubleshooting any rejections or missing information.\n\nUsing our service: You pay our facilitation fee on top of the government fees, and we handle the entire workflow on your behalf. We identify the correct authority, prepare and submit the file, monitor progress, and arrange international or domestic delivery to you or directly to your destination.\n\nFor straightforward cases with no time pressure, self-filing can be cost-effective. For tight deadlines, complex situations, multi-document packages, or when you are outside Canada, a service provider almost always saves money in the long run by avoiding rejected applications, double shipping, and missed deadlines.`,
+    },
+    {
+      question: `I'm based outside Canada. Should I still try to handle this myself?`,
+      answer: `Generally, no — and the reason is shipping economics, not service fees.\n\nIf you handle the file yourself from outside Canada, you typically need to ship your document or have the issuing institution ship it to you internationally, ship it from your country back to the Canadian apostille authority, wait for processing, then have it shipped back to you internationally a second time.\n\nInternational courier costs alone can exceed the entire fee a Canadian-based service would charge. With a service provider, the document moves only once internationally — at the end, when the apostilled package is delivered to you. Everything before that happens within Canada at domestic shipping rates.\n\nIn addition, working with a Canadian-based service eliminates the time-zone and language barriers when communicating with provincial ministries, universities, and other authorities.`,
+    },
+    {
+      question: 'Can I authorize a friend or family member in Canada to handle the apostille for me?',
+      answer: `Technically yes — there is no rule preventing you from giving someone else in Canada permission to handle paperwork on your behalf. Some apostille authorities allow third parties to submit documents on behalf of the document owner.\n\nIn practice, we generally do not recommend this approach unless your designated person has direct experience with the apostille process. The procedural details — which authority to use, what supporting documents are required, how the document must be packaged, where to send it — vary by document type and province. Errors made by an unfamiliar third party are common and can cause weeks of delay.\n\nIf saving cost is your primary concern, a better approach is to use a professional service. Our facilitation fee is typically less than the cost of one international courier shipment, and the file is handled correctly the first time.`,
+    },
+    {
+      question: 'Are different apostille service providers all doing the same thing?',
+      answer: `In broad terms, yes — multiple Canadian companies offer apostille and authentication facilitation services. The actual apostille is always issued by the government authority, regardless of which service provider you use. No private company can issue an apostille themselves.\n\nWhere service providers differ is in the scope of what they bundle. Some focus narrowly on apostille submission. Cethos offers apostille facilitation alongside certified translation, notary services, courier coordination, and a single point of contact across all these steps. The right choice depends on whether you need just the apostille or a full document package for use abroad.`,
+    },
+    {
+      question: 'What is your honest recommendation if I have a tight deadline?',
+      answer: `If your deadline is genuinely tight, the right answer is sometimes to stay with whichever service provider has already started research on your file, even if you have been talking to multiple companies. Switching providers mid-process means the new provider needs several days to mobilize, contact authorities, and prepare your file — time you may not have.\n\nOn a free consultation call, we will give you our honest assessment of whether your timeline is achievable and which path is most likely to meet your deadline. If we believe another provider already has a head start that we cannot reasonably catch up to, we will tell you and recommend you continue with them. Our reputation depends on giving useful advice, not winning every file.`,
+    },
+    {
+      question: 'What documents do I need to send to your office to start the apostille process?',
+      answer: `The exact requirements depend on the document type and the issuing authority's process. In most cases, you will need to provide some combination of: the original document, or a certified copy issued directly by the institution that produced the document (university registrar, vital statistics office, court, etc.); photocopies of two valid government-issued IDs, at least one of which contains a clear photograph, your full legal name, and your date of birth; a completed application or intake form provided by us at the start of your file; payment authorization (deposit and any required fees); and mailing instructions — the address where you would like the apostilled documents delivered after processing is complete.\n\nIf your IDs are not in English or French, certified translations of those IDs may also be required.`,
+    },
+    {
+      question: 'Do I need to fill out any government forms myself?',
+      answer: `In most cases, no. When you use our facilitation service, we prepare and submit any required application forms on your behalf. You complete a single client intake form with us, and we handle the rest.\n\nIf you choose to handle the apostille yourself, you will need to download and complete the relevant authority's application forms directly. These vary by province and by document type.`,
+    },
+    {
+      question: 'How will I be billed and when will I pay?',
+      answer: `Most apostille and authentication service providers — including us — operate on a deposit-plus-balance model. A non-refundable deposit is charged when you authorize service to begin. The remaining balance, including any government fees and shipping, is charged after processing is complete.\n\nWe provide a full written quote before any work begins. This quote includes our facilitation fee, the applicable government fees, notarization or translation fees if required, and shipping. There are no hidden charges.`,
+    },
+    {
+      question: 'Do transcripts need to be apostilled separately from my diploma?',
+      answer: `Yes. Each document is apostilled individually, and each carries its own apostille certificate. If your destination authority requires both your diploma and your academic transcript, both must go through the apostille process — typically as parallel files within the same submission package.\n\nMost universities can issue a sealed certified transcript directly to a recipient address, just as they do with certified diplomas. We coordinate this on your behalf when you order our service.`,
+    },
+    {
+      question: 'Can multiple documents be apostilled in one package?',
+      answer: `Yes, and bundling multiple documents in a single submission usually saves time and money. Most apostille authorities charge a per-document fee, but service providers, courier companies, and notaries often offer bundled rates for packages of two or more documents.\n\nCommon bundles include: diploma plus transcript; marriage certificate plus birth certificate; multiple corporate documents for foreign business registration.`,
+    },
+    {
+      question: 'Do you offer translation, notarization, and apostille as a single bundled service?',
+      answer: `Yes. For clients who need multiple steps completed (notarization, translation, apostille, courier), we offer end-to-end coordination under a single contract and invoice. You ship the document to us once, and we manage the entire workflow until the finished package arrives at your destination.\n\nThis bundled approach is especially valuable for international clients, who would otherwise need to coordinate with multiple service providers across multiple time zones.`,
+    },
   ]
 
   const heroBadge = 'Hague Convention · Canada-Wide Concierge'
@@ -861,7 +953,11 @@ export default function ApostilleContent() {
               >
                 <Card className="p-6">
                   <h3 className="text-lg font-semibold text-[#0C2340] mb-3">{faq.question}</h3>
-                  <p className="text-slate-600">{faq.answer}</p>
+                  <div className="text-slate-600 space-y-3">
+                    {faq.answer.split('\n\n').map((para, i) => (
+                      <p key={i}>{para}</p>
+                    ))}
+                  </div>
                 </Card>
               </motion.div>
             ))}
