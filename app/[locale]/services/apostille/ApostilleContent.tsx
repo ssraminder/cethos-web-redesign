@@ -30,9 +30,10 @@ import { Container, Card } from '@/components/ui'
 import { Breadcrumbs, BreadcrumbJsonLd } from '@/components/Breadcrumbs'
 import { FAQJsonLd } from '@/components/JsonLd'
 import { LandingLocalBusinessJsonLd } from '@/components/landing'
-import { ApostilleQuoteForm, type ApostilleFormMode } from './ApostilleQuoteForm'
+import { ApostilleQuoteForm } from './ApostilleQuoteForm'
 import { ApostilleStickyConsultBar } from './ApostilleStickyConsultBar'
 import { ApostilleExitIntent } from './ApostilleExitIntent'
+import { ApostilleCallbackModal } from './ApostilleCallbackModal'
 import { trackConsultEvent, type ConsultPlacement } from '@/lib/tracking'
 
 export default function ApostilleContent() {
@@ -41,9 +42,14 @@ export default function ApostilleContent() {
     { name: 'Apostille Services', url: '/services/apostille' },
   ]
 
-  const [formMode, setFormMode] = useState<ApostilleFormMode>('quote')
-  const [consultPlacement, setConsultPlacement] = useState<ConsultPlacement>('form_toggle')
+  // The page now has exactly two paths:
+  //   - Book a consultation (right-side form → Cal.com picker) — always visible
+  //   - Request a callback (left-side hero CTA → modal)
+  // The previous "Get Apostille Quote" path was removed; the actual price is
+  // confirmed on the consultation call after document review.
   const [hasInteracted, setHasInteracted] = useState(false)
+  const [callbackOpen, setCallbackOpen] = useState(false)
+  const [callbackPlacement, setCallbackPlacement] = useState<ConsultPlacement>('hero')
 
   // Pick a stable A/B variant for placement B headline (persists per visitor).
   const [sectionVariant, setSectionVariant] = useState<'A' | 'B'>('A')
@@ -60,25 +66,23 @@ export default function ApostilleContent() {
     }
   }, [])
 
-  const scrollToForm = () => {
-    document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })
+  const scrollToForm = (placement: ConsultPlacement = 'hero') => {
     setHasInteracted(true)
-  }
-
-  const openConsult = (placement: ConsultPlacement) => {
-    setHasInteracted(true)
-    setConsultPlacement(placement)
-    setFormMode('consult')
-    trackConsultEvent('free_consult_cta_clicked', { placement, variant: placement === 'section' ? sectionVariant : undefined })
-    // Wait for state-driven re-render before scroll, so the consult banner is visible.
-    requestAnimationFrame(() => {
-      document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })
+    trackConsultEvent('free_consult_cta_clicked', {
+      placement,
+      variant: placement === 'section' ? sectionVariant : undefined,
     })
+    document.getElementById('quote-form')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const switchToQuote = () => {
-    setFormMode('quote')
-    setConsultPlacement('form_toggle')
+  const openCallback = (placement: ConsultPlacement) => {
+    setHasInteracted(true)
+    setCallbackPlacement(placement)
+    setCallbackOpen(true)
+    trackConsultEvent('free_consult_cta_clicked', {
+      placement,
+      consult_method: 'callback',
+    })
   }
 
   const whyChooseUs = [
@@ -149,21 +153,13 @@ export default function ApostilleContent() {
   ]
 
   const howItWorks = [
-    formMode === 'consult'
-      ? {
-          step: 1,
-          icon: Calendar,
-          title: 'Book a Free 15-Min Consultation',
-          description:
-            'Tell us about your case in three quick steps, then pick a time. A specialist confirms scope, the right authority, and turnaround on the call — no commitment.',
-        }
-      : {
-          step: 1,
-          icon: Upload,
-          title: 'Get Your Quote (60 seconds)',
-          description:
-            'Upload digital copies. We confirm scope, document type, issuing province, destination country, and exact price.',
-        },
+    {
+      step: 1,
+      icon: Calendar,
+      title: 'Book a Free 15-Min Consultation',
+      description:
+        'Pick a Zoom slot or request a callback. A specialist reviews your documents on the call and confirms scope, the right authority, and turnaround — no commitment, no quote forms.',
+    },
     {
       step: 2,
       icon: Truck,
@@ -331,40 +327,37 @@ export default function ApostilleContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.25 }}
-                className="flex flex-wrap gap-3 mb-4"
+                className="flex flex-wrap gap-3 mb-3"
               >
                 <button
-                  onClick={() => {
-                    setFormMode('quote')
-                    setConsultPlacement('form_toggle')
-                    scrollToForm()
-                  }}
-                  className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
-                >
-                  Get Apostille Quote
-                </button>
-                <button
                   type="button"
-                  onClick={() => openConsult('hero')}
-                  className="px-6 py-3 bg-white text-[#0891B2] border-2 border-[#0891B2] rounded-lg font-semibold hover:bg-[#E0F2FE] transition-colors flex items-center gap-2"
+                  onClick={() => openCallback('hero')}
+                  className="px-6 py-3 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors flex items-center gap-2"
                 >
-                  <Calendar className="w-5 h-5" /> Book Free 15-Min Call
+                  <Phone className="w-5 h-5" /> Request a Callback
                 </button>
+                <a
+                  href="tel:5876000786"
+                  className="px-6 py-3 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-slate-50 transition-colors flex items-center gap-2"
+                >
+                  <Phone className="w-5 h-5" /> Call (587) 600-0786
+                </a>
               </motion.div>
 
-              <motion.div
+              <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.28 }}
-                className="mb-8"
+                className="text-sm text-slate-500 mb-8"
               >
-                <a
-                  href="tel:5876000786"
-                  className="text-sm text-[#0C2340] hover:text-[#0891B2] inline-flex items-center gap-2 font-medium"
+                Prefer Zoom? <button
+                  type="button"
+                  onClick={() => scrollToForm('hero')}
+                  className="text-[#0891B2] hover:text-[#06B6D4] underline-offset-2 hover:underline font-medium"
                 >
-                  <Phone className="w-4 h-4" /> Or call (587) 600-0786
-                </a>
-              </motion.div>
+                  Pick a 15-min slot on the right →
+                </button>
+              </motion.p>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -402,15 +395,7 @@ export default function ApostilleContent() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="bg-white rounded-2xl shadow-lg p-6 md:p-8"
             >
-              <ApostilleQuoteForm
-                formLocation="apostille-services"
-                mode={formMode}
-                consultPlacement={consultPlacement}
-                onModeChange={(m) => {
-                  setFormMode(m)
-                  if (m === 'quote') setConsultPlacement('form_toggle')
-                }}
-              />
+              <ApostilleQuoteForm formLocation="apostille-services" consultPlacement="hero" />
             </motion.div>
           </div>
         </div>
@@ -525,9 +510,7 @@ export default function ApostilleContent() {
         <Container>
           <h2 className="text-3xl font-bold text-white text-center mb-4">How Apostille Works</h2>
           <p className="text-white/70 text-center mb-12 max-w-2xl mx-auto">
-            {formMode === 'consult'
-              ? 'From your free 15-minute call to delivery — we manage the entire authentication process across every Canadian province.'
-              : 'From quote to delivery — we manage the entire authentication process across every Canadian province.'}
+            From your free 15-minute call to delivery — we manage the entire authentication process across every Canadian province.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {howItWorks.map((item, index) => (
@@ -810,10 +793,18 @@ export default function ApostilleContent() {
                 Not sure which path applies to your document?{' '}
                 <button
                   type="button"
-                  onClick={() => openConsult('section')}
+                  onClick={() => scrollToForm('section')}
                   className="text-[#0891B2] hover:underline font-medium"
                 >
                   Book a free 15-min consultation
+                </button>{' '}
+                or{' '}
+                <button
+                  type="button"
+                  onClick={() => openCallback('section')}
+                  className="text-[#0891B2] hover:underline font-medium"
+                >
+                  request a callback
                 </button>{' '}
                 and we&apos;ll confirm the routing before you ship anything.
               </p>
@@ -827,7 +818,7 @@ export default function ApostilleContent() {
         <Container>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Apostille Pricing</h2>
-            <p className="text-slate-600">All-inclusive pricing. Domestic courier both ways included. Get an exact quote in 60 seconds.</p>
+            <p className="text-slate-600">All-inclusive pricing. Domestic courier both ways included. Final price confirmed on your free 15-min consultation.</p>
           </div>
           <div className="max-w-2xl mx-auto">
             <Card className="overflow-hidden">
@@ -905,14 +896,22 @@ export default function ApostilleContent() {
                 </span>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() => openConsult('section')}
-              className="px-8 py-4 bg-[#0C2340] hover:bg-[#0C2340]/90 text-white rounded-lg font-semibold transition-colors"
-              data-variant={sectionVariant}
-            >
-              Book My Free Consultation
-            </button>
+            <div className="flex flex-wrap justify-center gap-3" data-variant={sectionVariant}>
+              <button
+                type="button"
+                onClick={() => scrollToForm('section')}
+                className="px-8 py-4 bg-[#0C2340] hover:bg-[#0C2340]/90 text-white rounded-lg font-semibold transition-colors inline-flex items-center gap-2"
+              >
+                <Calendar className="w-5 h-5" /> Book a Time
+              </button>
+              <button
+                type="button"
+                onClick={() => openCallback('section')}
+                className="px-8 py-4 bg-white text-[#0C2340] border-2 border-[#0C2340] rounded-lg font-semibold hover:bg-slate-50 transition-colors inline-flex items-center gap-2"
+              >
+                <Phone className="w-5 h-5" /> Request a Callback
+              </button>
+            </div>
             <p className="mt-3 text-sm text-slate-500">Calls available Mon–Fri, 9–5 Mountain Time</p>
           </div>
         </Container>
@@ -924,21 +923,23 @@ export default function ApostilleContent() {
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white mb-4">Ready to Apostille Your Documents?</h2>
             <p className="text-white/80 mb-8 max-w-2xl mx-auto">
-              Get a quote in 60 seconds. Hague Convention apostille for Canadian documents — recognized in 120+ countries.
+              Start with a free 15-minute consultation. Pick a Zoom slot or have us call you — we&apos;ll review your case and confirm the right path before you commit.
             </p>
             <div className="flex flex-wrap justify-center gap-4 mb-8">
               <button
-                onClick={scrollToForm}
-                className="px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors"
+                type="button"
+                onClick={() => scrollToForm('hero')}
+                className="px-8 py-4 bg-[#0891B2] text-white rounded-lg font-semibold hover:bg-[#06B6D4] transition-colors inline-flex items-center gap-2"
               >
-                Start My Apostille Quote
+                <Calendar className="w-5 h-5" /> Book a Free Consultation
               </button>
-              <a
-                href="tel:5876000786"
+              <button
+                type="button"
+                onClick={() => openCallback('section')}
                 className="px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg font-semibold hover:bg-white/10 transition-colors flex items-center gap-2"
               >
-                <Phone className="w-5 h-5" /> (587) 600-0786
-              </a>
+                <Phone className="w-5 h-5" /> Request a Callback
+              </button>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-white/70 text-sm">
               <span className="flex items-center gap-2">
@@ -1015,18 +1016,22 @@ export default function ApostilleContent() {
 
       {/* Placement C — sticky mobile bar */}
       <ApostilleStickyConsultBar
-        onConsultClick={() => openConsult('sticky')}
-        onQuoteClick={() => {
-          setFormMode('quote')
-          setConsultPlacement('form_toggle')
-          scrollToForm()
-        }}
+        onConsultClick={() => scrollToForm('sticky')}
+        onQuoteClick={() => openCallback('sticky')}
       />
 
-      {/* Placement D — exit-intent (desktop) */}
+      {/* Placement D — exit-intent (desktop) — opens callback modal */}
       <ApostilleExitIntent
         hasInteracted={hasInteracted}
-        onConsultClick={() => openConsult('exit_intent')}
+        onConsultClick={() => openCallback('exit_intent')}
+      />
+
+      {/* Callback modal (triggered from hero, section, sticky, exit-intent) */}
+      <ApostilleCallbackModal
+        open={callbackOpen}
+        onClose={() => setCallbackOpen(false)}
+        placement={callbackPlacement}
+        onSwitchToBooking={() => scrollToForm(callbackPlacement)}
       />
     </>
   )

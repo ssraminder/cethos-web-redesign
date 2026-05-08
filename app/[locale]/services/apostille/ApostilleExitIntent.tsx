@@ -63,18 +63,18 @@ export function ApostilleExitIntent({ onConsultClick, hasInteracted }: Apostille
           Before you go — quick question?
         </h3>
         <p className="text-slate-600 mb-6">
-          If you&apos;re not sure your situation fits the standard quote flow, a free 15-minute call with a specialist usually clears it up.
+          Apostille rules vary by document, province, and destination. A free 15-minute callback usually saves you a wrong shipment. We&apos;ll call you within 1 business day.
         </p>
         <button
           type="button"
           onClick={() => {
-            trackConsultEvent('free_consult_cta_clicked', { placement: 'exit_intent' })
+            trackConsultEvent('free_consult_cta_clicked', { placement: 'exit_intent', consult_method: 'callback' })
             setOpen(false)
             onConsultClick()
           }}
           className="w-full px-6 py-3 rounded-lg bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold transition-colors mb-3"
         >
-          Book a Free 15-Min Call
+          Request a Callback
         </button>
         <button
           type="button"

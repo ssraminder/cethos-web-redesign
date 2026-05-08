@@ -1,19 +1,22 @@
 'use client'
 
+// Apostille consultation form — 3-step intake that hands off to a Cal.com
+// picker for the actual booking. As of the May 2026 redesign this form ALWAYS
+// books a consultation; the previous "quote" mode was dropped because the
+// quote price is determined on the call after document review. The callback
+// path lives in ApostilleCallbackModal (separate component, opened from the
+// hero left-side CTA).
+
 import { useState, useCallback, useEffect, useRef, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, AlertCircle, Loader2, ArrowRight, ArrowLeft, ChevronDown, X } from 'lucide-react'
 import { getAdTrackingPayload } from '@/lib/ad-tracking'
-import { trackGenerateLead, trackConsultEvent, type ConsultPlacement } from '@/lib/tracking'
+import { trackGenerateLead, type ConsultPlacement } from '@/lib/tracking'
 import { ApostilleConsultEmbed } from './ApostilleConsultEmbed'
-
-export type ApostilleFormMode = 'quote' | 'consult'
 
 interface ApostilleQuoteFormProps {
   formLocation?: string
-  mode?: ApostilleFormMode
   consultPlacement?: ConsultPlacement
-  onModeChange?: (mode: ApostilleFormMode) => void
 }
 
 const DOCUMENT_TYPES = [
@@ -58,9 +61,7 @@ const STEPS = [
 
 export function ApostilleQuoteForm({
   formLocation = 'apostille-services',
-  mode = 'quote',
-  consultPlacement = 'form_toggle',
-  onModeChange,
+  consultPlacement = 'hero',
 }: ApostilleQuoteFormProps) {
   const [currentStep, setCurrentStep] = useState(1)
 
@@ -97,9 +98,6 @@ export function ApostilleQuoteForm({
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [additionalNotes, setAdditionalNotes] = useState('')
-  // For consult leads only: 'book' = pick a time on Cal.com, 'callback' = we
-  // call them within 1 business day. Hidden in quote mode.
-  const [consultMethod, setConsultMethod] = useState<'book' | 'callback'>('book')
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -124,11 +122,9 @@ export function ApostilleQuoteForm({
   }
 
   const validateStep2 = (): boolean => {
-    const next: Record<string, string> = {}
-    // In consult mode, shipping is informational — don't block.
-    if (mode === 'quote' && !dropoffMode) next.dropoffMode = 'Choose drop-off or courier.'
-    setErrors(next)
-    return Object.keys(next).length === 0
+    // Shipping is purely informational for the consultation — never blocks.
+    setErrors({})
+    return true
   }
 
   const validateStep3 = (): boolean => {
@@ -182,8 +178,8 @@ export function ApostilleQuoteForm({
           ad_tracking: adTracking,
           source_url: typeof window !== 'undefined' ? window.location.href : '',
           form_location: formLocation,
-          lead_type: mode,
-          ...(mode === 'consult' ? { consult_method: consultMethod } : {}),
+          lead_type: 'consult',
+          consult_method: 'book',
         }),
       })
 
@@ -192,11 +188,7 @@ export function ApostilleQuoteForm({
         throw new Error(data?.error || data?.message || 'Submission failed.')
       }
 
-      trackGenerateLead(
-        'quote',
-        mode === 'consult' ? 'Apostille Consult Lead' : 'Apostille Quote Submitted',
-        mode === 'consult' ? 'apostille_consult' : 'apostille_quote',
-      )
+      trackGenerateLead('quote', 'Apostille Consult Lead', 'apostille_consult')
       setSubmitSuccess(true)
     } catch (err: any) {
       setErrors({ submit: err?.message || 'Something went wrong. Please try again.' })
@@ -205,130 +197,39 @@ export function ApostilleQuoteForm({
   }
 
   if (submitSuccess) {
-    if (mode === 'consult' && consultMethod === 'callback') {
-      return (
-        <div className="text-center py-6">
-          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-          <h3 className="text-xl font-bold text-[#0C2340] mb-2">Callback Requested</h3>
-          <p className="text-slate-600 mb-4">
-            Thanks — a Cethos apostille specialist will call you at <strong>{phone.trim()}</strong> within one business day (Mon–Fri, 9–5 Mountain Time).
-          </p>
-          <div className="bg-slate-50 rounded-lg p-4 text-left text-sm text-slate-700 space-y-2 mb-6">
-            <p><strong>While you wait:</strong></p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Have your destination country&apos;s document requirements handy.</li>
-              <li>Note any deadline you&apos;re working against.</li>
-              <li>Photograph or scan each document so we can review on the call.</li>
-            </ul>
-          </div>
-          <p className="text-sm text-slate-500">
-            Need us sooner?{' '}
-            <a href="tel:5876000786" className="text-[#0891B2] font-medium hover:underline">(587) 600-0786</a>
-          </p>
-        </div>
-      )
-    }
-    if (mode === 'consult') {
-      const provinceLabel = PROVINCES.find((p) => p.value === issuingProvince)?.label || issuingProvince
-      const resolvedDocs = otherSelected
-        ? [...documentTypes.filter((t) => t !== OTHER_OPTION), otherDocumentType.trim() ? `Other: ${otherDocumentType.trim()}` : 'Other']
-        : documentTypes
-      return (
-        <ApostilleConsultEmbed
-          fullName={fullName.trim()}
-          email={email.trim()}
-          phone={phone.trim()}
-          documentTypes={resolvedDocs}
-          issuingProvinceLabel={provinceLabel}
-          destinationCountry={destinationCountry.trim()}
-          numDocuments={numDocuments}
-          needsNotarization={needsNotarization}
-          needsTranslation={needsTranslation}
-          additionalNotes={additionalNotes.trim()}
-          placement={consultPlacement}
-          onBookingToQuoteClick={() => {
-            // Switch the form back to quote mode so user can request a written quote.
-            setSubmitSuccess(false)
-            setCurrentStep(3)
-            onModeChange?.('quote')
-          }}
-        />
-      )
-    }
+    const provinceLabel = PROVINCES.find((p) => p.value === issuingProvince)?.label || issuingProvince
+    const resolvedDocs = otherSelected
+      ? [...documentTypes.filter((t) => t !== OTHER_OPTION), otherDocumentType.trim() ? `Other: ${otherDocumentType.trim()}` : 'Other']
+      : documentTypes
     return (
-      <div className="text-center py-6">
-        <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
-        </div>
-        <h3 className="text-xl font-bold text-[#0C2340] mb-2">Quote Request Received</h3>
-        <p className="text-slate-600 mb-6">
-          Thanks — we&apos;ll review your details and email you a confirmed price plus next steps within one business day.
-        </p>
-        <div className="bg-slate-50 rounded-lg p-4 text-left text-sm text-slate-700 space-y-2 mb-6">
-          <p><strong>What happens next:</strong></p>
-          <ol className="list-decimal pl-5 space-y-1">
-            <li>We confirm scope and exact price by email.</li>
-            <li>For non-Calgary clients we email a prepaid Purolator label.</li>
-            <li>You ship originals (or drop off in Calgary).</li>
-            <li>We submit to the correct issuing authority and track.</li>
-            <li>We courier the authenticated documents back to you.</li>
-          </ol>
-        </div>
-        <p className="text-sm text-slate-500">
-          Need to talk now?{' '}
-          <a href="tel:5876000786" className="text-[#0891B2] font-medium hover:underline">(587) 600-0786</a>
-        </p>
-      </div>
+      <ApostilleConsultEmbed
+        fullName={fullName.trim()}
+        email={email.trim()}
+        phone={phone.trim()}
+        documentTypes={resolvedDocs}
+        issuingProvinceLabel={provinceLabel}
+        destinationCountry={destinationCountry.trim()}
+        numDocuments={numDocuments}
+        needsNotarization={needsNotarization}
+        needsTranslation={needsTranslation}
+        additionalNotes={additionalNotes.trim()}
+        placement={consultPlacement}
+        onBookingToQuoteClick={() => {
+          // After-booking "while you wait, start your apostille quote" used to
+          // re-enter the quote flow. Quote mode is gone now — close the success
+          // panel so the user is back at the form (which is the same intake).
+          setSubmitSuccess(false)
+          setCurrentStep(3)
+        }}
+      />
     )
   }
 
-  const isConsult = mode === 'consult'
-
   return (
     <form onSubmit={handleSubmit}>
-      {isConsult ? (
-        <div className="mb-4 p-3 rounded-lg bg-[#E0F2FE] border border-[#0891B2]/20 flex items-start gap-2">
-          <CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <p className="font-semibold text-[#0C2340]">Free 15-min consultation</p>
-            <p className="text-slate-600">
-              Tell us about your situation in 3 quick steps — then pick a time. No quote needed.{' '}
-              <button
-                type="button"
-                onClick={() => onModeChange?.('quote')}
-                className="text-[#0891B2] underline hover:no-underline font-medium"
-              >
-                Switch to quote mode
-              </button>
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="mb-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-sm flex items-start gap-2">
-          <CheckCircle className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" />
-          <p className="text-slate-700">
-            Want help figuring out the right path first?{' '}
-            <button
-              type="button"
-              onClick={() => onModeChange?.('consult')}
-              className="text-[#0891B2] underline hover:no-underline font-semibold"
-            >
-              Book a free 15-min consultation instead
-            </button>
-            {' '}— no commitment.
-          </p>
-        </div>
-      )}
-
-      <h3 className="text-xl font-bold text-[#0C2340] mb-1">
-        {isConsult ? 'Tell Us About Your Apostille Case' : 'Get Your Apostille Quote'}
-      </h3>
+      <h3 className="text-xl font-bold text-[#0C2340] mb-1">Book a Free 15-Min Consultation</h3>
       <p className="text-gray-600 text-sm mb-5">
-        {isConsult
-          ? 'Three quick steps, then pick a time for your free 15-minute call.'
-          : "Three quick steps for an exact price within one business day — or book a free 15-min call to talk it through first."}
+        Three quick steps about your case — then pick a time. No quote needed; we&apos;ll review your documents on the call and confirm the right path.
       </p>
 
       {/* Step indicator */}
@@ -680,40 +581,6 @@ export function ApostilleQuoteForm({
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
           >
-            {isConsult && (
-              <div className="mb-5">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  How would you like us to help? <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setConsultMethod('book')}
-                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
-                      consultMethod === 'book'
-                        ? 'border-[#0891B2] bg-[#E0F2FE]'
-                        : 'border-slate-200 hover:border-[#0891B2]'
-                    }`}
-                  >
-                    <p className="font-semibold text-[#0C2340]">Book a 15-min call</p>
-                    <p className="text-xs text-slate-600 mt-1">Pick a time on the next screen. We&apos;ll email a Zoom link.</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConsultMethod('callback')}
-                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
-                      consultMethod === 'callback'
-                        ? 'border-[#0891B2] bg-[#E0F2FE]'
-                        : 'border-slate-200 hover:border-[#0891B2]'
-                    }`}
-                  >
-                    <p className="font-semibold text-[#0C2340]">Request a callback</p>
-                    <p className="text-xs text-slate-600 mt-1">A specialist will call you within 1 business day (Mon–Fri, 9–5 MT).</p>
-                  </button>
-                </div>
-              </div>
-            )}
-
             <div className="space-y-3 mb-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -803,11 +670,7 @@ export function ApostilleQuoteForm({
                   </>
                 ) : (
                   <>
-                    {isConsult
-                      ? consultMethod === 'callback'
-                        ? 'Send Callback Request'
-                        : 'Continue to Booking'
-                      : 'Get My Apostille Quote'} <ArrowRight className="w-4 h-4" />
+                    Continue to Booking <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>

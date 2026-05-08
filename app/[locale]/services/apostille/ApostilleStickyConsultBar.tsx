@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { trackConsultEvent } from '@/lib/tracking'
 
+// Two CTAs:
+//   onConsultClick  → book a time (scrolls to picker)
+//   onQuoteClick    → request a callback (opens modal)
+// Names retained from the previous quote/consult split for binary compat with
+// existing callers; relabeled in UI to "Book Time" / "Callback".
 interface ApostilleStickyConsultBarProps {
   onConsultClick: () => void
   onQuoteClick: () => void
@@ -52,20 +57,23 @@ export function ApostilleStickyConsultBar({
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={onQuoteClick}
-          className="flex-1 px-3 py-2.5 rounded-lg bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold text-sm transition-colors"
-        >
-          Get Quote
-        </button>
-        <button
-          type="button"
           onClick={() => {
             trackConsultEvent('free_consult_cta_clicked', { placement: 'sticky' })
             onConsultClick()
           }}
+          className="flex-1 px-3 py-2.5 rounded-lg bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold text-sm transition-colors"
+        >
+          Book Time
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            trackConsultEvent('free_consult_cta_clicked', { placement: 'sticky', consult_method: 'callback' })
+            onQuoteClick()
+          }}
           className="flex-1 px-3 py-2.5 rounded-lg border-2 border-[#0891B2] text-[#0891B2] hover:bg-[#E0F2FE] font-semibold text-sm transition-colors"
         >
-          Free Consult
+          Callback
         </button>
         <button
           type="button"
