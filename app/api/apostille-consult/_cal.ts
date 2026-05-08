@@ -173,6 +173,26 @@ interface BookingResponse {
   }
 }
 
+/**
+ * Normalize a phone string to E.164. Handles Canadian/US 10-digit numbers
+ * (prefixes +1) and strips formatting from already-E.164 inputs.
+ *
+ * Cal.com rejects bookings with `responses - {smsReminderNumber} invalid_number`
+ * when the phone isn't E.164; this is the single fix point.
+ */
+function toE164(raw: string | undefined): string | null {
+  if (!raw) return null
+  const trimmed = raw.trim()
+  if (trimmed.startsWith('+')) {
+    const digits = trimmed.slice(1).replace(/\D/g, '')
+    return digits.length >= 8 ? `+${digits}` : null
+  }
+  const digits = trimmed.replace(/\D/g, '')
+  if (digits.length === 10) return `+1${digits}`
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`
+  return null
+}
+
 export async function createBooking(opts: {
   start: string
   name: string
@@ -183,6 +203,8 @@ export async function createBooking(opts: {
   metadata: Record<string, string>
 }): Promise<{ uid: string; meetingUrl: string; raw: unknown }> {
   const eventTypeId = await resolveEventTypeId()
+  const phoneE164 = toE164(opts.phone)
+
   const body: Record<string, unknown> = {
     start: opts.start,
     eventTypeId,
@@ -190,11 +212,19 @@ export async function createBooking(opts: {
       name: opts.name,
       email: opts.email,
       timeZone: opts.timeZone,
-      ...(opts.phone ? { phoneNumber: opts.phone } : {}),
+      ...(phoneE164 ? { phoneNumber: phoneE164 } : {}),
     },
     metadata: opts.metadata,
   }
-  if (opts.notes) body.bookingFieldsResponses = { notes: opts.notes }
+  // bookingFieldsResponses must satisfy any required booking fields on the
+  // event (notes + smsReminderNumber when SMS workflows are active).
+  // Only include smsReminderNumber if we have a valid E.164 — empty/invalid
+  // values would re-trigger the "responses - {smsReminderNumber} invalid_number"
+  // rejection that motivated this normalization.
+  const responses: Record<string, string> = {}
+  if (opts.notes) responses.notes = opts.notes
+  if (phoneE164) responses.smsReminderNumber = phoneE164
+  if (Object.keys(responses).length > 0) body.bookingFieldsResponses = responses
 
   const data = await calFetch<BookingResponse>(`/bookings`, VERSION_BOOKINGS, {
     method: 'POST',
