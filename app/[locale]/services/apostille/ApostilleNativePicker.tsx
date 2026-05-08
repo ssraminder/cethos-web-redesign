@@ -20,7 +20,11 @@ interface ApostilleNativePickerProps {
   onBookingConfirmed: (uid: string, meetingUrl: string, startIso: string) => void
 }
 
-const DAY_WINDOW = 14
+// Visible-week window: show 7 days at a time, shift by 7 days per arrow click.
+// (Was 14 — feedback was that arrows skipped 2 weeks at a time and required
+// internal horizontal scrolling. One-week pages match user expectation.)
+const DAY_WINDOW = 7
+const SHIFT_DAYS = 7
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
 function buildNotes(p: Pick<
@@ -195,10 +199,17 @@ export function ApostilleNativePicker(props: ApostilleNativePickerProps) {
       </div>
 
       {/* Date strip */}
+      <div className="flex items-center justify-between mb-2 px-1">
+        <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+          {windowStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+          {' – '}
+          {new Date(windowStart.getTime() + (DAY_WINDOW - 1) * MS_PER_DAY).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+        </span>
+      </div>
       <div className="relative">
         <button
           type="button"
-          onClick={() => shiftWindow(-DAY_WINDOW)}
+          onClick={() => shiftWindow(-SHIFT_DAYS)}
           disabled={!canGoBack}
           className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#0891B2] hover:text-[#0891B2] transition-colors"
           aria-label="Earlier dates"
@@ -207,14 +218,14 @@ export function ApostilleNativePicker(props: ApostilleNativePickerProps) {
         </button>
         <button
           type="button"
-          onClick={() => shiftWindow(DAY_WINDOW)}
+          onClick={() => shiftWindow(SHIFT_DAYS)}
           className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:border-[#0891B2] hover:text-[#0891B2] transition-colors"
           aria-label="Later dates"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
-        <div className="overflow-x-auto px-7 pb-2 scrollbar-thin">
-          <div className="flex gap-2 min-w-max">
+        <div className="px-7 pb-2">
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
             {days.map((d) => {
               const key = ymd(d)
               const has = (slotsByDay[key]?.length || 0) > 0
@@ -227,7 +238,7 @@ export function ApostilleNativePicker(props: ApostilleNativePickerProps) {
                   onClick={() => setSelectedDay(key)}
                   disabled={!has && !loading}
                   className={[
-                    'flex flex-col items-center justify-center w-16 py-2 rounded-lg border transition-colors',
+                    'flex flex-col items-center justify-center py-2 rounded-lg border transition-colors',
                     isSelected
                       ? 'border-[#0891B2] bg-[#E0F2FE] text-[#0C2340]'
                       : has
