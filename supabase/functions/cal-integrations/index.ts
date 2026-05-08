@@ -428,6 +428,59 @@ async function handleAction(action: string, params: any): Promise<{ status: numb
       return calFetch("/schedules");
     case "list_webhooks":
       return calFetch("/webhooks");
+    case "get_event_type": {
+      // GET /event-types/{username}/{slug}
+      const username = params?.username || "cethos";
+      const slug = params?.event_slug;
+      if (!slug) return { status: 400, data: { error: "event_slug required" } };
+      return calFetch(`/event-types/${encodeURIComponent(username)}/${encodeURIComponent(slug)}`);
+    }
+    case "list_event_slots": {
+      // GET /slots/available
+      // params: { event_type_id, start_time (ISO), end_time (ISO), time_zone }
+      const eventTypeId = params?.event_type_id;
+      const start = params?.start_time;
+      const end = params?.end_time;
+      const tz = params?.time_zone || "America/Edmonton";
+      if (!eventTypeId || !start || !end) {
+        return { status: 400, data: { error: "event_type_id, start_time, end_time required" } };
+      }
+      const qs = new URLSearchParams({
+        eventTypeId: String(eventTypeId),
+        startTime: start,
+        endTime: end,
+        timeZone: tz,
+      });
+      return calFetch(`/slots/available?${qs.toString()}`);
+    }
+    case "create_booking": {
+      // POST /bookings
+      // params: { event_type_id, start (ISO UTC), name, email, phone, notes, metadata, time_zone }
+      const eventTypeId = params?.event_type_id;
+      const start = params?.start;
+      const name = params?.name;
+      const email = params?.email;
+      const tz = params?.time_zone || "America/Edmonton";
+      if (!eventTypeId || !start || !name || !email) {
+        return { status: 400, data: { error: "event_type_id, start, name, email required" } };
+      }
+      const body: Record<string, any> = {
+        start,
+        eventTypeId,
+        attendee: {
+          name,
+          email,
+          timeZone: tz,
+          ...(params.phone ? { phoneNumber: params.phone } : {}),
+        },
+        metadata: params.metadata || {},
+      };
+      if (params.notes) body.bookingFieldsResponses = { notes: params.notes };
+      return calFetch(`/bookings`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+    }
     default:
       return { status: 400, data: { error: `Unknown action: ${action}` } };
   }
