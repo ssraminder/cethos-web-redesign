@@ -97,6 +97,9 @@ export function ApostilleQuoteForm({
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [additionalNotes, setAdditionalNotes] = useState('')
+  // For consult leads only: 'book' = pick a time on Cal.com, 'callback' = we
+  // call them within 1 business day. Hidden in quote mode.
+  const [consultMethod, setConsultMethod] = useState<'book' | 'callback'>('book')
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -180,6 +183,7 @@ export function ApostilleQuoteForm({
           source_url: typeof window !== 'undefined' ? window.location.href : '',
           form_location: formLocation,
           lead_type: mode,
+          ...(mode === 'consult' ? { consult_method: consultMethod } : {}),
         }),
       })
 
@@ -201,6 +205,31 @@ export function ApostilleQuoteForm({
   }
 
   if (submitSuccess) {
+    if (mode === 'consult' && consultMethod === 'callback') {
+      return (
+        <div className="text-center py-6">
+          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-green-600" />
+          </div>
+          <h3 className="text-xl font-bold text-[#0C2340] mb-2">Callback Requested</h3>
+          <p className="text-slate-600 mb-4">
+            Thanks — a Cethos apostille specialist will call you at <strong>{phone.trim()}</strong> within one business day (Mon–Fri, 9–5 Mountain Time).
+          </p>
+          <div className="bg-slate-50 rounded-lg p-4 text-left text-sm text-slate-700 space-y-2 mb-6">
+            <p><strong>While you wait:</strong></p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Have your destination country&apos;s document requirements handy.</li>
+              <li>Note any deadline you&apos;re working against.</li>
+              <li>Photograph or scan each document so we can review on the call.</li>
+            </ul>
+          </div>
+          <p className="text-sm text-slate-500">
+            Need us sooner?{' '}
+            <a href="tel:5876000786" className="text-[#0891B2] font-medium hover:underline">(587) 600-0786</a>
+          </p>
+        </div>
+      )
+    }
     if (mode === 'consult') {
       const provinceLabel = PROVINCES.find((p) => p.value === issuingProvince)?.label || issuingProvince
       const resolvedDocs = otherSelected
@@ -636,6 +665,40 @@ export function ApostilleQuoteForm({
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.2 }}
           >
+            {isConsult && (
+              <div className="mb-5">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  How would you like us to help? <span className="text-red-500">*</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setConsultMethod('book')}
+                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                      consultMethod === 'book'
+                        ? 'border-[#0891B2] bg-[#E0F2FE]'
+                        : 'border-slate-200 hover:border-[#0891B2]'
+                    }`}
+                  >
+                    <p className="font-semibold text-[#0C2340]">Book a 15-min call</p>
+                    <p className="text-xs text-slate-600 mt-1">Pick a time on the next screen. We&apos;ll email a Zoom link.</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConsultMethod('callback')}
+                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                      consultMethod === 'callback'
+                        ? 'border-[#0891B2] bg-[#E0F2FE]'
+                        : 'border-slate-200 hover:border-[#0891B2]'
+                    }`}
+                  >
+                    <p className="font-semibold text-[#0C2340]">Request a callback</p>
+                    <p className="text-xs text-slate-600 mt-1">A specialist will call you within 1 business day (Mon–Fri, 9–5 MT).</p>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-3 mb-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
@@ -725,7 +788,11 @@ export function ApostilleQuoteForm({
                   </>
                 ) : (
                   <>
-                    {isConsult ? 'Continue to Booking' : 'Get My Apostille Quote'} <ArrowRight className="w-4 h-4" />
+                    {isConsult
+                      ? consultMethod === 'callback'
+                        ? 'Send Callback Request'
+                        : 'Continue to Booking'
+                      : 'Get My Apostille Quote'} <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>

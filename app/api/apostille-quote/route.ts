@@ -72,6 +72,14 @@ export async function POST(req: Request) {
 
     const adTracking = body.ad_tracking || {}
     const leadType: 'quote' | 'consult' = body.lead_type === 'consult' ? 'consult' : 'quote'
+    // For consult leads, distinguish two paths:
+    //   'book'     → user will pick a time; the form-submission email is
+    //                suppressed because cal-integrations sends a branded
+    //                confirmation email AFTER the booking webhook fires.
+    //   'callback' → user wants us to call them; this is the only signal,
+    //                so we send a branded callback-request email here.
+    const consultMethod: 'book' | 'callback' =
+      leadType === 'consult' && body.consult_method === 'callback' ? 'callback' : 'book'
 
     const apostilleData = {
       document_types: body.document_types,
@@ -83,6 +91,7 @@ export async function POST(req: Request) {
       dropoff_mode: body.dropoff_mode || null,
       additional_notes: body.additional_notes || null,
       lead_type: leadType,
+      ...(leadType === 'consult' ? { consult_method: consultMethod } : {}),
     }
 
     const dbData = {
@@ -118,18 +127,37 @@ export async function POST(req: Request) {
 
     const emailRecipients = process.env.QUOTE_EMAIL_RECIPIENTS?.split(',') || ['info@cethos.com']
 
-    try {
+    // Email gating:
+    //   quote              → send (existing notification)
+    //   consult + book     → SKIP (cal-integrations webhook sends a branded
+    //                        confirmation after the booking is created — sending
+    //                        a second email here is redundant noise)
+    //   consult + callback → send (this is the only notification — the team
+    //                        needs to call this person back)
+    const shouldSendEmail = leadType === 'quote' || consultMethod === 'callback'
+    const isCallback = leadType === 'consult' && consultMethod === 'callback'
+
+    if (shouldSendEmail) try {
       const apiInstance = new Brevo.TransactionalEmailsApi()
       apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+
+      const heroTitle = isCallback
+        ? 'New Callback Request (Apostille Consult)'
+        : leadType === 'consult'
+          ? 'New Free Consult Lead (Apostille)'
+          : 'New Apostille Quote Request'
+      const heroSubtitle = isCallback
+        ? 'Lead requested a callback instead of booking a meeting time. Please call them within 1 business day.'
+        : ''
 
       const htmlContent = `
         <!DOCTYPE html>
         <html>
-        <head><meta charset="utf-8"><title>New Apostille Quote Request</title></head>
+        <head><meta charset="utf-8"><title>${heroTitle}</title></head>
         <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: linear-gradient(135deg, #0C2340 0%, #0891B2 100%); padding: 30px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: #fff; margin: 0; font-size: 24px;">${leadType === 'consult' ? 'New Free Consult Lead (Apostille)' : 'New Apostille Quote Request'}</h1>
-            ${leadType === 'consult' ? '<p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 14px;">Lead has booked (or is booking) a 15-min apostille consultation via Cal.com.</p>' : ''}
+            <h1 style="color: #fff; margin: 0; font-size: 24px;">${heroTitle}</h1>
+            ${heroSubtitle ? `<p style="color: rgba(255,255,255,0.85); margin: 8px 0 0 0; font-size: 14px;">${heroSubtitle}</p>` : ''}
           </div>
           <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
             <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
@@ -171,8 +199,9 @@ export async function POST(req: Request) {
       `
 
       const sendSmtpEmail = new Brevo.SendSmtpEmail()
-      sendSmtpEmail.subject =
-        leadType === 'consult'
+      sendSmtpEmail.subject = isCallback
+        ? `[Callback] Apostille - ${body.full_name}`
+        : leadType === 'consult'
           ? `[Consult] Apostille - ${body.full_name}`
           : `New Apostille Quote - ${body.full_name}`
       sendSmtpEmail.htmlContent = htmlContent
