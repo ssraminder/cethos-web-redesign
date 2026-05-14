@@ -199,15 +199,20 @@ export async function POST(req: Request) {
           })
 
         if (!uploadError && uploadData) {
-          // Generate public URL for the uploaded file
-          const { data: urlData } = supabase.storage
+          // 30-day signed URL — bucket is private after the May 2026 lockdown.
+          const { data: urlData, error: urlError } = await supabase.storage
             .from('cethosweb-quote-files')
-            .getPublicUrl(filePath)
+            .createSignedUrl(filePath, 60 * 60 * 24 * 30)
+
+          if (urlError || !urlData) {
+            console.error('[API Quote] createSignedUrl failed:', urlError)
+            continue
+          }
 
           fileUrls.push({
             name: file.name,
             path: filePath,
-            url: urlData.publicUrl,
+            url: urlData.signedUrl,
             size: file.size,
             type: file.type
           })
