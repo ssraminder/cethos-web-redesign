@@ -114,3 +114,12 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Rationale:** Single point for OAuth refresh-token caching (60s buffer), uniform error/CORS handling, and one place for the audit cron (`audit-cethos-health`) to compose multi-platform queries. Already in place when 2026-05-05 PPC audit ran.
 - **Status:** active (pre-existing — documenting for future sessions).
 - **Affects:** all marketing/analytics integrations.
+
+### 2026-05-14 — Sentry client config uses `instrumentation-client.ts`, not `sentry.client.config.ts`
+- **Decision:** With `@sentry/nextjs` v10 on Next 14, the browser-side Sentry init must live in `instrumentation-client.ts` at the repo root. The legacy `sentry.client.config.ts` is supported but leaks the file's contents into server prerender chunks.
+- **Rationale:** Netlify build for cethos.com failed every static page (254 routes) with `TypeError: o.browserTracingIntegration is not a function` during prerender — `Sentry.browserTracingIntegration()` (browser-only) was being evaluated in server chunks. Same Next 14 build emitted Sentry's own deprecation warning recommending the rename. After `git mv sentry.client.config.ts instrumentation-client.ts`, the build compiled cleanly and progressed past prerender; the deprecation warning also disappeared. The previous revert (PR #165) was based on the incorrect belief that `instrumentation-client.ts` is Next 15-only — Sentry's plugin wires it into Next 14 just fine.
+- **Alternatives considered:**
+  - Keep `sentry.client.config.ts` and narrow the global-error import: would only mask the leak, not fix it.
+  - Downgrade Sentry to v8: avoidable churn.
+- **Status:** active
+- **Affects:** `instrumentation-client.ts`, `next.config.js` (`withSentryConfig` wrapper auto-detects either filename, prefers the new one). Do NOT re-revert this rename if a future build error appears related to Sentry; investigate the new error first.
