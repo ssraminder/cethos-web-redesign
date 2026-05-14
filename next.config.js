@@ -1,4 +1,5 @@
 const createNextIntlPlugin = require('next-intl/plugin')
+const { withSentryConfig } = require('@sentry/nextjs')
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -77,4 +78,17 @@ const nextConfig = {
   },
 }
 
-module.exports = withBundleAnalyzer(withNextIntl(nextConfig))
+module.exports = withSentryConfig(
+  withBundleAnalyzer(withNextIntl(nextConfig)),
+  {
+    // Build-time source-map upload. Auth token + org/project come from env
+    // vars at build time (Netlify). Skipped locally because authToken is unset.
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    hideSourceMaps: true,
+    disableLogger: true,
+  },
+)
