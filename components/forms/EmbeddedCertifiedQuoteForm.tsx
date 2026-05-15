@@ -800,178 +800,155 @@ export function EmbeddedCertifiedQuoteForm({
 
       // Resolve target language — if "Other" use null ID + store free text
       const resolvedTargetId = isOtherSelected ? null : targetLanguageId;
-      const resolvedTargetName = isOtherSelected ? otherTargetLanguage.trim() : targetLanguageName;
-
-      // 1. Create draft quote
       const adTracking = getAdTrackingPayload();
-      const { data: quote, error: quoteError } = await supabase
-        .from('quotes')
-        .insert({
-          status: 'draft',
-          source_language_id: sourceLanguageId,
-          target_language_id: resolvedTargetId,
-          target_language_other: isOtherSelected ? otherTargetLanguage.trim() : null,
-          entry_point: 'website_embed',
-          source_url: window.location.href,
-          source_location: formLocation,
-          subtotal: 0,
-          certification_total: 0,
-          rush_fee: 0,
-          delivery_fee: 0,
-          tax_amount: 0,
-          total: 0,
-          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          ...adTracking,
-        })
-        .select('id, quote_number')
-        .single();
 
-      if (quoteError || !quote) throw new Error(quoteError?.message || 'Failed to create quote');
-
-      const quoteId = quote.id;
-
-      // 2. Combine images into a single PDF, then upload all files
+      // 1. Upload any pending blobs (image-combined PDFs) to the anon-allowed
+      // `uploads/` prefix and collect the full set of temp paths to finalize.
+      // RLS lockdown (May 14): anon may only INSERT under `uploads/`; the
+      // edge function moves them to `<quoteId>/...` server-side.
+      const successRefFiles = refFiles.filter((f) => f.status === 'success');
       const imageFiles = successFiles.filter((f) => f.isImage);
       const nonImageFiles = successFiles.filter((f) => !f.isImage);
-
-      // 2a. Combine all images into one PDF
-      if (imageFiles.length > 0) {
-        const combinedName = `${quote.quote_number}-combined-images.pdf`;
-        const combinedPdf = await combineImagesToPdf(
-          imageFiles.map((f) => f.file),
-          combinedName
-        );
-        // Compress the combined PDF if large
-        const finalPdf = await compressPdfIfNeeded(combinedPdf);
-        const sanitized = sanitizeFilename(finalPdf.name);
-        const finalPath = `${quoteId}/${sanitized}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('quote-files')
-          .upload(finalPath, finalPdf, { cacheControl: '3600', upsert: true });
-
-        if (uploadError) {
-          console.error('Failed to upload combined images PDF:', uploadError);
-        } else {
-          await supabase.from('quote_files').insert({
-            quote_id: quoteId,
-            original_filename: combinedName,
-            storage_path: finalPath,
-            file_size: finalPdf.size,
-            mime_type: 'application/pdf',
-            upload_status: 'uploaded',
-            ai_processing_status: 'pending',
-          });
-        }
-      }
-
-      // 2b. Upload individual PDFs (and converted DOCX) to final path
-      for (const lf of nonImageFiles) {
-        const sanitized = sanitizeFilename(lf.name);
-        const finalPath = `${quoteId}/${sanitized}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('quote-files')
-          .upload(finalPath, lf.file, { cacheControl: '3600', upsert: true });
-
-        if (uploadError) { console.error(`Failed to upload ${lf.name}:`, uploadError); continue; }
-
-        await supabase.from('quote_files').insert({
-          quote_id: quoteId,
-          original_filename: lf.name,
-          storage_path: finalPath,
-          file_size: lf.size,
-          mime_type: lf.mimeType,
-          upload_status: 'uploaded',
-          ai_processing_status: 'pending',
-        });
-
-        if (lf.storagePath && lf.storagePath !== finalPath) {
-          supabase.storage.from('quote-files').remove([lf.storagePath]).catch(() => {});
-        }
-      }
-
-      // 2c. Upload reference files to final path and create quote_files records
-      const successRefFiles = refFiles.filter((f) => f.status === 'success');
       const refImageFiles = successRefFiles.filter((f) => f.isImage);
       const refNonImageFiles = successRefFiles.filter((f) => !f.isImage);
 
-      // Combine reference images into a single PDF
+      type FinalizeInput = {
+        temp_path: string;
+        original_filename: string;
+        file_size: number;
+        mime_type: string;
+        is_reference?: boolean;
+      };
+      const filesToFinalize: FinalizeInput[] = [];
+
+      const uploadBlobToUploads = async (
+        bucket: 'quote-files' | 'quote-reference-files',
+        file: File,
+        filename: string,
+      ): Promise<string> => {
+        const ext = (filename.split('.').pop() || 'bin').toLowerCase();
+        const tempPath = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage
+          .from(bucket)
+          .upload(tempPath, file, { cacheControl: '3600', upsert: false });
+        if (error) throw error;
+        return tempPath;
+      };
+
+      // 1a. Combine translation images into one PDF, upload to uploads/
+      if (imageFiles.length > 0) {
+        const combinedName = `combined-images-${Date.now()}.pdf`;
+        const combinedPdf = await combineImagesToPdf(
+          imageFiles.map((f) => f.file),
+          combinedName,
+        );
+        const finalPdf = await compressPdfIfNeeded(combinedPdf);
+        const tempPath = await uploadBlobToUploads('quote-files', finalPdf, finalPdf.name);
+        filesToFinalize.push({
+          temp_path: tempPath,
+          original_filename: finalPdf.name,
+          file_size: finalPdf.size,
+          mime_type: 'application/pdf',
+          is_reference: false,
+        });
+      }
+
+      // 1b. Non-image translation files already uploaded to uploads/ on add
+      for (const lf of nonImageFiles) {
+        if (!lf.storagePath) continue;
+        filesToFinalize.push({
+          temp_path: lf.storagePath,
+          original_filename: lf.name,
+          file_size: lf.size,
+          mime_type: lf.mimeType,
+          is_reference: false,
+        });
+      }
+
+      // 1c. Combine reference images into one PDF, upload to uploads/
       if (refImageFiles.length > 0) {
-        const refCombinedName = `${quote.quote_number}-ref-combined-images.pdf`;
+        const refCombinedName = `ref-combined-images-${Date.now()}.pdf`;
         const refCombinedPdf = await combineImagesToPdf(
           refImageFiles.map((f) => f.file),
-          refCombinedName
+          refCombinedName,
         );
-        const sanitized = sanitizeFilename(refCombinedPdf.name);
-        const finalPath = `${quoteId}/ref_${sanitized}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('quote-reference-files')
-          .upload(finalPath, refCombinedPdf, { cacheControl: '3600', upsert: true });
-
-        if (!uploadError) {
-          await supabase.from('quote_files').insert({
-            quote_id: quoteId,
-            original_filename: refCombinedName,
-            storage_path: finalPath,
-            file_size: refCombinedPdf.size,
-            mime_type: 'application/pdf',
-            upload_status: 'uploaded',
-            ai_processing_status: 'skipped',
-            category_id: 'f1aed462-a25f-4dd0-96c0-f952c3a72950',
-          });
-        }
+        const tempPath = await uploadBlobToUploads(
+          'quote-reference-files',
+          refCombinedPdf,
+          refCombinedPdf.name,
+        );
+        filesToFinalize.push({
+          temp_path: tempPath,
+          original_filename: refCombinedPdf.name,
+          file_size: refCombinedPdf.size,
+          mime_type: 'application/pdf',
+          is_reference: true,
+        });
       }
 
+      // 1d. Non-image reference files already uploaded to uploads/ on add
       for (const rf of refNonImageFiles) {
-        const sanitized = sanitizeFilename(rf.name);
-        const finalPath = `${quoteId}/ref_${sanitized}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('quote-reference-files')
-          .upload(finalPath, rf.file, { cacheControl: '3600', upsert: true });
-
-        if (uploadError) {
-          console.error(`Failed to upload ref file ${rf.name}:`, uploadError);
-          continue;
-        }
-
-        await supabase.from('quote_files').insert({
-          quote_id: quoteId,
+        if (!rf.storagePath) continue;
+        filesToFinalize.push({
+          temp_path: rf.storagePath,
           original_filename: rf.name,
-          storage_path: finalPath,
           file_size: rf.size,
           mime_type: rf.mimeType,
-          upload_status: 'uploaded',
-          ai_processing_status: 'skipped',
-          category_id: 'f1aed462-a25f-4dd0-96c0-f952c3a72950',
+          is_reference: true,
         });
-
-        if (rf.storagePath && rf.storagePath !== finalPath) {
-          supabase.storage.from('quote-reference-files').remove([rf.storagePath]).catch(() => {});
-        }
       }
 
-      // 3. Log status history
-      try {
-        await supabase.from('quote_status_history').insert({
-          quote_id: quoteId,
-          previous_status: null,
-          new_status: 'draft',
-          changed_by_type: 'system',
-          change_reason: `Website embed quote created from ${formLocation || 'unknown'}`,
-          metadata: {
-            source_url: window.location.href,
-            files_count: successFiles.length,
-            ref_files_count: successRefFiles.length,
-            entry_point: 'website_embed',
-            source_language: sourceLanguageName,
-            target_language: resolvedTargetName,
-            default_document_type: defaultDocumentType || null,
+      // 2. Create the draft quote via the customer-quote-create edge function
+      // (RLS lockdown blocks anon INSERT on `quotes`).
+      const createResp = await fetch(
+        `${supabaseUrl}/functions/v1/customer-quote-create`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${supabaseAnonKey}`,
+            apikey: supabaseAnonKey,
           },
-        });
-      } catch (logError) { console.warn('Failed to log status history:', logError); }
+          body: JSON.stringify({
+            source_language_id: sourceLanguageId,
+            target_language_id: resolvedTargetId,
+            target_language_other: isOtherSelected ? otherTargetLanguage.trim() : null,
+            entry_point: 'website_embed',
+            source_url: typeof window !== 'undefined' ? window.location.href : null,
+            source_location: formLocation,
+            expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            ad_tracking: adTracking,
+          }),
+        },
+      );
+      const createJson = await createResp.json().catch(() => ({}));
+      if (!createResp.ok || !createJson?.success || !createJson?.quote?.id) {
+        throw new Error(createJson?.error || 'Failed to create quote');
+      }
+      const quoteId = createJson.quote.id as string;
+
+      // 3. Finalize files (move from uploads/ → <quoteId>/ + insert quote_files)
+      if (filesToFinalize.length > 0) {
+        const finalizeResp = await fetch(
+          `${supabaseUrl}/functions/v1/customer-quote-finalize-files`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${supabaseAnonKey}`,
+              apikey: supabaseAnonKey,
+            },
+            body: JSON.stringify({ quote_id: quoteId, files: filesToFinalize }),
+          },
+        );
+        const finalizeJson = await finalizeResp.json().catch(() => ({}));
+        if (!finalizeResp.ok) {
+          throw new Error(finalizeJson?.error || 'Failed to attach files to quote');
+        }
+        if (Array.isArray(finalizeJson?.errors) && finalizeJson.errors.length > 0) {
+          console.warn('Some files failed to finalize:', finalizeJson.errors);
+        }
+      }
 
       // 4. Fire AI processing (fire and forget)
       fetch(`${supabaseUrl}/functions/v1/process-quote-documents`, {
