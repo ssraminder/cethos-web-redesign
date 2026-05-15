@@ -1032,11 +1032,18 @@ serve(async (req: Request) => {
           );
 
           if (analysis) {
-            aiConfidence = Math.min(
-              analysis.language.primary.confidence || 0,
-              analysis.documentType.confidence || 0,
-              analysis.complexity.confidence || 0
-            );
+            // Only fold in confidences Claude actually returned.
+            // Earlier `|| 0` fallback treated a missing field as zero
+            // confidence — Claude commonly omits language.primary.confidence
+            // (because the language is obvious from OCR), and that single
+            // omission dragged aiConfidence to 0 → false-positive review
+            // on every otherwise-fine document.
+            const reported = [
+              analysis.language.primary.confidence,
+              analysis.documentType.confidence,
+              analysis.complexity.confidence,
+            ].filter((c): c is number => typeof c === "number" && c > 0);
+            aiConfidence = reported.length > 0 ? Math.min(...reported) : 1.0;
 
             console.log(`  📊 AI: type=${analysis.documentType.type}, complexity=${analysis.complexity.level}, confidence=${aiConfidence.toFixed(3)}`);
 
@@ -1212,6 +1219,7 @@ serve(async (req: Request) => {
         ocr_raw_text: ocrText.substring(0, 100000),
         detected_language: analysis?.language.primary.code || sourceLanguageCode || null,
         language_name: analysis?.language.primary.name || sourceLanguageName || null,
+        language_confidence: analysis?.language.primary.confidence ?? null,
         detected_document_type: analysis?.documentType.type || null,
         document_type_other: analysis?.documentType.other || null,
         document_type_confidence: analysis?.documentType.confidence || null,
