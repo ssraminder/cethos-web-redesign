@@ -1,7 +1,7 @@
 import type { Viewport } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
-import { getLocale } from 'next-intl/server'
 import { PostHogProvider } from '@/components/PostHogProvider'
+import { DEFAULT_LOCALE } from '@/lib/i18n'
 import './globals.css'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -18,15 +18,13 @@ export const viewport: Viewport = {
   themeColor: '#0C2340',
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const locale = await getLocale()
-
   return (
-    <html lang={locale} className={plusJakartaSans.className} suppressHydrationWarning>
+    <html lang={DEFAULT_LOCALE} className={plusJakartaSans.className} suppressHydrationWarning>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <PostHogProvider>
           {children}
