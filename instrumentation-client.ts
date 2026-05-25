@@ -21,6 +21,13 @@ Sentry.init({
     // Third-party code we don't control; spams Sentry without actionable signal.
     /\$refs\['branding-widget'\]/,
     /twk-chunk-/,
+    "$_Tawk",
+    "BufferLoader: XHR error",
+  ],
+  denyUrls: [
+    /embed\.tawk\.to/i,
+    /twk-chunk-/i,
+    /twk-vendor/i,
   ],
   beforeSend(event) {
     const exception = event.exception?.values?.[0];
@@ -34,6 +41,12 @@ Sentry.init({
     if (issueType === "replay_hydration_error") return null;
     const tags = event.tags as Record<string, unknown> | undefined;
     if (tags?.replay_hydration_error) return null;
+
+    // Defense in depth: also drop events whose top frame is Tawk.to code.
+    const frames = exception?.stacktrace?.frames ?? [];
+    if (frames.some((f) => /twk-(chunk|vendor)|embed\.tawk\.to/i.test(f.filename ?? ""))) {
+      return null;
+    }
 
     return event;
   },
