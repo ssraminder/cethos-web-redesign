@@ -12,6 +12,22 @@ const UTM_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', '
 
 const COOKIE_MAX_AGE_SECONDS = 90 * 24 * 60 * 60 // 90 days (matches default Google Ads click-through window)
 
+// Cookie domain: the portal lives at portal.cethos.com and the vendor app at
+// vendor.cethos.com, but the marketing site (and Google Ads landing pages)
+// runs on cethos.com / www.cethos.com. Without an explicit domain attribute
+// the cookies are scoped to the exact host and the portal cannot read them
+// when the user clicks "Get Quote" — which is why orders.utm_* is null on
+// nearly every May 2026 order despite the middleware capturing UTMs.
+// Setting domain='.cethos.com' makes the cookies visible across subdomains.
+// Localhost/preview hosts skip the domain attribute (browsers reject it).
+function cookieDomain(request: NextRequest): string | undefined {
+  const host = request.nextUrl.hostname.toLowerCase()
+  if (host === 'cethos.com' || host.endsWith('.cethos.com')) {
+    return '.cethos.com'
+  }
+  return undefined
+}
+
 export default function middleware(request: NextRequest) {
   const response = intlMiddleware(request) as NextResponse
 
@@ -20,6 +36,7 @@ export default function middleware(request: NextRequest) {
   // earlier click with a later unrelated visit).
   const sp = request.nextUrl.searchParams
   let anyClickId = false
+  const domain = cookieDomain(request)
 
   for (const name of CLICK_ID_PARAMS) {
     const value = sp.get(name)
@@ -32,6 +49,7 @@ export default function middleware(request: NextRequest) {
         secure: true,
         sameSite: 'lax',
         path: '/',
+        ...(domain ? { domain } : {}),
       })
       anyClickId = true
     }
@@ -48,6 +66,7 @@ export default function middleware(request: NextRequest) {
         secure: true,
         sameSite: 'lax',
         path: '/',
+        ...(domain ? { domain } : {}),
       })
     }
   }
@@ -61,6 +80,7 @@ export default function middleware(request: NextRequest) {
       secure: true,
       sameSite: 'lax',
       path: '/',
+      ...(domain ? { domain } : {}),
     })
   }
 
