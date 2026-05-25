@@ -958,6 +958,8 @@ export function EmbeddedCertifiedQuoteForm({
           Authorization: `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({ quoteId }),
+      }).catch((err) => {
+        console.warn('process-quote-documents kickoff failed (non-blocking):', err);
       });
 
       // 5. Track conversion
