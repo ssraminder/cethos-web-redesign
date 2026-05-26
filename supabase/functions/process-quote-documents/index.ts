@@ -1,7 +1,12 @@
 // ============================================================================
-// process-quote-documents v1.7 (Multi-page bundle discount)
-// Date: 2026-05-04
-// Changes from v1.6:
+// process-quote-documents v1.8 (DOCX-sibling skip)
+// Date: 2026-05-26
+// Changes from v1.7:
+//   - Phase 0: when a .docx file and a same-stem .pdf are both in the batch
+//     (the website quote form pairs original .docx with a converted PDF),
+//     mark the .docx as 'skipped' instead of re-extracting its text into the
+//     combined PDF. Prevents double-counting of pages.
+// Previous changes (v1.7):
 //   - Auto multi-page bundle discount applied via quote_adjustments before
 //     recalculate_quote_from_groups RPC fires.
 //     Tier 1 (active): 2 billable pages → flat $95 (saves $15 vs $55/pg).
@@ -421,7 +426,7 @@ serve(async (req: Request) => {
     }
 
     console.log(`\n${"=".repeat(60)}`);
-    console.log(`process-quote-documents v1.7 — Quote: ${quoteId}`);
+    console.log(`process-quote-documents v1.8 — Quote: ${quoteId}`);
     console.log(`${"=".repeat(60)}`);
 
     const supabaseAdmin = createClient(
@@ -550,6 +555,43 @@ serve(async (req: Request) => {
         unsupportedFiles.push(file);
       }
     }
+
+    // The website quote form uploads .docx files as a pair: the original
+    // .docx (retained for archival) plus a client-side-converted PDF (what
+    // we actually OCR). When both arrive in the same batch with the same
+    // filename stem, skip the .docx — re-extracting its text into the
+    // combined PDF would double-count pages.
+    const pdfStems = new Set(
+      pdfFiles.map((f) => (f.original_filename || "")
+        .toLowerCase()
+        .replace(/\.pdf$/i, "")),
+    );
+    const skippedDocxSiblings: QuoteFile[] = [];
+    const filteredNonPdfFiles: QuoteFile[] = [];
+    for (const f of nonPdfFiles) {
+      const stem = (f.original_filename || "")
+        .toLowerCase()
+        .replace(/\.docx?$/i, "");
+      const isDocx = f.mime_type.includes("wordprocessingml");
+      if (isDocx && stem && pdfStems.has(stem)) {
+        skippedDocxSiblings.push(f);
+      } else {
+        filteredNonPdfFiles.push(f);
+      }
+    }
+    if (skippedDocxSiblings.length > 0) {
+      console.log(
+        `  ⏭️  Skipping ${skippedDocxSiblings.length} .docx file(s) — converted PDF sibling present`,
+      );
+      for (const f of skippedDocxSiblings) {
+        await supabaseAdmin
+          .from("quote_files")
+          .update({ ai_processing_status: "skipped" })
+          .eq("id", f.id);
+      }
+    }
+    nonPdfFiles.length = 0;
+    nonPdfFiles.push(...filteredNonPdfFiles);
 
     console.log(`  📄 PDFs: ${pdfFiles.length}, Non-PDFs: ${nonPdfFiles.length}, Unsupported: ${unsupportedFiles.length}`);
 

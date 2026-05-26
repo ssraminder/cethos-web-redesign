@@ -30,6 +30,13 @@ interface LocalFile {
   storagePath?: string;
   error?: string;
   isImage: boolean;
+  // When the user uploads a .docx we convert to PDF for processing but also
+  // retain the original .docx in storage. These fields point at the retained
+  // .docx so the submit handler can attach both files to the quote.
+  originalDocxPath?: string;
+  originalDocxName?: string;
+  originalDocxSize?: number;
+  originalDocxMimeType?: string;
 }
 
 interface LanguageOption {
@@ -487,16 +494,53 @@ export function EmbeddedCertifiedQuoteForm({
 
   const convertAndUploadDocx = useCallback(async (localFile: LocalFile) => {
     try {
+      // 1. Upload original .docx to uploads/ first so it's retained alongside
+      //    the converted PDF for archival / customer download.
+      const origExt = localFile.name.split('.').pop() || 'docx';
+      const origPath = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${origExt}`;
+      const { error: origUploadErr } = await supabase.storage
+        .from('quote-files')
+        .upload(origPath, localFile.file, { cacheControl: '3600', upsert: false });
+      if (origUploadErr) throw origUploadErr;
+
+      // 2. Convert .docx → PDF via the convert-docx-to-pdf edge function.
       const pdfFile = await convertDocxToPdf(localFile.file);
+
+      // 3. Reflect the conversion in state, carrying the original .docx path
+      //    so the submit handler can attach both to the quote.
       setLocalFiles((prev) =>
         prev.map((f) =>
           f.id === localFile.id
-            ? { ...f, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', status: 'uploading' as const, isImage: false }
+            ? {
+                ...f,
+                file: pdfFile,
+                name: pdfFile.name,
+                size: pdfFile.size,
+                mimeType: 'application/pdf',
+                status: 'uploading' as const,
+                isImage: false,
+                originalDocxPath: origPath,
+                originalDocxName: localFile.name,
+                originalDocxSize: localFile.size,
+                originalDocxMimeType: localFile.mimeType,
+              }
             : f,
         ),
       );
-      // Now upload the converted PDF
-      uploadFile({ ...localFile, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', isImage: false });
+
+      // 4. Upload the converted PDF (this is what downstream OCR consumes).
+      uploadFile({
+        ...localFile,
+        file: pdfFile,
+        name: pdfFile.name,
+        size: pdfFile.size,
+        mimeType: 'application/pdf',
+        isImage: false,
+        originalDocxPath: origPath,
+        originalDocxName: localFile.name,
+        originalDocxSize: localFile.size,
+        originalDocxMimeType: localFile.mimeType,
+      });
     } catch (err: any) {
       setLocalFiles((prev) =>
         prev.map((f) =>
@@ -506,7 +550,7 @@ export function EmbeddedCertifiedQuoteForm({
         ),
       );
     }
-  }, [uploadFile]);
+  }, [uploadFile, supabase]);
 
   const processFiles = useCallback((files: File[]) => {
     const newFiles: LocalFile[] = [];
@@ -555,6 +599,9 @@ export function EmbeddedCertifiedQuoteForm({
     // Only clean up storage for files that were actually uploaded (not images held client-side)
     if (file?.storagePath && !file.isImage) {
       supabase.storage.from('quote-files').remove([file.storagePath]).catch(() => {});
+    }
+    if (file?.originalDocxPath) {
+      supabase.storage.from('quote-files').remove([file.originalDocxPath]).catch(() => {});
     }
     setLocalFiles((prev) => prev.filter((f) => f.id !== fileId));
   }, [localFiles, supabase]);
@@ -619,15 +666,47 @@ export function EmbeddedCertifiedQuoteForm({
 
   const convertAndUploadRefDocx = useCallback(async (localFile: LocalFile) => {
     try {
+      // Retain original .docx in quote-reference-files bucket, then convert.
+      const origExt = localFile.name.split('.').pop() || 'docx';
+      const origPath = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${origExt}`;
+      const { error: origUploadErr } = await supabase.storage
+        .from('quote-reference-files')
+        .upload(origPath, localFile.file, { cacheControl: '3600', upsert: false });
+      if (origUploadErr) throw origUploadErr;
+
       const pdfFile = await convertDocxToPdf(localFile.file);
+
       setRefFiles((prev) =>
         prev.map((f) =>
           f.id === localFile.id
-            ? { ...f, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', status: 'uploading' as const, isImage: false }
+            ? {
+                ...f,
+                file: pdfFile,
+                name: pdfFile.name,
+                size: pdfFile.size,
+                mimeType: 'application/pdf',
+                status: 'uploading' as const,
+                isImage: false,
+                originalDocxPath: origPath,
+                originalDocxName: localFile.name,
+                originalDocxSize: localFile.size,
+                originalDocxMimeType: localFile.mimeType,
+              }
             : f,
         ),
       );
-      uploadRefFile({ ...localFile, file: pdfFile, name: pdfFile.name, size: pdfFile.size, mimeType: 'application/pdf', isImage: false });
+      uploadRefFile({
+        ...localFile,
+        file: pdfFile,
+        name: pdfFile.name,
+        size: pdfFile.size,
+        mimeType: 'application/pdf',
+        isImage: false,
+        originalDocxPath: origPath,
+        originalDocxName: localFile.name,
+        originalDocxSize: localFile.size,
+        originalDocxMimeType: localFile.mimeType,
+      });
     } catch (err: any) {
       setRefFiles((prev) =>
         prev.map((f) =>
@@ -637,7 +716,7 @@ export function EmbeddedCertifiedQuoteForm({
         ),
       );
     }
-  }, [uploadRefFile]);
+  }, [uploadRefFile, supabase]);
 
   const processRefFiles = useCallback((files: File[]) => {
     const newFiles: LocalFile[] = [];
@@ -681,6 +760,9 @@ export function EmbeddedCertifiedQuoteForm({
     const file = refFiles.find((f) => f.id === fileId);
     if (file?.storagePath && !file.isImage) {
       supabase.storage.from('quote-reference-files').remove([file.storagePath]).catch(() => {});
+    }
+    if (file?.originalDocxPath) {
+      supabase.storage.from('quote-reference-files').remove([file.originalDocxPath]).catch(() => {});
     }
     setRefFiles((prev) => prev.filter((f) => f.id !== fileId));
   }, [refFiles, supabase]);
@@ -853,7 +935,11 @@ export function EmbeddedCertifiedQuoteForm({
         });
       }
 
-      // 1b. Non-image translation files already uploaded to uploads/ on add
+      // 1b. Non-image translation files already uploaded to uploads/ on add.
+      //     For .docx uploads, we keep the original .docx in storage AND attach
+      //     the converted PDF (the PDF is what process-quote-documents OCRs;
+      //     the .docx is retained for archival — Phase 0 skips it when a
+      //     same-stem PDF is present in the batch).
       for (const lf of nonImageFiles) {
         if (!lf.storagePath) continue;
         filesToFinalize.push({
@@ -863,6 +949,15 @@ export function EmbeddedCertifiedQuoteForm({
           mime_type: lf.mimeType,
           is_reference: false,
         });
+        if (lf.originalDocxPath && lf.originalDocxName) {
+          filesToFinalize.push({
+            temp_path: lf.originalDocxPath,
+            original_filename: lf.originalDocxName,
+            file_size: lf.originalDocxSize ?? 0,
+            mime_type: lf.originalDocxMimeType || 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            is_reference: false,
+          });
+        }
       }
 
       // 1c. Combine reference images into one PDF, upload to uploads/
@@ -886,7 +981,8 @@ export function EmbeddedCertifiedQuoteForm({
         });
       }
 
-      // 1d. Non-image reference files already uploaded to uploads/ on add
+      // 1d. Non-image reference files already uploaded to uploads/ on add.
+      //     Same .docx-retention treatment as translation files (1b).
       for (const rf of refNonImageFiles) {
         if (!rf.storagePath) continue;
         filesToFinalize.push({
@@ -896,6 +992,15 @@ export function EmbeddedCertifiedQuoteForm({
           mime_type: rf.mimeType,
           is_reference: true,
         });
+        if (rf.originalDocxPath && rf.originalDocxName) {
+          filesToFinalize.push({
+            temp_path: rf.originalDocxPath,
+            original_filename: rf.originalDocxName,
+            file_size: rf.originalDocxSize ?? 0,
+            mime_type: rf.originalDocxMimeType || 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            is_reference: true,
+          });
+        }
       }
 
       // 2. Create the draft quote via the customer-quote-create edge function
