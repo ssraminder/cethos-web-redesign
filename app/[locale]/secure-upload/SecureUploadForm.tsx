@@ -20,20 +20,9 @@ import { Input, Textarea } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 
 const MAX_FILES = 25
-const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100 MB
-const ACCEPTED_EXTENSIONS =
-  '.pdf,.jpg,.jpeg,.png,.webp,.tif,.tiff,.heic,.heif,.doc,.docx'
-const ACCEPTED_MIME_TYPES = new Set([
-  'application/pdf',
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/tiff',
-  'image/heic',
-  'image/heif',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/msword',
-])
+const MAX_FILE_SIZE = 500 * 1024 * 1024 // 500 MB
+// No file-type allowlist: the form is OTP-gated and every upload is
+// virus-scanned server-side. Restricting formats only added friction.
 
 type Channel = 'email' | 'phone'
 type UploadStatus = 'pending' | 'uploading' | 'success' | 'error'
@@ -65,22 +54,6 @@ function newGroupId(): string {
   return `g-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
-function inferMimeOk(name: string): boolean {
-  const ext = name.split('.').pop()?.toLowerCase()
-  return [
-    'pdf',
-    'jpg',
-    'jpeg',
-    'png',
-    'webp',
-    'tif',
-    'tiff',
-    'heic',
-    'heif',
-    'doc',
-    'docx',
-  ].includes(ext || '')
-}
 
 export function SecureUploadForm() {
   // Step 1: identity
@@ -230,9 +203,7 @@ export function SecureUploadForm() {
   )
 
   const validateFile = (file: File): string | null => {
-    if (!ACCEPTED_MIME_TYPES.has(file.type) && !inferMimeOk(file.name))
-      return `${file.name}: file type not allowed`
-    if (file.size > MAX_FILE_SIZE) return `${file.name}: exceeds 100 MB`
+    if (file.size > MAX_FILE_SIZE) return `${file.name}: exceeds 500 MB`
     if (file.size === 0) return `${file.name}: empty file`
     return null
   }
@@ -955,7 +926,7 @@ function DocsStep(props: {
             Documents <span className="text-red-500">*</span>
           </label>
           <span className="text-xs text-slate-500">
-            {totalFiles}/{MAX_FILES} files · 100 MB each max
+            {totalFiles}/{MAX_FILES} files · 500 MB each max
           </span>
         </div>
         {errors.files && (
@@ -1100,7 +1071,6 @@ function FolderCard(props: {
         <input
           ref={inputRef}
           type="file"
-          accept={ACCEPTED_EXTENSIONS}
           multiple
           onChange={(e) => {
             if (e.target.files) onAddFiles(Array.from(e.target.files))
@@ -1115,7 +1085,7 @@ function FolderCard(props: {
           or drag and drop
         </p>
         <p className="text-xs text-slate-500 mt-0.5">
-          PDF, images, Word documents
+          Any file type up to 500 MB each
         </p>
       </div>
 
