@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import TranscriptionQuoteForm from '@/components/forms/TranscriptionQuoteForm';
+import TranscriptionUploadWidget from '@/components/forms/TranscriptionUploadWidget';
 import { FAQJsonLd } from '@/components/JsonLd';
 
 // Legal transcription services detail (keep hardcoded - detailed data not fully in translations)
@@ -402,6 +403,44 @@ export default function TranscriptionPageContent() {
         </div>
       </section>
 
+      {/* INSTANT AI TRANSCRIPTION SECTION */}
+      <section id="ai-transcription" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center px-4 py-1.5 bg-[#0891B2]/10 text-[#0891B2] text-sm font-semibold rounded-full mb-4">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Instant AI Transcription
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340] mb-4">
+              Try Free AI Transcription — Instant Results
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Upload any audio or video file and get an AI-powered transcript in seconds.
+              Free for files up to 1 minute — no account needed. Supports 99+ languages with automatic detection.
+            </p>
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <TranscriptionUploadWidget />
+          </div>
+          <div className="mt-12 grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto text-center">
+            <div>
+              <div className="text-2xl font-bold text-[#0891B2]">99+</div>
+              <p className="text-sm text-gray-600">Languages Supported</p>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-[#0891B2]">5 Free/Day</div>
+              <p className="text-sm text-gray-600">No Account Required</p>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-[#0891B2]">$0.15/min</div>
+              <p className="text-sm text-gray-600">Longer Files (CAD)</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* LEGAL TRANSCRIPTION HIGHLIGHT SECTION */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -674,16 +713,20 @@ export default function TranscriptionPageContent() {
                 <p className="text-sm text-gray-600">{tPricing('volume_cta')} <Link href="/contact" className="text-[#0891B2] hover:text-[#06B6D4] font-medium">{tPricing('volume_link')}</Link></p>
               </div>
 
-              {/* AI-Powered Coming Soon Notice */}
+              {/* AI-Powered Transcription CTA */}
               <div className="mt-6 pt-6 border-t border-[#0891B2]/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <svg className="w-5 h-5 text-[#0891B2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  <span className="text-sm font-semibold text-gray-500">{tPricing('ai_heading')}</span>
-                  <span className="px-2 py-0.5 bg-gray-200 text-gray-600 text-xs font-semibold rounded-full">{tPricing('ai_badge')}</span>
+                  <span className="text-sm font-semibold text-[#0891B2]">AI Transcription</span>
+                  <span className="px-2 py-0.5 bg-[#0891B2] text-white text-xs font-semibold rounded-full">Live</span>
                 </div>
-                <p className="text-xs text-gray-500">{tPricing('ai_desc')}</p>
+                <p className="text-xs text-gray-600 mb-3">Instant AI-powered transcription from $0.15/min. Free for files up to 1 minute.</p>
+                <a href="#ai-transcription" className="inline-flex items-center text-sm font-semibold text-[#0891B2] hover:text-[#06B6D4]">
+                  Try it free
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </a>
               </div>
             </div>
           </div>
