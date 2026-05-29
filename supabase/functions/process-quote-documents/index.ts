@@ -290,8 +290,12 @@ async function notifyStaffReviewRequired(
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if (!supabaseUrl || !serviceRoleKey) return;
 
+    // Re-pointed 2026-05-28 from the zombie `send-staff-notification` (source
+    // unrecoverable per CLAUDE.md feedback_supabase_bundle_loss_pattern) to
+    // the new in-tree `notify-staff-new-lead`. Same payload contract so this
+    // is a URL-only swap.
     const response = await fetch(
-      `${supabaseUrl}/functions/v1/send-staff-notification`,
+      `${supabaseUrl}/functions/v1/notify-staff-new-lead`,
       {
         method: "POST",
         headers: {
