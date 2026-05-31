@@ -1055,7 +1055,15 @@ export function EmbeddedCertifiedQuoteForm({
         }
       }
 
-      // 4. Fire AI processing (fire and forget)
+      // 4. Fire AI processing (fire and forget).
+      // keepalive: true tells the browser to hold the connection open even
+      // if the page navigates away before the response arrives. Without it,
+      // the redirect to portal.cethos.com/quote at step 6 below cancels this
+      // cross-origin request before it reaches the server — the quote ends
+      // up with files uploaded but OCR never triggered, processing_status
+      // stuck at 'pending', and no ocr_batches row is ever created. Same
+      // fix as portal/Step1Upload.tsx (see comment there).
+      // keepalive caps the body at 64 KB; our payload (~80 B) is well under.
       fetch(`${supabaseUrl}/functions/v1/process-quote-documents`, {
         method: 'POST',
         headers: {
@@ -1063,6 +1071,7 @@ export function EmbeddedCertifiedQuoteForm({
           Authorization: `Bearer ${supabaseAnonKey}`,
         },
         body: JSON.stringify({ quoteId }),
+        keepalive: true,
       }).catch((err) => {
         console.warn('process-quote-documents kickoff failed (non-blocking):', err);
       });
