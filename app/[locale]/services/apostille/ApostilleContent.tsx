@@ -187,16 +187,17 @@ export default function ApostilleContent() {
   ]
 
   const pricingTable = [
-    { service: 'Apostille (out-of-Calgary, courier both ways included)', price: 'From $149', turnaround: 'Province-dependent (see turnaround guide)' },
-    { service: 'Apostille (Calgary drop-off, no inbound courier)', price: 'From $99', turnaround: 'Province-dependent (see turnaround guide)' },
+    { service: 'Apostille — Calgary drop-off & pickup (1st document)', price: 'From $159', turnaround: 'Province-dependent (see turnaround guide)' },
+    { service: 'Apostille — Alberta with door-to-door courier (1st document)', price: 'From $200', turnaround: 'Province-dependent + 1–3 days courier' },
+    { service: 'Apostille — Outside Alberta (1st document)', price: 'From $159 + courier at cost', turnaround: 'Province-dependent + courier transit' },
+    { service: 'Each additional document (same order)', price: '$50 per doc', turnaround: 'No extra time' },
     { service: 'Notarization Add-On', price: 'From $35', turnaround: 'Built into turnaround' },
     { service: 'Translation + Apostille Bundle', price: 'From $199', turnaround: 'Same as apostille turnaround' },
-    { service: 'Multi-Document (5+ docs)', price: '10% off per doc', turnaround: 'Varies by volume' },
     { service: 'International Return Courier', price: 'Quote on request', turnaround: 'Adds 2–7 days' },
     { service: 'Embassy Legalization (non-Hague)', price: 'Quote on request', turnaround: '4–8 weeks' },
   ]
 
-  const pricingFooter = 'Prices include domestic tracked courier both ways for Canadian addresses. Government fees and embassy fees (where applicable) are billed at cost. Get an exact quote in 60 seconds.'
+  const pricingFooter = 'Government fees ($25 per document) and embassy fees (where applicable) are billed at cost. Calgary clients save the customer courier charge by dropping off and picking up at our 421 7 Ave SW office. Final price confirmed on your free 15-min consultation.'
 
   const turnaroundTable = [
     { path: 'Alberta-issued (AB authority)', calgary: '2–2.5 weeks', other: '2.5–3.5 weeks' },
@@ -231,7 +232,7 @@ export default function ApostilleContent() {
     {
       question: 'Is the courier cost included?',
       answer:
-        'Yes. Our pricing is all-inclusive of domestic tracked courier both ways for orders shipping within Canada. International return courier is quoted separately because rates vary by destination country.',
+        'Courier to and from the issuing authority (Global Affairs Canada or the provincial Competent Authority) is included in every price. Customer-side courier — getting your documents to us and the apostilled package back to you — is handled at cost: typically $40 round-trip within Alberta (built into the Alberta with door-to-door courier price), or billed at actuals for other provinces. International return courier is quoted separately. Walk-in clients at our Calgary office (421 7 Avenue SW, Floor 30) pay no customer courier charge.',
     },
     {
       question: 'Do I need an apostille or a translation (or both)?',
@@ -350,11 +351,11 @@ export default function ApostilleContent() {
   const heroBadge = 'Hague Convention · Canada-Wide Concierge'
   const heroHeading = 'Apostille Services Canada — We Handle the Whole Process'
   const heroDesc =
-    'Canada-wide concierge service for Hague Convention apostille. We collect your documents, handle notarization, submit to the right Competent Authority on your behalf, and return your authenticated documents. From any province in Canada — tracked courier both ways.'
+    'Canada-wide concierge service for Hague Convention apostille. We collect your documents, handle notarization, submit to the right Competent Authority on your behalf, and return your authenticated documents. From any province in Canada — tracked end-to-end.'
   const heroDescConsult =
     'Not sure where to start? Book a free 15-minute call with a Cethos apostille specialist to discuss your situation — no commitment, no quote needed.'
-  const priceBadge = 'From $149'
-  const priceUnit = 'all-inclusive · domestic courier both ways'
+  const priceBadge = 'From $159'
+  const priceUnit = '1st document · Calgary drop-off · government fees at cost'
 
   return (
     <>
@@ -464,7 +465,7 @@ export default function ApostilleContent() {
                   </span>
                   <span className="flex items-center gap-2">
                     <Truck className="w-5 h-5 text-[#0891B2]" />
-                    Tracked courier both ways
+                    Tracked end-to-end
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[#4B5563]">
@@ -636,10 +637,10 @@ export default function ApostilleContent() {
           </div>
           <div className="max-w-3xl mx-auto space-y-4 text-slate-700 leading-relaxed">
             <p>
-              Whether you are in Toronto, Vancouver, Montreal, Halifax, or anywhere else in Canada, the process is the same: we email you a prepaid Purolator label, you drop your documents at any counter, we route them to the correct issuing authority, and we courier the authenticated documents back. All tracked, all included in the price.
+              Whether you are in Toronto, Vancouver, Montreal, Halifax, or anywhere else in Canada, the process is the same: we arrange a prepaid Purolator label, you drop your documents at any counter, we route them to the correct issuing authority, and we courier the authenticated documents back. All tracked end-to-end. Customer-side courier is at cost — typically $40 round-trip within Alberta, billed at actuals elsewhere.
             </p>
             <p>
-              <strong>Calgary clients:</strong> drop off in person at 421 7 Avenue SW, Floor 30 to save the inbound courier cost.
+              <strong>Calgary clients:</strong> drop off and pick up in person at 421 7 Avenue SW, Floor 30 to skip the customer courier charge entirely.
             </p>
             <p>
               <strong>Sending the apostille internationally?</strong> We use FedEx International with full tracking, quoted separately based on destination country.
@@ -910,7 +911,7 @@ export default function ApostilleContent() {
         <Container>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0C2340] mb-4">Apostille Pricing</h2>
-            <p className="text-slate-600">All-inclusive pricing. Domestic courier both ways included. Final price confirmed on your free 15-min consultation.</p>
+            <p className="text-slate-600">Transparent pricing. Courier to/from the issuing authority included. Final price confirmed on your free 15-min consultation.</p>
           </div>
           <div className="max-w-2xl mx-auto">
             <Card className="overflow-hidden">
@@ -1044,7 +1045,7 @@ export default function ApostilleContent() {
               </span>
               <span className="flex items-center gap-2">
                 <Truck className="w-4 h-4" />
-                Tracked Courier Both Ways
+                Tracked End-to-End
               </span>
               <span className="flex items-center gap-2">
                 <Globe className="w-4 h-4" />
