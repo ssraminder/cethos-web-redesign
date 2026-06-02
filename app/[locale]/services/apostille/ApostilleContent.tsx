@@ -355,7 +355,7 @@ export default function ApostilleContent() {
   const heroDescConsult =
     'Not sure where to start? Book a free 15-minute call with a Cethos apostille specialist to discuss your situation — no commitment, no quote needed.'
   const priceBadge = 'From $159'
-  const priceUnit = '1st document · Calgary drop-off · government fees at cost'
+  const priceUnit = '1st document · Calgary drop-off'
 
   return (
     <>
@@ -410,10 +410,10 @@ export default function ApostilleContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#0891B2]/10 rounded-full mb-6"
+                className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2 bg-[#0891B2]/10 rounded-3xl mb-6 max-w-full"
               >
-                <span className="text-[#0891B2] font-bold text-lg">{priceBadge}</span>
-                <span className="text-slate-600">{priceUnit}</span>
+                <span className="text-[#0891B2] font-bold text-lg whitespace-nowrap">{priceBadge}</span>
+                <span className="text-slate-600 text-sm">{priceUnit}</span>
               </motion.div>
 
               <motion.div
