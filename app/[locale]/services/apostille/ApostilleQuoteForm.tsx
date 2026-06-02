@@ -681,8 +681,8 @@ export function ApostilleQuoteForm({
 
       <div className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-slate-600">
         <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />Hague Convention</span>
-        <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />Tracked courier both ways</span>
-        <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />From $149</span>
+        <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />Tracked end-to-end</span>
+        <span className="flex items-center gap-1"><CheckCircle className="w-3.5 h-3.5 text-green-500" />From $159</span>
       </div>
 
       <div className="mt-5 pt-4 border-t border-slate-200 text-center">
