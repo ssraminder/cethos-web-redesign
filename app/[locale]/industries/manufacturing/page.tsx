@@ -4,8 +4,8 @@ import ManufacturingPageContent from './ManufacturingPageContent'
 
 export const metadata: Metadata = {
   title: 'Manufacturing Translation Services | Technical & Industrial',
-  description: 'Expert manufacturing translation for technical manuals, safety docs, quality systems & machinery documentation. ISO compliant. 50+ languages. Industry specialists.',
-  keywords: ['manufacturing translation', 'technical manual translation', 'industrial translation', 'machinery documentation', 'ISO translation', 'quality documentation translation'],
+  description: 'Expert manufacturing translation for technical manuals, safety docs, quality systems & machinery documentation. Rigorous multi-step quality process. 50+ languages. Industry specialists.',
+  keywords: ['manufacturing translation', 'technical manual translation', 'industrial translation', 'machinery documentation', 'quality documentation translation'],
   alternates: {
     canonical: 'https://cethos.com/industries/manufacturing',
   },
@@ -19,15 +19,15 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: 'What manufacturing documents do you translate?',
-    answer: 'We translate technical manuals, user guides, safety documentation, MSDS sheets, ISO quality documents, training materials, engineering specifications, equipment documentation, and patents.',
+    answer: 'We translate technical manuals, user guides, safety documentation, MSDS sheets, quality management documents, training materials, engineering specifications, equipment documentation, and patents.',
   },
   {
     question: 'Do you work with CAD and technical drawings?',
     answer: 'Yes, we can extract and translate text from CAD files, technical drawings, and engineering diagrams. We work with common formats including AutoCAD, SolidWorks, and other CAD software.',
   },
   {
-    question: 'Are your translations ISO compliant?',
-    answer: 'Yes, our translations support ISO 9001, ISO 14001, and other quality management standards. We follow ISO 17100 translation quality standards and maintain full traceability.',
+    question: 'How do you ensure translation quality?',
+    answer: 'Every project follows a rigorous multi-step process — translation, editing, and proofreading by separate qualified linguists — supporting your quality management and traceability requirements with full documentation and audit trails.',
   },
   {
     question: 'Can you handle safety-critical content?',

@@ -29,7 +29,7 @@ const translations: TranslationSeed[] = [
   { namespace: 'about.hero', key: 'trust_founded', value: 'Founded 2015' },
   { namespace: 'about.hero', key: 'trust_languages', value: '200+ Languages' },
   { namespace: 'about.hero', key: 'trust_offices', value: 'Offices in Canada, UAE & India' },
-  { namespace: 'about.hero', key: 'trust_iso', value: 'ISO 17100 Compliant' },
+  { namespace: 'about.hero', key: 'trust_iso', value: 'TEP Quality Process' },
 
   // =============================================
   // ABOUT PAGE - Story
@@ -214,8 +214,11 @@ const translations: TranslationSeed[] = [
   { namespace: 'about.quality', key: 'description', value: 'Our processes align with international standards for translation quality, data security, and regulatory compliance.' },
   { namespace: 'about.quality', key: 'status_compliant', value: 'Compliant' },
   { namespace: 'about.quality', key: 'status_followed', value: 'Followed' },
-  { namespace: 'about.quality', key: 'iso17100_desc', value: 'Translation services quality standard' },
-  { namespace: 'about.quality', key: 'iso9001_desc', value: 'Quality management systems' },
+  { namespace: 'about.quality', key: 'status_standard', value: 'Standard Practice' },
+  { namespace: 'about.quality', key: 'human_name', value: 'Human-Only Translation' },
+  { namespace: 'about.quality', key: 'human_desc', value: 'All translations performed by qualified human linguists — never raw machine output' },
+  { namespace: 'about.quality', key: 'tep_name', value: 'TEP Workflow' },
+  { namespace: 'about.quality', key: 'tep_desc', value: 'Translation, Editing & Proofreading by separate qualified reviewers' },
   { namespace: 'about.quality', key: 'gcp_desc', value: 'Good Clinical Practice' },
   { namespace: 'about.quality', key: 'ispor_name', value: 'ISPOR Guidelines' },
   { namespace: 'about.quality', key: 'ispor_desc', value: 'Linguistic validation standards' },
@@ -233,7 +236,7 @@ const translations: TranslationSeed[] = [
   { namespace: 'services.hero', key: 'breadcrumb_home', value: 'Home' },
   { namespace: 'services.hero', key: 'breadcrumb_services', value: 'Services' },
   { namespace: 'services.hero', key: 'heading', value: 'Professional Translation Services' },
-  { namespace: 'services.hero', key: 'description', value: 'From life sciences to certified immigration documents, we deliver accurate, culturally-adapted translations in 200+ languages. ISO 17100 compliant with specialized expertise across industries.' },
+  { namespace: 'services.hero', key: 'description', value: 'From life sciences to certified immigration documents, we deliver accurate, culturally-adapted translations in 200+ languages — backed by a rigorous TEP quality process and specialized expertise across industries.' },
 
   // =============================================
   // SERVICES LANDING PAGE - Service List
@@ -269,9 +272,9 @@ const translations: TranslationSeed[] = [
   { namespace: 'services.whychoose', key: 'specialists_value', value: '5,000+' },
   { namespace: 'services.whychoose', key: 'specialists_label', value: 'Specialists' },
   { namespace: 'services.whychoose', key: 'specialists_desc', value: 'Native-speaking linguists and subject matter experts' },
-  { namespace: 'services.whychoose', key: 'iso_value', value: 'ISO 17100' },
-  { namespace: 'services.whychoose', key: 'iso_label', value: 'Compliant' },
-  { namespace: 'services.whychoose', key: 'iso_desc', value: 'Quality management systems for translation services' },
+  { namespace: 'services.whychoose', key: 'iso_value', value: 'TEP' },
+  { namespace: 'services.whychoose', key: 'iso_label', value: 'Quality Process' },
+  { namespace: 'services.whychoose', key: 'iso_desc', value: 'Translation, editing, and proofreading by separate qualified linguists' },
   { namespace: 'services.whychoose', key: 'support_value', value: '24/7' },
   { namespace: 'services.whychoose', key: 'support_label', value: 'Support' },
   { namespace: 'services.whychoose', key: 'support_desc', value: 'Project managers available around the clock' },
@@ -413,7 +416,7 @@ const translations: TranslationSeed[] = [
   { namespace: 'lifesciences.index', key: 'hero_description', value: 'End-to-end language solutions for pharma, biotech, and medical device companies. ISPOR-compliant linguistic validation, clinical trial translation, and regulatory submissions in 200+ languages.' },
   { namespace: 'lifesciences.index', key: 'hero_cta_quote', value: 'Get a Quote' },
   { namespace: 'lifesciences.index', key: 'hero_cta_phone', value: 'Call (587) 600-0786' },
-  { namespace: 'lifesciences.index', key: 'hero_badge_iso', value: 'ISO 17100 Certified' },
+  { namespace: 'lifesciences.index', key: 'hero_badge_iso', value: 'GCP-Trained Linguists' },
   { namespace: 'lifesciences.index', key: 'hero_badge_ispor', value: 'ISPOR-Compliant' },
   { namespace: 'lifesciences.index', key: 'hero_badge_gcp', value: 'GCP Trained Linguists' },
   { namespace: 'lifesciences.index', key: 'hero_stat1_value', value: '200+' },
@@ -520,8 +523,8 @@ const translations: TranslationSeed[] = [
   // Compliance Standards
   { namespace: 'lifesciences.index', key: 'compliance_heading', value: 'Compliance & Quality Standards' },
   { namespace: 'lifesciences.index', key: 'compliance_description', value: 'Every translation is produced in accordance with the industry\'s most demanding quality and regulatory frameworks.' },
-  { namespace: 'lifesciences.index', key: 'compliance_std_1', value: 'ISO 17100:2015' },
-  { namespace: 'lifesciences.index', key: 'compliance_std_2', value: 'ISO 9001:2015' },
+  { namespace: 'lifesciences.index', key: 'compliance_std_1', value: 'TEP Quality Workflow' },
+  { namespace: 'lifesciences.index', key: 'compliance_std_2', value: 'EU IVDR 2017/746' },
   { namespace: 'lifesciences.index', key: 'compliance_std_3', value: 'ICH GCP (E6 R2)' },
   { namespace: 'lifesciences.index', key: 'compliance_std_4', value: 'ISPOR Guidelines' },
   { namespace: 'lifesciences.index', key: 'compliance_std_5', value: '21 CFR Part 11' },
@@ -549,14 +552,14 @@ const translations: TranslationSeed[] = [
   { namespace: 'lifesciences.index', key: 'faq_q4', value: 'Which regulatory frameworks do you support?' },
   { namespace: 'lifesciences.index', key: 'faq_a4', value: 'We support submissions to all major regulatory bodies including FDA, EMA, Health Canada, MHRA, PMDA, NMPA, Swissmedic, and TGA. Our translations comply with ICH GCP, 21 CFR Part 11, EU MDR, and other applicable frameworks.' },
   { namespace: 'lifesciences.index', key: 'faq_q5', value: 'Do you provide certified translations for regulatory submissions?' },
-  { namespace: 'lifesciences.index', key: 'faq_a5', value: 'Yes. We provide certified translations with declarations of accuracy for all regulatory submissions. Our process is ISO 17100-compliant, and we maintain full audit trails including translator qualifications, revision history, and quality assurance records.' },
+  { namespace: 'lifesciences.index', key: 'faq_a5', value: 'Yes. We provide certified translations with declarations of accuracy for all regulatory submissions. Our quality processes follow internationally recognized standards for translation, and we maintain full audit trails including translator qualifications, revision history, and quality assurance records.' },
 
   // CTA
   { namespace: 'lifesciences.index', key: 'cta_heading', value: 'Ready to Start Your Life Sciences Project?' },
   { namespace: 'lifesciences.index', key: 'cta_description', value: 'Contact our specialized life sciences team for a consultation. We\'ll help you navigate regulatory requirements and deliver translations that meet the highest quality standards.' },
   { namespace: 'lifesciences.index', key: 'cta_cta_phone', value: 'Call (587) 600-0786' },
   { namespace: 'lifesciences.index', key: 'cta_cta_contact', value: 'Contact Us' },
-  { namespace: 'lifesciences.index', key: 'cta_footer_text', value: 'ISO 17100 certified. ISPOR-compliant methodology. FDA, EMA & Health Canada expertise.' },
+  { namespace: 'lifesciences.index', key: 'cta_footer_text', value: 'ISPOR-compliant methodology. GCP-trained linguists. FDA, EMA & Health Canada expertise.' },
 
   // =============================================
   // CAREERS PAGE - Hero

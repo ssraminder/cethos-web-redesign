@@ -38,7 +38,7 @@ export async function generateMetadata({
       default: 'Cethos Solutions Inc. | Professional Translation Services',
       template: '%s | Cethos',
     },
-    description: 'Expert translation services in 200+ languages. Specializing in life sciences, linguistic validation, clinical trials, and certified translations. ISO 17100 compliant. Serving Canada and clients worldwide.',
+    description: 'Expert translation services in 200+ languages. Specializing in life sciences, linguistic validation, clinical trials, and certified translations. Rigorous multi-step quality process. Serving Canada and clients worldwide.',
     keywords: ['translation services', 'localization', 'language services', 'certified translation', 'life sciences translation', 'linguistic validation', 'clinical trial translation', 'software localization'],
     authors: [{ name: 'Cethos Solutions Inc.' }],
     creator: 'Cethos Solutions Inc.',

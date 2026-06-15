@@ -24,7 +24,7 @@ BEGIN
     (ns_id, 'hero.cta_quote', 0, 'en', 'Get a Free Quote', 'published'),
     (ns_id, 'hero.cta_documents', 0, 'en', 'View Document Types', 'published'),
     (ns_id, 'hero.badge_gcp', 0, 'en', 'GCP Compliant', 'published'),
-    (ns_id, 'hero.badge_iso', 0, 'en', 'ISO 17100 Certified', 'published'),
+    (ns_id, 'hero.badge_iso', 0, 'en', 'TEP Quality Process', 'published'),
     (ns_id, 'hero.badge_languages', 0, 'en', '180+ Languages', 'published'),
     (ns_id, 'hero.badge_support', 0, 'en', '24/7 Support', 'published'),
     -- Introduction
@@ -692,7 +692,7 @@ BEGIN
     (ns_id, 'hero.subtitle', 0, 'en', 'Expert translation of CTD modules, regulatory submissions, product labeling, and correspondence for global regulatory authorities.', 'published'),
     (ns_id, 'hero.cta_quote', 0, 'en', 'Get a Free Quote', 'published'),
     (ns_id, 'hero.cta_ctd', 0, 'en', 'CTD Module Coverage', 'published'),
-    (ns_id, 'hero.badge_iso', 0, 'en', 'ISO 17100 Certified', 'published'),
+    (ns_id, 'hero.badge_iso', 0, 'en', 'TEP Quality Process', 'published'),
     (ns_id, 'hero.badge_agencies', 0, 'en', '50+ Regulatory Agencies', 'published'),
     (ns_id, 'hero.badge_ctd', 0, 'en', 'Full CTD Coverage', 'published'),
     (ns_id, 'hero.badge_languages', 0, 'en', '180+ Languages', 'published'),

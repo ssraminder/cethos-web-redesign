@@ -41,6 +41,11 @@ export default function LocationPageTemplate({
 
   const t = useTranslations('locations.template');
 
+  // next-intl parses `<strong>` in messages as rich-text tags; for the prose
+  // blocks rendered via dangerouslySetInnerHTML we use t.markup() with a strong
+  // handler so the bold tags render instead of falling back to the message key.
+  const strong = (chunks: string) => `<strong>${chunks}</strong>`;
+
   // Certified subpages for internal linking
   const certifiedServices = [
     { label: t('cert_svc1'), href: '/services/certified/immigration-translation-services' },
@@ -225,8 +230,8 @@ export default function LocationPageTemplate({
             {t('certified_heading', { city })}
           </h2>
           <div className="prose prose-lg max-w-none text-gray-700">
-            <p dangerouslySetInnerHTML={{ __html: t('certified_p1', { city }) }} />
-            <p dangerouslySetInnerHTML={{ __html: t('certified_p2') }} />
+            <p dangerouslySetInnerHTML={{ __html: t.markup('certified_p1', { city, strong }) }} />
+            <p dangerouslySetInnerHTML={{ __html: t.markup('certified_p2', { strong }) }} />
             {uniqueFeatures.length > 0 && (
               <ul className="mt-4">
                 {uniqueFeatures.map((feature, index) => (
@@ -253,7 +258,7 @@ export default function LocationPageTemplate({
             {t('immigration_heading', { city })}
           </h2>
           <div className="prose prose-lg max-w-none text-gray-700 mb-8">
-            <p dangerouslySetInnerHTML={{ __html: t('immigration_desc', { city, pnpName }) }} />
+            <p dangerouslySetInnerHTML={{ __html: t.markup('immigration_desc', { city, pnpName, strong }) }} />
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -298,8 +303,8 @@ export default function LocationPageTemplate({
                 {t('birth_heading', { city })}
               </h2>
               <div className="prose prose-lg text-gray-700">
-                <p dangerouslySetInnerHTML={{ __html: t('birth_p1', { city }) }} />
-                <p dangerouslySetInnerHTML={{ __html: t('birth_p2') }} />
+                <p dangerouslySetInnerHTML={{ __html: t.markup('birth_p1', { city, strong }) }} />
+                <p dangerouslySetInnerHTML={{ __html: t.markup('birth_p2', { strong }) }} />
               </div>
               <div className="mt-6">
                 <Link
@@ -357,8 +362,8 @@ export default function LocationPageTemplate({
                 {t('marriage_heading', { city })}
               </h2>
               <div className="prose prose-lg text-gray-700">
-                <p dangerouslySetInnerHTML={{ __html: t('marriage_p1', { city }) }} />
-                <p dangerouslySetInnerHTML={{ __html: t('marriage_p2') }} />
+                <p dangerouslySetInnerHTML={{ __html: t.markup('marriage_p1', { city, strong }) }} />
+                <p dangerouslySetInnerHTML={{ __html: t.markup('marriage_p2', { strong }) }} />
               </div>
               <div className="mt-6">
                 <Link
@@ -380,7 +385,7 @@ export default function LocationPageTemplate({
           <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
             {t('documents_heading', { city })}
           </h2>
-          <p className="text-lg text-gray-700 mb-8 max-w-3xl" dangerouslySetInnerHTML={{ __html: t('documents_desc', { city }) }} />
+          <p className="text-lg text-gray-700 mb-8 max-w-3xl" dangerouslySetInnerHTML={{ __html: t.markup('documents_desc', { city, strong }) }} />
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {documents.map((doc, index) => (
@@ -535,7 +540,7 @@ export default function LocationPageTemplate({
           <h2 className="text-3xl font-bold text-[#0C2340] mb-6">
             {t('languages_heading', { city })}
           </h2>
-          <p className="text-lg text-gray-700 mb-8" dangerouslySetInnerHTML={{ __html: t('languages_desc', { city }) }} />
+          <p className="text-lg text-gray-700 mb-8" dangerouslySetInnerHTML={{ __html: t.markup('languages_desc', { city, strong }) }} />
 
           <div className="flex flex-wrap gap-3">
             {topLanguages.map((lang, index) => (

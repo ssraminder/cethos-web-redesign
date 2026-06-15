@@ -3,7 +3,7 @@ import ServicesPageContent from './ServicesPageContent'
 
 export const metadata: Metadata = {
   title: 'Professional Translation Services | 200+ Languages',
-  description: 'Life sciences, certified, website, software, and legal translation services in 200+ languages. ISO 17100 compliant. Same-day available.',
+  description: 'Life sciences, certified, website, software, and legal translation services in 200+ languages. Rigorous multi-step quality process. Same-day available.',
   keywords: ['translation services', 'localization services', 'life sciences translation', 'linguistic validation', 'certified translation', 'software localization', 'interpretation services', 'transcription services'],
   alternates: {
     canonical: 'https://cethos.com/services',
