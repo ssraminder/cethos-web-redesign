@@ -4,7 +4,7 @@ import ClinicalTrialsContent from './ClinicalTrialsContent'
 
 export const metadata: Metadata = {
   title: 'Clinical Trial Translation Services | Protocols, ICFs, CRFs',
-  description: 'Specialized clinical trial document translation including protocols, ICFs, CRFs, patient materials, and site documentation. GCP-compliant with ISO 17100 compliant processes.',
+  description: 'Specialized clinical trial document translation including protocols, ICFs, CRFs, patient materials, and site documentation. GCP-compliant with rigorous multi-step quality processes.',
   keywords: ['clinical trial translation', 'protocol translation', 'ICF translation', 'informed consent translation', 'CRF translation', 'GCP compliant'],
   openGraph: {
     title: 'Clinical Trial Translation Services',

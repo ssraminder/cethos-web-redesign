@@ -4,7 +4,7 @@ import RegulatoryAffairsContent from './RegulatoryAffairsContent'
 
 export const metadata: Metadata = {
   title: 'Regulatory Affairs Translation | CTD, SmPC, PIL Translation',
-  description: 'Expert regulatory translation for CTD Modules 1-5, SmPCs, PILs, and IMP labels. FDA, EMA, PMDA, Health Canada submissions. ISO 17100 compliant processes.',
+  description: 'Expert regulatory translation for CTD Modules 1-5, SmPCs, PILs, and IMP labels. FDA, EMA, PMDA, Health Canada submissions. Rigorous multi-step quality processes.',
   keywords: ['regulatory translation', 'CTD translation', 'SmPC translation', 'PIL translation', 'FDA submission', 'EMA submission', 'regulatory affairs'],
   openGraph: {
     title: 'Regulatory Affairs Translation',

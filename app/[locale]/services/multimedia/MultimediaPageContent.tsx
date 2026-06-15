@@ -44,6 +44,8 @@ export default function MultimediaPageContent() {
   const tHero = useTranslations('service.multimedia.hero')
   const tServices = useTranslations('service.multimedia.services')
   const tWhy = useTranslations('service.multimedia.why')
+  const tHow = useTranslations('service.multimedia.how')
+  const tFaq = useTranslations('service.multimedia.faq')
   const tCta = useTranslations('service.multimedia.cta')
 
   return (
@@ -157,6 +159,46 @@ export default function MultimediaPageContent() {
                   <p className="text-slate-600">{tWhy(item.descKey)}</p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[1200px] mx-auto px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340] mb-4">{tHow('heading')}</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">{tHow('description')}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i}>
+                <div className="w-12 h-12 rounded-full bg-[#0891B2] text-white font-bold flex items-center justify-center mb-4">{i}</div>
+                <h3 className="text-lg font-semibold text-[#0C2340] mb-2">{tHow(`step${i}_title`)}</h3>
+                <p className="text-slate-600">{tHow(`step${i}_desc`)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-[800px] mx-auto px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340] mb-4">{tFaq('heading')}</h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">{tFaq('description')}</p>
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <details key={i} className="group bg-white rounded-xl border border-slate-100 p-6">
+                <summary className="flex justify-between items-center cursor-pointer list-none font-semibold text-[#0C2340]">
+                  {tFaq(`q${i}`)}
+                  <span className="ml-4 text-2xl leading-none text-[#0891B2] transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-4 text-slate-600 leading-relaxed">{tFaq(`a${i}`)}</p>
+              </details>
             ))}
           </div>
         </div>

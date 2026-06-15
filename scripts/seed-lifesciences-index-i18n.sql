@@ -22,7 +22,7 @@ VALUES
   ((SELECT id FROM ns), 'hero_description', 0, 'en', 'End-to-end language solutions for pharma, biotech, and medical device companies. ISPOR-compliant linguistic validation, clinical trial translation, and regulatory submissions in 200+ languages.', 'published'),
   ((SELECT id FROM ns), 'hero_cta_quote', 0, 'en', 'Get a Quote', 'published'),
   ((SELECT id FROM ns), 'hero_cta_phone', 0, 'en', 'Call (587) 600-0786', 'published'),
-  ((SELECT id FROM ns), 'hero_badge_iso', 0, 'en', 'ISO 17100 Certified', 'published'),
+  ((SELECT id FROM ns), 'hero_badge_iso', 0, 'en', 'GCP-Trained Linguists', 'published'),
   ((SELECT id FROM ns), 'hero_badge_ispor', 0, 'en', 'ISPOR-Compliant', 'published'),
   ((SELECT id FROM ns), 'hero_badge_gcp', 0, 'en', 'GCP Trained Linguists', 'published'),
   ((SELECT id FROM ns), 'hero_stat1_value', 0, 'en', '200+', 'published'),
@@ -129,8 +129,8 @@ VALUES
   -- Compliance Standards
   ((SELECT id FROM ns), 'compliance_heading', 0, 'en', 'Compliance & Quality Standards', 'published'),
   ((SELECT id FROM ns), 'compliance_description', 0, 'en', 'Every translation is produced in accordance with the industry''s most demanding quality and regulatory frameworks.', 'published'),
-  ((SELECT id FROM ns), 'compliance_std_1', 0, 'en', 'ISO 17100:2015', 'published'),
-  ((SELECT id FROM ns), 'compliance_std_2', 0, 'en', 'ISO 9001:2015', 'published'),
+  ((SELECT id FROM ns), 'compliance_std_1', 0, 'en', 'TEP Quality Workflow', 'published'),
+  ((SELECT id FROM ns), 'compliance_std_2', 0, 'en', 'EU IVDR 2017/746', 'published'),
   ((SELECT id FROM ns), 'compliance_std_3', 0, 'en', 'ICH GCP (E6 R2)', 'published'),
   ((SELECT id FROM ns), 'compliance_std_4', 0, 'en', 'ISPOR Guidelines', 'published'),
   ((SELECT id FROM ns), 'compliance_std_5', 0, 'en', '21 CFR Part 11', 'published'),
@@ -158,12 +158,12 @@ VALUES
   ((SELECT id FROM ns), 'faq_q4', 0, 'en', 'Which regulatory frameworks do you support?', 'published'),
   ((SELECT id FROM ns), 'faq_a4', 0, 'en', 'We support submissions to all major regulatory bodies including FDA, EMA, Health Canada, MHRA, PMDA, NMPA, Swissmedic, and TGA. Our translations comply with ICH GCP, 21 CFR Part 11, EU MDR, and other applicable frameworks.', 'published'),
   ((SELECT id FROM ns), 'faq_q5', 0, 'en', 'Do you provide certified translations for regulatory submissions?', 'published'),
-  ((SELECT id FROM ns), 'faq_a5', 0, 'en', 'Yes. We provide certified translations with declarations of accuracy for all regulatory submissions. Our process is ISO 17100-compliant, and we maintain full audit trails including translator qualifications, revision history, and quality assurance records.', 'published'),
+  ((SELECT id FROM ns), 'faq_a5', 0, 'en', 'Yes. We provide certified translations with declarations of accuracy for all regulatory submissions. Our quality processes follow internationally recognized standards for translation, and we maintain full audit trails including translator qualifications, revision history, and quality assurance records.', 'published'),
 
   -- CTA
   ((SELECT id FROM ns), 'cta_heading', 0, 'en', 'Ready to Start Your Life Sciences Project?', 'published'),
   ((SELECT id FROM ns), 'cta_description', 0, 'en', 'Contact our specialized life sciences team for a consultation. We''ll help you navigate regulatory requirements and deliver translations that meet the highest quality standards.', 'published'),
   ((SELECT id FROM ns), 'cta_cta_phone', 0, 'en', 'Call (587) 600-0786', 'published'),
   ((SELECT id FROM ns), 'cta_cta_contact', 0, 'en', 'Contact Us', 'published'),
-  ((SELECT id FROM ns), 'cta_footer_text', 0, 'en', 'ISO 17100 certified. ISPOR-compliant methodology. FDA, EMA & Health Canada expertise.', 'published')
+  ((SELECT id FROM ns), 'cta_footer_text', 0, 'en', 'ISPOR-compliant methodology. GCP-trained linguists. FDA, EMA & Health Canada expertise.', 'published')
 ON CONFLICT (namespace_id, key, segment_index, locale) DO NOTHING;

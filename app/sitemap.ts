@@ -37,9 +37,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/industries/energy-mining', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/industries/finance', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/industries/gaming', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/government', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/industries/healthcare', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/industries/legal', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/industries/manufacturing', changeFrequency: 'monthly', priority: 0.8 },
+    { path: '/industries/oil-gas', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/industries/pharmaceutical', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/industries/technology', changeFrequency: 'monthly', priority: 0.8 },
 
@@ -102,6 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/services/lifesciences/medical-devices', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/services/lifesciences/pharmacovigilance', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/services/lifesciences/regulatory-affairs', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/therapeutic-areas', changeFrequency: 'monthly', priority: 0.7 },
   ];
 
   // Generate entries for each locale with hreflang alternates

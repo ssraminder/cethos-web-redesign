@@ -657,14 +657,14 @@ export default function AboutPageContent() {
             {[
               { name: tIndustries('pharma'), icon: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z', href: '/industries/pharmaceutical' },
               { name: tIndustries('medical_devices'), icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z' },
-              { name: tIndustries('oil_gas'), icon: 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z', href: '/industries/energy-mining' },
+              { name: tIndustries('oil_gas'), icon: 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z', href: '/industries/oil-gas' },
               { name: tIndustries('healthcare'), icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z', href: '/industries/healthcare' },
               { name: tIndustries('legal'), icon: 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3', href: '/industries/legal' },
               { name: tIndustries('immigration'), icon: 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2' },
               { name: tIndustries('technology'), icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4', href: '/industries/technology' },
               { name: tIndustries('finance'), icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', href: '/industries/finance' },
               { name: tIndustries('energy_mining'), icon: 'M13 10V3L4 14h7v7l9-11h-7z', href: '/industries/energy-mining' },
-              { name: tIndustries('government'), icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' }
+              { name: tIndustries('government'), icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', href: '/industries/government' }
             ].map((industry) => {
               const content = (
                 <>
@@ -741,14 +741,14 @@ export default function AboutPageContent() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {[
-              { name: 'ISO 17100', status: tQuality('status_compliant'), description: tQuality('iso17100_desc') },
-              { name: 'ISO 9001', status: tQuality('status_compliant'), description: tQuality('iso9001_desc') },
-              { name: 'GCP', status: tQuality('status_compliant'), description: tQuality('gcp_desc') },
-              { name: tQuality('ispor_name'), status: tQuality('status_followed'), description: tQuality('ispor_desc') }
+              { name: tQuality('human_name'), abbr: 'TEP', status: tQuality('status_standard'), description: tQuality('human_desc') },
+              { name: tQuality('tep_name'), abbr: 'TEP', status: tQuality('status_standard'), description: tQuality('tep_desc') },
+              { name: 'GCP', abbr: 'GCP', status: tQuality('status_compliant'), description: tQuality('gcp_desc') },
+              { name: tQuality('ispor_name'), abbr: 'ISPOR', status: tQuality('status_followed'), description: tQuality('ispor_desc') }
             ].map((standard) => (
               <div key={standard.name} className="bg-white rounded-xl p-6 text-center border border-gray-100">
                 <div className="w-14 h-14 bg-[#0C2340] rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white font-bold text-sm">{standard.name.includes('ISO') ? 'ISO' : standard.name.split(' ')[0]}</span>
+                  <span className="text-white font-bold text-sm">{standard.abbr || standard.name.split(' ')[0]}</span>
                 </div>
                 <h3 className="font-bold text-[#0C2340] mb-1">{standard.name}</h3>
                 <p className="text-sm text-[#0891B2] font-medium mb-2">{standard.status}</p>

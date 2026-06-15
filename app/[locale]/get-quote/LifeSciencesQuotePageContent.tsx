@@ -44,7 +44,7 @@ export default function LifeSciencesQuotePageContent() {
             >
               <span className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-[#0891B2]" />
-                ISO 17100 Compliant
+                GCP-Trained Linguists
               </span>
               <span className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-[#0891B2]" />

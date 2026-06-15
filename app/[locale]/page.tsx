@@ -8,11 +8,11 @@ import { getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
   title: { absolute: "Cethos | Certified Translation & Life Sciences" },
-  description: 'Certified translator & life sciences translation services. ISO 17100 compliant. Enterprise solutions across Canada, Dubai & India.',
+  description: 'Certified translator & life sciences translation services. Rigorous multi-step quality process. Enterprise solutions across Canada, Dubai & India.',
   alternates: { canonical: 'https://cethos.com' },
   openGraph: {
     title: "Cethos | Certified Translation & Life Sciences",
-    description: 'Certified translator & life sciences translation services. ISO 17100 compliant. Enterprise solutions across Canada, Dubai & India.',
+    description: 'Certified translator & life sciences translation services. Rigorous multi-step quality process. Enterprise solutions across Canada, Dubai & India.',
     url: 'https://cethos.com',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',
