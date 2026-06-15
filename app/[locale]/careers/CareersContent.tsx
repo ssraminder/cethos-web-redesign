@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Building, Languages, Headphones, Headset, Mic, Stethoscope, ArrowRight } from 'lucide-react'
+import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Wallet, Languages, Headphones, Headset, Mic, Stethoscope, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { fullTimeRoles, roleApplyUrl } from '@/lib/careers'
 
 const APPLY_URL = 'https://join.cethos.com/apply'
 
@@ -40,13 +41,6 @@ const vendorRoles = [
 ]
 
 const benefitIcons = [Globe, TrendingUp, Heart, Layers]
-
-const positions = [
-  { key: 'pos1', emailSubject: 'Application: Senior Medical Translator (German)' },
-  { key: 'pos2', emailSubject: 'Application: Project Manager' },
-  { key: 'pos3', emailSubject: 'Application: Linguistic Validator (Spanish)' },
-  { key: 'pos4', emailSubject: 'Application: Quality Assurance Specialist' },
-]
 
 export default function CareersContent() {
   const tHero = useTranslations('careers.hero')
@@ -139,41 +133,53 @@ export default function CareersContent() {
             </p>
           </div>
           <div className="space-y-4">
-            {positions.map((position) => (
+            {fullTimeRoles.map((role) => (
               <div
-                key={position.key}
+                key={role.slug}
                 className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-semibold text-[#0C2340] mb-2">
-                      {tPositions(`${position.key}_title`)}
+                      {role.title}
                     </h3>
-                    <div className="flex flex-wrap gap-4 text-sm text-[#4B5563]">
-                      <span className="flex items-center gap-1">
-                        <Building className="w-4 h-4" />
-                        {tPositions(`${position.key}_department`)}
-                      </span>
+                    <p className="text-[#4B5563] mb-3 max-w-2xl text-sm leading-relaxed">
+                      {role.blurb}
+                    </p>
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[#4B5563]">
                       <span className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        {tPositions(`${position.key}_location`)}
+                        {role.location}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        {tPositions(`${position.key}_type`)}
+                        {role.type}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Wallet className="w-4 h-4" />
+                        {role.compensation}
                       </span>
                     </div>
                   </div>
                   <a
-                    href={`mailto:careers@cethos.com?subject=${encodeURIComponent(position.emailSubject)}`}
-                    className="inline-flex items-center justify-center px-6 py-3 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors whitespace-nowrap"
+                    href={roleApplyUrl(role.slug)}
+                    className="inline-flex items-center justify-center gap-1 px-6 py-3 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors whitespace-nowrap"
                   >
-                    {tPositions('apply_now')}
+                    View &amp; apply
+                    <ArrowRight className="w-4 h-4" />
                   </a>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* Cross-link to the freelance / vendor network */}
+          <p className="text-center text-[#4B5563] mt-10">
+            Looking to join our freelance / vendor network instead?{' '}
+            <a href="#vendor-network" className="text-[#0891B2] font-semibold hover:text-[#06B6D4] transition-colors">
+              See open freelance roles →
+            </a>
+          </p>
         </div>
       </section>
 
