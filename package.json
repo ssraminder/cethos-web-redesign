@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@getbrevo/brevo": "^3.0.1",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.4",
+    "@playwright/test": "^1.61.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
