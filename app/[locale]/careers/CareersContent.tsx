@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link'
+import { Link } from '@/i18n/routing'
 import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Wallet, Languages, Headphones, Headset, Mic, Stethoscope, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { fullTimeRoles, roleApplyUrl } from '@/lib/careers'
@@ -161,13 +161,13 @@ export default function CareersContent() {
                       </span>
                     </div>
                   </div>
-                  <a
+                  <Link
                     href={roleApplyUrl(role.slug)}
                     className="inline-flex items-center justify-center gap-1 px-6 py-3 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors whitespace-nowrap"
                   >
                     View &amp; apply
                     <ArrowRight className="w-4 h-4" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}
