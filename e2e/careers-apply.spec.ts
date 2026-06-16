@@ -32,6 +32,14 @@ const ROLES = [
   },
 ]
 
+// Fake camera/mic so the in-browser recording path can be exercised headlessly.
+test.use({
+  launchOptions: {
+    args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'],
+  },
+  permissions: ['camera', 'microphone'],
+})
+
 test.beforeAll(() => {
   fs.writeFileSync(CV_PATH, '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n')
   // Tiny placeholder mp4 (bucket validates the declared content-type, not bytes).
@@ -103,3 +111,33 @@ for (const role of ROLES) {
     })
   })
 }
+
+test('records an intro video in-browser and submits', async ({ page }) => {
+  test.skip(!CAN_SUBMIT, 'Set SUPABASE_SERVICE_ROLE_KEY to enable the destructive submit test.')
+  const role = ROLES[0]
+
+  await page.goto(`/careers/${role.slug}/apply`)
+  await page.fill('#full_name', 'E2E Recorder Applicant')
+  await page.fill('#email', 'e2e-careers-record@cethos-e2e.invalid')
+  await page.fill('#city', 'Calgary')
+  await page.selectOption('#country', 'Canada')
+  await page.selectOption('#years_experience', '3–5 years')
+  await page.setInputFiles('#resume', CV_PATH)
+  await page.fill('#screening_experience', 'E2E recorder test — relevant experience.')
+  await page.fill('#screening_hours', 'E2E recorder test — willing to work shifted hours.')
+  await page.fill('#about_you', 'E2E recorder test — a short paragraph about the applicant.')
+  await page.check('input[name="consent_privacy"]')
+
+  // Record in-browser via the fake camera.
+  await page.getByRole('button', { name: /record now/i }).click()
+  await page.getByRole('button', { name: /start camera/i }).click()
+  await page.getByRole('button', { name: 'Record', exact: true }).click()
+  await page.waitForTimeout(2500)
+  await page.getByRole('button', { name: /stop/i }).click()
+  await expect(page.getByRole('button', { name: /re-record/i })).toBeVisible({ timeout: 10_000 })
+
+  await page.getByRole('button', { name: /submit application/i }).click()
+  await expect(page.getByRole('heading', { name: /application received/i })).toBeVisible({
+    timeout: 30_000,
+  })
+})

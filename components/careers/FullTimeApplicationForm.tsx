@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Loader2, UploadCloud, Video } from 'lucide-react'
+import { CheckCircle2, Loader2, UploadCloud } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
+import VideoField from './VideoField'
 import {
   COUNTRY_OPTIONS,
   CURRENCY_OPTIONS,
@@ -11,8 +12,6 @@ import {
 } from '@/lib/formOptions'
 
 const MAX_CV_BYTES = 10 * 1024 * 1024 // 10 MB
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024 // 50 MB
-const VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 const CV_BUCKET = 'careers-applications'
 const VIDEO_BUCKET = 'careers-videos'
 
@@ -36,7 +35,6 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvError, setCvError] = useState<string | null>(null)
   const [videoFile, setVideoFile] = useState<File | null>(null)
-  const [videoError, setVideoError] = useState<string | null>(null)
 
   function onCvChange(e: React.ChangeEvent<HTMLInputElement>) {
     setCvError(null)
@@ -55,30 +53,15 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
     setCvFile(f)
   }
 
-  function onVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setVideoError(null)
-    const f = e.target.files?.[0] || null
-    if (!f) return setVideoFile(null)
-    const okType = VIDEO_TYPES.includes(f.type) || /\.(mp4|mov|webm)$/i.test(f.name)
-    if (!okType) {
-      setVideoError('Video must be MP4, MOV, or WEBM.')
-      e.target.value = ''
-      return setVideoFile(null)
-    }
-    if (f.size > MAX_VIDEO_BYTES) {
-      setVideoError('Video must be 50 MB or smaller. Keep it short (~1 minute).')
-      e.target.value = ''
-      return setVideoFile(null)
-    }
-    setVideoFile(f)
-  }
-
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
-    if (cvError || videoError) return
+    if (cvError) return
     if (!cvFile) return setCvError('Please attach your résumé (PDF).')
-    if (!videoFile) return setVideoError('Please attach a short intro video.')
+    if (!videoFile) {
+      setError('Please add an intro video — record one or upload a file.')
+      return
+    }
 
     const supabase = createBrowserSupabaseClient()
     if (!supabase) {
@@ -228,30 +211,21 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
         </div>
       </div>
 
-      {/* Uploads */}
-      <div className="grid md:grid-cols-2 gap-4">
-        <div>
-          <label className={labelCls} htmlFor="resume">Résumé / CV (PDF, max 10 MB) {req}</label>
-          <label htmlFor="resume" className="flex items-center gap-3 px-4 py-3 rounded-lg border border-dashed border-gray-300 cursor-pointer hover:border-[#0891B2] transition-colors">
-            <UploadCloud className="w-5 h-5 text-[#0891B2]" />
-            <span className="text-sm text-[#4B5563] truncate">{cvFile?.name || 'Upload your PDF résumé'}</span>
-          </label>
-          <input id="resume" type="file" accept="application/pdf,.pdf" onChange={onCvChange} className="sr-only" />
-          {cvError && <p className="text-sm text-red-600 mt-1.5">{cvError}</p>}
-        </div>
-        <div>
-          <label className={labelCls} htmlFor="video">Intro video (MP4/MOV/WEBM, max 50 MB) {req}</label>
-          <label htmlFor="video" className="flex items-center gap-3 px-4 py-3 rounded-lg border border-dashed border-gray-300 cursor-pointer hover:border-[#0891B2] transition-colors">
-            <Video className="w-5 h-5 text-[#0891B2]" />
-            <span className="text-sm text-[#4B5563] truncate">{videoFile?.name || 'Upload a short intro video'}</span>
-          </label>
-          <input id="video" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" onChange={onVideoChange} className="sr-only" />
-          {videoError ? (
-            <p className="text-sm text-red-600 mt-1.5">{videoError}</p>
-          ) : (
-            <p className="text-xs text-[#6B7280] mt-1.5">Record a ~1-minute intro telling us about yourself.</p>
-          )}
-        </div>
+      {/* Résumé */}
+      <div>
+        <label className={labelCls} htmlFor="resume">Résumé / CV (PDF, max 10 MB) {req}</label>
+        <label htmlFor="resume" className="flex items-center gap-3 px-4 py-3 rounded-lg border border-dashed border-gray-300 cursor-pointer hover:border-[#0891B2] transition-colors">
+          <UploadCloud className="w-5 h-5 text-[#0891B2]" />
+          <span className="text-sm text-[#4B5563] truncate">{cvFile?.name || 'Upload your PDF résumé'}</span>
+        </label>
+        <input id="resume" type="file" accept="application/pdf,.pdf" onChange={onCvChange} className="sr-only" />
+        {cvError && <p className="text-sm text-red-600 mt-1.5">{cvError}</p>}
+      </div>
+
+      {/* Intro video — record in-browser or upload a file */}
+      <div>
+        <label className={labelCls}>Intro video — record or upload (max 50 MB) {req}</label>
+        <VideoField onSelect={(f) => setVideoFile(f)} />
       </div>
 
       {/* Screening */}
