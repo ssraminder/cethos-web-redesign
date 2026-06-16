@@ -3,8 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { UploadCloud, Video, Circle, Square, RotateCcw } from 'lucide-react'
 
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024 // 50 MB
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024 // 50 MB (bucket cap)
+const MAX_RECORD_BYTES = 47 * 1024 * 1024 // safety auto-stop, leaves margin under the cap
 const MAX_RECORD_SECONDS = 120 // hard stop at 2 minutes
+// ~2.5 Mbps video + 128 kbps audio => ~2 min ≈ 40 MB, safely under the 50 MB cap.
+const REC_VIDEO_BPS = 2_500_000
+const REC_AUDIO_BPS = 128_000
 const VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
 
 interface Props {
@@ -43,10 +47,12 @@ export default function VideoField({ onSelect }: Props) {
   const [seconds, setSeconds] = useState(0)
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
 
+  const [notice, setNotice] = useState<string | null>(null)
   const liveRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
+  const sizeRef = useRef(0)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   function stopStream() {
@@ -116,10 +122,25 @@ export default function VideoField({ onSelect }: Props) {
     if (!stream) return
     const mimeType = pickMime()
     chunksRef.current = []
-    const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined)
+    sizeRef.current = 0
+    setNotice(null)
+    const opts: MediaRecorderOptions = {
+      videoBitsPerSecond: REC_VIDEO_BPS,
+      audioBitsPerSecond: REC_AUDIO_BPS,
+    }
+    if (mimeType) opts.mimeType = mimeType
+    const rec = new MediaRecorder(stream, opts)
     recorderRef.current = rec
     rec.ondataavailable = (ev) => {
-      if (ev.data && ev.data.size > 0) chunksRef.current.push(ev.data)
+      if (ev.data && ev.data.size > 0) {
+        chunksRef.current.push(ev.data)
+        sizeRef.current += ev.data.size
+        // Hard backstop: never let the clip exceed the storage cap.
+        if (sizeRef.current >= MAX_RECORD_BYTES) {
+          setNotice('Reached the maximum size — recording stopped automatically.')
+          stopRecording()
+        }
+      }
     }
     rec.onstop = () => {
       const type = mimeType.startsWith('video/mp4') ? 'video/mp4' : 'video/webm'
@@ -135,7 +156,7 @@ export default function VideoField({ onSelect }: Props) {
       setRecState('recorded')
       validateAndSelect(file)
     }
-    rec.start()
+    rec.start(1000) // emit a chunk every second so we can track accumulated size
     setSeconds(0)
     setRecState('recording')
     timerRef.current = setInterval(() => {
@@ -156,6 +177,7 @@ export default function VideoField({ onSelect }: Props) {
     if (recordedUrl) URL.revokeObjectURL(recordedUrl)
     setRecordedUrl(null)
     setChosen(null)
+    setNotice(null)
     onSelect(null)
     setRecState('idle')
   }
@@ -168,6 +190,7 @@ export default function VideoField({ onSelect }: Props) {
     setRecState('idle')
     setChosen(null)
     setError(null)
+    setNotice(null)
     onSelect(null)
     setMode(next)
   }
@@ -259,12 +282,13 @@ export default function VideoField({ onSelect }: Props) {
         </div>
       )}
 
+      {notice && <p className="text-xs text-[#0891B2] mt-1.5">{notice}</p>}
       {error ? (
         <p className="text-sm text-red-600 mt-1.5">{error}</p>
       ) : chosen ? (
         <p className="text-xs text-[#6B7280] mt-1.5">Selected: {chosen.name} · {humanSize(chosen.size)}</p>
       ) : (
-        <p className="text-xs text-[#6B7280] mt-1.5">Record or upload a ~1-minute intro telling us about yourself. Max 50 MB.</p>
+        <p className="text-xs text-[#6B7280] mt-1.5">Record (up to 2 min) or upload a short intro telling us about yourself. Max 50 MB.</p>
       )}
     </div>
   )
