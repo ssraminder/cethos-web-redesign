@@ -83,7 +83,7 @@ for (const role of ROLES) {
     await page.fill('#screening_hours', 'E2E test — yes, able and willing to work the shifted schedule.')
     await page.fill('#expected_comp_amount', '120000')
     await page.selectOption('#expected_comp_currency', 'USD')
-    await page.fill('#writing_sample', 'https://example.com/writing-sample')
+    await page.fill('#about_you', 'E2E automated browser test — a short paragraph about the applicant for the about-you question.')
     await page.selectOption('#how_heard', 'LinkedIn')
     await page.check('input[name="consent_privacy"]')
 

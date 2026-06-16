@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     const years_experience = get('years_experience')
     const screening_experience = get('screening_experience')
     const screening_hours = get('screening_hours')
-    const writing_sample = get('writing_sample')
+    const about_you = get('about_you')
     const consent_privacy = get('consent_privacy') === 'true'
     const resume = form.get('resume')
 
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     if (!years_experience) missing.push('years of experience')
     if (!screening_experience) missing.push('relevant experience')
     if (!screening_hours) missing.push('schedule willingness')
-    if (!writing_sample) missing.push('writing sample')
+    if (!about_you) missing.push('about you')
     if (!consent_privacy) missing.push('privacy consent')
     if (!(resume instanceof File) || resume.size === 0) missing.push('résumé / CV')
     if (missing.length) {
@@ -109,7 +109,7 @@ export async function POST(req: Request) {
       screening_hours,
       expected_comp_amount: Number.isFinite(expected_comp_amount as number) ? expected_comp_amount : null,
       expected_comp_currency: get('expected_comp_currency') || null,
-      writing_sample,
+      about_you,
       how_heard: get('how_heard') || null,
       additional_notes: get('additional_notes') || null,
       consent_privacy,
@@ -155,7 +155,7 @@ export async function POST(req: Request) {
             ${row.linkedin_url ? `<p><strong>LinkedIn:</strong> ${esc(row.linkedin_url)}</p>` : ''}
             <p style="margin-top:16px;"><strong>Relevant experience:</strong><br>${esc(screening_experience)}</p>
             <p><strong>Shifted-schedule willingness:</strong><br>${esc(screening_hours)}</p>
-            <p><strong>Writing sample:</strong><br>${esc(writing_sample)}</p>
+            <p><strong>About them:</strong><br>${esc(about_you)}</p>
             ${row.additional_notes ? `<p><strong>Notes:</strong><br>${esc(row.additional_notes)}</p>` : ''}
             <p style="color:#6b7280; font-size:13px; margin-top:20px;">View in the portal → Employment Applications. Application ID: ${inserted?.id}</p>
           </div>

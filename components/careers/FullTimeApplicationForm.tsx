@@ -22,6 +22,7 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
+  const [aboutWords, setAboutWords] = useState(0)
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setFileError(null)
@@ -219,10 +220,20 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
       </div>
 
       <div>
-        <label className={labelCls} htmlFor="writing_sample">
-          Provide a short writing sample or a link demonstrating your written English. {req}
+        <label className={labelCls} htmlFor="about_you">
+          Tell us something about yourself — in about 200 words. {req}
         </label>
-        <textarea id="writing_sample" name="writing_sample" required rows={3} className={inputCls} />
+        <textarea
+          id="about_you"
+          name="about_you"
+          required
+          rows={6}
+          className={inputCls}
+          onChange={(e) =>
+            setAboutWords(e.target.value.trim() ? e.target.value.trim().split(/\s+/).length : 0)
+          }
+        />
+        <p className="text-xs text-[#6B7280] mt-1.5">{aboutWords} words · aim for ~200</p>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
