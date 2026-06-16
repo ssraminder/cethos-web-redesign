@@ -3,9 +3,8 @@ import { notFound } from 'next/navigation'
 import { setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
 import { routing } from '@/i18n/routing'
-import { ArrowLeft, MapPin, Clock, Wallet, CalendarClock } from 'lucide-react'
-import { fullTimeRoles, getRole } from '@/lib/careers'
-import FullTimeApplicationForm from '@/components/careers/FullTimeApplicationForm'
+import { ArrowLeft, ArrowRight, MapPin, Clock, Wallet, CalendarClock } from 'lucide-react'
+import { fullTimeRoles, getRole, roleApplyFormUrl } from '@/lib/careers'
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
@@ -46,6 +45,8 @@ export default function CareerRolePage({
   const role = getRole(slug)
   if (!role) notFound()
 
+  const applyHref = roleApplyFormUrl(role.slug)
+
   const jobPostingLd = {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
@@ -71,7 +72,7 @@ export default function CareerRolePage({
 
       {/* Hero */}
       <section className="pt-32 pb-14 bg-gradient-to-br from-[#0C2340] to-[#1a3a5c]">
-        <div className="max-w-[1100px] mx-auto px-8">
+        <div className="max-w-[900px] mx-auto px-8">
           <Link
             href="/careers"
             className="inline-flex items-center gap-1 text-gray-300 hover:text-white text-sm mb-6"
@@ -81,58 +82,56 @@ export default function CareerRolePage({
           <h1 className="text-[40px] leading-[1.1] font-bold text-white mb-5 max-w-3xl">
             {role.title}
           </h1>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-200">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="w-4 h-4" /> {role.location}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="w-4 h-4" /> {role.type}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Wallet className="w-4 h-4" /> {role.compensation}
-            </span>
+          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-200 mb-8">
+            <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {role.location}</span>
+            <span className="inline-flex items-center gap-1.5"><Clock className="w-4 h-4" /> {role.type}</span>
+            <span className="inline-flex items-center gap-1.5"><Wallet className="w-4 h-4" /> {role.compensation}</span>
           </div>
+          <Link
+            href={applyHref}
+            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors"
+          >
+            Apply for this role <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </section>
 
-      {/* Body: JD + form */}
+      {/* JD */}
       <section className="py-16 bg-white">
-        <div className="max-w-[1100px] mx-auto px-8 grid lg:grid-cols-5 gap-12">
-          {/* JD */}
-          <div className="lg:col-span-3 space-y-8">
-            <div className="bg-[#F8FAFC] border border-gray-100 rounded-xl p-5 flex gap-3">
-              <CalendarClock className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-[#0C2340] mb-1">Hours</p>
-                <p className="text-[#4B5563] text-sm leading-relaxed">{role.hoursNote}</p>
-              </div>
+        <div className="max-w-[900px] mx-auto px-8 space-y-8">
+          <div className="bg-[#F8FAFC] border border-gray-100 rounded-xl p-5 flex gap-3">
+            <CalendarClock className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-[#0C2340] mb-1">Hours</p>
+              <p className="text-[#4B5563] text-sm leading-relaxed">{role.hoursNote}</p>
             </div>
-
-            {role.sections.map((section) => (
-              <div key={section.heading}>
-                <h2 className="text-xl font-bold text-[#0C2340] mb-3">{section.heading}</h2>
-                {section.body && (
-                  <p className="text-[#4B5563] leading-relaxed">{section.body}</p>
-                )}
-                {section.bullets && (
-                  <ul className="mt-2 space-y-2">
-                    {section.bullets.map((b, i) => (
-                      <li key={i} className="flex gap-2.5 text-[#4B5563] leading-relaxed">
-                        <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#0891B2] flex-shrink-0" />
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))}
           </div>
 
-          {/* Form */}
-          <div className="lg:col-span-2">
-            <div className="lg:sticky lg:top-24">
-              <FullTimeApplicationForm roleSlug={role.slug} roleTitle={role.title} />
+          {role.sections.map((section) => (
+            <div key={section.heading}>
+              <h2 className="text-xl font-bold text-[#0C2340] mb-3">{section.heading}</h2>
+              {section.body && <p className="text-[#4B5563] leading-relaxed">{section.body}</p>}
+              {section.bullets && (
+                <ul className="mt-2 space-y-2">
+                  {section.bullets.map((b, i) => (
+                    <li key={i} className="flex gap-2.5 text-[#4B5563] leading-relaxed">
+                      <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#0891B2] flex-shrink-0" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
+          ))}
+
+          {/* Bottom CTA */}
+          <div className="pt-4">
+            <Link
+              href={applyHref}
+              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors"
+            >
+              Apply for this role <ArrowRight className="w-5 h-5" />
+            </Link>
           </div>
         </div>
       </section>

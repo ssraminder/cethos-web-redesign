@@ -135,7 +135,12 @@ export function getRole(slug: string): FullTimeRole | undefined {
   return fullTimeRoles.find((r) => r.slug === slug)
 }
 
-/** Internal path to the position-specific job description + application form. */
+/** Internal path to the position-specific job description page. */
 export function roleApplyUrl(slug: string): string {
   return `/careers/${slug}`
+}
+
+/** Internal path to the position-specific application form page. */
+export function roleApplyFormUrl(slug: string): string {
+  return `/careers/${slug}/apply`
 }

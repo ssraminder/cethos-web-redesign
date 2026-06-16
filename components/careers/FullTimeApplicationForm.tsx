@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, Loader2, UploadCloud } from 'lucide-react'
+import { CheckCircle2, Loader2, UploadCloud, Video } from 'lucide-react'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
 import {
   COUNTRY_OPTIONS,
   CURRENCY_OPTIONS,
@@ -9,56 +10,131 @@ import {
   YEARS_EXPERIENCE_OPTIONS,
 } from '@/lib/formOptions'
 
-const MAX_CV_BYTES = 10 * 1024 * 1024
+const MAX_CV_BYTES = 10 * 1024 * 1024 // 10 MB
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024 // 50 MB
+const VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
+const CV_BUCKET = 'careers-applications'
+const VIDEO_BUCKET = 'careers-videos'
 
 interface Props {
   roleSlug: string
   roleTitle: string
 }
 
+function extFor(file: File, fallback: string): string {
+  const fromName = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : ''
+  return fromName || fallback
+}
+
 export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) {
   const [submitting, setSubmitting] = useState(false)
+  const [progress, setProgress] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [fileName, setFileName] = useState<string | null>(null)
-  const [fileError, setFileError] = useState<string | null>(null)
   const [aboutWords, setAboutWords] = useState(0)
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setFileError(null)
-    const f = e.target.files?.[0]
-    if (!f) {
-      setFileName(null)
-      return
-    }
+  const [cvFile, setCvFile] = useState<File | null>(null)
+  const [cvError, setCvError] = useState<string | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [videoError, setVideoError] = useState<string | null>(null)
+
+  function onCvChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setCvError(null)
+    const f = e.target.files?.[0] || null
+    if (!f) return setCvFile(null)
     if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
-      setFileError('Résumé must be a PDF.')
+      setCvError('Résumé must be a PDF.')
       e.target.value = ''
-      setFileName(null)
-      return
+      return setCvFile(null)
     }
     if (f.size > MAX_CV_BYTES) {
-      setFileError('Résumé must be 10 MB or smaller.')
+      setCvError('Résumé must be 10 MB or smaller.')
       e.target.value = ''
-      setFileName(null)
-      return
+      return setCvFile(null)
     }
-    setFileName(f.name)
+    setCvFile(f)
+  }
+
+  function onVideoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setVideoError(null)
+    const f = e.target.files?.[0] || null
+    if (!f) return setVideoFile(null)
+    const okType = VIDEO_TYPES.includes(f.type) || /\.(mp4|mov|webm)$/i.test(f.name)
+    if (!okType) {
+      setVideoError('Video must be MP4, MOV, or WEBM.')
+      e.target.value = ''
+      return setVideoFile(null)
+    }
+    if (f.size > MAX_VIDEO_BYTES) {
+      setVideoError('Video must be 50 MB or smaller. Keep it short (~1 minute).')
+      e.target.value = ''
+      return setVideoFile(null)
+    }
+    setVideoFile(f)
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
-    if (fileError) return
+    if (cvError || videoError) return
+    if (!cvFile) return setCvError('Please attach your résumé (PDF).')
+    if (!videoFile) return setVideoError('Please attach a short intro video.')
+
+    const supabase = createBrowserSupabaseClient()
+    if (!supabase) {
+      setError('Upload service is unavailable right now. Please try again later.')
+      return
+    }
+
     const formEl = e.currentTarget
-    const data = new FormData(formEl)
-    data.set('role_slug', roleSlug)
+    const fd = new FormData(formEl)
+    // Build the JSON payload from text fields only (files are uploaded separately).
+    const payload: Record<string, string> = { role_slug: roleSlug }
+    fd.forEach((v, k) => {
+      if (typeof v === 'string') payload[k] = v
+    })
+    payload['consent_privacy'] = fd.get('consent_privacy') ? 'true' : 'false'
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/careers/apply', { method: 'POST', body: data })
+      const uid = (crypto as Crypto).randomUUID()
+
+      setProgress('Uploading résumé…')
+      const resumePath = `${roleSlug}/${uid}.pdf`
+      const cvUp = await supabase.storage
+        .from(CV_BUCKET)
+        .upload(resumePath, cvFile, { contentType: 'application/pdf', upsert: false })
+      if (cvUp.error) {
+        setError('Could not upload your résumé. Please try again.')
+        return
+      }
+
+      setProgress('Uploading video…')
+      const videoPath = `${roleSlug}/${uid}.${extFor(videoFile, 'mp4')}`
+      const vidUp = await supabase.storage
+        .from(VIDEO_BUCKET)
+        .upload(videoPath, videoFile, {
+          contentType: videoFile.type || 'video/mp4',
+          upsert: false,
+        })
+      if (vidUp.error) {
+        await supabase.storage.from(CV_BUCKET).remove([resumePath])
+        setError('Could not upload your video. Keep it under 50 MB and try again.')
+        return
+      }
+
+      setProgress('Submitting…')
+      payload['resume_path'] = resumePath
+      payload['video_path'] = videoPath
+      const res = await fetch('/api/careers/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
+        await supabase.storage.from(CV_BUCKET).remove([resumePath])
+        await supabase.storage.from(VIDEO_BUCKET).remove([videoPath])
         setError(json.error || 'Something went wrong. Please try again.')
         return
       }
@@ -68,6 +144,7 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
       setError('Network error. Please try again.')
     } finally {
       setSubmitting(false)
+      setProgress(null)
     }
   }
 
@@ -80,8 +157,7 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
         <h3 className="text-2xl font-bold text-[#0C2340] mb-2">Application received</h3>
         <p className="text-[#4B5563] max-w-md mx-auto">
           Thanks for applying for <strong>{roleTitle}</strong>. Our team will review your
-          application and be in touch if there&apos;s a fit. You&apos;ll hear from us at the email
-          you provided.
+          application and be in touch if there&apos;s a fit.
         </p>
       </div>
     )
@@ -94,10 +170,7 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
 
   return (
     <form onSubmit={onSubmit} className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 space-y-6">
-      <div>
-        <h3 className="text-2xl font-bold text-[#0C2340]">Apply for this role</h3>
-        <p className="text-sm text-[#4B5563] mt-1">Fields marked {req} are required.</p>
-      </div>
+      <p className="text-sm text-[#4B5563]">Fields marked {req} are required.</p>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">
@@ -155,28 +228,30 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
         </div>
       </div>
 
-      {/* Résumé */}
-      <div>
-        <label className={labelCls} htmlFor="resume">Résumé / CV (PDF, max 10 MB) {req}</label>
-        <label
-          htmlFor="resume"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg border border-dashed border-gray-300 cursor-pointer hover:border-[#0891B2] transition-colors"
-        >
-          <UploadCloud className="w-5 h-5 text-[#0891B2]" />
-          <span className="text-sm text-[#4B5563]">
-            {fileName || 'Click to upload your PDF résumé'}
-          </span>
-        </label>
-        <input
-          id="resume"
-          name="resume"
-          type="file"
-          accept="application/pdf,.pdf"
-          required
-          onChange={onFileChange}
-          className="sr-only"
-        />
-        {fileError && <p className="text-sm text-red-600 mt-1.5">{fileError}</p>}
+      {/* Uploads */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div>
+          <label className={labelCls} htmlFor="resume">Résumé / CV (PDF, max 10 MB) {req}</label>
+          <label htmlFor="resume" className="flex items-center gap-3 px-4 py-3 rounded-lg border border-dashed border-gray-300 cursor-pointer hover:border-[#0891B2] transition-colors">
+            <UploadCloud className="w-5 h-5 text-[#0891B2]" />
+            <span className="text-sm text-[#4B5563] truncate">{cvFile?.name || 'Upload your PDF résumé'}</span>
+          </label>
+          <input id="resume" type="file" accept="application/pdf,.pdf" onChange={onCvChange} className="sr-only" />
+          {cvError && <p className="text-sm text-red-600 mt-1.5">{cvError}</p>}
+        </div>
+        <div>
+          <label className={labelCls} htmlFor="video">Intro video (MP4/MOV/WEBM, max 50 MB) {req}</label>
+          <label htmlFor="video" className="flex items-center gap-3 px-4 py-3 rounded-lg border border-dashed border-gray-300 cursor-pointer hover:border-[#0891B2] transition-colors">
+            <Video className="w-5 h-5 text-[#0891B2]" />
+            <span className="text-sm text-[#4B5563] truncate">{videoFile?.name || 'Upload a short intro video'}</span>
+          </label>
+          <input id="video" type="file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" onChange={onVideoChange} className="sr-only" />
+          {videoError ? (
+            <p className="text-sm text-red-600 mt-1.5">{videoError}</p>
+          ) : (
+            <p className="text-xs text-[#6B7280] mt-1.5">Record a ~1-minute intro telling us about yourself.</p>
+          )}
+        </div>
       </div>
 
       {/* Screening */}
@@ -200,13 +275,7 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className={labelCls} htmlFor="expected_comp_amount">Expected annual compensation</label>
-          <input
-            id="expected_comp_amount"
-            name="expected_comp_amount"
-            inputMode="numeric"
-            placeholder="Amount"
-            className={inputCls}
-          />
+          <input id="expected_comp_amount" name="expected_comp_amount" inputMode="numeric" placeholder="Amount" className={inputCls} />
         </div>
         <div>
           <label className={labelCls} htmlFor="expected_comp_currency">Currency</label>
@@ -269,7 +338,7 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
         className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#0891B2] text-white font-semibold rounded-lg hover:bg-[#06B6D4] transition-colors disabled:opacity-60"
       >
         {submitting && <Loader2 className="w-5 h-5 animate-spin" />}
-        {submitting ? 'Submitting…' : 'Submit application'}
+        {submitting ? progress || 'Submitting…' : 'Submit application'}
       </button>
     </form>
   )

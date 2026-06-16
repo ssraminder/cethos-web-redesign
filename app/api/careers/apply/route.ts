@@ -1,6 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
-import { randomUUID } from 'crypto'
 import { getRole } from '@/lib/careers'
 
 const Brevo = require('@getbrevo/brevo')
@@ -8,9 +7,13 @@ const Brevo = require('@getbrevo/brevo')
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
-const MAX_CV_BYTES = 10 * 1024 * 1024 // 10 MB
-const BUCKET = 'careers-applications'
+const CV_BUCKET = 'careers-applications'
+const VIDEO_BUCKET = 'careers-videos'
 
+// Files are uploaded directly from the browser to private Storage buckets
+// (Netlify functions cap request bodies at ~6 MB, far below video size). This
+// handler receives JSON with the resulting storage paths, validates, inserts the
+// application row (service role), and notifies the recruiting inbox.
 export async function POST(req: Request) {
   try {
     let supabase
@@ -21,27 +24,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Server configuration error.' }, { status: 500 })
     }
 
-    const form = await req.formData()
-    const get = (k: string) => {
-      const v = form.get(k)
-      return typeof v === 'string' ? v.trim() : ''
+    let body: Record<string, unknown>
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
     }
 
-    const role_slug = get('role_slug')
+    const str = (k: string) => (typeof body[k] === 'string' ? (body[k] as string).trim() : '')
+
+    const role_slug = str('role_slug')
     const role = getRole(role_slug)
-    const role_title = get('role_title') || role?.title || null
+    const role_title = str('role_title') || role?.title || null
 
-    const full_name = get('full_name')
-    const email = get('email')
-    const country = get('country')
-    const years_experience = get('years_experience')
-    const screening_experience = get('screening_experience')
-    const screening_hours = get('screening_hours')
-    const about_you = get('about_you')
-    const consent_privacy = get('consent_privacy') === 'true'
-    const resume = form.get('resume')
+    const full_name = str('full_name')
+    const email = str('email')
+    const country = str('country')
+    const years_experience = str('years_experience')
+    const screening_experience = str('screening_experience')
+    const screening_hours = str('screening_hours')
+    const about_you = str('about_you')
+    const resume_path = str('resume_path')
+    const video_path = str('video_path')
+    const consent_privacy = body['consent_privacy'] === true || body['consent_privacy'] === 'true'
 
-    // Required-field validation
     const missing: string[] = []
     if (!role_slug || !role) missing.push('role')
     if (!full_name) missing.push('full name')
@@ -51,13 +57,11 @@ export async function POST(req: Request) {
     if (!screening_experience) missing.push('relevant experience')
     if (!screening_hours) missing.push('schedule willingness')
     if (!about_you) missing.push('about you')
+    if (!resume_path) missing.push('résumé / CV')
+    if (!video_path) missing.push('intro video')
     if (!consent_privacy) missing.push('privacy consent')
-    if (!(resume instanceof File) || resume.size === 0) missing.push('résumé / CV')
     if (missing.length) {
-      return NextResponse.json(
-        { error: `Missing or invalid: ${missing.join(', ')}.` },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: `Missing or invalid: ${missing.join(', ')}.` }, { status: 400 })
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -65,27 +69,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid email format.' }, { status: 400 })
     }
 
-    const cv = resume as File
-    if (cv.type !== 'application/pdf' && !cv.name.toLowerCase().endsWith('.pdf')) {
-      return NextResponse.json({ error: 'Résumé must be a PDF.' }, { status: 400 })
-    }
-    if (cv.size > MAX_CV_BYTES) {
-      return NextResponse.json({ error: 'Résumé must be 10 MB or smaller.' }, { status: 400 })
+    // Uploaded paths must live under this role's prefix (defends against arbitrary
+    // path injection from the client).
+    if (!resume_path.startsWith(`${role_slug}/`) || !video_path.startsWith(`${role_slug}/`)) {
+      return NextResponse.json({ error: 'Invalid upload reference.' }, { status: 400 })
     }
 
-    // Upload CV to the private bucket (service role).
-    const resume_path = `${role_slug}/${randomUUID()}.pdf`
-    const buffer = Buffer.from(await cv.arrayBuffer())
-    const { error: uploadErr } = await supabase.storage
-      .from(BUCKET)
-      .upload(resume_path, buffer, { contentType: 'application/pdf', upsert: false })
-    if (uploadErr) {
-      console.error('[careers/apply] CV upload error:', uploadErr)
-      return NextResponse.json({ error: 'Could not upload résumé. Please try again.' }, { status: 500 })
-    }
-
-    const compRaw = get('expected_comp_amount')
-    const expected_comp_amount = compRaw ? Number(compRaw.replace(/[^0-9.]/g, '')) : null
+    const compRaw = str('expected_comp_amount')
+    const compNum = compRaw ? Number(compRaw.replace(/[^0-9.]/g, '')) : null
+    const expected_comp_amount = compNum != null && Number.isFinite(compNum) ? compNum : null
 
     const ip_address =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -98,21 +90,23 @@ export async function POST(req: Request) {
       role_title,
       full_name,
       email,
-      phone: get('phone') || null,
-      city: get('city') || null,
+      phone: str('phone') || null,
+      city: str('city') || null,
       country,
-      linkedin_url: get('linkedin_url') || null,
+      linkedin_url: str('linkedin_url') || null,
       years_experience,
-      resume_bucket: BUCKET,
+      resume_bucket: CV_BUCKET,
       resume_path,
+      video_bucket: VIDEO_BUCKET,
+      video_path,
       screening_experience,
       screening_hours,
-      expected_comp_amount: Number.isFinite(expected_comp_amount as number) ? expected_comp_amount : null,
-      expected_comp_currency: get('expected_comp_currency') || null,
+      expected_comp_amount,
+      expected_comp_currency: str('expected_comp_currency') || null,
       about_you,
-      how_heard: get('how_heard') || null,
-      additional_notes: get('additional_notes') || null,
-      consent_privacy,
+      how_heard: str('how_heard') || null,
+      additional_notes: str('additional_notes') || null,
+      consent_privacy: true,
       status: 'new',
       source: 'careers-web',
       ip_address,
@@ -127,16 +121,15 @@ export async function POST(req: Request) {
 
     if (dbError) {
       console.error('[careers/apply] insert error:', dbError)
-      // Best-effort cleanup of the orphaned upload.
-      await supabase.storage.from(BUCKET).remove([resume_path])
+      // Best-effort cleanup of the orphaned uploads.
+      await supabase.storage.from(CV_BUCKET).remove([resume_path])
+      await supabase.storage.from(VIDEO_BUCKET).remove([video_path])
       return NextResponse.json({ error: 'Could not submit application. Please try again.' }, { status: 500 })
     }
 
-    // Notify the recruiting inbox (non-fatal).
     try {
       const recipients =
-        process.env.CAREERS_EMAIL_RECIPIENTS?.split(',') ||
-        ['office@cethoscorp.com']
+        process.env.CAREERS_EMAIL_RECIPIENTS?.split(',') || ['office@cethoscorp.com']
       const apiInstance = new Brevo.TransactionalEmailsApi()
       apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
       const esc = (s: string) => String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -157,7 +150,7 @@ export async function POST(req: Request) {
             <p><strong>Shifted-schedule willingness:</strong><br>${esc(screening_hours)}</p>
             <p><strong>About them:</strong><br>${esc(about_you)}</p>
             ${row.additional_notes ? `<p><strong>Notes:</strong><br>${esc(row.additional_notes)}</p>` : ''}
-            <p style="color:#6b7280; font-size:13px; margin-top:20px;">View in the portal → Employment Applications. Application ID: ${inserted?.id}</p>
+            <p style="color:#6b7280; font-size:13px; margin-top:20px;">CV + intro video attached to the application. View in the portal → Employment Applications. ID: ${inserted?.id}</p>
           </div>
         </div>`
       const sendSmtpEmail = new Brevo.SendSmtpEmail()
@@ -174,9 +167,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, id: inserted?.id })
   } catch (error) {
     console.error('[careers/apply] ERROR:', (error as Error).message)
-    return NextResponse.json(
-      { error: 'Failed to submit application. Please try again.' },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: 'Failed to submit application. Please try again.' }, { status: 500 })
   }
 }
