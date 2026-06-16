@@ -8,7 +8,7 @@ import {
   LayoutDashboard, FileText, FolderOpen, Users, Code2,
   Search, LogOut, ChevronDown, ChevronRight, ChevronLeft,
   X, ExternalLink, CalendarDays, Image, ArrowLeftRight,
-  Settings, User, BarChart3, Globe,
+  Settings, User, BarChart3, Globe, Briefcase,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { CETHOS_LOGO_DARK_BG, CETHOS_FAVICON } from '@/lib/admin/brand';
@@ -112,6 +112,14 @@ export default function Sidebar({ open, onClose, collapsed, onToggleCollapse }: 
           href: '/admin/translations',
           icon: Globe,
           active: pathname.startsWith('/admin/translations'),
+        }]
+      : []),
+    ...(hasPermission(adminUser.role, 'employment_applications', 'read')
+      ? [{
+          label: 'Employment Applications',
+          href: '/admin/employment-applications',
+          icon: Briefcase,
+          active: pathname.startsWith('/admin/employment-applications'),
         }]
       : []),
   ];
