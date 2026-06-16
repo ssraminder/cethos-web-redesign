@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import LifeSciencesRelated from '@/components/lifesciences/LifeSciencesRelated'
 
 const CheckIcon = () => (
   <svg className="w-5 h-5 text-[#0891B2] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -21,6 +22,18 @@ const ChevronIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
   </svg>
 )
+
+const SvgIcon = ({ d }: { d: string }) => (
+  <svg className="w-6 h-6 text-[#0891B2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={d} />
+  </svg>
+)
+
+const ICON_PEOPLE = "M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"
+const ICON_DOC = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+const ICON_SHIELD_CHECK = "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+const ICON_CLIPBOARD_CHECK = "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+const ICON_PENCIL = "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
 
 export default function ClinicianReviewContent() {
   const t = useTranslations('lifesciences.clinician-review')
@@ -50,6 +63,13 @@ export default function ClinicianReviewContent() {
     { step: '2', title: t('process.step2_title'), desc: t('process.step2_desc') },
     { step: '3', title: t('process.step3_title'), desc: t('process.step3_desc') },
     { step: '4', title: t('process.step4_title'), desc: t('process.step4_desc') },
+  ]
+
+  const deliverables = [
+    { icon: ICON_DOC, title: t('deliverables.item1_title'), desc: t('deliverables.item1_desc') },
+    { icon: ICON_PEOPLE, title: t('deliverables.item2_title'), desc: t('deliverables.item2_desc') },
+    { icon: ICON_PENCIL, title: t('deliverables.item3_title'), desc: t('deliverables.item3_desc') },
+    { icon: ICON_SHIELD_CHECK, title: t('deliverables.item4_title'), desc: t('deliverables.item4_desc') },
   ]
 
   const faqs = [
@@ -84,7 +104,7 @@ export default function ClinicianReviewContent() {
             <span className="inline-block bg-[#0891B2]/20 text-[#06B6D4] text-sm font-medium px-3 py-1 rounded-full mb-4">
               {t('hero.badge')}
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white">
               {t('hero.title')}
             </h1>
             <p className="text-xl md:text-2xl mt-6 text-gray-300 max-w-3xl">
@@ -118,6 +138,7 @@ export default function ClinicianReviewContent() {
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
             </p>
+            <p className="mt-4 text-lg text-gray-600 leading-relaxed">{t('why.p3')}</p>
           </div>
         </div>
       </section>
@@ -131,6 +152,9 @@ export default function ClinicianReviewContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
             {reviewers.map((reviewer) => (
               <div key={reviewer.title} className="bg-white p-6 rounded-xl shadow-sm">
+                <div className="w-12 h-12 bg-[#0891B2]/10 rounded-xl flex items-center justify-center mb-4">
+                  <SvgIcon d={ICON_PEOPLE} />
+                </div>
                 <div className="text-4xl font-bold text-[#0891B2]">{reviewer.count}</div>
                 <h3 className="font-semibold text-[#0C2340] mt-2">{reviewer.title}</h3>
                 <p className="text-gray-600 text-sm mt-1">{reviewer.desc}</p>
@@ -190,13 +214,34 @@ export default function ClinicianReviewContent() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* What You Receive */}
       <section className="py-16 md:py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">{t('deliverables.title')}</h2>
+            <p className="mt-4 text-lg text-gray-600">{t('deliverables.subtitle')}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+            {deliverables.map((d) => (
+              <div key={d.title} className="bg-white rounded-xl p-6">
+                <div className="w-12 h-12 bg-[#0891B2]/10 rounded-xl flex items-center justify-center mb-4">
+                  <SvgIcon d={d.icon} />
+                </div>
+                <h3 className="font-semibold text-[#0C2340]">{d.title}</h3>
+                <p className="text-gray-600 text-sm mt-2">{d.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 md:py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">{t('faq.title')}</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
             {faqs.map((faq, i) => (
-              <details key={i} className="bg-white rounded-xl group">
+              <details key={i} className="bg-gray-50 rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
                   {faq.question}
                   <ChevronIcon />
@@ -227,10 +272,13 @@ export default function ClinicianReviewContent() {
         </div>
       </section>
 
+      {/* Related Services */}
+      <LifeSciencesRelated current="clinician-review" />
+
       {/* CTA */}
       <section className="py-16 md:py-20 bg-[#0C2340] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold">{t('cta.title')}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">{t('cta.title')}</h2>
           <p className="mt-4 text-xl text-gray-300 max-w-2xl mx-auto">{t('cta.subtitle')}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <a href="#quote-form" className="inline-flex items-center justify-center bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold px-8 py-4 rounded-lg transition-colors">

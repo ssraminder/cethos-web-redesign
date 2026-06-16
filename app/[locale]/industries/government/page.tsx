@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { FAQJsonLd } from '@/components/JsonLd'
 import IndustryPageTemplate from '@/components/industries/IndustryPageTemplate'
 
 export const metadata: Metadata = {
@@ -16,9 +17,19 @@ export const metadata: Metadata = {
   },
 }
 
+const faqs = [
+  { question: 'What government and public-sector documents do you translate?', answer: 'Certified vital records and identity documents, IRCC immigration and citizenship documentation, court and tribunal materials, public communications, and policy and administrative documents.' },
+  { question: 'Are your translations accepted by IRCC and the courts?', answer: 'Yes. We provide certified translations with declarations of accuracy that meet IRCC requirements and are accepted by courts, tribunals, and government bodies across Canada.' },
+  { question: 'Can you support Official Languages Act obligations?', answer: 'Yes. We provide English–French translation and bilingual publication support to help federal institutions meet their Official Languages Act obligations.' },
+  { question: 'How do you handle privacy and sensitive citizen data?', answer: 'We follow PIPEDA- and Privacy Act-aligned data handling, with encrypted transfer, signed NDAs, and security-cleared linguists available for sensitive material.' },
+  { question: 'Do you provide interpretation for hearings and public events?', answer: 'Yes. We provide professional interpreters for court and tribunal hearings, public consultations, and citizen services — on-site, remote, or by telephone.' },
+  { question: 'Can you produce accessible and plain-language formats?', answer: 'Yes. We offer plain-language adaptation and accessible, alternate formats so public communications reach every resident.' },
+]
+
 export default function GovernmentPage() {
   return (
     <>
+      <FAQJsonLd faqs={faqs} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

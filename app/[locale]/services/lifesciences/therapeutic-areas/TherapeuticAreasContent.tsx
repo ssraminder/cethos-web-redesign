@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import LifeSciencesRelated from '@/components/lifesciences/LifeSciencesRelated'
 
 const AREA_GROUPS: { group: string; areas: string[] }[] = [
   { group: 'Oncology & Hematology', areas: ['Oncology', 'Hematology', 'Immuno-Oncology'] },
@@ -102,6 +103,9 @@ export default function TherapeuticAreasContent() {
           </div>
         </div>
       </section>
+
+      {/* Related Services */}
+      <LifeSciencesRelated current="therapeutic-areas" />
 
       {/* CTA */}
       <section className="py-20 bg-gradient-to-br from-[#0C2340] via-[#0F3A5C] to-[#0891B2]">

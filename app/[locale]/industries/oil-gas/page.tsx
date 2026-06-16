@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { FAQJsonLd } from '@/components/JsonLd'
 import IndustryPageTemplate from '@/components/industries/IndustryPageTemplate'
 
 export const metadata: Metadata = {
@@ -16,9 +17,19 @@ export const metadata: Metadata = {
   },
 }
 
+const faqs = [
+  { question: 'What oil & gas documents do you translate?', answer: 'Drilling and completion programs, equipment and rig manuals, P&IDs, HSE and safety procedures, AER and regulatory filings, PSCs and JOAs, and corporate and investor communications — among others.' },
+  { question: 'Do your linguists understand technical oil & gas terminology?', answer: 'Yes. We assign sector-experienced linguists and maintain client-specific terminology databases so drilling, reservoir, pipeline, and refining terms stay accurate and consistent.' },
+  { question: 'Can you handle HSE and safety-critical content?', answer: 'Yes. Safe work procedures, permits, well-control and emergency-response plans, and SDS/MSDS are translated through a rigorous multi-step quality process, because errors carry real safety risk.' },
+  { question: 'Which regulatory frameworks do you support?', answer: 'We translate filings for the AER and international regulators, plus environmental impact assessments and permit applications for jurisdictions worldwide.' },
+  { question: 'How do you protect confidential technical data?', answer: 'Encrypted file transfer, signed NDAs, and PIPEDA- and GDPR-aligned handling protect seismic data, drilling plans, and proprietary information.' },
+  { question: 'What are your turnaround times?', answer: 'Turnaround depends on volume and language count; we scale teams for large projects and offer rush service for time-sensitive submissions and field operations.' },
+]
+
 export default function OilGasPage() {
   return (
     <>
+      <FAQJsonLd faqs={faqs} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

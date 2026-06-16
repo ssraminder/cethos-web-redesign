@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import LifeSciencesRelated from '@/components/lifesciences/LifeSciencesRelated'
 
 const CheckIcon = () => (
   <svg className="w-5 h-5 text-[#0891B2] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -21,6 +22,17 @@ const ChevronIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
   </svg>
 )
+
+const SvgIcon = ({ d }: { d: string }) => (
+  <svg className="w-6 h-6 text-[#0891B2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={d} />
+  </svg>
+)
+
+const ICON_DOC = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+const ICON_SHIELD_CHECK = "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+const ICON_BELL = "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+const ICON_CLOCK = "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
 
 export default function PharmacovigilanceContent() {
   const t = useTranslations('lifesciences.pharmacovigilance')
@@ -51,6 +63,13 @@ export default function PharmacovigilanceContent() {
     { time: t('turnaround.icsr_time'), title: t('turnaround.icsr_title'), detail: t('turnaround.icsr_detail') },
     { time: t('turnaround.sae_time'), title: t('turnaround.sae_title'), detail: t('turnaround.sae_detail') },
     { time: t('turnaround.safety_time'), title: t('turnaround.safety_title'), detail: t('turnaround.safety_detail') },
+  ]
+
+  const deliverables = [
+    { icon: ICON_DOC, title: t('deliverables.item1_title'), desc: t('deliverables.item1_desc') },
+    { icon: ICON_BELL, title: t('deliverables.item2_title'), desc: t('deliverables.item2_desc') },
+    { icon: ICON_CLOCK, title: t('deliverables.item3_title'), desc: t('deliverables.item3_desc') },
+    { icon: ICON_SHIELD_CHECK, title: t('deliverables.item4_title'), desc: t('deliverables.item4_desc') },
   ]
 
   const faqs = [
@@ -84,7 +103,7 @@ export default function PharmacovigilanceContent() {
             <span className="inline-block bg-[#0891B2]/20 text-[#06B6D4] text-sm font-medium px-3 py-1 rounded-full mb-4">
               {t('hero.badge')}
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">{t('hero.title')}</h1>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white">{t('hero.title')}</h1>
             <p className="text-xl md:text-2xl mt-6 text-gray-300 max-w-3xl">{t('hero.subtitle')}</p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <a href="#quote-form" className="inline-flex items-center justify-center bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold px-8 py-4 rounded-lg transition-colors">
@@ -113,6 +132,7 @@ export default function PharmacovigilanceContent() {
               {t.rich('intro.p1', { strong: (chunks) => <strong>{chunks}</strong> })}
             </p>
             <p className="mt-4 text-lg text-gray-600 leading-relaxed">{t('intro.p2')}</p>
+            <p className="mt-4 text-lg text-gray-600 leading-relaxed">{t('intro.p3')}</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
@@ -198,13 +218,34 @@ export default function PharmacovigilanceContent() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* What You Receive */}
       <section className="py-16 md:py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">{t('deliverables.title')}</h2>
+            <p className="mt-4 text-lg text-gray-600">{t('deliverables.subtitle')}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+            {deliverables.map((d) => (
+              <div key={d.title} className="bg-white rounded-xl p-6">
+                <div className="w-12 h-12 bg-[#0891B2]/10 rounded-xl flex items-center justify-center mb-4">
+                  <SvgIcon d={d.icon} />
+                </div>
+                <h3 className="font-semibold text-[#0C2340]">{d.title}</h3>
+                <p className="text-gray-600 text-sm mt-2">{d.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-16 md:py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">{t('faq.title')}</h2>
           <div className="mt-10 space-y-4 max-w-3xl">
             {faqs.map((faq, i) => (
-              <details key={i} className="bg-white rounded-xl group">
+              <details key={i} className="bg-gray-50 rounded-xl group">
                 <summary className="p-5 font-semibold text-[#0C2340] cursor-pointer hover:text-[#0891B2] list-none flex justify-between items-center">
                   {faq.question}
                   <ChevronIcon />
@@ -236,10 +277,13 @@ export default function PharmacovigilanceContent() {
         </div>
       </section>
 
+      {/* Related Services */}
+      <LifeSciencesRelated current="pharmacovigilance" />
+
       {/* CTA */}
       <section className="py-16 md:py-20 bg-[#0C2340] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold">{t('cta.title')}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">{t('cta.title')}</h2>
           <p className="mt-4 text-xl text-gray-300 max-w-2xl mx-auto">{t('cta.subtitle')}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <a href="#quote-form" className="inline-flex items-center justify-center bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold px-8 py-4 rounded-lg transition-colors">

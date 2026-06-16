@@ -52,13 +52,6 @@ export const PERMISSIONS = {
     update: ['super_admin'],
     delete: ['super_admin'],
   },
-  // Full-time staff ("Careers") applications. Super-admin only — these contain
-  // applicant PII and CVs and must not be visible to other admin roles.
-  employment_applications: {
-    read: ['super_admin'],
-    update: ['super_admin'],
-    delete: ['super_admin'],
-  },
   audit_log: {
     read: ['super_admin', 'admin'],
   },

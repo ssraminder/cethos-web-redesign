@@ -27,6 +27,7 @@ export default function IndustryPageTemplate({ base }: { base: string }) {
   const tQuality = useTranslations(`industry.${base}.quality`)
   const tSuccess = useTranslations(`industry.${base}.success`)
   const tCta = useTranslations(`industry.${base}.cta`)
+  const tFaq = useTranslations(`industry.${base}.faq`)
 
   const checkPath = "M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
   const chevronPath = "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
@@ -396,6 +397,27 @@ export default function IndustryPageTemplate({ base }: { base: string }) {
 
       {/* Client Logos Section */}
       <ClientTestimonials />
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-[800px] mx-auto px-4">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340] mb-4">{tFaq('heading')}</h2>
+            <p className="text-lg text-gray-600">{tFaq('description')}</p>
+          </div>
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <details key={i} className="group bg-gray-50 rounded-xl border border-gray-100 p-6">
+                <summary className="flex justify-between items-center cursor-pointer list-none font-semibold text-[#0C2340]">
+                  {tFaq(`q${i}`)}
+                  <span className="ml-4 text-2xl leading-none text-[#0891B2] transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-4 text-gray-600 leading-relaxed">{tFaq(`a${i}`)}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#0C2340] via-[#0F3A5C] to-[#0891B2]">

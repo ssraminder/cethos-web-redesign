@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import LifeSciencesQuoteForm from '@/components/forms/LifeSciencesQuoteForm'
+import LifeSciencesRelated from '@/components/lifesciences/LifeSciencesRelated'
 
 const HeroBadgeIcon = () => (
   <svg className="w-5 h-5 text-[#0891B2]" fill="currentColor" viewBox="0 0 20 20">
@@ -15,6 +16,17 @@ const ChevronIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
   </svg>
 )
+
+const SvgIcon = ({ d }: { d: string }) => (
+  <svg className="w-6 h-6 text-[#0891B2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={d} />
+  </svg>
+)
+
+const ICON_DEVICE = "M9 17.25v1.007a3 3 0 01-.879 2.122L7 21h10l-1.121-.621A3 3 0 0115 18.257V17.25m6-12V15a2 2 0 01-2 2H5a2 2 0 01-2-2V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2 2 0 01-2 2H5a2 2 0 01-2-2V5.25"
+const ICON_REFRESH = "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+const ICON_DOC = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+const ICON_SHIELD_CHECK = "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
 
 export default function EcoaMigrationContent() {
   const t = useTranslations('lifesciences.ecoa-migration')
@@ -58,6 +70,13 @@ export default function EcoaMigrationContent() {
     t('platforms.p9'), t('platforms.p10'), t('platforms.p11'), t('platforms.p12'),
   ]
 
+  const deliverables = [
+    { icon: ICON_DEVICE, title: t('deliverables.item1_title'), desc: t('deliverables.item1_desc') },
+    { icon: ICON_REFRESH, title: t('deliverables.item2_title'), desc: t('deliverables.item2_desc') },
+    { icon: ICON_DOC, title: t('deliverables.item3_title'), desc: t('deliverables.item3_desc') },
+    { icon: ICON_SHIELD_CHECK, title: t('deliverables.item4_title'), desc: t('deliverables.item4_desc') },
+  ]
+
   const faqs = [
     { question: t('faq.q1'), answer: t('faq.a1') },
     { question: t('faq.q2'), answer: t('faq.a2') },
@@ -89,7 +108,7 @@ export default function EcoaMigrationContent() {
             <span className="inline-block bg-[#0891B2]/20 text-[#06B6D4] text-sm font-medium px-3 py-1 rounded-full mb-4">
               {t('hero.badge')}
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">{t('hero.title')}</h1>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white">{t('hero.title')}</h1>
             <p className="text-xl md:text-2xl mt-6 text-gray-300 max-w-3xl">{t('hero.subtitle')}</p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <a href="#quote-form" className="inline-flex items-center justify-center bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold px-8 py-4 rounded-lg transition-colors">
@@ -120,6 +139,7 @@ export default function EcoaMigrationContent() {
                 strong: (chunks) => <strong>{chunks}</strong>,
               })}
             </p>
+            <p className="mt-4 text-lg text-gray-600 leading-relaxed">{t('intro.p3')}</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
@@ -185,8 +205,32 @@ export default function EcoaMigrationContent() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 max-w-4xl mx-auto">
             {platforms.map((platform) => (
-              <div key={platform} className="bg-white px-4 py-3 rounded-lg text-center text-gray-700 text-sm">
+              <div key={platform} className="bg-white px-4 py-4 rounded-lg text-center text-gray-700 text-sm">
+                <div className="w-12 h-12 bg-[#0891B2]/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <SvgIcon d={ICON_DEVICE} />
+                </div>
                 {platform}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What You Receive */}
+      <section className="py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0C2340]">{t('deliverables.title')}</h2>
+            <p className="mt-4 text-lg text-gray-600">{t('deliverables.subtitle')}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+            {deliverables.map((d) => (
+              <div key={d.title} className="bg-gray-50 rounded-xl p-6">
+                <div className="w-12 h-12 bg-[#0891B2]/10 rounded-xl flex items-center justify-center mb-4">
+                  <SvgIcon d={d.icon} />
+                </div>
+                <h3 className="font-semibold text-[#0C2340]">{d.title}</h3>
+                <p className="text-gray-600 text-sm mt-2">{d.desc}</p>
               </div>
             ))}
           </div>
@@ -231,10 +275,13 @@ export default function EcoaMigrationContent() {
         </div>
       </section>
 
+      {/* Related Services */}
+      <LifeSciencesRelated current="ecoa-migration" />
+
       {/* CTA */}
       <section className="py-16 md:py-20 bg-[#0C2340] text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold">{t('cta.title')}</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white">{t('cta.title')}</h2>
           <p className="mt-4 text-xl text-gray-300 max-w-2xl mx-auto">{t('cta.subtitle')}</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
             <a href="#quote-form" className="inline-flex items-center justify-center bg-[#0891B2] hover:bg-[#06B6D4] text-white font-semibold px-8 py-4 rounded-lg transition-colors">
