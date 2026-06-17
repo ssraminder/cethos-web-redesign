@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { UploadCloud, Video, Circle, Square, RotateCcw } from 'lucide-react'
+import { UploadCloud, Video, Circle, Square, RotateCcw, SwitchCamera } from 'lucide-react'
 
 const MAX_VIDEO_BYTES = 50 * 1024 * 1024 // 50 MB (bucket cap)
 const MAX_RECORD_BYTES = 47 * 1024 * 1024 // safety auto-stop, leaves margin under the cap
-const MAX_RECORD_SECONDS = 120 // hard stop at 2 minutes
-// ~2.5 Mbps video + 128 kbps audio => ~2 min ≈ 40 MB, safely under the 50 MB cap.
+const MAX_RECORD_SECONDS = 60 // hard stop at 1 minute
+// ~2.5 Mbps video + 128 kbps audio => ~1 min ≈ 20 MB, well under the 50 MB cap.
 const REC_VIDEO_BPS = 2_500_000
 const REC_AUDIO_BPS = 128_000
 const VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/webm']
@@ -46,6 +46,8 @@ export default function VideoField({ onSelect }: Props) {
   const [recState, setRecState] = useState<'idle' | 'previewing' | 'recording' | 'recorded'>('idle')
   const [seconds, setSeconds] = useState(0)
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
+  const [multiCam, setMultiCam] = useState(false)
 
   const [notice, setNotice] = useState<string | null>(null)
   const liveRef = useRef<HTMLVideoElement>(null)
@@ -98,22 +100,45 @@ export default function VideoField({ onSelect }: Props) {
     if (!validateAndSelect(f)) e.target.value = ''
   }
 
+  async function acquire(facing: 'user' | 'environment') {
+    // Release any existing stream first (mobile can't open two cameras at once).
+    streamRef.current?.getTracks().forEach((t) => t.stop())
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: true,
+    })
+    streamRef.current = stream
+    if (liveRef.current) {
+      liveRef.current.srcObject = stream
+      liveRef.current.muted = true
+      await liveRef.current.play().catch(() => {})
+    }
+    // Show the switch button only when there's more than one camera.
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      setMultiCam(devices.filter((d) => d.kind === 'videoinput').length > 1)
+    } catch {
+      /* enumerateDevices unavailable — leave switch hidden */
+    }
+  }
+
   async function startCamera() {
     setError(null)
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: true,
-      })
-      streamRef.current = stream
-      if (liveRef.current) {
-        liveRef.current.srcObject = stream
-        liveRef.current.muted = true
-        await liveRef.current.play().catch(() => {})
-      }
+      await acquire(facingMode)
       setRecState('previewing')
     } catch {
       setError('Could not access your camera/microphone. Check browser permissions, or upload a file instead.')
+    }
+  }
+
+  async function switchCamera() {
+    const next = facingMode === 'user' ? 'environment' : 'user'
+    setFacingMode(next)
+    try {
+      await acquire(next)
+    } catch {
+      setError('Could not switch camera.')
     }
   }
 
@@ -246,6 +271,8 @@ export default function VideoField({ onSelect }: Props) {
               playsInline
               muted
               className="w-full max-h-64 rounded-md bg-black/90 object-contain"
+              // Mirror the front-camera preview so it feels natural (selfie view).
+              style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'none' }}
             />
           )}
           {recState === 'recorded' && recordedUrl && (
@@ -259,9 +286,16 @@ export default function VideoField({ onSelect }: Props) {
               </button>
             )}
             {recState === 'previewing' && (
-              <button type="button" onClick={startRecording} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700">
-                <Circle className="w-4 h-4 fill-current" /> Record
-              </button>
+              <>
+                <button type="button" onClick={startRecording} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700">
+                  <Circle className="w-4 h-4 fill-current" /> Record
+                </button>
+                {multiCam && (
+                  <button type="button" onClick={switchCamera} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 text-[#0C2340] hover:bg-gray-50">
+                    <SwitchCamera className="w-4 h-4" /> Switch camera
+                  </button>
+                )}
+              </>
             )}
             {recState === 'recording' && (
               <>
@@ -269,7 +303,7 @@ export default function VideoField({ onSelect }: Props) {
                   <Square className="w-4 h-4 fill-current" /> Stop
                 </button>
                 <span className="inline-flex items-center gap-1.5 text-sm text-red-600 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" /> {mm}:{ss} / 2:00
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" /> {mm}:{ss} / 1:00
                 </span>
               </>
             )}
@@ -288,7 +322,7 @@ export default function VideoField({ onSelect }: Props) {
       ) : chosen ? (
         <p className="text-xs text-[#6B7280] mt-1.5">Selected: {chosen.name} · {humanSize(chosen.size)}</p>
       ) : (
-        <p className="text-xs text-[#6B7280] mt-1.5">Record (up to 2 min) or upload a short intro telling us about yourself. Max 50 MB.</p>
+        <p className="text-xs text-[#6B7280] mt-1.5">Record (up to 1 min) or upload a short intro telling us about yourself. Max 50 MB.</p>
       )}
     </div>
   )
