@@ -553,3 +553,16 @@ export function calculateReadTime(content: string): number {
   const words = content.trim().split(/\s+/).length;
   return Math.ceil(words / wordsPerMinute);
 }
+
+/**
+ * Format a stored read_time value into a "N min read" label.
+ *
+ * read_time is meant to be stored as a BARE NUMBER (e.g. "8"), but legacy rows
+ * may contain "8 min read" / "8 min". We strip everything except the leading
+ * number before appending " min read" so the label is never doubled. Returns
+ * an empty string when there is no number, so callers render nothing.
+ */
+export function formatReadTime(readTime: string | number | null | undefined): string {
+  const n = String(readTime ?? '').match(/\d+/)?.[0];
+  return n ? `${n} min read` : '';
+}

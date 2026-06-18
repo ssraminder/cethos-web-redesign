@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import BlogImage from '@/components/BlogImage';
-import { BlogPost } from '@/lib/blog-db';
+import { BlogPost, formatReadTime } from '@/lib/blog-db';
 
 interface BlogListInfiniteProps {
   initialPosts: BlogPost[];
@@ -115,7 +115,7 @@ export default function BlogListInfinite({ initialPosts, initialHasMore }: BlogL
               )}
               <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
                 <span>{post.published_at && formatDate(post.published_at)}</span>
-                <span>{post.read_time} min read</span>
+                <span>{formatReadTime(post.read_time)}</span>
               </div>
             </div>
           </article>
