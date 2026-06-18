@@ -5,7 +5,7 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import BlogImage from '@/components/BlogImage';
-import { getPostBySlug, getRelatedPosts, getAllPostSlugs, formatDate } from '@/lib/blog-db';
+import { getPostBySlug, getRelatedPosts, getAllPostSlugs, formatDate, formatReadTime } from '@/lib/blog-db';
 
 // Revalidate every 60 seconds for faster post updates
 export const revalidate = 60;
@@ -173,7 +173,7 @@ export default async function BlogPostPage({
                       <span className="mx-2">•</span>
                     </>
                   )}
-                  <span>{post.read_time} min read</span>
+                  {formatReadTime(post.read_time) && <span>{formatReadTime(post.read_time)}</span>}
                 </div>
               </div>
             </div>
@@ -400,7 +400,7 @@ export default async function BlogPostPage({
                         {relatedPost.title}
                       </h3>
                       <p className="text-xs text-gray-500">
-                        {relatedPost.read_time} min read
+                        {formatReadTime(relatedPost.read_time)}
                       </p>
                     </div>
                   </Link>

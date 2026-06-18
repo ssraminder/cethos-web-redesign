@@ -51,6 +51,17 @@ function AccordionSection({
   );
 }
 
+// published_at convention: a <datetime-local> input holds LOCAL wall-clock time
+// with no timezone. We display the stored UTC instant in the author's LOCAL time
+// on load, and on save `new Date(value).toISOString()` parses that local string
+// back to the same UTC instant. Load and save must stay symmetric — otherwise
+// each save shifts the stored instant by the author's UTC offset.
+function toLocalDateTimeInput(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export default function PostEditor({ postId }: PostEditorProps) {
   const { adminFetch } = useAdmin();
   const router = useRouter();
@@ -89,13 +100,14 @@ export default function PostEditor({ postId }: PostEditorProps) {
   const autoSaveTimer = useRef<NodeJS.Timeout>();
   const lastSavedContent = useRef('');
 
-  // Auto-calculate read time
+  // Auto-calculate read time. Store a BARE NUMBER (e.g. "8"); the public
+  // renderer appends " min read". Storing the full label here double-appends it.
   useEffect(() => {
     if (content) {
       const textContent = content.replace(/<[^>]*>/g, '');
       const words = textContent.trim().split(/\s+/).length;
       const mins = Math.ceil(words / 200);
-      setReadTime(`${mins} min read`);
+      setReadTime(String(mins));
     }
   }, [content]);
 
@@ -136,7 +148,7 @@ export default function PostEditor({ postId }: PostEditorProps) {
       setDescription(post.description || '');
       setContent(post.content || '');
       setStatus(post.status || 'draft');
-      setPublishedAt(post.published_at ? new Date(post.published_at).toISOString().slice(0, 16) : '');
+      setPublishedAt(post.published_at ? toLocalDateTimeInput(post.published_at) : '');
       setCategoryId(post.category_id || '');
       setAuthorId(post.author_id || '');
       setTags(post.tags || []);
@@ -518,7 +530,7 @@ export default function PostEditor({ postId }: PostEditorProps) {
                   value={readTime}
                   onChange={(e) => setReadTime(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
-                  placeholder="e.g. 8 min read"
+                  placeholder="e.g. 8"
                 />
               </div>
             </AccordionSection>

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import BlogImage from '@/components/BlogImage';
-import { getPostsByCategory, getAllCategorySlugs, getCategories } from '@/lib/blog-db';
+import { getPostsByCategory, getAllCategorySlugs, getCategories, formatReadTime } from '@/lib/blog-db';
 
 // Revalidate every 60 seconds for faster post updates
 export const revalidate = 60;
@@ -152,7 +152,7 @@ export default async function CategoryPage({ params }: Props) {
                     )}
                     <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
                       <span>{post.published_at && formatDate(post.published_at)}</span>
-                      <span>{post.read_time} min read</span>
+                      <span>{formatReadTime(post.read_time)}</span>
                     </div>
                   </div>
                 </article>
