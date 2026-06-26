@@ -42,6 +42,24 @@ interface FolderGroup {
   files: LocalFile[]
 }
 
+interface LangOption {
+  id: string
+  name: string
+  native_name: string | null
+}
+interface UseOption {
+  id: string
+  name: string
+  subcategory: string | null
+}
+interface UploadOptions {
+  sourceLanguages: LangOption[]
+  targetLanguages: LangOption[]
+  intendedUses: UseOption[]
+}
+
+type SubmissionType = 'new_quote' | 'existing'
+
 type Step = 'identity' | 'otp' | 'docs' | 'success'
 
 function formatBytes(bytes: number): string {
@@ -92,7 +110,12 @@ export function SecureUploadForm() {
   const [otpVerifying, setOtpVerifying] = useState(false)
 
   // Step 3: docs (with folder grouping)
+  const [submissionType, setSubmissionType] = useState<SubmissionType>('new_quote')
   const [orderId, setOrderId] = useState('')
+  const [sourceLanguageId, setSourceLanguageId] = useState('') // '' = "Not sure — detect"
+  const [targetLanguageId, setTargetLanguageId] = useState('')
+  const [intendedUseId, setIntendedUseId] = useState('')
+  const [options, setOptions] = useState<UploadOptions | null>(null)
   const [message, setMessage] = useState('')
   const [groups, setGroups] = useState<FolderGroup[]>([
     { id: newGroupId(), name: '', files: [] },
@@ -114,6 +137,23 @@ export function SecureUploadForm() {
     const t = setTimeout(() => setOtpResendCountdown((v) => v - 1), 1000)
     return () => clearTimeout(t)
   }, [otpResendCountdown])
+
+  // Load language + intended-use options for the "new quote" path. Cached
+  // server-side; failure leaves the selects empty (validation still blocks).
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/secure-upload-options')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data && Array.isArray(data.intendedUses)) {
+          setOptions(data as UploadOptions)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // ── Identity / OTP step handlers ───────────────────────────────────────────
 
@@ -290,8 +330,20 @@ export function SecureUploadForm() {
     )
       return
     const allFiles = groups.flatMap((g) => g.files)
-    if (allFiles.length === 0) {
-      setErrors({ noFiles: 'Please attach at least one document' })
+    const vErrors: Record<string, string> = {}
+    if (submissionType === 'existing') {
+      if (!orderId.trim())
+        vErrors.orderId = 'Enter your order or quote number'
+    } else {
+      if (!targetLanguageId)
+        vErrors.targetLanguageId = 'Select the language to translate into'
+      if (!intendedUseId)
+        vErrors.intendedUseId = 'Select what this translation is for'
+    }
+    if (allFiles.length === 0)
+      vErrors.noFiles = 'Please attach at least one document'
+    if (Object.keys(vErrors).length > 0) {
+      setErrors(vErrors)
       return
     }
     if (!verificationToken) {
@@ -439,6 +491,12 @@ export function SecureUploadForm() {
         contextKey === 'apostille-consult' && consultUid
           ? `\n\n[Apostille consult upload — booking ${consultUid}]`
           : ''
+      // Resolve the quote-intent fields. Languages/use only apply to a new
+      // quote; for an existing order we just carry the reference number.
+      const isExisting = submissionType === 'existing'
+      const srcLang = options?.sourceLanguages.find((l) => l.id === sourceLanguageId) || null
+      const tgtLang = options?.targetLanguages.find((l) => l.id === targetLanguageId) || null
+      const intUse = options?.intendedUses.find((u) => u.id === intendedUseId) || null
       const completeRes = await supabase.functions.invoke('upload-complete', {
         body: {
           submissionId,
@@ -446,7 +504,15 @@ export function SecureUploadForm() {
           fullName: fullName.trim(),
           email: email.trim(),
           phone: phone.trim(),
-          orderOrQuoteId: orderId.trim() || consultUid || undefined,
+          orderOrQuoteId:
+            (isExisting ? orderId.trim() : '') || consultUid || undefined,
+          submissionType,
+          sourceLanguageId: isExisting ? undefined : sourceLanguageId || undefined,
+          targetLanguageId: isExisting ? undefined : targetLanguageId || undefined,
+          sourceLanguageName: isExisting ? undefined : srcLang?.name || undefined,
+          targetLanguageName: isExisting ? undefined : tgtLang?.name || undefined,
+          intendedUseId: isExisting ? undefined : intendedUseId || undefined,
+          intendedUseName: isExisting ? undefined : intUse?.name || undefined,
           message: (message.trim() ? message.trim() : '') + consultContextSuffix || undefined,
           context: contextKey || undefined,
           consultUid: consultUid || undefined,
@@ -592,13 +658,25 @@ export function SecureUploadForm() {
 
       {step === 'docs' && (
         <DocsStep
+          submissionType={submissionType}
           orderId={orderId}
+          sourceLanguageId={sourceLanguageId}
+          targetLanguageId={targetLanguageId}
+          intendedUseId={intendedUseId}
+          options={options}
           message={message}
           groups={groups}
           totalFiles={totalFiles}
           phase={phase}
           errors={errors}
-          onChange={{ setOrderId, setMessage }}
+          onChange={{
+            setSubmissionType,
+            setOrderId,
+            setSourceLanguageId,
+            setTargetLanguageId,
+            setIntendedUseId,
+            setMessage,
+          }}
           onAddFolder={addFolder}
           onRenameFolder={renameFolder}
           onRemoveFolder={removeFolder}
@@ -855,14 +933,23 @@ function OtpStep(props: {
 // ───────────────────────────────────────────────────────────────────────────
 
 function DocsStep(props: {
+  submissionType: SubmissionType
   orderId: string
+  sourceLanguageId: string
+  targetLanguageId: string
+  intendedUseId: string
+  options: UploadOptions | null
   message: string
   groups: FolderGroup[]
   totalFiles: number
   phase: 'idle' | 'starting' | 'uploading' | 'finalizing' | 'error'
   errors: Record<string, string>
   onChange: {
+    setSubmissionType: (v: SubmissionType) => void
     setOrderId: (v: string) => void
+    setSourceLanguageId: (v: string) => void
+    setTargetLanguageId: (v: string) => void
+    setIntendedUseId: (v: string) => void
     setMessage: (v: string) => void
   }
   onAddFolder: () => void
@@ -873,7 +960,12 @@ function DocsStep(props: {
   onSubmit: (e: React.FormEvent) => void
 }) {
   const {
+    submissionType,
     orderId,
+    sourceLanguageId,
+    targetLanguageId,
+    intendedUseId,
+    options,
     message,
     groups,
     totalFiles,
@@ -898,22 +990,88 @@ function DocsStep(props: {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Input
-          label="Order or Quote ID (optional)"
-          value={orderId}
-          onChange={(e) => onChange.setOrderId(e.target.value)}
-          placeholder="If you already have one"
-          disabled={submitting}
-        />
+      {/* What is this submission for? */}
+      <div>
+        <label className="block text-sm font-medium text-navy mb-2">
+          What would you like to do? <span className="text-red-500">*</span>
+        </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <RadioCard
+            checked={submissionType === 'new_quote'}
+            onClick={() => onChange.setSubmissionType('new_quote')}
+            title="Get a new quote"
+            subtitle="Price these documents for me"
+            disabled={submitting}
+          />
+          <RadioCard
+            checked={submissionType === 'existing'}
+            onClick={() => onChange.setSubmissionType('existing')}
+            title="Existing order or quote"
+            subtitle="I already have a number"
+            disabled={submitting}
+          />
+        </div>
       </div>
+
+      {submissionType === 'existing' ? (
+        <div className="mt-4">
+          <Input
+            label="Order or Quote number"
+            required
+            value={orderId}
+            onChange={(e) => onChange.setOrderId(e.target.value)}
+            placeholder="e.g. ORD-2026-10527 or QT26-10687"
+            error={errors.orderId}
+            disabled={submitting}
+          />
+        </div>
+      ) : (
+        <div className="mt-4 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <SelectField
+              label="Translate from"
+              value={sourceLanguageId}
+              onChange={onChange.setSourceLanguageId}
+              disabled={submitting || !options}
+              emptyLabel={
+                options ? 'Not sure — detect from documents' : 'Loading…'
+              }
+              options={(options?.sourceLanguages || []).map((l) => ({
+                value: l.id,
+                label: langLabel(l),
+              }))}
+            />
+            <SelectField
+              label="Translate into"
+              required
+              value={targetLanguageId}
+              onChange={onChange.setTargetLanguageId}
+              disabled={submitting || !options}
+              emptyLabel={options ? 'Select target language' : 'Loading…'}
+              error={errors.targetLanguageId}
+              options={(options?.targetLanguages || []).map((l) => ({
+                value: l.id,
+                label: langLabel(l),
+              }))}
+            />
+          </div>
+          <IntendedUseSelect
+            value={intendedUseId}
+            onChange={onChange.setIntendedUseId}
+            uses={options?.intendedUses || []}
+            loading={!options}
+            disabled={submitting}
+            error={errors.intendedUseId}
+          />
+        </div>
+      )}
 
       <div className="mt-4">
         <Textarea
           label="Message (optional)"
           value={message}
           onChange={(e) => onChange.setMessage(e.target.value)}
-          placeholder="Anything we should know — source/target languages, deadlines, special instructions…"
+          placeholder="Anything else we should know — deadlines, names/spellings, special instructions…"
           rows={3}
           disabled={submitting}
         />
@@ -991,6 +1149,139 @@ function DocsStep(props: {
         </p>
       )}
     </form>
+  )
+}
+
+function langLabel(l: LangOption): string {
+  return l.native_name && l.native_name !== l.name
+    ? `${l.name} — ${l.native_name}`
+    : l.name
+}
+
+function RadioCard(props: {
+  checked: boolean
+  onClick: () => void
+  title: string
+  subtitle: string
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
+      disabled={props.disabled}
+      aria-pressed={props.checked}
+      className={`text-left rounded-lg border p-3 transition-all disabled:opacity-50 ${
+        props.checked
+          ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-500'
+          : 'border-slate-300 hover:border-teal-400 bg-white'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={`w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0 ${
+            props.checked ? 'border-teal-600' : 'border-slate-400'
+          }`}
+        >
+          {props.checked && (
+            <span className="w-2 h-2 rounded-full bg-teal-600" />
+          )}
+        </span>
+        <span className="font-medium text-navy text-sm">{props.title}</span>
+      </div>
+      <p className="text-xs text-slate-500 mt-1 ml-6">{props.subtitle}</p>
+    </button>
+  )
+}
+
+function SelectField(props: {
+  label: string
+  required?: boolean
+  value: string
+  onChange: (v: string) => void
+  options: Array<{ value: string; label: string }>
+  emptyLabel: string
+  error?: string
+  disabled?: boolean
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-navy mb-1">
+        {props.label}
+        {props.required && <span className="text-red-500"> *</span>}
+      </label>
+      <select
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        disabled={props.disabled}
+        className={`w-full px-3 py-2.5 rounded-lg border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 disabled:opacity-60 ${
+          props.error ? 'border-red-400' : 'border-slate-300'
+        }`}
+      >
+        <option value="">{props.emptyLabel}</option>
+        {props.options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      {props.error && <p className="text-sm text-red-600 mt-1">{props.error}</p>}
+    </div>
+  )
+}
+
+function IntendedUseSelect(props: {
+  value: string
+  onChange: (v: string) => void
+  uses: UseOption[]
+  loading: boolean
+  disabled?: boolean
+  error?: string
+}) {
+  // Group by subcategory; un-categorised entries fall under "Other purposes",
+  // which is always listed last.
+  const groups = new Map<string, UseOption[]>()
+  for (const u of props.uses) {
+    const key = u.subcategory?.trim() || 'Other purposes'
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(u)
+  }
+  const ordered = Array.from(groups.entries()).sort((a, b) => {
+    if (a[0] === 'Other purposes') return 1
+    if (b[0] === 'Other purposes') return -1
+    return a[0].localeCompare(b[0])
+  })
+  return (
+    <div>
+      <label className="block text-sm font-medium text-navy mb-1">
+        What is the translation for? <span className="text-red-500">*</span>
+      </label>
+      <select
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+        disabled={props.disabled || props.loading}
+        className={`w-full px-3 py-2.5 rounded-lg border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500 disabled:opacity-60 ${
+          props.error ? 'border-red-400' : 'border-slate-300'
+        }`}
+      >
+        <option value="">
+          {props.loading ? 'Loading…' : 'Select intended use'}
+        </option>
+        {ordered.map(([group, items]) => (
+          <optgroup key={group} label={group}>
+            {items.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      <p className="text-[11px] text-slate-400 mt-1">
+        Helps us apply the right certification. Not sure? Pick the closest — we&apos;ll confirm.
+      </p>
+      {props.error && <p className="text-sm text-red-600 mt-1">{props.error}</p>}
+    </div>
   )
 }
 
