@@ -25,6 +25,15 @@ export const publicUploadSchema = z.object({
     .max(100, 'Order/quote ID is too long')
     .optional()
     .or(z.literal('')),
+  // Quote intent. 'new_quote' captures source/target/intended-use; 'existing'
+  // carries the order/quote reference. Ids are portal languages/intended_uses uuids.
+  submissionType: z.enum(['new_quote', 'existing']).optional(),
+  sourceLanguageId: z.string().uuid().optional().or(z.literal('')),
+  targetLanguageId: z.string().uuid().optional().or(z.literal('')),
+  intendedUseId: z.string().uuid().optional().or(z.literal('')),
+  sourceLanguageName: z.string().trim().max(120).optional().or(z.literal('')),
+  targetLanguageName: z.string().trim().max(120).optional().or(z.literal('')),
+  intendedUseName: z.string().trim().max(200).optional().or(z.literal('')),
   message: z
     .string()
     .trim()
