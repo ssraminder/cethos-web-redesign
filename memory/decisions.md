@@ -168,3 +168,9 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Implementation notes:** Page copy is DB-driven i18n — namespace `research` (49 keys × en/fr) inserted into `cethosweb_i18n_translations` (status published) on the shared Supabase project; nothing hardcoded except metadata. Footer link added in BOTH `public/embed/cethos-components.js` (loaded by this site) and `cethos-components.min.js` (external embedders — note: min bundle's nav lists are otherwise STALE relative to the .js; it was not regenerated, just patched). French nav label row added to the `nav` namespace ("Research Panel" → "Panel de recherche").
 - **Status:** active
 - **Affects:** `app/[locale]/research/*`, `app/sitemap.ts`, `public/embed/cethos-components.{js,min.js}`, DB namespaces `research` + `nav`.
+
+### 2026-07-08 — /research language claim matches the linguistic-validation pages (150+)
+- **Decision:** The /research page cites **150+ languages** (metadata + `research` namespace rows `roadmap.p1`, `cta.sponsor_body` in en/fr), matching `/services/lifesciences/linguistic-validation` and `/cognitive-debriefing` — not the panel's current membership count.
+- **Rationale:** The page initially said "20+" (actual panel membership); the service pages claim 150+ study-language capability. Marketing claims must be consistent across pages, and the capability number is the right one for a program page. Copy was reworded so it stays truthful: studies "run in 150+ languages" and the panel "is being built to match".
+- **Status:** active
+- **Affects:** `app/[locale]/research/page.tsx` metadata; DB rows in `cethosweb_i18n_translations` (namespace `research`) — already updated in place, live within ~60s of cache revalidation.
