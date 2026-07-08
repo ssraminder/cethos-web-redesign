@@ -4,7 +4,7 @@ import ResearchPageContent from './ResearchPageContent'
 export const metadata: Metadata = {
   title: 'Language & Research Panel | Paid Healthcare Research | Cethos',
   description:
-    'Join the Cethos Language & Research Panel: paid online interviews and focus groups with native speakers and patients that make translated health questionnaires clearer. Linguistic validation and cognitive debriefing for clinical outcome assessments, in 20+ languages.',
+    'Join the Cethos Language & Research Panel: paid online interviews and focus groups with native speakers and patients that make translated health questionnaires clearer. Linguistic validation and cognitive debriefing for clinical outcome assessments, in 150+ languages.',
   keywords: [
     'research panel',
     'paid research participants',
