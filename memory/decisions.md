@@ -161,3 +161,10 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
   - Downgrade Sentry to v8: avoidable churn.
 - **Status:** active
 - **Affects:** `instrumentation-client.ts`, `next.config.js` (`withSentryConfig` wrapper auto-detects either filename, prefers the new one). Do NOT re-revert this rename if a future build error appears related to Sentry; investigate the new error first.
+
+### 2026-07-08 — /research page + footer link for the Language & Research Panel
+- **Decision:** Public program page at `/research` (en+fr) explaining the Cethos Language & Research Panel (linguistic validation / cognitive debriefing sessions, honorarium model, roadmap), with CTAs to the portal sign-up at `portal.cethos.com/research-panel/<locale>`; "Research Panel" added to the footer Company column and the sitemap.
+- **Rationale:** The panel is operational on the portal (sign-up + scheduling + honorarium flows, 20+ languages, live recruitment for CD orders) but had zero presence on the marketing site. Participants receiving invitations or word-of-mouth referrals need a public page that explains the program and links to sign-up.
+- **Implementation notes:** Page copy is DB-driven i18n — namespace `research` (49 keys × en/fr) inserted into `cethosweb_i18n_translations` (status published) on the shared Supabase project; nothing hardcoded except metadata. Footer link added in BOTH `public/embed/cethos-components.js` (loaded by this site) and `cethos-components.min.js` (external embedders — note: min bundle's nav lists are otherwise STALE relative to the .js; it was not regenerated, just patched). French nav label row added to the `nav` namespace ("Research Panel" → "Panel de recherche").
+- **Status:** active
+- **Affects:** `app/[locale]/research/*`, `app/sitemap.ts`, `public/embed/cethos-components.{js,min.js}`, DB namespaces `research` + `nav`.

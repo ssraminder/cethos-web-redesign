@@ -91,6 +91,7 @@
       company: [
         { label: 'About Us', href: '/about' },
         { label: 'Careers', href: '/careers' },
+        { label: 'Research Panel', href: '/research' },
         { label: 'News', href: '/blog' },
         { label: 'Contact', href: '/contact' }
       ],
