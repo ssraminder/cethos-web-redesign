@@ -1,22 +1,26 @@
-'use client'
-
 import Link from 'next/link'
-import { useLocale, useTranslations } from 'next-intl'
+import { RESEARCH_LANG_VARIANTS, researchPath } from './panelLocales'
 
 // Public overview of the Cethos Language & Research Panel. The panel itself
 // (sign-up, scheduling, honorarium handling) lives on the portal — this page
 // explains the program and funnels visitors to portal.cethos.com/research-panel.
+// Presentational server component shared by the en/fr route (/research,
+// /fr/research) and the standalone language variants (/research/<lang>);
+// copy comes from the DB-backed `research` i18n namespace as a flat record.
 const PORTAL_PANEL_URL = 'https://portal.cethos.com/research-panel'
 
-function panelUrl(locale: string) {
-  // The portal supports more locales than the site; en/fr both exist there.
-  return `${PORTAL_PANEL_URL}/${locale === 'fr' ? 'fr' : 'en'}`
+interface ResearchPageViewProps {
+  /** Flat `research` namespace messages for this language (EN fallback applied upstream). */
+  msgs: Record<string, string>
+  /** BCP 47 language code of the page content (also used for the portal signup link). */
+  lang: string
+  /** Where the breadcrumb "Home" points (/, or /fr for the French variant). */
+  homeHref: string
 }
 
-export default function ResearchPageContent() {
-  const locale = useLocale()
-  const t = useTranslations('research')
-  const joinUrl = panelUrl(locale)
+export default function ResearchPageView({ msgs, lang, homeHref }: ResearchPageViewProps) {
+  const t = (key: string) => msgs[key] ?? key
+  const joinUrl = `${PORTAL_PANEL_URL}/${lang}`
 
   const steps = [1, 2, 3, 4].map((n) => ({
     n,
@@ -37,12 +41,12 @@ export default function ResearchPageContent() {
   const roadmap = [1, 2, 3, 4].map((n) => t(`roadmap.item${n}`))
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white" lang={lang}>
       {/* Hero */}
       <section className="min-h-[420px] bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#0891B2] pt-32 pb-16 flex items-center">
         <div className="container mx-auto px-4 text-center">
           <nav className="text-sm text-gray-300 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">
+            <Link href={homeHref} className="hover:text-white transition-colors">
               {t('hero.breadcrumb_home')}
             </Link>
             <span className="mx-2">/</span>
@@ -64,6 +68,29 @@ export default function ResearchPageContent() {
               {t('hero.cta_learn')}
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* Language variants of this page */}
+      <section className="border-b border-gray-100 bg-gray-50">
+        <div className="container mx-auto px-4 py-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm">
+          {RESEARCH_LANG_VARIANTS.map((v) =>
+            v.code === lang ? (
+              <span key={v.code} lang={v.code} className="font-semibold text-[#0C2340]">
+                {v.label}
+              </span>
+            ) : (
+              <a
+                key={v.code}
+                href={researchPath(v.code)}
+                lang={v.code}
+                hrefLang={v.code}
+                className="text-gray-500 hover:text-[#0891B2] transition-colors"
+              >
+                {v.label}
+              </a>
+            )
+          )}
         </div>
       </section>
 

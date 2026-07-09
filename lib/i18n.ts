@@ -35,9 +35,12 @@ export type Messages = Record<string, unknown>
  * Fetch all published translations for a namespace + locale from Supabase.
  * Multi-segment keys are concatenated by segment_index order.
  * Falls back to English for any missing keys when locale !== 'en'.
+ * `locale` is a plain string (not Locale): single-page language variants like
+ * /research/<lang> store extra locales (th, ja, pl, de, cs, it) in the same
+ * i18n tables without being site-wide locales.
  */
 export const getNamespaceMessages = unstable_cache(
-  async (namespace: string, locale: Locale): Promise<Record<string, string>> => {
+  async (namespace: string, locale: string): Promise<Record<string, string>> => {
     if (!supabase) return {}
 
     // Get namespace ID
