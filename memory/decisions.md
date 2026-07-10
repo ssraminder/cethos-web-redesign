@@ -190,3 +190,9 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Rationale:** Role covers client comms, project/vendor assignment, CR+CD logistics, deliveries, invoicing for the LV practice. Junior framing ("career-launching", founder mentorship) chosen deliberately over PM-level to match coordinator salary band. Same posting to be adapted for LinkedIn + Indeed (copy-paste versions; no API posting available).
 - **Status:** active
 - **Affects:** `lib/careers.ts`, `app/[locale]/careers/[slug]/page.tsx`, `app/[locale]/careers/[slug]/apply/page.tsx`, `components/careers/FullTimeApplicationForm.tsx`
+
+### 2026-07-09 — Locale detection disabled + careers work-mode filters
+- **Decision:** `localeDetection: false` + `localeCookie: false` in `i18n/routing.ts`. One visit to any /fr page set NEXT_LOCALE=fr and pinned the browser to French for every unprefixed URL (Raminder: "all my requests are resolving to /fr/apply"). Unprefixed URLs now always serve English; /fr only via explicit links. Note: `<html lang>` is hardcoded to en at the root layout even on /fr — pre-existing, untouched.
+- **Also:** /careers gains Remote / On-site filter pills (On-site expands to per-city chips derived from `onsiteAddress`); /apply full-time card blurb now says "Remote and on-site staff positions".
+- **Status:** active
+- **Affects:** `i18n/routing.ts`, `app/[locale]/careers/CareersContent.tsx`, `app/[locale]/apply/page.tsx`
