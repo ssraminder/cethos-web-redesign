@@ -30,6 +30,12 @@ const ROLES = [
     title: 'Operations & Vendor Manager (Cognitive Debriefing & Clinician Review)',
     email: 'e2e-careers-ops@cethos-e2e.invalid',
   },
+  {
+    slug: 'project-coordinator-translation-lv',
+    title: 'Project Coordinator (Translation & Linguistic Validation)',
+    email: 'e2e-careers-pc@cethos-e2e.invalid',
+    onsite: true,
+  },
 ]
 
 // Fake camera/mic so the in-browser recording path can be exercised headlessly.
@@ -84,6 +90,16 @@ for (const role of ROLES) {
     await expect(page.locator('#video')).toHaveCount(1)
     await expect(page.locator('#about_you')).toHaveCount(1)
     await expect(page.getByRole('button', { name: /submit application/i })).toBeVisible()
+
+    // On-site roles swap the shifted-schedule screening question for the
+    // on-site / work-authorization one; remote roles keep the original.
+    const hoursLabel = page.locator('label[for="screening_hours"]')
+    if ((role as { onsite?: boolean }).onsite) {
+      await expect(hoursLabel).toContainText(/on-site.*Calgary/i)
+      await expect(hoursLabel).toContainText(/authorized to work in Canada/i)
+    } else {
+      await expect(hoursLabel).toContainText(/shifted schedule/i)
+    }
   })
 
   test(`full-time application submits end-to-end: ${role.slug}`, async ({ page }) => {

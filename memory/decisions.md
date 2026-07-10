@@ -196,3 +196,4 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Also:** /careers gains Remote / On-site filter pills (On-site expands to per-city chips derived from `onsiteAddress`); /apply full-time card blurb now says "Remote and on-site staff positions".
 - **Status:** active
 - **Affects:** `i18n/routing.ts`, `app/[locale]/careers/CareersContent.tsx`, `app/[locale]/apply/page.tsx`
+- **E2E:** careers.spec.ts was stale (expected join.cethos.com links) — rewritten for on-site apply links + filter tests + NEXT_LOCALE-hijack regression test; careers-apply.spec.ts covers the new role incl. the on-site screening question. Submit tests fire real staff notification emails from "E2E Test Applicant" — disregard.
