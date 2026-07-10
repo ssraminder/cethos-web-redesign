@@ -197,3 +197,9 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Also:** /careers gains Remote / On-site filter pills (On-site expands to per-city chips derived from `onsiteAddress`); /apply full-time card blurb now says "Remote and on-site staff positions".
 - **Status:** active
 - **Affects:** `i18n/routing.ts`, `app/[locale]/careers/CareersContent.tsx`, `app/[locale]/apply/page.tsx`
+
+### 2026-07-10 — Second coordinator posting: fully remote (global), Argentina-targeted on boards
+- **Decision:** Added `project-coordinator-lv-translation-remote` ("Project Coordinator — Linguistic Validation & Translation (Remote)") ALONGSIDE the Calgary on-site posting (Raminder: add as second posting, applicants from anywhere, full currency list). Boards (LinkedIn/Indeed) target Argentina for sourcing; the role itself is global-remote.
+- **Plumbing:** `FullTimeRole.hoursQuestion` (optional) overrides the application form hours screening question — this role works NA Mountain-Time business hours (not the shifted US/EU-evening schedule the default remote question describes). Title deliberately does NOT contain the Calgary role title as a substring (Playwright getByRole name substring matching in e2e).
+- **Status:** active
+- **Affects:** `lib/careers.ts`, `components/careers/FullTimeApplicationForm.tsx`, `app/[locale]/careers/[slug]/apply/page.tsx`
