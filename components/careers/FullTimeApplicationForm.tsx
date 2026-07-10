@@ -20,6 +20,8 @@ interface Props {
   roleTitle: string
   /** True for on-site roles: swaps the shifted-schedule screening question for an on-site one. */
   onsite?: boolean
+  /** Role-specific override for the working-hours screening question. */
+  hoursQuestion?: string
 }
 
 function extFor(file: File, fallback: string): string {
@@ -27,7 +29,7 @@ function extFor(file: File, fallback: string): string {
   return fromName || fallback
 }
 
-export default function FullTimeApplicationForm({ roleSlug, roleTitle, onsite }: Props) {
+export default function FullTimeApplicationForm({ roleSlug, roleTitle, onsite, hoursQuestion }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [progress, setProgress] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
@@ -241,9 +243,10 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle, onsite }:
 
       <div>
         <label className={labelCls} htmlFor="screening_hours">
-          {onsite
-            ? 'This role is on-site at our downtown Calgary office, Monday to Friday during regular business hours. Are you able to work on-site in Calgary, and are you legally authorized to work in Canada? Describe any constraints.'
-            : 'These roles run on a shifted schedule into the evening to cover US and EU clients (e.g. regularly working into the evening, occasionally later for US afternoon / West-Coast calls). Are you able and willing to work these hours? Describe any constraints.'}{' '}
+          {hoursQuestion ||
+            (onsite
+              ? 'This role is on-site at our downtown Calgary office, Monday to Friday during regular business hours. Are you able to work on-site in Calgary, and are you legally authorized to work in Canada? Describe any constraints.'
+              : 'These roles run on a shifted schedule into the evening to cover US and EU clients (e.g. regularly working into the evening, occasionally later for US afternoon / West-Coast calls). Are you able and willing to work these hours? Describe any constraints.')}{' '}
           {req}
         </label>
         <textarea id="screening_hours" name="screening_hours" required rows={3} className={inputCls} />
