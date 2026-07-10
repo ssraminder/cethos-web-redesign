@@ -40,7 +40,7 @@ export default function ApplyPage({ params }: { params: { locale: string } }) {
             </div>
             <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Full-time roles</h2>
             <p className="text-[#4B5563] mb-6">
-              Fully-remote staff positions. View the description and apply directly on this site.
+              Remote and on-site staff positions. View the description and apply directly on this site.
             </p>
             <div className="space-y-3 mb-2">
               {fullTimeRoles.map((role) => (
