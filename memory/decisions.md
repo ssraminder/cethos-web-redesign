@@ -189,6 +189,7 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Plumbing:** `FullTimeRole.onsiteAddress` (optional) drives (a) JobPosting JSON-LD — `jobLocation` PostalAddress instead of the previously hardcoded `TELECOMMUTE`/Worldwide; (b) `FullTimeApplicationForm` `onsite` prop swaps the shifted-schedule screening question for an on-site/work-authorization one. Remote roles unchanged.
 - **Rationale:** Role covers client comms, project/vendor assignment, CR+CD logistics, deliveries, invoicing for the LV practice. Junior framing ("career-launching", founder mentorship) chosen deliberately over PM-level to match coordinator salary band. Same posting to be adapted for LinkedIn + Indeed (copy-paste versions; no API posting available).
 - **Status:** active
+- **Comp currency:** on-site roles collect expected compensation in CAD only (currency select locked to CAD, preselected); remote roles keep the full currency list. Per Raminder 2026-07-09.
 - **Affects:** `lib/careers.ts`, `app/[locale]/careers/[slug]/page.tsx`, `app/[locale]/careers/[slug]/apply/page.tsx`, `components/careers/FullTimeApplicationForm.tsx`
 
 ### 2026-07-09 — Locale detection disabled + careers work-mode filters

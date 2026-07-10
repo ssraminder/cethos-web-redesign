@@ -256,11 +256,23 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle, onsite }:
         </div>
         <div>
           <label className={labelCls} htmlFor="expected_comp_currency">Currency</label>
-          <select id="expected_comp_currency" name="expected_comp_currency" defaultValue="" className={inputCls}>
-            <option value="">Select…</option>
-            {CURRENCY_OPTIONS.map((c) => (
-              <option key={c.code} value={c.code}>{c.label}</option>
-            ))}
+          {/* On-site (Canada) roles are paid in CAD only; remote roles offer the full list. */}
+          <select
+            id="expected_comp_currency"
+            name="expected_comp_currency"
+            defaultValue={onsite ? 'CAD' : ''}
+            className={inputCls}
+          >
+            {onsite ? (
+              <option value="CAD">CAD — Canadian Dollar</option>
+            ) : (
+              <>
+                <option value="">Select…</option>
+                {CURRENCY_OPTIONS.map((c) => (
+                  <option key={c.code} value={c.code}>{c.label}</option>
+                ))}
+              </>
+            )}
           </select>
         </div>
       </div>
