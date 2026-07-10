@@ -28,8 +28,30 @@ function cookieDomain(request: NextRequest): string | undefined {
   return undefined
 }
 
+// Research-page language variants (/research/th etc.) are standalone pages,
+// not site locales — they must never carry a locale prefix. Keep the language
+// list in sync with PANEL_PAGE_LANGS in app/[locale]/research/panelLocales.ts.
+const RESEARCH_LANG_PATH = /^\/research\/(th|ja|pl|de|cs|it)$/
+const PREFIXED_RESEARCH_LANG_PATH = /^\/(?:en|fr)(\/research\/(?:th|ja|pl|de|cs|it))$/
+
 export default function middleware(request: NextRequest) {
-  const response = intlMiddleware(request) as NextResponse
+  const { pathname } = request.nextUrl
+
+  let response: NextResponse
+  const prefixed = pathname.match(PREFIXED_RESEARCH_LANG_PATH)
+  if (prefixed) {
+    // A NEXT_LOCALE=fr cookie (or French Accept-Language) makes next-intl
+    // redirect /research/ja -> /fr/research/ja; send those back.
+    const url = request.nextUrl.clone()
+    url.pathname = prefixed[1]
+    response = NextResponse.redirect(url, 308)
+  } else if (RESEARCH_LANG_PATH.test(pathname)) {
+    // Serve under the default locale directly, bypassing next-intl's locale
+    // detection so fr-cookie visitors aren't bounced to the /fr prefix.
+    response = NextResponse.rewrite(new URL(`/en${pathname}`, request.url))
+  } else {
+    response = intlMiddleware(request) as NextResponse
+  }
 
   // Capture click/attribution params from the query string. Only set the
   // cookie when a param is actually present (so we don't overwrite a valid
