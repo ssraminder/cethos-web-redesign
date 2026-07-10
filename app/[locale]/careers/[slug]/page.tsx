@@ -53,8 +53,17 @@ export default function CareerRolePage({
     title: role.title,
     description: role.blurb,
     employmentType: 'FULL_TIME',
-    jobLocationType: 'TELECOMMUTE',
-    applicantLocationRequirements: { '@type': 'Country', name: 'Worldwide' },
+    ...(role.onsiteAddress
+      ? {
+          jobLocation: {
+            '@type': 'Place',
+            address: { '@type': 'PostalAddress', ...role.onsiteAddress },
+          },
+        }
+      : {
+          jobLocationType: 'TELECOMMUTE',
+          applicantLocationRequirements: { '@type': 'Country', name: 'Worldwide' },
+        }),
     hiringOrganization: {
       '@type': 'Organization',
       name: 'Cethos Solutions Inc.',

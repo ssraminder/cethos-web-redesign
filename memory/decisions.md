@@ -183,3 +183,10 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Rationale:** The page initially said "20+" (actual panel membership); the service pages claim 150+ study-language capability. Marketing claims must be consistent across pages, and the capability number is the right one for a program page. Copy was reworded so it stays truthful: studies "run in 150+ languages" and the panel "is being built to match".
 - **Status:** active
 - **Affects:** `app/[locale]/research/page.tsx` metadata; DB rows in `cethosweb_i18n_translations` (namespace `research`) — already updated in place, live within ~60s of cache revalidation.
+
+### 2026-07-09 — Careers: on-site Calgary Project Coordinator role + onsite-aware careers plumbing
+- **Decision:** Added `project-coordinator-translation-lv` (junior Project Coordinator — Translation & Linguistic Validation; **on-site Calgary**, NA business hours, "Competitive" comp, no range shown per Raminder). First non-remote role on /careers.
+- **Plumbing:** `FullTimeRole.onsiteAddress` (optional) drives (a) JobPosting JSON-LD — `jobLocation` PostalAddress instead of the previously hardcoded `TELECOMMUTE`/Worldwide; (b) `FullTimeApplicationForm` `onsite` prop swaps the shifted-schedule screening question for an on-site/work-authorization one. Remote roles unchanged.
+- **Rationale:** Role covers client comms, project/vendor assignment, CR+CD logistics, deliveries, invoicing for the LV practice. Junior framing ("career-launching", founder mentorship) chosen deliberately over PM-level to match coordinator salary band. Same posting to be adapted for LinkedIn + Indeed (copy-paste versions; no API posting available).
+- **Status:** active
+- **Affects:** `lib/careers.ts`, `app/[locale]/careers/[slug]/page.tsx`, `app/[locale]/careers/[slug]/apply/page.tsx`, `components/careers/FullTimeApplicationForm.tsx`
