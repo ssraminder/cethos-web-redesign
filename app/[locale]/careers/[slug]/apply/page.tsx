@@ -63,7 +63,7 @@ export default function CareerApplyPage({
 
       <section className="py-12 bg-[#F8FAFC]">
         <div className="max-w-[760px] mx-auto px-8">
-          <FullTimeApplicationForm roleSlug={role.slug} roleTitle={role.title} />
+          <FullTimeApplicationForm roleSlug={role.slug} roleTitle={role.title} onsite={!!role.onsiteAddress} hoursQuestion={role.hoursQuestion} />
         </div>
       </section>
     </main>

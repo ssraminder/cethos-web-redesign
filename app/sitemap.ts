@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getAllPublishedPosts, getAllCategorySlugs } from '@/lib/blog-db';
+import { RESEARCH_LANG_VARIANTS, researchUrl, researchHreflangAlternates } from '@/app/[locale]/research/panelLocales';
 
 const locales = ['en', 'fr'] as const;
 const baseUrl = 'https://cethos.com';
@@ -143,5 +144,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   );
 
-  return [...staticPages, ...blogPosts, ...categoryPages];
+  // Research-page language variants (/research, /fr/research, /research/<lang>)
+  // as one hreflang cluster across all 8 languages. The plain /research and
+  // /fr/research entries from staticPaths are superseded by these richer ones,
+  // but duplicates in a sitemap are harmless.
+  const researchAlternates = { languages: researchHreflangAlternates() };
+  const researchPages: MetadataRoute.Sitemap = RESEARCH_LANG_VARIANTS
+    .filter((v) => v.code !== 'en' && v.code !== 'fr')
+    .map((v) => ({
+      url: researchUrl(v.code),
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+      alternates: researchAlternates,
+    }));
+
+  return [...staticPages, ...blogPosts, ...categoryPages, ...researchPages];
 }

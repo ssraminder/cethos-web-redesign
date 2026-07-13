@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Link } from '@/i18n/routing'
 import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Wallet, Languages, Headphones, Headset, Mic, Stethoscope, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -42,7 +43,35 @@ const vendorRoles = [
 
 const benefitIcons = [Globe, TrendingUp, Heart, Layers]
 
+type WorkMode = 'all' | 'remote' | 'onsite'
+
+const onsiteLocationOf = (role: (typeof fullTimeRoles)[number]): string | null =>
+  role.onsiteAddress
+    ? `${role.onsiteAddress.addressLocality}, ${role.onsiteAddress.addressRegion}`
+    : null
+
 export default function CareersContent() {
+  const [workMode, setWorkMode] = useState<WorkMode>('all')
+  const [onsiteLocation, setOnsiteLocation] = useState<string | null>(null)
+
+  const onsiteLocations = Array.from(
+    new Set(fullTimeRoles.map(onsiteLocationOf).filter((l): l is string => !!l)),
+  )
+
+  const visibleRoles = fullTimeRoles.filter((role) => {
+    const loc = onsiteLocationOf(role)
+    if (workMode === 'remote') return !loc
+    if (workMode === 'onsite') return !!loc && (!onsiteLocation || loc === onsiteLocation)
+    return true
+  })
+
+  const modePillCls = (active: boolean) =>
+    `px-5 py-2 rounded-full text-sm font-semibold border transition-colors ${
+      active
+        ? 'bg-[#0891B2] border-[#0891B2] text-white'
+        : 'bg-white border-gray-200 text-[#4B5563] hover:border-[#0891B2] hover:text-[#0891B2]'
+    }`
+
   const tHero = useTranslations('careers.hero')
   const tBenefits = useTranslations('careers.benefits')
   const tPositions = useTranslations('careers.positions')
@@ -132,8 +161,61 @@ export default function CareersContent() {
               {tPositions('description')}
             </p>
           </div>
+          {/* Work-mode filter */}
+          <div className="flex flex-col items-center gap-3 mb-10">
+            <div className="flex flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                className={modePillCls(workMode === 'all')}
+                onClick={() => { setWorkMode('all'); setOnsiteLocation(null) }}
+              >
+                All roles
+              </button>
+              <button
+                type="button"
+                className={modePillCls(workMode === 'remote')}
+                onClick={() => { setWorkMode('remote'); setOnsiteLocation(null) }}
+              >
+                <span className="inline-flex items-center gap-1.5"><Globe className="w-4 h-4" /> Remote</span>
+              </button>
+              <button
+                type="button"
+                className={modePillCls(workMode === 'onsite')}
+                onClick={() => { setWorkMode('onsite'); setOnsiteLocation(null) }}
+              >
+                <span className="inline-flex items-center gap-1.5"><MapPin className="w-4 h-4" /> On-site</span>
+              </button>
+            </div>
+            {workMode === 'onsite' && onsiteLocations.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-2">
+                <button
+                  type="button"
+                  className={modePillCls(onsiteLocation === null)}
+                  onClick={() => setOnsiteLocation(null)}
+                >
+                  All locations
+                </button>
+                {onsiteLocations.map((loc) => (
+                  <button
+                    key={loc}
+                    type="button"
+                    className={modePillCls(onsiteLocation === loc)}
+                    onClick={() => setOnsiteLocation(loc)}
+                  >
+                    {loc}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          {visibleRoles.length === 0 && (
+            <p className="text-center text-[#4B5563]">
+              No open {workMode === 'remote' ? 'remote' : 'on-site'} roles right now — check back soon
+              or view all roles.
+            </p>
+          )}
           <div className="space-y-4">
-            {fullTimeRoles.map((role) => (
+            {visibleRoles.map((role) => (
               <div
                 key={role.slug}
                 className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
