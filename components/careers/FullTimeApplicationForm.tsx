@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CheckCircle2, Loader2, UploadCloud } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
 import VideoField from './VideoField'
@@ -25,6 +25,25 @@ function extFor(file: File, fallback: string): string {
   return fromName || fallback
 }
 
+// Human-friendly labels for known referral-link tokens. Any other token is
+// title-cased for display; the raw token is what gets stored for attribution.
+const REFERRAL_LABELS: Record<string, string> = {
+  indeed: 'Indeed',
+  linkedin: 'LinkedIn',
+  glassdoor: 'Glassdoor',
+  google: 'Google',
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  twitter: 'X (Twitter)',
+  x: 'X (Twitter)',
+}
+
+function prettyReferral(token: string): string {
+  const key = token.toLowerCase()
+  if (REFERRAL_LABELS[key]) return REFERRAL_LABELS[key]
+  return token.charAt(0).toUpperCase() + token.slice(1)
+}
+
 export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [progress, setProgress] = useState<string | null>(null)
@@ -35,6 +54,17 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
   const [cvFile, setCvFile] = useState<File | null>(null)
   const [cvError, setCvError] = useState<string | null>(null)
   const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [referral, setReferral] = useState('')
+
+  // Capture the referral source from the tracked apply link (e.g.
+  // /careers/:slug/apply?ref=indeed). Read from the URL on mount so it also
+  // works when the param is forwarded from the job-description page. Kept in a
+  // hidden field and submitted as `referral_source` for channel attribution.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const raw = (params.get('ref') || params.get('referral') || '').trim()
+    if (raw) setReferral(raw.slice(0, 80))
+  }, [])
 
   function onCvChange(e: React.ChangeEvent<HTMLInputElement>) {
     setCvError(null)
@@ -154,6 +184,18 @@ export default function FullTimeApplicationForm({ roleSlug, roleTitle }: Props) 
   return (
     <form onSubmit={onSubmit} className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 space-y-6">
       <p className="text-sm text-[#4B5563]">Fields marked {req} are required.</p>
+
+      {/* Auto-captured referral source (read-only). Populated from the ?ref=
+          param on the apply link; hidden input carries it into the payload. */}
+      {referral && (
+        <>
+          <input type="hidden" name="referral_source" value={referral} />
+          <div className="flex items-center gap-2 bg-[#ECFEFF] border border-[#A5F3FC] text-[#0E7490] rounded-lg px-4 py-2.5 text-sm">
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>Referred by <strong>{prettyReferral(referral)}</strong></span>
+          </div>
+        </>
+      )}
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">

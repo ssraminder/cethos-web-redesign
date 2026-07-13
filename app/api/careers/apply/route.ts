@@ -105,6 +105,7 @@ export async function POST(req: Request) {
       expected_comp_currency: str('expected_comp_currency') || null,
       about_you,
       how_heard: str('how_heard') || null,
+      referral_source: str('referral_source').slice(0, 80) || null,
       additional_notes: str('additional_notes') || null,
       consent_privacy: true,
       status: 'new',
@@ -146,6 +147,7 @@ export async function POST(req: Request) {
             <p><strong>Experience:</strong> ${esc(years_experience)}</p>
             ${expected_comp_amount != null ? `<p><strong>Expected comp:</strong> ${esc(String(expected_comp_amount))} ${esc(row.expected_comp_currency || '')}</p>` : ''}
             ${row.linkedin_url ? `<p><strong>LinkedIn:</strong> ${esc(row.linkedin_url)}</p>` : ''}
+            ${row.referral_source ? `<p><strong>Referral source:</strong> ${esc(row.referral_source)}</p>` : ''}
             <p style="margin-top:16px;"><strong>Relevant experience:</strong><br>${esc(screening_experience)}</p>
             <p><strong>Shifted-schedule willingness:</strong><br>${esc(screening_hours)}</p>
             <p><strong>About them:</strong><br>${esc(about_you)}</p>
