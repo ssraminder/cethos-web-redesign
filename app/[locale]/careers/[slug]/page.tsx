@@ -36,8 +36,10 @@ export async function generateMetadata({
 
 export default function CareerRolePage({
   params,
+  searchParams,
 }: {
   params: { locale: string; slug: string }
+  searchParams?: { ref?: string | string[]; referral?: string | string[] }
 }) {
   const { locale, slug } = params
   setRequestLocale(locale)
@@ -45,7 +47,13 @@ export default function CareerRolePage({
   const role = getRole(slug)
   if (!role) notFound()
 
-  const applyHref = roleApplyFormUrl(role.slug)
+  // Forward a referral token (?ref=indeed) from the job page through to the
+  // apply form so tracked links to either URL attribute correctly.
+  const refRaw = searchParams?.ref ?? searchParams?.referral
+  const ref = (Array.isArray(refRaw) ? refRaw[0] : refRaw)?.trim().slice(0, 80)
+  const applyHref = ref
+    ? `${roleApplyFormUrl(role.slug)}?ref=${encodeURIComponent(ref)}`
+    : roleApplyFormUrl(role.slug)
 
   const jobPostingLd = {
     '@context': 'https://schema.org',
