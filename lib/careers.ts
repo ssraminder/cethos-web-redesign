@@ -211,7 +211,7 @@ export const fullTimeRoles: FullTimeRole[] = [
     title: 'Project Coordinator — Linguistic Validation & Translation (Remote)',
     location: 'Fully remote (global)',
     type: 'Full-time',
-    compensation: 'Competitive — based on experience and location',
+    compensation: 'Competitive — based on experience and location, with a review after your first six months',
     blurb:
       'Coordinate translation and linguistic validation projects end-to-end, fully remote — client communication, project and vendor assignment, clinician review and cognitive debriefing logistics, deliveries, and invoicing.',
     hoursNote:
@@ -260,7 +260,7 @@ export const fullTimeRoles: FullTimeRole[] = [
           'Learn a rare, in-demand specialization — linguistic validation — that very few coordinators can put on a resume.',
           'Direct mentorship from the founders: no layers between you and the people who built the business.',
           'Our automation-heavy platform handles the repetitive work (folder setup, vendor packages, notifications), so you do the interesting parts.',
-          'Fully remote with a stable, predictable schedule.',
+          'Fully remote with a stable, predictable schedule, and a compensation review after your first six months.',
         ],
       },
     ],
