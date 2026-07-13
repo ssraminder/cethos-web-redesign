@@ -215,9 +215,9 @@ export const fullTimeRoles: FullTimeRole[] = [
     blurb:
       'Coordinate translation and linguistic validation projects end-to-end, fully remote — client communication, project and vendor assignment, clinician review and cognitive debriefing logistics, deliveries, and invoicing.',
     hoursNote:
-      'Fully remote, working North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Calgary time. From Latin America that is an afternoon-to-evening local schedule (e.g. about 12pm–8pm in Argentina); from Europe or Asia it is a late shift. Genuine comfort with this overlap is essential.',
+      'Fully remote, working North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Mountain Time. Depending on where you are based this may fall in your afternoon, evening, or overnight, so genuine comfort with this overlap is essential.',
     hoursQuestion:
-      'This role works North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Calgary time. Are you able and willing to keep this schedule from your location? Describe any constraints.',
+      'This role works North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Mountain Time. Are you able and willing to keep this schedule from your location? Describe any constraints.',
     sections: [
       { heading: 'About Cethos', body: ABOUT_CETHOS },
       {
