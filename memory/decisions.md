@@ -203,3 +203,10 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 - **Plumbing:** `FullTimeRole.hoursQuestion` (optional) overrides the application form hours screening question — this role works NA Mountain-Time business hours (not the shifted US/EU-evening schedule the default remote question describes). Title deliberately does NOT contain the Calgary role title as a substring (Playwright getByRole name substring matching in e2e).
 - **Status:** active
 - **Affects:** `lib/careers.ts`, `components/careers/FullTimeApplicationForm.tsx`, `app/[locale]/careers/[slug]/apply/page.tsx`
+
+### 2026-07-14 — Dutch /research/nl language variant
+- **Decision:** Added Dutch (`nl`) as a standalone language variant of the /research program page (`cethos.com/research/nl`), matching the portal's new Dutch research-panel signup form (same session). `nl` is NOT a site locale (routing stays en/fr) — it's a `PANEL_PAGE_LANGS` entry only, like th/ja/pl/de/cs/it.
+- **Plumbing:** `app/[locale]/research/panelLocales.ts` — added `nl` to `PANEL_PAGE_LANGS`, `RESEARCH_LANG_VARIANTS` (label "Nederlands", placed after Deutsch), and `OG_LOCALES` (`nl_NL`). Copy lives in the DB `research` i18n namespace (51 keys, locale `nl`, status published), upserted via SQL.
+- **DB schema change (prod, user-authorized):** `cethosweb_i18n_translations.locale` CHECK constraint widened to add `'nl'` (was 14 locales) — migration `supabase/migrations/014_i18n_locale_add_nl.sql`. The CHECK is the gate for any new content locale; widen it first. The hero/CTA "Join" button deep-links to `portal.cethos.com/research-panel/nl`.
+- **Status:** active. Verified live on local `next dev`: /research/nl renders full Dutch copy + "Nederlands" in the on-page language bar.
+- **Affects:** `app/[locale]/research/panelLocales.ts`, `supabase/migrations/014_i18n_locale_add_nl.sql`, DB `cethosweb_i18n_translations`
