@@ -38,6 +38,18 @@ const nextConfig = {
         destination: '/locations/edmonton',
         permanent: true,
       },
+      // Clinician Review moved under Linguistic Validation (canonical nested URL).
+      // Preserves SEO equity from the former flat page. Keep en + fr in sync.
+      {
+        source: '/services/lifesciences/clinician-review',
+        destination: '/services/lifesciences/linguistic-validation/clinician-review',
+        permanent: true,
+      },
+      {
+        source: '/fr/services/lifesciences/clinician-review',
+        destination: '/fr/services/lifesciences/linguistic-validation/clinician-review',
+        permanent: true,
+      },
       // Research-page language variants live at /research/<lang> (not site
       // locales). Catch locale-prefix-style URLs; runs before next-intl
       // middleware so /th/research never 404s. Keep the list in sync with

@@ -99,7 +99,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Services - Life Sciences
     { path: '/services/lifesciences/cognitive-debriefing', changeFrequency: 'weekly', priority: 0.8 },
-    { path: '/services/lifesciences/clinician-review', changeFrequency: 'weekly', priority: 0.8 },
+    { path: '/services/lifesciences/linguistic-validation/clinician-review', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/services/lifesciences/clinical-trials', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/services/lifesciences/ecoa-migration', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/services/lifesciences/linguistic-validation', changeFrequency: 'weekly', priority: 0.8 },
