@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { RESEARCH_LANG_VARIANTS, researchPath } from './panelLocales'
+import { RESEARCH_LANG_VARIANTS, researchPath, isRtlLang } from './panelLocales'
 
 // Public overview of the Cethos Language & Research Panel. The panel itself
 // (sign-up, scheduling, honorarium handling) lives on the portal — this page
@@ -21,6 +21,7 @@ interface ResearchPageViewProps {
 export default function ResearchPageView({ msgs, lang, homeHref }: ResearchPageViewProps) {
   const t = (key: string) => msgs[key] ?? key
   const joinUrl = `${PORTAL_PANEL_URL}/${lang}`
+  const rtl = isRtlLang(lang)
 
   const steps = [1, 2, 3, 4].map((n) => ({
     n,
@@ -41,7 +42,7 @@ export default function ResearchPageView({ msgs, lang, homeHref }: ResearchPageV
   const roadmap = [1, 2, 3, 4].map((n) => t(`roadmap.item${n}`))
 
   return (
-    <main className="min-h-screen bg-white" lang={lang}>
+    <main className="min-h-screen bg-white" lang={lang} dir={rtl ? 'rtl' : undefined}>
       {/* Hero */}
       <section className="min-h-[420px] bg-gradient-to-br from-[#0C2340] via-[#0C2340] to-[#0891B2] pt-32 pb-16 flex items-center">
         <div className="container mx-auto px-4 text-center">
