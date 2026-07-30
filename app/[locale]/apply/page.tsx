@@ -113,7 +113,7 @@ export default function ApplyPage({ params }: { params: { locale: string } }) {
         <div className="max-w-[1100px] mx-auto px-8">
           <div className="flex items-center gap-2.5 mb-2">
             <Stethoscope className="w-6 h-6 text-[#0891B2]" />
-            <h2 className="text-2xl font-bold text-[#0C2340]">Clinicians — physicians, nurses &amp; pharmacists</h2>
+            <h2 className="text-2xl font-bold text-[#0C2340]">Clinicians &amp; allied-health professionals</h2>
           </div>
           <p className="text-[#4B5563] max-w-2xl mb-8">
             Review translated COA/PRO instruments for clinical accuracy. Register directly with
@@ -138,14 +138,13 @@ export default function ApplyPage({ params }: { params: { locale: string } }) {
               </a>
             ))}
           </div>
-          <p className="text-xs text-[#6B7280] mt-6">
-            Another regulated clinician?{' '}
-            <a
-              href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=other`}
-              className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline"
-            >
-              Register here
-            </a>.
+          <p className="text-sm text-[#4B5563] mt-6">
+            Also recruiting allied-health clinicians:{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=speech_language_therapist`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Speech &amp; Language Therapists</a>,{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=physiotherapist`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Physiotherapists</a>,{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=occupational_therapist`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Occupational Therapists</a>,{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=dietitian`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Dietitians</a>, or{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=other`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">another regulated clinician</a>.
           </p>
         </div>
       </section>
