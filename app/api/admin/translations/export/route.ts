@@ -2,11 +2,6 @@ import { NextResponse } from 'next/server';
 import { getAdminUserFromToken } from '@/lib/admin/auth';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!
-);
-
 /**
  * GET /api/admin/translations/export?locale=fr&format=csv|json
  *
@@ -14,6 +9,13 @@ const supabase = createClient(
  * for sending to translators.
  */
 export async function GET(request: Request) {
+  // Build the Supabase client per-request. At module scope this crashed
+  // `next build` (page-data collection) when NEXT_PUBLIC_SUPABASE_URL was absent
+  // — e.g. the Vercel Preview env, which only had Production-scoped vars.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!,
+  );
   const admin = await getAdminUserFromToken(request.headers.get('authorization'));
   if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

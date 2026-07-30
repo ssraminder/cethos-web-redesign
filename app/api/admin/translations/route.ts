@@ -2,11 +2,6 @@ import { NextResponse } from 'next/server';
 import { getAdminUserFromToken } from '@/lib/admin/auth';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!
-);
-
 /**
  * GET /api/admin/translations?locale=fr
  *
@@ -14,6 +9,12 @@ const supabase = createClient(
  * Uses service_role to bypass RLS so admins can see draft translations.
  */
 export async function GET(request: Request) {
+  // Per-request client (see export/route.ts): module-scope createClient crashed
+  // `next build` when NEXT_PUBLIC_SUPABASE_URL was absent in the Preview env.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY!,
+  );
   const admin = await getAdminUserFromToken(request.headers.get('authorization'));
   if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
