@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAdminUserFromToken } from '@/lib/admin/auth';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * GET /api/admin/translations?locale=fr
@@ -29,8 +29,8 @@ export async function GET(request: Request) {
       .from('cethosweb_i18n_namespaces')
       .select('id, name, description, page_path')
       .order('name'),
-    fetchAllRows('cethosweb_i18n_translations', 'en'),
-    fetchAllRows('cethosweb_i18n_translations', targetLocale),
+    fetchAllRows(supabase, 'cethosweb_i18n_translations', 'en'),
+    fetchAllRows(supabase, 'cethosweb_i18n_translations', targetLocale),
   ]);
 
   if (nsRes.error) {
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
   });
 }
 
-async function fetchAllRows(table: string, locale: string) {
+async function fetchAllRows(supabase: SupabaseClient, table: string, locale: string) {
   const allRows: Record<string, unknown>[] = [];
   const pageSize = 1000;
   let offset = 0;
