@@ -1,12 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 export async function GET() {
+  // Per-request client (see admin/translations/export/route.ts): module-scope
+  // createClient crashed `next build` when the Supabase env vars were absent in
+  // the Vercel Preview environment.
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
   try {
     const { data, error } = await supabase
       .from('cethosweb_testimonials')
