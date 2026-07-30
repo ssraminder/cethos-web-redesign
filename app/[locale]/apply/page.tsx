@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/routing'
-import { ArrowRight, Briefcase, Users, MapPin, Clock } from 'lucide-react'
+import { ArrowRight, Briefcase, Users, MapPin, Clock, Stethoscope } from 'lucide-react'
 import { fullTimeRoles, roleApplyUrl } from '@/lib/careers'
 
 const VENDOR_APPLY_URL = 'https://join.cethos.com/apply'
@@ -105,6 +105,47 @@ export default function ApplyPage({ params }: { params: { locale: string } }) {
               Apply to the vendor network <ArrowRight className="w-5 h-5" />
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* Clinicians — dedicated self-registration channel */}
+      <section className="py-16 bg-[#F8FAFC] border-t border-gray-100">
+        <div className="max-w-[1100px] mx-auto px-8">
+          <div className="flex items-center gap-2.5 mb-2">
+            <Stethoscope className="w-6 h-6 text-[#0891B2]" />
+            <h2 className="text-2xl font-bold text-[#0C2340]">Clinicians &amp; allied-health professionals</h2>
+          </div>
+          <p className="text-[#4B5563] max-w-2xl mb-8">
+            Review translated COA/PRO instruments for clinical accuracy. Register directly with
+            your degrees and professional registration — there&rsquo;s no translation test.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              { profession: 'physician', title: 'Physician', hint: 'MD / DO / MBBS / MBChB' },
+              { profession: 'nurse', title: 'Nurse', hint: 'RN / NP' },
+              { profession: 'pharmacist', title: 'Pharmacist', hint: 'PharmD / RPh' },
+            ].map((c) => (
+              <a
+                key={c.profession}
+                href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=${c.profession}`}
+                className="group block rounded-xl border border-gray-200 bg-white p-6 hover:border-[#0891B2] transition-colors"
+              >
+                <h3 className="font-semibold text-[#0C2340] text-lg">{c.title}</h3>
+                <p className="text-sm text-[#4B5563] mt-1">{c.hint}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-[#0891B2] font-semibold text-sm">
+                  Register <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </a>
+            ))}
+          </div>
+          <p className="text-sm text-[#4B5563] mt-6">
+            Also recruiting allied-health clinicians:{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=speech_language_therapist`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Speech &amp; Language Therapists</a>,{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=physiotherapist`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Physiotherapists</a>,{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=occupational_therapist`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Occupational Therapists</a>,{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=dietitian`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">Dietitians</a>, or{' '}
+            <a href={`${VENDOR_APPLY_URL}?role=clinician_reviewer&profession=other`} className="text-[#0891B2] font-semibold hover:text-[#06B6D4] underline">another regulated clinician</a>.
+          </p>
         </div>
       </section>
     </main>
