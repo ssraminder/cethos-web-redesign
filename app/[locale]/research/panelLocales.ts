@@ -4,7 +4,7 @@
 // exist only for this page. The set mirrors the locales supported by the
 // portal's research-panel signup form (client/i18n/researchPanel.ts in the
 // portal repo), so every page links to a signup form in the same language.
-export const PANEL_PAGE_LANGS = ['th', 'ja', 'pl', 'de', 'cs', 'it', 'nl', 'sk', 'ar', 'hi', 'kn', 'ta', 'te'] as const
+export const PANEL_PAGE_LANGS = ['th', 'ja', 'pl', 'de', 'cs', 'it', 'nl', 'sk', 'ar', 'hi', 'kn', 'ta', 'te', 'es'] as const
 export type PanelPageLang = (typeof PANEL_PAGE_LANGS)[number]
 
 export function isPanelPageLang(value: string): value is PanelPageLang {
@@ -39,6 +39,7 @@ export function researchPath(lang: string): string {
 export const RESEARCH_LANG_VARIANTS: { code: string; label: string }[] = [
   { code: 'en', label: 'English' },
   { code: 'fr', label: 'Français' },
+  { code: 'es', label: 'Español' },
   { code: 'de', label: 'Deutsch' },
   { code: 'nl', label: 'Nederlands' },
   { code: 'it', label: 'Italiano' },
@@ -67,6 +68,7 @@ export function researchHreflangAlternates(): Record<string, string> {
 export const OG_LOCALES: Record<string, string> = {
   en: 'en_US',
   fr: 'fr_CA',
+  es: 'es_ES',
   th: 'th_TH',
   ja: 'ja_JP',
   pl: 'pl_PL',

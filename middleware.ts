@@ -31,8 +31,8 @@ function cookieDomain(request: NextRequest): string | undefined {
 // Research-page language variants (/research/th etc.) are standalone pages,
 // not site locales — they must never carry a locale prefix. Keep the language
 // list in sync with PANEL_PAGE_LANGS in app/[locale]/research/panelLocales.ts.
-const RESEARCH_LANG_PATH = /^\/research\/(th|ja|pl|de|cs|it)$/
-const PREFIXED_RESEARCH_LANG_PATH = /^\/(?:en|fr)(\/research\/(?:th|ja|pl|de|cs|it))$/
+const RESEARCH_LANG_PATH = /^\/research\/(th|ja|pl|de|cs|it|nl|sk|ar|hi|kn|ta|te|es)$/
+const PREFIXED_RESEARCH_LANG_PATH = /^\/(?:en|fr)(\/research\/(?:th|ja|pl|de|cs|it|nl|sk|ar|hi|kn|ta|te|es))$/
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
