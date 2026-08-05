@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getAllPublishedPosts, getAllCategorySlugs } from '@/lib/blog-db';
 import { RESEARCH_LANG_VARIANTS, researchUrl, researchHreflangAlternates } from '@/app/[locale]/research/panelLocales';
+import { fullTimeRoles } from '@/lib/careers';
 
 const locales = ['en', 'fr'] as const;
 const baseUrl = 'https://cethos.com';
@@ -29,6 +30,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/get-quote', changeFrequency: 'monthly', priority: 0.9 },
     { path: '/blog', changeFrequency: 'daily', priority: 0.8 },
     { path: '/careers', changeFrequency: 'weekly', priority: 0.7 },
+    { path: '/apply', changeFrequency: 'weekly', priority: 0.7 },
+    // Job-description pages, derived from the role registry so new postings are
+    // indexable (Google Jobs picks up their JobPosting JSON-LD).
+    ...fullTimeRoles.map((r) => ({
+      path: `/careers/${r.slug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })),
     { path: '/research', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/privacy', changeFrequency: 'monthly', priority: 0.3 },
     { path: '/terms', changeFrequency: 'monthly', priority: 0.3 },

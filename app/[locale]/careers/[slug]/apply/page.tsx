@@ -22,7 +22,7 @@ export async function generateMetadata({
   if (!role) return {}
   return {
     title: `Apply — ${role.title}`,
-    description: `Apply for ${role.title} at Cethos — fully remote.`,
+    description: `Apply for ${role.title} at Cethos — ${role.location}.`,
     alternates: { canonical: `https://cethos.com/careers/${role.slug}/apply` },
     robots: { index: false, follow: true },
   }
@@ -63,7 +63,14 @@ export default function CareerApplyPage({
 
       <section className="py-12 bg-[#F8FAFC]">
         <div className="max-w-[760px] mx-auto px-8">
-          <FullTimeApplicationForm roleSlug={role.slug} roleTitle={role.title} onsite={!!role.onsiteAddress} hoursQuestion={role.hoursQuestion} />
+          {/* Dual-arrangement roles (alsoRemote) get the remote form variant:
+              full currency list; the arrangement itself is asked via hoursQuestion. */}
+          <FullTimeApplicationForm
+            roleSlug={role.slug}
+            roleTitle={role.title}
+            onsite={!!role.onsiteAddress && !role.alsoRemote}
+            hoursQuestion={role.hoursQuestion}
+          />
         </div>
       </section>
     </main>
