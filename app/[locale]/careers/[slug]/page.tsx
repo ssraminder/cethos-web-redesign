@@ -61,6 +61,9 @@ export default function CareerRolePage({
     title: role.title,
     description: role.blurb,
     employmentType: 'FULL_TIME',
+    // Dual-arrangement roles (onsiteAddress + alsoRemote) advertise both the
+    // physical office and TELECOMMUTE/Worldwide, per Google's combined
+    // onsite-or-remote JobPosting guidance.
     ...(role.onsiteAddress
       ? {
           jobLocation: {
@@ -68,10 +71,13 @@ export default function CareerRolePage({
             address: { '@type': 'PostalAddress', ...role.onsiteAddress },
           },
         }
-      : {
+      : {}),
+    ...(!role.onsiteAddress || role.alsoRemote
+      ? {
           jobLocationType: 'TELECOMMUTE',
           applicantLocationRequirements: { '@type': 'Country', name: 'Worldwide' },
-        }),
+        }
+      : {}),
     hiringOrganization: {
       '@type': 'Organization',
       name: 'Cethos Solutions Inc.',

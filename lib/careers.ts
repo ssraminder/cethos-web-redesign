@@ -37,6 +37,12 @@ export interface FullTimeRole {
     addressCountry: string
   }
   /**
+   * Set together with `onsiteAddress` for roles that can ALSO be worked fully
+   * remote from anywhere. Drives the JobPosting JSON-LD (onsite address +
+   * TELECOMMUTE/Worldwide) and makes the role match both careers filters.
+   */
+  alsoRemote?: boolean
+  /**
    * Optional override for the working-hours screening question on the
    * application form. Defaults: on-site question when onsiteAddress is set,
    * otherwise the generic shifted-schedule (US/EU evening) question.
@@ -262,6 +268,95 @@ export const fullTimeRoles: FullTimeRole[] = [
           'Our automation-heavy platform handles the repetitive work (folder setup, vendor packages, notifications), so you do the interesting parts.',
           'Fully remote with a stable, predictable schedule, and a compensation review after your first six months.',
         ],
+      },
+    ],
+  },
+  {
+    slug: 'account-manager-lv-clinical-translation',
+    title: 'Account Manager — Linguistic Validation & Clinical Translation',
+    location: 'Calgary, AB (on-site) or Fully remote (global)',
+    type: 'Full-time',
+    compensation: 'Competitive — based on experience and location',
+    blurb:
+      'Own client relationships end to end — grow the accounts you hold and deliver the work you sell, across linguistic validation, cognitive debriefing, clinician review, and certified translation.',
+    hoursNote:
+      'Two arrangements: on-site at our downtown Calgary office (421 7th Ave SW) during regular Mountain Time business hours, Monday to Friday — or fully remote from anywhere in the world keeping the same Mountain Time schedule. Depending on where you are based, the remote arrangement may fall in your afternoon, evening, or overnight, so genuine comfort with this overlap is essential. No rotating shifts and no on-call.',
+    onsiteAddress: {
+      streetAddress: '421 7th Ave SW, Floor 30',
+      addressLocality: 'Calgary',
+      addressRegion: 'AB',
+      addressCountry: 'CA',
+    },
+    alsoRemote: true,
+    hoursQuestion:
+      'This role can be based on-site at our downtown Calgary office or fully remote from anywhere in the world, working North American (Mountain Time) business hours, Monday to Friday. Which arrangement are you applying for? If on-site: confirm you are legally authorized to work in Canada. If remote: confirm you can keep the Mountain Time schedule from your location. Describe any constraints.',
+    sections: [
+      {
+        heading: 'About Cethos',
+        body:
+          'Cethos Translation Services, a division of Cethos Solutions Inc., is a Calgary-based translation and language services provider serving clients across Canada and globally in over 200 languages. We specialize in linguistic validation and life sciences translation for clinical trials, regulatory submissions, and medical devices, alongside certified translation for immigration, legal, and government use. Cethos is a BBB Accredited Business with an A+ rating.',
+      },
+      {
+        heading: 'The Role',
+        body:
+          'We are hiring an Account Manager to own our client relationships end to end. This role is deliberately two-sided: you will grow the accounts you hold, and you will deliver the work you sell. If you like being the person a client calls first, and you would rather expand a relationship than simply maintain it, this will suit you. You will work with project managers at global language service providers, CROs, and sponsors, on studies that are actively running. Work on-site at our downtown Calgary office, or fully remote from anywhere in the world on a Mountain Time schedule.',
+      },
+      {
+        heading: "What You'll Do — Grow the Account",
+        bullets: [
+          'Own a portfolio of client accounts as their primary point of contact.',
+          "Learn each client's study pipeline well enough to see what is coming, and position the right services against it: linguistic validation, translatability assessment, cognitive debriefing, clinician review, certified translation, interpretation, and transcription.",
+          'Scope, quote, and negotiate new work; prepare proposals and pricing.',
+          'Track account performance and revenue growth against targets.',
+          'Turn one-off projects into repeat business through delivery clients can rely on.',
+        ],
+      },
+      {
+        heading: "What You'll Do — Service the Work",
+        bullets: [
+          'Run the projects you bring in, coordinating linguists, clinical reviewers, and cognitive debriefing moderators across multiple locales.',
+          'Keep timelines, milestones, and budgets on track across concurrent studies.',
+          'QA deliverables before they reach the client: cognitive debriefing reports, clinician review reports, translatability assessments, reconciliation grids, and certificates.',
+          'Own escalations and quality issues directly, and close them out properly.',
+          'Maintain complete, audit-ready documentation aligned with ISPOR good practices and ISO 17100.',
+        ],
+      },
+      {
+        heading: 'What You Need',
+        bullets: [
+          '3+ years in account management, client services, or project management, in translation/localization, clinical research, or a comparable B2B services environment.',
+          'Genuine comfort with a commercial target; you should enjoy identifying and closing incremental work.',
+          'Excellent written and spoken English, and confident, professional client communication.',
+          'Advanced Word and Excel; tracked changes, formatting, and document QA are daily work.',
+          'Proven ability to manage multiple concurrent deadlines without losing detail.',
+          'On-site: legal authorization to work in Canada. Remote: a reliable internet connection and quiet workspace, with genuine availability during Mountain Time business hours.',
+        ],
+      },
+      {
+        heading: 'Nice to Have',
+        bullets: [
+          'Direct linguistic validation or clinical translation experience (COA/PRO instruments, cognitive debriefing, clinician review).',
+          'Familiarity with ISPOR translation and cultural adaptation principles.',
+          'Experience with a TMS or client portal (XTM, GlobalLink, Plunet, memoQ, or similar).',
+          'A degree in linguistics, translation, life sciences, or business.',
+          'Additional working languages.',
+        ],
+      },
+      {
+        heading: 'What We Offer',
+        bullets: [
+          'Fixed schedule. Regular Mountain Time business hours — no rotating shifts and no on-call.',
+          'Your choice of arrangement: our downtown Calgary office (steps from the CTrain) or fully remote from anywhere in the world.',
+          'Benefits plan for Calgary-based staff, including group health and dental coverage.',
+          'Real ownership. Your accounts are yours, and you will see the direct result of the relationships you build.',
+          'Meaningful work. The instruments you help validate are used in active clinical trials worldwide.',
+          'A small, collaborative team headquartered in Calgary, Canada.',
+        ],
+      },
+      {
+        heading: 'Equal Opportunity',
+        body:
+          'Cethos is an equal opportunity employer. We welcome applications from all qualified candidates and are happy to provide accommodation during the recruitment process on request.',
       },
     ],
   },

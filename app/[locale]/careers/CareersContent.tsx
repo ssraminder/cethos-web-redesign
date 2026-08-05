@@ -60,7 +60,8 @@ export default function CareersContent() {
 
   const visibleRoles = fullTimeRoles.filter((role) => {
     const loc = onsiteLocationOf(role)
-    if (workMode === 'remote') return !loc
+    // Dual-arrangement roles (onsiteAddress + alsoRemote) match both filters.
+    if (workMode === 'remote') return !loc || !!role.alsoRemote
     if (workMode === 'onsite') return !!loc && (!onsiteLocation || loc === onsiteLocation)
     return true
   })
