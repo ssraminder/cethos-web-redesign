@@ -43,7 +43,9 @@ export default function ApplyPage({ params }: { params: { locale: string } }) {
               Remote and on-site staff positions. View the description and apply directly on this site.
             </p>
             <div className="space-y-3 mb-2">
-              {fullTimeRoles.map((role) => (
+              {/* Freelance postings (externalApplyUrl) apply via the vendor
+                  network column instead — this column is staff positions only. */}
+              {fullTimeRoles.filter((role) => !role.externalApplyUrl).map((role) => (
                 <Link
                   key={role.slug}
                   href={roleApplyUrl(role.slug)}
@@ -81,16 +83,16 @@ export default function ApplyPage({ params }: { params: { locale: string } }) {
             </div>
             <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Freelance / vendor network</h2>
             <p className="text-[#4B5563] mb-6">
-              Join our global network of freelance translators, interpreters, transcribers,
-              clinician reviewers, and cognitive debriefing consultants across 130+ languages.
+              Join our global network of freelance translators, cognitive debriefing interviewers,
+              clinician reviewers, recruitment consultants, and QA &amp; project coordinators across 130+ languages.
             </p>
             <ul className="space-y-2 text-sm text-[#4B5563] mb-8">
               {[
                 'Translator / Reviewer',
-                'Interpreter',
-                'Transcriber',
+                'Cognitive Debriefing Interviewer',
                 'Clinician Reviewer',
-                'Cognitive Debriefing Consultant',
+                'CD & Clinician Review Consultant',
+                'LV QA & Project Coordinator',
               ].map((r) => (
                 <li key={r} className="flex gap-2.5">
                   <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#0891B2] flex-shrink-0" />

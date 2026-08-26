@@ -51,16 +51,21 @@ export default function CareerRolePage({
   // apply form so tracked links to either URL attribute correctly.
   const refRaw = searchParams?.ref ?? searchParams?.referral
   const ref = (Array.isArray(refRaw) ? refRaw[0] : refRaw)?.trim().slice(0, 80)
-  const applyHref = ref
-    ? `${roleApplyFormUrl(role.slug)}?ref=${encodeURIComponent(ref)}`
-    : roleApplyFormUrl(role.slug)
+  // Freelance/contract postings apply through the vendor recruitment pipeline
+  // (join.cethos.com) — the referral token isn't consumed there, so it's only
+  // forwarded on the internal full-time form.
+  const applyHref = role.externalApplyUrl
+    ? role.externalApplyUrl
+    : ref
+      ? `${roleApplyFormUrl(role.slug)}?ref=${encodeURIComponent(ref)}`
+      : roleApplyFormUrl(role.slug)
 
   const jobPostingLd = {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
     title: role.title,
     description: role.blurb,
-    employmentType: 'FULL_TIME',
+    employmentType: role.employmentTypeLd ?? 'FULL_TIME',
     // Dual-arrangement roles (onsiteAddress + alsoRemote) advertise both the
     // physical office and TELECOMMUTE/Worldwide, per Google's combined
     // onsite-or-remote JobPosting guidance.
