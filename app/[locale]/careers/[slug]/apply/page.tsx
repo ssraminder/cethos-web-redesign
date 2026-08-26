@@ -8,8 +8,10 @@ import { fullTimeRoles, getRole, roleApplyUrl } from '@/lib/careers'
 import FullTimeApplicationForm from '@/components/careers/FullTimeApplicationForm'
 
 export function generateStaticParams() {
+  // Freelance/contract postings apply through the vendor recruitment pipeline
+  // (externalApplyUrl) — they have no on-site application form page.
   return routing.locales.flatMap((locale) =>
-    fullTimeRoles.map((r) => ({ locale, slug: r.slug })),
+    fullTimeRoles.filter((r) => !r.externalApplyUrl).map((r) => ({ locale, slug: r.slug })),
   )
 }
 
@@ -37,7 +39,7 @@ export default function CareerApplyPage({
   setRequestLocale(locale)
 
   const role = getRole(slug)
-  if (!role) notFound()
+  if (!role || role.externalApplyUrl) notFound()
 
   return (
     <main>

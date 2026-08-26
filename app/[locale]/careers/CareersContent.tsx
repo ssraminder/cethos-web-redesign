@@ -2,12 +2,14 @@
 
 import { useState } from 'react'
 import { Link } from '@/i18n/routing'
-import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Wallet, Languages, Headphones, Headset, Mic, Stethoscope, ArrowRight } from 'lucide-react'
+import { Briefcase, Globe, TrendingUp, Heart, Layers, MapPin, Clock, Wallet, Languages, Mic, Stethoscope, Users, ClipboardCheck, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { fullTimeRoles, roleApplyUrl } from '@/lib/careers'
 
 const APPLY_URL = 'https://join.cethos.com/apply'
 
+// Cards must only advertise roles the join.cethos.com form actually offers
+// (its VALID_ROLES) — an unsupported ?role= silently falls back to translator.
 const vendorRoles = [
   {
     icon: Languages,
@@ -16,16 +18,10 @@ const vendorRoles = [
     query: 'role=translator',
   },
   {
-    icon: Headset,
-    title: 'Interpreter',
-    description: 'Consecutive, simultaneous, OPI, VRI, sign language, and escort interpretation.',
-    query: 'role=interpreter',
-  },
-  {
-    icon: Headphones,
-    title: 'Transcriber',
-    description: 'Audio transcription for medical, legal, research, and media contexts.',
-    query: 'role=transcriber',
+    icon: Mic,
+    title: 'Cognitive Debriefing Interviewer',
+    description: 'COA/PRO patient interviewing and linguistic validation reporting.',
+    query: 'role=cognitive_debriefing',
   },
   {
     icon: Stethoscope,
@@ -34,10 +30,16 @@ const vendorRoles = [
     query: 'role=clinician_reviewer',
   },
   {
-    icon: Mic,
-    title: 'Cognitive Debriefing Consultant',
-    description: 'COA/PRO patient interviewing and linguistic validation reporting.',
-    query: 'role=cognitive_debriefing',
+    icon: Users,
+    title: 'CD & Clinician Review Consultant',
+    description: 'Participant & clinician recruitment, CD/ClinRO study consulting and coordination.',
+    query: 'role=cd_clinician_consultant',
+  },
+  {
+    icon: ClipboardCheck,
+    title: 'LV QA & Project Coordinator',
+    description: 'QC passes and project coordination on linguistic validation projects — hourly, remote.',
+    query: 'role=lv_qa_coordinator',
   },
 ]
 
@@ -277,7 +279,7 @@ export default function CareersContent() {
               Join our global network of language professionals
             </h2>
             <p className="text-lg text-[#4B5563] max-w-2xl mx-auto">
-              We partner with freelance translators, interpreters, transcribers, clinician reviewers, and cognitive debriefing consultants across 130+ languages. One application for any role below.
+              We partner with freelance translators, cognitive debriefing interviewers, clinician reviewers, recruitment consultants, and QA &amp; project coordinators across 130+ languages. One application for any role below.
             </p>
           </div>
 
