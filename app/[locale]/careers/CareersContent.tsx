@@ -279,7 +279,7 @@ export default function CareersContent() {
               Join our global network of language professionals
             </h2>
             <p className="text-lg text-[#4B5563] max-w-2xl mx-auto">
-              We partner with freelance translators, cognitive debriefing interviewers, clinician reviewers, recruitment consultants, and QA &amp; project coordinators across 130+ languages. One application for any role below.
+              We partner with freelance translators, cognitive debriefing interviewers, clinician reviewers, recruitment consultants, and QA &amp; project coordinators across 200+ languages. One application for any role below.
             </p>
           </div>
 
