@@ -84,7 +84,7 @@ export default function ApplyPage({ params }: { params: { locale: string } }) {
             <h2 className="text-2xl font-bold text-[#0C2340] mb-2">Freelance / vendor network</h2>
             <p className="text-[#4B5563] mb-6">
               Join our global network of freelance translators, cognitive debriefing interviewers,
-              clinician reviewers, recruitment consultants, and QA &amp; project coordinators across 130+ languages.
+              clinician reviewers, recruitment consultants, and QA &amp; project coordinators across 200+ languages.
             </p>
             <ul className="space-y-2 text-sm text-[#4B5563] mb-8">
               {[
