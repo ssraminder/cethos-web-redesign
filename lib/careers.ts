@@ -123,6 +123,65 @@ export const fullTimeRoles: FullTimeRole[] = [
     ],
   },
   {
+    slug: 'iso-certification-quality-compliance-specialist',
+    title: 'ISO Certification & Quality Compliance Specialist (ISO 17100 · 9001 · 27001)',
+    location: 'Fully remote (global)',
+    type: 'Contract',
+    compensation: 'Hourly or monthly retainer — based on experience and location',
+    blurb:
+      'Lead our ISO certification readiness end-to-end on a contract basis — building the quality management system and audit evidence for ISO 17100 first, then planning and driving ISO 9001 and ISO 27001.',
+    hoursNote:
+      'Fully remote contract role open worldwide, working North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Mountain Time — so you can work directly with our Calgary-based leadership. Depending on where you are based this schedule may fall in your afternoon, evening, or overnight, so genuine comfort with this overlap is essential.',
+    hoursQuestion:
+      'This contract role works North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Mountain Time. Are you able and willing to keep this schedule from your location? Describe any constraints.',
+    employmentTypeLd: 'CONTRACTOR',
+    sections: [
+      { heading: 'About Cethos', body: ABOUT_CETHOS },
+      {
+        heading: 'The Role',
+        body:
+          "You'll own our path to ISO certification. Cethos is preparing for a formal certification program that starts with ISO 17100 (translation services), followed by ISO 9001 (quality management) and ISO 27001 (information security). Working directly with our leadership team, you'll run the gap analysis, build and document the quality management system, prepare the audit evidence, and take us through the certification audits. It's a hands-on implementer role — you'll be writing the SOPs and building the records, not just advising — for someone who has taken an organization through ISO certification before and knows exactly what an auditor will ask for.",
+      },
+      {
+        heading: "What You'll Do",
+        bullets: [
+          'Run a gap analysis of our current processes against ISO 17100 — translator and reviser qualification records, TEP (translate-edit-proofread) workflows, project management, vendor management, and client agreement handling — and turn it into a prioritized audit-readiness plan.',
+          'Build and maintain the QMS documentation: quality manual, SOPs, work instructions, templates, and the records that prove the processes are actually followed.',
+          'Set up vendor competence files per ISO 17100 — qualifications, degrees, experience evidence, and ongoing evaluation records for our linguist network.',
+          'Plan and conduct internal audits, run corrective actions (CAPA) to closure, and prepare management reviews.',
+          'Coordinate with the certification body: selection, quotes, scheduling of Stage 1 and Stage 2 audits, and hands-on support during the audits themselves.',
+          'Train our team on the procedures so the QMS lives in daily work, not in a binder.',
+          'After ISO 17100: build the roadmap and lead implementation for ISO 9001, then ISO 27001 — including the ISMS risk assessment, Statement of Applicability, and information-security policies and controls.',
+        ],
+      },
+      {
+        heading: 'What You Need',
+        bullets: [
+          'Hands-on experience preparing an organization for ISO certification and passing the audit — you have done this before as an implementer, quality manager, or consultant, not only as an auditor.',
+          'Working knowledge of at least two of: ISO 17100, ISO 9001, ISO 27001 (ISO 17100 or another language-industry standard is a strong plus).',
+          'Strong command of QMS fundamentals: document control, internal audits, CAPA, management review, and audit-evidence discipline.',
+          'Excellent written English — the documentation you produce is the deliverable.',
+          'Genuine availability during North American (Mountain Time) business hours, Monday to Friday, from wherever you are based.',
+          'Reliable self-directed working habits in a fully remote, deadline-driven engagement.',
+        ],
+      },
+      {
+        heading: 'Nice to Have',
+        bullets: [
+          'Lead Auditor or Lead Implementer certification (ISO 9001, ISO 27001, or equivalent).',
+          'Experience at or with a language service provider — familiarity with TEP workflows, CAT tools, and linguist qualification requirements.',
+          'ISO 27001 ISMS implementation experience, including risk assessments and Statement of Applicability.',
+          'Familiarity with clinical-research quality expectations (ISPOR good practices, sponsor/CRO audits).',
+        ],
+      },
+      {
+        heading: 'The Engagement',
+        body:
+          'This is a contract engagement, hourly or on a monthly retainer, sized to the certification roadmap: the initial phase runs through ISO 17100 certification, with the expectation of continuing into the ISO 9001 and ISO 27001 phases as the program progresses. You set your expected rate in the application, and we confirm scope and rate together before the engagement starts.',
+      },
+    ],
+  },
+  {
     slug: 'business-development-manager-lv-coa',
     title: 'Business Development Manager (Linguistic Validation & COA/eCOA)',
     location: 'Fully remote (global)',
