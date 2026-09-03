@@ -123,6 +123,63 @@ export const fullTimeRoles: FullTimeRole[] = [
     ],
   },
   {
+    slug: 'qa-reviewer-cogdeb-clinician-review-freelance',
+    title: 'QA Reviewer — Cognitive Debriefing & Clinician Review Reports',
+    location: 'Fully remote (global)',
+    type: 'Freelance / Contract',
+    // TODO(raminder): confirm hourly-rate guidance before adding any rate specifics.
+    compensation: 'Hourly — hours allocated per assignment based on report volume',
+    blurb:
+      'Freelance, review-only QA on our linguistic validation deliverables — checking cognitive debriefing reports and clinician review reports for completeness, methodology, and audit-readiness before they reach the client. No coordination duties.',
+    hoursNote:
+      'Freelance and flexible: work is assigned per report or per batch, with hours allocated from volume (approximately 750 words reviewed per hour, per language). Reviews are done on your own schedule against agreed deadlines — no meetings-heavy calendar and no coordination duties, just occasional overlap with North American or European business hours for handoffs and queries.',
+    externalApplyUrl: 'https://join.cethos.com/apply?role=lv_qa_coordinator',
+    employmentTypeLd: 'CONTRACTOR',
+    sections: [
+      { heading: 'About Cethos', body: ABOUT_CETHOS },
+      {
+        heading: 'The Role',
+        body: "You'll be the final set of expert eyes on the two deliverables our clients scrutinize hardest: cognitive debriefing reports and clinician review reports. This is a pure review role — our project managers and coordinators handle scheduling, freelancer follow-ups, and logistics, so your time goes entirely into the reports themselves: methodology, completeness, internal consistency, and the audit-readiness that ISPOR-aligned linguistic validation demands. It suits someone who has written or reviewed these reports before and notices immediately when a finding isn't supported, a round is missing, or a template has been quietly deviated from.",
+      },
+      {
+        heading: "What You'll Do",
+        bullets: [
+          'Review cognitive debriefing reports: interview rounds and participant details complete, subject quotes and paraphrase findings internally consistent, issue resolutions traceable across testing rounds, and conclusions supported by the data.',
+          'Review clinician review reports: clinical terminology assessments substantiated, reviewer statements and credentials documented, and recommendations consistent with the instrument and target language.',
+          'Check both against client templates and project instructions — formatting, file naming, versioning, and required sections.',
+          'Document findings clearly and hand them to the project manager with severity flagged, so fixes are fast and nothing subjective blocks a delivery.',
+          'Feed recurring issues back into our QA checklists and report templates so they get fixed at the source.',
+        ],
+      },
+      {
+        heading: 'What You Need',
+        bullets: [
+          'Hands-on experience with cognitive debriefing or clinician review deliverables — as a report writer, QC reviewer, project manager, or methodologist.',
+          'Working knowledge of the linguistic validation process: forward/back translation, reconciliation, cognitive debriefing, and COA review.',
+          'Exceptional attention to detail — the role exists to catch what others miss.',
+          'Strong written English: your findings need to be precise, evidence-based, and professional.',
+          'Disciplined, self-directed working habits in a fully remote, deadline-driven environment.',
+        ],
+      },
+      {
+        heading: 'Nice to Have',
+        bullets: [
+          'Familiarity with ISPOR and ISOQOL good-practice guidelines for COA translation, cultural adaptation, and cognitive debriefing.',
+          'A clinical, life-sciences, or health-outcomes background.',
+          'Additional working languages.',
+        ],
+      },
+      {
+        heading: "How You're Paid",
+        body: 'This is an hourly freelance engagement with a simple, transparent structure: each assignment comes with an hour allocation derived from its volume — approximately 750 words reviewed per hour, per language — so the scope is agreed before you start and efficient work is never penalized. You set your expected hourly rate in the application, and we confirm the rate together before the first assignment.',
+      },
+      {
+        heading: 'Selection Process',
+        body: 'We review applications on CV and experience — there is no unpaid test. Shortlisted candidates complete a short paid review exercise on a real-style report so both sides can see the fit, followed by a brief call. Successful candidates are onboarded to our vendor portal, where assignments, files, and invoicing are managed.',
+      },
+    ],
+  },
+  {
     slug: 'iso-certification-quality-compliance-specialist',
     title: 'ISO Certification & Quality Compliance Specialist (ISO 17100 · 9001 · 27001)',
     location: 'Fully remote (global)',
