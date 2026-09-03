@@ -38,7 +38,7 @@ const vendorRoles = [
   {
     icon: ClipboardCheck,
     title: 'LV QA & Project Coordinator',
-    description: 'QC passes and project coordination on linguistic validation projects — hourly, remote.',
+    description: 'Report QA review and project coordination on linguistic validation projects — hourly, remote.',
     query: 'role=lv_qa_coordinator',
   },
 ]

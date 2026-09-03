@@ -66,39 +66,38 @@ const ABOUT_CETHOS =
 export const fullTimeRoles: FullTimeRole[] = [
   {
     slug: 'lv-qa-project-coordinator-freelance',
-    title: 'LV QA & Project Coordinator (Linguistic Validation)',
+    title: 'LV Project Coordinator (Linguistic Validation)',
     location: 'Fully remote (global)',
     type: 'Freelance / Contract',
     compensation: 'Hourly — hours allocated per assignment based on project volume',
     blurb:
-      'Freelance quality-control and coordination on our linguistic validation projects — running QC passes on LV deliverables across languages, keeping trackers and documentation audit-ready, and coordinating freelancers so projects move on time.',
+      'Freelance coordination on our linguistic validation projects — keeping trackers, schedules, and documentation audit-ready, and coordinating freelance linguists across languages and time zones so projects move on time.',
     hoursNote:
-      'Freelance and flexible: work is assigned per project, with hours allocated from project volume (approximately 750 words reviewed per hour, per language). Some overlap with North American or European business hours is needed for handoffs and check-ins, but most QC work can be done on your own schedule against agreed deadlines.',
+      'Freelance and flexible: work is assigned per project, with an hour allocation agreed from project scope before you start. Some overlap with North American or European business hours is needed for handoffs and check-ins, but much of the work can be done on your own schedule against agreed deadlines.',
     externalApplyUrl: 'https://join.cethos.com/apply?role=lv_qa_coordinator',
     employmentTypeLd: 'CONTRACTOR',
     sections: [
       { heading: 'About Cethos', body: ABOUT_CETHOS },
       {
         heading: 'The Role',
-        body: "You'll be the extra set of expert eyes on our linguistic validation work. Working with our project managers, you'll run structured quality-control passes on LV deliverables — forward and back translations, reconciliation files, cognitive debriefing reports — and coordinate the moving pieces of multi-language projects: freelancer follow-ups, trackers, schedules, and documentation. It's a detail-driven, process-driven role for someone who has seen how linguistic validation is supposed to run and notices immediately when it isn't.",
+        body: "You'll keep the moving pieces of our multi-language linguistic validation projects moving. Working with our project managers, you'll coordinate freelancer follow-ups, trackers, schedules, and documentation across concurrent projects — the operational glue that keeps LV work on time and audit-ready. It's a detail-driven, process-driven role for someone who has seen how linguistic validation is supposed to run and notices immediately when it isn't.",
       },
       {
         heading: "What You'll Do",
         bullets: [
-          'Run QC passes on linguistic validation deliverables: completeness, formatting, consistency with trackers, adherence to project instructions, and correct file naming and versioning.',
-          'Check LV documentation (translation certificates, reconciliation notes, cognitive debriefing summaries) for accuracy and audit-readiness.',
           'Coordinate with freelance linguists across languages and time zones — sending materials, chasing deliveries, and flagging risks to the project manager early.',
           'Maintain project trackers, status reports, and meeting notes so every project has a clean, current paper trail.',
+          'Keep LV documentation (translation certificates, reconciliation notes, cognitive debriefing summaries) complete, correctly named and versioned, and filed so projects stay audit-ready.',
           'Support scheduling and logistics across concurrent multi-language projects.',
-          'Feed observations back into our QA checklists and process documents so recurring issues get fixed at the source.',
+          'Feed observations back into our process documents so recurring issues get fixed at the source.',
         ],
       },
       {
         heading: 'What You Need',
         bullets: [
-          'Hands-on experience with linguistic validation, COA/PRO translation, or clinical-trial language services — as a coordinator, QC reviewer, or project manager.',
+          'Hands-on experience with linguistic validation, COA/PRO translation, or clinical-trial language services — as a coordinator or project manager.',
           'Familiarity with the LV process: forward/back translation, reconciliation, cognitive debriefing, and COA review.',
-          'Exceptional attention to detail — the role exists to catch what others miss.',
+          'Exceptional organization and follow-through — trackers, follow-ups, and deadlines are how you think.',
           'Strong written English and clear, professional communication with freelancers and project managers.',
           'Comfort with trackers and checklists (Excel / Google Sheets), and disciplined file management.',
           'Reliable self-directed working habits in a fully remote, deadline-driven environment.',
@@ -114,11 +113,11 @@ export const fullTimeRoles: FullTimeRole[] = [
       },
       {
         heading: "How You're Paid",
-        body: 'This is an hourly freelance engagement with a simple, transparent structure: each assignment comes with an hour allocation derived from its volume — approximately 750 words reviewed per hour, per language — so the scope is agreed before you start and efficient work is never penalized. You set your expected hourly rate in the application, and we confirm the rate together before the first assignment.',
+        body: 'This is an hourly freelance engagement with a simple, transparent structure: each assignment comes with an hour allocation agreed from its scope before you start, so efficient work is never penalized. You set your expected hourly rate in the application, and we confirm the rate together before the first assignment.',
       },
       {
         heading: 'Selection Process',
-        body: 'We review applications on CV and experience — there is no unpaid test. Shortlisted candidates complete a short paid review exercise on a real-style file so both sides can see the fit, followed by a brief call. Successful candidates are onboarded to our vendor portal, where assignments, files, and invoicing are managed.',
+        body: 'We review applications on CV and experience — there is no unpaid test. Shortlisted candidates complete a short paid working exercise on a real-style project scenario so both sides can see the fit, followed by a brief call. Successful candidates are onboarded to our vendor portal, where assignments, files, and invoicing are managed.',
       },
     ],
   },
