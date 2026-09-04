@@ -241,6 +241,145 @@ export const fullTimeRoles: FullTimeRole[] = [
     ],
   },
   {
+    slug: 'head-of-operations-remote',
+    title: 'Head of Operations — Linguistic Validation & Translation (Remote)',
+    location: 'Fully remote (global)',
+    type: 'Full-time',
+    compensation: 'Competitive — based on experience and location',
+    blurb:
+      'Lead end-to-end delivery across our linguistic validation, cognitive debriefing, clinician review, and translation work — owning project management, quality, turnaround commitments, and the team behind them.',
+    hoursNote:
+      'Fully remote leadership role open worldwide, working North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Mountain Time — so you can work directly with our Calgary-based leadership and our US and European clients. Depending on where you are based this schedule may fall in your afternoon, evening, or overnight, so genuine comfort with this overlap is essential.',
+    hoursQuestion:
+      'This leadership role works North American (Mountain Time) business hours, Monday to Friday — roughly 9am–5pm Mountain Time. Are you able and willing to keep this schedule from your location? Describe any constraints.',
+    sections: [
+      { heading: 'About Cethos', body: ABOUT_CETHOS },
+      {
+        heading: 'The Role',
+        body:
+          "You'll be our first dedicated operations leader, owning delivery end to end: every project that comes in — linguistic validation, cognitive debriefing, clinician review, certified translation — leaves on time, on quality, and on margin. Today that machinery is run day-to-day by the founders; your job is to take it over, systematize it, and build the team that scales it. It's a hands-on leadership role for someone who has run production at a language service provider or clinical-services company and wants real ownership of how an operation grows.",
+      },
+      {
+        heading: "What You'll Do",
+        bullets: [
+          'Own delivery across all service lines: intake, scheduling, resourcing, quality gates, and on-time handoff to clients, across concurrent multi-language projects.',
+          'Lead and grow the operations team — project managers and coordinators across time zones — including hiring, training, and performance.',
+          'Define and track the numbers that matter: on-time delivery, turnaround times, gross margin per project, rework rates, and client escalations.',
+          'Own the operating system: workflows in our in-house project portal, automation of repetitive steps, and clear escalation paths for at-risk projects.',
+          'Own quality in practice — QA gates for cognitive debriefing and clinician review reports, corrective actions run to closure, and documentation kept audit-ready in line with ISPOR good practices and our ISO 17100 certification program.',
+          'Plan vendor capacity with our vendor management function so the linguist, interviewer, and clinician network is ahead of the pipeline, not behind it.',
+          'Partner with business development on scoping and capacity, so every commitment we sell is one we can deliver.',
+        ],
+      },
+      {
+        heading: 'What You Need',
+        bullets: [
+          '5+ years in operations or production at a language service provider, CRO, or comparable deadline-driven professional-services environment, including 2+ years leading a team.',
+          'Hands-on familiarity with translation production workflows; direct linguistic validation or COA/clinical translation experience is a strong advantage.',
+          'A builder’s track record: processes you created, metrics you moved, teams you grew — be ready to walk us through them.',
+          'Comfort managing a distributed team and freelance network across languages and time zones.',
+          'Excellent written and spoken English, and calm, professional communication under deadline pressure.',
+          'Genuine availability during North American (Mountain Time) business hours, Monday to Friday, from wherever you are based.',
+        ],
+      },
+      {
+        heading: 'Nice to Have',
+        bullets: [
+          'Familiarity with ISPOR / ISOQOL good-practice methodology for COA translation and cognitive debriefing.',
+          'Experience preparing for or operating under ISO 17100 or ISO 9001.',
+          'Experience with a TMS or CAT environment (XTM, memoQ, Trados, Phrase, or similar) and with evaluating tooling.',
+          'Additional working languages.',
+        ],
+      },
+      {
+        heading: 'Why Join Cethos',
+        bullets: [
+          'Real scope: this is the senior delivery seat, reporting directly to the founders, with a mandate to build rather than maintain.',
+          'Meaningful work: the instruments and documents we handle end up in front of patients and regulators in active clinical trials.',
+          'A modern stack: our automation-heavy in-house portal handles the repetitive work, so your team’s time goes into judgment, not admin.',
+          'A small, collaborative team headquartered in Calgary, Canada, working with clients worldwide.',
+        ],
+      },
+      {
+        heading: 'Equal Opportunity',
+        body:
+          'Cethos is an equal opportunity employer. We welcome applications from all qualified candidates and are happy to provide accommodation during the recruitment process on request.',
+      },
+    ],
+  },
+  {
+    slug: 'head-of-operations-calgary',
+    title: 'Head of Operations — Linguistic Validation & Translation (Calgary)',
+    location: 'On-site — Calgary, AB',
+    type: 'Full-time',
+    compensation: 'Competitive — based on experience',
+    blurb:
+      'Lead end-to-end delivery from our downtown Calgary office — owning project management, quality, turnaround commitments, and the team behind our linguistic validation, cognitive debriefing, clinician review, and translation work.',
+    hoursNote:
+      'On-site at our downtown Calgary office (421 7th Ave SW), regular Mountain Time business hours, Monday to Friday. As the delivery lead you may occasionally take an early or late call when a European or US client deadline requires it, but this is not a shifted-schedule role.',
+    onsiteAddress: {
+      streetAddress: '421 7th Ave SW, Floor 30',
+      addressLocality: 'Calgary',
+      addressRegion: 'AB',
+      addressCountry: 'CA',
+    },
+    sections: [
+      { heading: 'About Cethos', body: ABOUT_CETHOS },
+      {
+        heading: 'The Role',
+        body:
+          "You'll be our first dedicated operations leader, working alongside the founders at our Calgary headquarters and owning delivery end to end: every project that comes in — linguistic validation, cognitive debriefing, clinician review, certified translation — leaves on time, on quality, and on margin. Today that machinery is run day-to-day by the founders; your job is to take it over, systematize it, and build the team that scales it. We especially welcome candidates who built their operations career internationally — at a language service provider, CRO, or BPO abroad — and are now based in Canada: that background is exactly what this operation looks like from the inside.",
+      },
+      {
+        heading: "What You'll Do",
+        bullets: [
+          'Own delivery across all service lines: intake, scheduling, resourcing, quality gates, and on-time handoff to clients, across concurrent multi-language projects.',
+          'Lead and grow the operations team — project managers and coordinators in Calgary and remote — including hiring, training, and performance.',
+          'Define and track the numbers that matter: on-time delivery, turnaround times, gross margin per project, rework rates, and client escalations.',
+          'Own the operating system: workflows in our in-house project portal, automation of repetitive steps, and clear escalation paths for at-risk projects.',
+          'Own quality in practice — QA gates for cognitive debriefing and clinician review reports, corrective actions run to closure, and documentation kept audit-ready in line with ISPOR good practices and our ISO 17100 certification program.',
+          'Plan vendor capacity with our vendor management function so the linguist, interviewer, and clinician network is ahead of the pipeline, not behind it.',
+          'Partner with business development on scoping and capacity, so every commitment we sell is one we can deliver.',
+        ],
+      },
+      {
+        heading: 'What You Need',
+        bullets: [
+          '5+ years in operations or production at a language service provider, CRO, or comparable deadline-driven professional-services environment, including 2+ years leading a team — Canadian or international experience equally welcome.',
+          'Hands-on familiarity with translation production workflows; direct linguistic validation or COA/clinical translation experience is a strong advantage.',
+          'A builder’s track record: processes you created, metrics you moved, teams you grew — be ready to walk us through them.',
+          'Comfort managing a distributed team and freelance network across languages and time zones.',
+          'Excellent written and spoken English, and calm, professional communication under deadline pressure.',
+          'Ability to work on-site at our downtown Calgary office and legal authorization to work in Canada.',
+        ],
+      },
+      {
+        heading: 'Nice to Have',
+        bullets: [
+          'Familiarity with ISPOR / ISOQOL good-practice methodology for COA translation and cognitive debriefing.',
+          'Experience preparing for or operating under ISO 17100 or ISO 9001.',
+          'Experience with a TMS or CAT environment (XTM, memoQ, Trados, Phrase, or similar) and with evaluating tooling.',
+          'Additional working languages.',
+        ],
+      },
+      {
+        heading: 'What We Offer',
+        bullets: [
+          'Real scope: this is the senior delivery seat, reporting directly to the founders, with a mandate to build rather than maintain.',
+          'Meaningful work: the instruments and documents we handle end up in front of patients and regulators in active clinical trials.',
+          'A modern stack: our automation-heavy in-house portal handles the repetitive work, so your team’s time goes into judgment, not admin.',
+          'Benefits plan for Calgary-based staff, including group health and dental coverage.',
+          'Downtown Calgary office steps from the CTrain, regular business hours.',
+        ],
+      },
+      {
+        heading: 'Equal Opportunity',
+        body:
+          'Cethos is an equal opportunity employer. We welcome applications from all qualified candidates and are happy to provide accommodation during the recruitment process on request.',
+      },
+    ],
+  },
+  {
     slug: 'business-development-manager-lv-coa',
     title: 'Business Development Manager (Linguistic Validation & COA/eCOA)',
     location: 'Fully remote (global)',
