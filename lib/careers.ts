@@ -132,7 +132,10 @@ export const fullTimeRoles: FullTimeRole[] = [
       'Freelance, review-only QA on our linguistic validation deliverables — checking cognitive debriefing reports and clinician review reports for completeness, methodology, and audit-readiness before they reach the client. No coordination duties.',
     hoursNote:
       'Freelance and flexible: work is assigned per report or per batch, with hours allocated from volume (approximately 750 words reviewed per hour, per language). Reviews are done on your own schedule against agreed deadlines — no meetings-heavy calendar and no coordination duties, just occasional overlap with North American or European business hours for handoffs and queries.',
-    externalApplyUrl: 'https://join.cethos.com/apply?role=lv_qa_coordinator',
+    // Dedicated qa_reviewer role on join.cethos.com (2026-09-04) — previously
+    // shared ?role=lv_qa_coordinator with the LV Project Coordinator posting,
+    // which made the two applicant streams indistinguishable in recruitment.
+    externalApplyUrl: 'https://join.cethos.com/apply?role=qa_reviewer',
     employmentTypeLd: 'CONTRACTOR',
     sections: [
       { heading: 'About Cethos', body: ABOUT_CETHOS },
