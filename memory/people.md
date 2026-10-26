@@ -8,6 +8,9 @@ For each entry: **Name** — role/relationship — relevant context (what they c
 ## Team
 _(Cethos staff: developers, project managers, accountants, reviewers)_
 
+- **Amruta** — Cethos team member — coordinates vendor meetings; set up the Oct 2026 qualification meeting with Cognify (Maria).
+- **Usman** — former vendor/partner (departed before 2026-10) — previously handled cognitive debriefing work; his departure is why Cognify became the primary CD vendor.
+
 ## Stakeholders
 _(Decision-makers, advisors, anyone whose approval matters)_
 
@@ -16,3 +19,5 @@ _(Business/AR customers worth remembering — recurring projects, special handli
 
 ## Vendors
 _(Translators or partners with notable context — preferred for certain language pairs, specific quirks, etc.)_
+
+- **Cognify (Cognify Translations)** — **primary vendor for cognitive debriefing services** as of 2026-10, after Usman's departure. Contact: **Maria**. Candidate for clinician review jobs too. Applied via vendor recruitment as APP-26-2037 (status staff_review since 2026-07-18) — onboarding not finished as of 2026-10-26. No public web footprint found under this name; certifications, QC procedures, and audit-support commitments unverified pending the qualification meeting (prep doc: https://claude.ai/artifact/GhHTfCFgBzdTMXVvXec1ob).
