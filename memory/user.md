@@ -24,6 +24,7 @@ Primary user of this codebase: who they are, their role, what they're responsibl
 - Concise updates preferred. State the finding, the action, and what's next — no recap paragraphs.
 
 ## Active focus
+- **2026-10 (tax accounting):** Handover of 2024–2026 tax accounting work (vendor invoice register, card expense review, FY2025 T2 for 12537494 Canada Inc.). Bundle lives in Dropbox `D:\d\Cethos Dropbox\Raminder Shah\Tax Accounting\Handover 2024-2026` on cethos-pc1 (Windows — NOT reachable via Remote Control, which is Mac/Linux only); vendor invoice PDF archive of record is SharePoint *Accounting ▸ Shared Documents ▸ Vendor Invoices* (~29 folders; register xlsx sits in the `Indeed` subfolder, last modified 2026-09-17 so possibly stale vs the 28-Oct bundle copy). Two entities — see decisions.md 2026-10-29 entry for BNs; never mix their purchases/GST.
 - **2026-05 (marketing):** Bringing Google Ads CPC down for translation keywords (current $9-18, target ~$4 competitor benchmark). Keyword-level Final URL remapping via Google Ads API implemented.
 - **2026-05 (product):** Vendor assignment workflow — admin portal (`portal.cethos.com`, repo `cethos_app_figma_design_v1`) and vendor portal (`vendor.cethos.com`, repo `cethosvendorportal`). Core loop: PM finds vendors → offers/assigns steps → vendor accepts → delivers → PM approves. Multiple E2E bugs fixed across two sessions (see decisions.md).
 

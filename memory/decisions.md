@@ -18,6 +18,16 @@ If a decision is later reversed or refined, mark the old one **superseded** rath
 
 ## Decisions
 
+### 2026-10-29 — Tax accounting: two Cethos entities and their GST/HST numbers
+- **Decision (facts of record):** There are **two separate companies** and their books must never be mixed:
+  - **Cethos Solutions Inc.** (t/a Cethos Solutions) — GST/HST **781741533 RT0001**. Banking: CIBC 43-11213, Amex, CIBC cards. The 957-invoice vendor register and card expense review are THIS entity's purchases.
+  - **12537494 Canada Inc.** (o/a Cethos Translations) — GST/HST **796773141 RT0001** (user-supplied 2026-10-29; previously unsighted). Banking: RBC CAD 01309-1016245 + USD 01309-4001624. The FY2025 T2 working paper (FY 2024-12-01→2025-11-30, revenue $596,723.54) and XTRF revenue belong to THIS entity.
+  - Inter-company flows in FY2025 ($41,400 in / $25,400 out vs Cethos Solutions) need a **loan account, not expense/income**.
+  - A third name, **Cethos Knowledge Works Pvt. Ltd**, appears on cPanel invoices — neither entity; unresolved.
+- **Rationale:** Per the 2026-10-28 tax handover, mixing the entities is "the single thing most likely to cause an expensive mistake" — the vendor register is not support for 12537494's GST return. RT9999-suffixed supplier registrations (Meta, Anthropic, Semrush, Calendly, Google LLC) are simplified non-resident registrations: tax charged is an expense, not an ITC.
+- **Status:** active
+- **Affects:** Tax/GST work only — no code. Source: handover doc in Dropbox `Tax Accounting\Handover 2024-2026\HANDOVER.md`.
+
 ### 2026-07-23 — Arabic /research/ar language variant (first RTL page)
 - **Decision:** Added Arabic (`ar`) as a standalone variant of the /research program page (`cethos.com/research/ar`), same pattern as th/ja/pl/de/cs/it/nl/sk. `ar` is NOT a site locale — a `PANEL_PAGE_LANGS` entry only. Both "Join" CTAs deep-link to `portal.cethos.com/research-panel/ar`.
 - **Plumbing:** `app/[locale]/research/panelLocales.ts` — added `ar` to `PANEL_PAGE_LANGS`, `RESEARCH_LANG_VARIANTS` (label "العربية", placed last after 日本語) and `OG_LOCALES` (`ar_AR`). Copy lives in DB `research` namespace (51 keys, locale `ar`, MSA, status published) — parity vs en verified (0 missing/stray/empty/identical). Applied directly to prod (no migration for translation rows, same as nl/sk).
