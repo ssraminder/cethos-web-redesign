@@ -24,6 +24,7 @@ Primary user of this codebase: who they are, their role, what they're responsibl
 - Concise updates preferred. State the finding, the action, and what's next — no recap paragraphs.
 
 ## Active focus
+- **2026-11 (quality):** ISO 17100:2015 certification granted 11 Nov 2026 (ATC Certification, cert ATCISO2567). Announcing it on cethos.com, to staff, to ISO-scope clients and on LinkedIn. Next standards in the pipeline: ISO 18587, then 9001 and 27001.
 - **2026-05 (marketing):** Bringing Google Ads CPC down for translation keywords (current $9-18, target ~$4 competitor benchmark). Keyword-level Final URL remapping via Google Ads API implemented.
 - **2026-05 (product):** Vendor assignment workflow — admin portal (`portal.cethos.com`, repo `cethos_app_figma_design_v1`) and vendor portal (`vendor.cethos.com`, repo `cethosvendorportal`). Core loop: PM finds vendors → offers/assigns steps → vendor accepts → delivers → PM approves. Multiple E2E bugs fixed across two sessions (see decisions.md).
 

@@ -1580,7 +1580,7 @@
           <footer class="footer footer-minimal">
             <div class="footer-container">
               <div class="footer-bottom-content">
-                <p class="footer-copyright">&copy; ${currentYear} Cethos Solutions Inc. All rights reserved.</p>
+                <p class="footer-copyright">&copy; ${currentYear} Cethos Solutions Inc. All rights reserved. &middot; <a class="footer-legal-link" href="https://atccertification.com/cwc/?id=266-692-738-077-N" target="_blank" rel="noopener noreferrer">ISO 17100:2015 Certified · ATCISO2567</a></p>
                 <div class="footer-legal">
                   ${legalLinks}
                 </div>
@@ -1667,7 +1667,7 @@
           <div class="footer-bottom">
             <div class="footer-container">
               <div class="footer-bottom-content">
-                <p class="footer-copyright">&copy; ${currentYear} Cethos Solutions Inc. All rights reserved.</p>
+                <p class="footer-copyright">&copy; ${currentYear} Cethos Solutions Inc. All rights reserved. &middot; <a class="footer-legal-link" href="https://atccertification.com/cwc/?id=266-692-738-077-N" target="_blank" rel="noopener noreferrer">ISO 17100:2015 Certified · ATCISO2567</a></p>
                 <div class="footer-legal">
                   ${legalLinks}
                 </div>
