@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Hero, Services, Stats, Industries, WhyUs, MidPageCTA, DualCTA } from '@/components/sections'
+import { Hero, Services, Stats, IsoCertification, Industries, WhyUs, MidPageCTA, DualCTA } from '@/components/sections'
 import ClientTestimonials from '@/components/ClientTestimonials'
 import { LocalBusinessJsonLd } from '@/components/JsonLd'
 import { BreadcrumbJsonLd } from '@/components/Breadcrumbs'
@@ -8,11 +8,11 @@ import { getTranslations } from 'next-intl/server'
 
 export const metadata: Metadata = {
   title: { absolute: "Cethos | Certified Translation & Life Sciences" },
-  description: 'Certified translator & life sciences translation services. Rigorous multi-step quality process. Enterprise solutions across Canada, Dubai & India.',
+  description: 'ISO 17100:2015 certified translation services. Certified translator & life sciences translation with a rigorous multi-step quality process. Enterprise solutions across Canada, Dubai & India.',
   alternates: { canonical: 'https://cethos.com' },
   openGraph: {
     title: "Cethos | Certified Translation & Life Sciences",
-    description: 'Certified translator & life sciences translation services. Rigorous multi-step quality process. Enterprise solutions across Canada, Dubai & India.',
+    description: 'ISO 17100:2015 certified translation services. Certified translator & life sciences translation with a rigorous multi-step quality process. Enterprise solutions across Canada, Dubai & India.',
     url: 'https://cethos.com',
     siteName: 'Cethos Solutions Inc.',
     type: 'website',
@@ -30,6 +30,7 @@ export default async function HomePage() {
       <Hero />
       <Services />
       <Stats />
+      <IsoCertification />
       <Industries />
       <WhyUs />
       <ClientTestimonials />
