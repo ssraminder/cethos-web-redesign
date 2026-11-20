@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Script from 'next/script'
 import { Toaster } from 'sonner'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
@@ -9,6 +8,7 @@ import { CethosHeader, CethosFooter } from '@/components/layout'
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLdServer'
 import { GoogleTagManager } from '@/components/GoogleTagManager'
 import TrackingPixels from '@/components/TrackingPixels'
+import ChatWidget from '@/components/webchat/ChatWidget'
 import { getSettingServer } from '@/lib/settings-server'
 import { isValidLocale, type Locale } from '@/lib/i18n'
 
@@ -118,21 +118,9 @@ export default async function LocaleLayout({
         <CethosHeader ctaType="login" locale={locale} />
         <main>{children}</main>
         <CethosFooter locale={locale} />
+        {/* In-house live chat (replaces Tawk.to) — chats land in the portal inbox */}
+        <ChatWidget />
       </NextIntlClientProvider>
-      {/* Tawk.to Live Chat Widget - lazy loaded for better LCP */}
-      <Script id="tawk-to" strategy="lazyOnload">
-        {`
-          var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-          (function(){
-            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-            s1.async=true;
-            s1.src='https://embed.tawk.to/62477a0b2abe5b455fc31fd7/1fvjj9fse';
-            s1.charset='UTF-8';
-            s1.setAttribute('crossorigin','*');
-            s0.parentNode.insertBefore(s1,s0);
-          })();
-        `}
-      </Script>
     </>
   )
 }
