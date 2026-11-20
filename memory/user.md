@@ -30,7 +30,7 @@ Primary user of this codebase: who they are, their role, what they're responsibl
 - **2026-05 (product):** Vendor assignment workflow — admin portal (`portal.cethos.com`, repo `cethos_app_figma_design_v1`) and vendor portal (`vendor.cethos.com`, repo `cethosvendorportal`). Core loop: PM finds vendors → offers/assigns steps → vendor accepts → delivers → PM approves. Multiple E2E bugs fixed across two sessions (see decisions.md).
 
 ## Parking lot / pending issues
-- **Populate `vendor_rates` for Editing and Proofreading** — currently empty; find-matching-vendors falls back to showing all language-matched vendors without rate info. PM must set rates manually at assignment.
+- **Website live chat (2026-11-20):** review + publish the FR `webchat` i18n rows (seeded as draft). Phase 2 ideas: AI first responder (ask_cethos), typing/presence, office-hours messaging.- **Populate `vendor_rates` for Editing and Proofreading** — currently empty; find-matching-vendors falls back to showing all language-matched vendors without rate info. PM must set rates manually at assignment.
 - **Customer name on vendor job cards** — `orders.customer_name` doesn't exist. If PMs want their name visible to vendors, need a join to `profiles` or `customers` table in `vendor-get-jobs`.
 - **Merge open PRs:** portal [#523](https://github.com/ssraminder/cethos_app_figma_design_v1/pull/523) and vendor [#53](https://github.com/ssraminder/cethosvendorportal/pull/53).
 - **QMS gating mode** — `update-workflow-step` v23 is deployed with QMS checks in `warn` mode (writes audit rows, never blocks). Decision needed on when to flip to `block` mode.
