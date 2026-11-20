@@ -68,6 +68,22 @@ export function OrganizationJsonLd() {
       'https://www.linkedin.com/company/cethos',
       'https://www.proz.com/business/51142',
     ],
+    hasCredential: {
+      '@type': 'EducationalOccupationalCredential',
+      name: 'ISO 17100:2015 Translation Services Certification',
+      credentialCategory: 'certification',
+      identifier: 'ATCISO2567',
+      description:
+        'Certified to ISO 17100:2015. Scope: all translation and revision services unless agreed otherwise with the client.',
+      recognizedBy: {
+        '@type': 'Organization',
+        name: 'ATC Certification Ltd',
+        url: 'https://atccertification.com',
+      },
+      validFrom: '2026-11-11',
+      validIn: { '@type': 'Country', name: 'Canada' },
+      url: 'https://atccertification.com/cwc/?id=266-692-738-077-N',
+    },
     knowsAbout: [
       'Translation Services',
       'Linguistic Validation',
