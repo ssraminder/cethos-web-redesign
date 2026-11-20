@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import ClientTestimonials from '@/components/ClientTestimonials'
 import { FAQJsonLd } from '@/components/JsonLd'
+import { ISO_17100 } from '@/components/sections/IsoCertification'
 import { useTranslations } from 'next-intl'
 
 // FAQ Accordion Item Component
@@ -39,6 +40,22 @@ function FAQItem({ question, answer, isOpen, onClick }: {
   )
 }
 
+const ISO_QUALITY_EN: Record<string, string> = {
+  status_certified: 'Certified',
+  iso17100_desc: 'Translation services quality standard',
+  iso_banner_title: 'ISO 17100:2015 certified by ATC Certification',
+  iso_banner_body:
+    'Following Stage 1 and Stage 2 audits in October and November 2026, Cethos Solutions Inc. was certified to ISO 17100:2015, the international standard for translation services. The certification covers linguist qualification, project management, the translation and revision process, and client feedback handling.',
+  iso_cert_label: 'Certificate',
+  iso_valid_label: 'Valid',
+  iso_valid_value: '11 Nov 2026 – 10 Nov 2029',
+  iso_scope_label: 'Scope',
+  iso_scope_value: 'All translation and revision services unless agreed otherwise with the client.',
+  iso_verify: 'Verify certificate ATCISO2567',
+  iso_mark_alt: 'ATC Certification mark: ISO 17100:2015 Certified, Translation Services',
+  atc_label: 'ISO 17100:2015 Certified',
+}
+
 export default function AboutPageContent() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null)
   const tHero = useTranslations('about.hero')
@@ -50,7 +67,9 @@ export default function AboutPageContent() {
   const tFaq = useTranslations('about.faq')
   const tServices = useTranslations('about.services')
   const tIndustries = useTranslations('about.industries')
-  const tQuality = useTranslations('about.quality')
+  const tQualityRaw = useTranslations('about.quality')
+  // ISO 17100 keys fall back to English until the rows from scripts/seed-iso-17100-i18n.sql exist.
+  const tQuality = (key: string) => (tQualityRaw.has(key) ? tQualityRaw(key) : ISO_QUALITY_EN[key] ?? tQualityRaw(key))
 
   const faqItems = [
     { question: tFaq('q1'), answer: tFaq('a1') },
@@ -739,9 +758,45 @@ export default function AboutPageContent() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {/* ISO 17100:2015 certification (ATC Certification Ltd, ATCISO2567) */}
+          <div
+            className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8 mb-12 grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8 items-center"
+            data-testid="about-iso-17100"
+          >
+            <a href={ISO_17100.verifyUrl} target="_blank" rel="noopener noreferrer" className="flex justify-center">
+              <Image
+                src={ISO_17100.markSrc}
+                alt={tQuality('iso_mark_alt')}
+                width={260}
+                height={100}
+                className="w-[240px] md:w-[260px] h-auto"
+              />
+            </a>
+            <div>
+              <h3 className="text-2xl font-bold text-[#0C2340] mb-2">{tQuality('iso_banner_title')}</h3>
+              <p className="text-gray-600 mb-4">{tQuality('iso_banner_body')}</p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600 mb-4">
+                <span><span className="font-medium text-[#0C2340]">{tQuality('iso_cert_label')}:</span> {ISO_17100.certificateNumber}</span>
+                <span><span className="font-medium text-[#0C2340]">{tQuality('iso_valid_label')}:</span> {tQuality('iso_valid_value')}</span>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                <span className="font-medium text-[#0C2340]">{tQuality('iso_scope_label')}:</span> {tQuality('iso_scope_value')}
+              </p>
+              <a
+                href={ISO_17100.verifyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#0891B2] font-semibold hover:text-[#06B6D4] transition-colors"
+              >
+                {tQuality('iso_verify')} →
+              </a>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
             {[
-              { name: tQuality('human_name'), abbr: 'TEP', status: tQuality('status_standard'), description: tQuality('human_desc') },
+              { name: 'ISO 17100:2015', abbr: 'ISO', status: tQuality('status_certified'), description: tQuality('iso17100_desc') },
+              { name: tQuality('human_name'), abbr: '100%', status: tQuality('status_standard'), description: tQuality('human_desc') },
               { name: tQuality('tep_name'), abbr: 'TEP', status: tQuality('status_standard'), description: tQuality('tep_desc') },
               { name: 'GCP', abbr: 'GCP', status: tQuality('status_compliant'), description: tQuality('gcp_desc') },
               { name: tQuality('ispor_name'), abbr: 'ISPOR', status: tQuality('status_followed'), description: tQuality('ispor_desc') }
@@ -773,6 +828,10 @@ export default function AboutPageContent() {
 
           {/* Trust Badges */}
           <div className="flex flex-wrap justify-center items-center gap-8 pt-12 border-t border-gray-200">
+            <a href={ISO_17100.verifyUrl} target="_blank" rel="noopener noreferrer" className="text-center">
+              <Image src={ISO_17100.markSrc} alt={tQuality('iso_mark_alt')} width={180} height={69} className="w-[180px] h-auto mx-auto" />
+              <div className="text-sm text-gray-500 mt-1">{tQuality('atc_label')}</div>
+            </a>
             <div className="text-center">
               <div className="text-2xl font-bold text-[#0C2340]">BBB A+</div>
               <div className="text-sm text-gray-500">{tQuality('bbb_label')}</div>
