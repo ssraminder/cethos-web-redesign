@@ -30,10 +30,10 @@ export type WebchatKey =
   | 'identify_body'
   | 'field_name'
   | 'field_email'
-  | 'field_phone_optional'
+  | 'field_phone'
   | 'field_message'
   | 'identify_save'
-  | 'identify_skip'
+  | 'details_needed'
   | 'identify_saved'
   | 'offline_title'
   | 'offline_body'
@@ -62,6 +62,7 @@ export type WebchatKey =
   | 'error_file_too_large'
   | 'error_file_type'
   | 'error_too_many'
+  | 'error_details_required'
 
 export const WEBCHAT_DEFAULTS: Record<'en' | 'fr', Record<WebchatKey, string>> = {
   en: {
@@ -82,14 +83,14 @@ export const WEBCHAT_DEFAULTS: Record<'en' | 'fr', Record<WebchatKey, string>> =
     end_chat: 'End chat',
     mute: 'Mute sounds',
     unmute: 'Turn sounds on',
-    identify_title: 'How can we reach you if you step away?',
-    identify_body: 'Leave your email and we’ll send our reply there too.',
+    identify_title: 'How can we reach you?',
+    identify_body: 'Please share your name, email and phone so our team can follow up — we’ll reply here, and by email if you step away.',
     field_name: 'Name',
     field_email: 'Email',
-    field_phone_optional: 'Phone (optional)',
+    field_phone: 'Phone',
     field_message: 'Message',
     identify_save: 'Save',
-    identify_skip: 'Not now',
+    details_needed: 'Add your name, email and phone above to keep chatting.',
     identify_saved: 'Thanks! We’ll reply here, and by email if you step away.',
     offline_title: 'Leave us a message',
     offline_body: 'No one is online right now. Leave a message and we’ll reply by email, usually within one business day.',
@@ -118,6 +119,7 @@ export const WEBCHAT_DEFAULTS: Record<'en' | 'fr', Record<WebchatKey, string>> =
     error_file_too_large: 'That file is over 10 MB.',
     error_file_type: 'That file type isn’t supported. Try PDF, JPG, PNG, Word or Excel.',
     error_too_many: 'Too many messages — please try again later.',
+    error_details_required: 'Please add your name, email and phone to continue the chat.',
   },
   fr: {
     launcher_open: 'Clavardez avec nous',
@@ -137,14 +139,14 @@ export const WEBCHAT_DEFAULTS: Record<'en' | 'fr', Record<WebchatKey, string>> =
     end_chat: 'Terminer',
     mute: 'Couper le son',
     unmute: 'Activer le son',
-    identify_title: 'Comment vous joindre si vous partez ?',
-    identify_body: 'Laissez votre courriel et nous y enverrons aussi notre réponse.',
+    identify_title: 'Comment vous joindre ?',
+    identify_body: 'Indiquez votre nom, votre courriel et votre téléphone pour que notre équipe puisse faire le suivi — nous répondrons ici, et par courriel si vous partez.',
     field_name: 'Nom',
     field_email: 'Courriel',
-    field_phone_optional: 'Téléphone (facultatif)',
+    field_phone: 'Téléphone',
     field_message: 'Message',
     identify_save: 'Enregistrer',
-    identify_skip: 'Plus tard',
+    details_needed: 'Ajoutez votre nom, votre courriel et votre téléphone ci-dessus pour continuer.',
     identify_saved: 'Merci ! Nous répondrons ici, et par courriel si vous partez.',
     offline_title: 'Laissez-nous un message',
     offline_body: 'Personne n’est en ligne pour le moment. Laissez un message et nous vous répondrons par courriel, habituellement en un jour ouvrable.',
@@ -173,6 +175,7 @@ export const WEBCHAT_DEFAULTS: Record<'en' | 'fr', Record<WebchatKey, string>> =
     error_file_too_large: 'Ce fichier dépasse 10 Mo.',
     error_file_type: 'Ce type de fichier n’est pas pris en charge. Essayez PDF, JPG, PNG, Word ou Excel.',
     error_too_many: 'Trop de messages — veuillez réessayer plus tard.',
+    error_details_required: 'Veuillez indiquer votre nom, votre courriel et votre téléphone pour continuer.',
   },
 }
 
@@ -189,6 +192,8 @@ export function errorKey(code: string | undefined): WebchatKey {
       return 'error_slow_down'
     case 'too_many':
       return 'error_too_many'
+    case 'details_required':
+      return 'error_details_required'
     case 'file_too_large':
       return 'error_file_too_large'
     case 'file_type_not_allowed':
