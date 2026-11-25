@@ -347,7 +347,7 @@ begin
 
   return query
   select c.id, c.visitor_id, c.customer_id, c.status, c.started_by,
-         c.assigned_staff_id, su.full_name,
+         c.assigned_staff_id, su.full_name::text,
          coalesce(nullif(v.name, ''), nullif(v.email, ''),
                   'Visitor #' || upper(left(replace(v.id::text, '-', ''), 4))),
          v.email, v.phone,
@@ -409,7 +409,7 @@ begin
          v.first_seen_at, v.visit_started_at, v.last_seen_at, v.visits,
          (select count(*) from public.webchat_page_views pv
            where pv.visitor_id = v.id and pv.viewed_at >= v.visit_started_at),
-         oc.id, su.full_name, v.customer_id
+         oc.id, su.full_name::text, v.customer_id
     from public.webchat_visitors v
     left join lateral (
       select c.id, c.assigned_staff_id from public.webchat_chats c
@@ -508,7 +508,7 @@ begin
     raise exception 'webchat access required' using errcode = '42501';
   end if;
   return query
-  select su.id, su.full_name, su.avatar_url,
+  select su.id, su.full_name::text, su.avatar_url::text,
          coalesce(s.status, 'away'),
          coalesce(s.status = 'online' and s.heartbeat_at > now() - interval '2 minutes', false)
     from public.staff_users su
@@ -765,7 +765,7 @@ begin
     raise exception 'staff only' using errcode = '42501';
   end if;
   return query
-  select c.id, c.status, c.created_at, c.last_message_at, c.last_message_text, su.full_name, c.rating
+  select c.id, c.status, c.created_at, c.last_message_at, c.last_message_text, su.full_name::text, c.rating
     from public.webchat_chats c
     left join public.staff_users su on su.id = c.assigned_staff_id
    where c.customer_id = p_customer_id
