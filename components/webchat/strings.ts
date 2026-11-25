@@ -1,4 +1,4 @@
-// Default copy for the website chat widget.
+// Default copy for the website chat widget (v2, Tawk.to-style).
 //
 // The source of truth is the DB-backed next-intl namespace `webchat`
 // (seed: scripts/seed-webchat-i18n.sql). These defaults are used only when a
@@ -12,113 +12,167 @@ export type WebchatKey =
   | 'launcher_open'
   | 'launcher_close'
   | 'header_title'
-  | 'header_subtitle'
-  | 'end_chat'
-  | 'prechat_intro'
-  | 'field_name'
-  | 'field_email'
-  | 'field_phone'
-  | 'start_button'
-  | 'starting'
-  | 'privacy_note'
-  | 'verify_title'
-  | 'verify_body'
-  | 'verify_code_label'
-  | 'verify_button'
-  | 'verify_resend'
-  | 'verify_resent'
-  | 'verify_change_email'
-  | 'welcome_message'
-  | 'offline_note'
+  | 'status_online'
+  | 'status_away'
+  | 'welcome'
   | 'composer_placeholder'
   | 'send_button'
+  | 'attach_file'
+  | 'drop_files'
+  | 'uploading'
   | 'staff_label'
-  | 'you_label'
   | 'sending'
+  | 'typing'
+  | 'end_chat'
+  | 'mute'
+  | 'unmute'
+  | 'identify_title'
+  | 'identify_body'
+  | 'field_name'
+  | 'field_email'
+  | 'field_phone_optional'
+  | 'field_message'
+  | 'identify_save'
+  | 'identify_skip'
+  | 'identify_saved'
+  | 'offline_title'
+  | 'offline_body'
+  | 'offline_send'
+  | 'offline_sent_title'
+  | 'offline_sent_body'
+  | 'chat_ended'
+  | 'rate_title'
+  | 'rate_good'
+  | 'rate_bad'
+  | 'rate_comment'
+  | 'rate_submit'
+  | 'rate_thanks'
+  | 'transcript_title'
+  | 'transcript_send'
+  | 'transcript_sent'
+  | 'new_chat'
+  | 'privacy_note'
+  | 'greeting_close'
   | 'error_generic'
   | 'error_invalid_name'
   | 'error_invalid_email'
   | 'error_invalid_phone'
-  | 'error_wrong_code'
-  | 'error_code_expired'
-  | 'error_too_many'
   | 'error_slow_down'
   | 'error_session'
+  | 'error_file_too_large'
+  | 'error_file_type'
+  | 'error_too_many'
 
 export const WEBCHAT_DEFAULTS: Record<'en' | 'fr', Record<WebchatKey, string>> = {
   en: {
     launcher_open: 'Chat with us',
     launcher_close: 'Close chat',
     header_title: 'Chat with Cethos',
-    header_subtitle: 'Real people, usually replying within minutes during business hours (Mountain Time).',
-    end_chat: 'End chat',
-    prechat_intro: 'Tell us a little about you so we can follow up by email if you step away.',
-    field_name: 'Full name',
-    field_email: 'Email',
-    field_phone: 'Phone',
-    start_button: 'Start chat',
-    starting: 'Starting…',
-    privacy_note: 'We only use your details to reply to your enquiry.',
-    verify_title: 'Check your email',
-    verify_body: 'This email is already linked to a Cethos account, so we sent a 6-digit code to {email}.',
-    verify_code_label: 'Verification code',
-    verify_button: 'Continue',
-    verify_resend: 'Resend code',
-    verify_resent: 'A new code is on its way.',
-    verify_change_email: 'Use a different email',
-    welcome_message: 'Hi {name}! How can we help with your translation today?',
-    offline_note: 'If we’re away, we’ll reply by email to {email}.',
+    status_online: 'We’re online · usually reply in a few minutes',
+    status_away: 'We’re away right now — leave a message',
+    welcome: 'Hi there! 👋 How can we help with your translation today?',
     composer_placeholder: 'Type your message…',
     send_button: 'Send',
+    attach_file: 'Attach a file',
+    drop_files: 'Drop files to send',
+    uploading: 'Uploading…',
     staff_label: 'Cethos team',
-    you_label: 'You',
     sending: 'Sending…',
+    typing: '{name} is typing…',
+    end_chat: 'End chat',
+    mute: 'Mute sounds',
+    unmute: 'Turn sounds on',
+    identify_title: 'How can we reach you if you step away?',
+    identify_body: 'Leave your email and we’ll send our reply there too.',
+    field_name: 'Name',
+    field_email: 'Email',
+    field_phone_optional: 'Phone (optional)',
+    field_message: 'Message',
+    identify_save: 'Save',
+    identify_skip: 'Not now',
+    identify_saved: 'Thanks! We’ll reply here, and by email if you step away.',
+    offline_title: 'Leave us a message',
+    offline_body: 'No one is online right now. Leave a message and we’ll reply by email, usually within one business day.',
+    offline_send: 'Send message',
+    offline_sent_title: 'Message sent',
+    offline_sent_body: 'Thanks! We’ll reply to {email} soon.',
+    chat_ended: 'This chat has ended.',
+    rate_title: 'How was this chat?',
+    rate_good: 'Good',
+    rate_bad: 'Not good',
+    rate_comment: 'Anything to add? (optional)',
+    rate_submit: 'Send feedback',
+    rate_thanks: 'Thanks for your feedback!',
+    transcript_title: 'Email me the transcript',
+    transcript_send: 'Send',
+    transcript_sent: 'Transcript sent to {email}.',
+    new_chat: 'Start a new chat',
+    privacy_note: 'We only use your details to reply to your enquiry.',
+    greeting_close: 'Dismiss',
     error_generic: 'Something went wrong. Please try again.',
     error_invalid_name: 'Please enter your name.',
     error_invalid_email: 'Please enter a valid email address.',
     error_invalid_phone: 'Please enter a valid phone number.',
-    error_wrong_code: 'That code isn’t right. Please check and try again.',
-    error_code_expired: 'That code has expired. Request a new one.',
-    error_too_many: 'Too many attempts. Please wait a few minutes and try again.',
     error_slow_down: 'You’re sending messages a little fast. Please wait a moment.',
-    error_session: 'Your chat session has ended. Please start a new chat.',
+    error_session: 'Your chat session ended. Please reload the page.',
+    error_file_too_large: 'That file is over 10 MB.',
+    error_file_type: 'That file type isn’t supported. Try PDF, JPG, PNG, Word or Excel.',
+    error_too_many: 'Too many messages — please try again later.',
   },
   fr: {
-    launcher_open: 'Clavarder avec nous',
+    launcher_open: 'Clavardez avec nous',
     launcher_close: 'Fermer le clavardage',
-    header_title: 'Clavarder avec Cethos',
-    header_subtitle: 'De vraies personnes, qui répondent généralement en quelques minutes pendant les heures d’ouverture (heure des Rocheuses).',
-    end_chat: 'Terminer',
-    prechat_intro: 'Présentez-vous brièvement afin que nous puissions vous répondre par courriel si vous vous absentez.',
-    field_name: 'Nom complet',
-    field_email: 'Courriel',
-    field_phone: 'Téléphone',
-    start_button: 'Commencer',
-    starting: 'Démarrage…',
-    privacy_note: 'Nous utilisons vos coordonnées uniquement pour répondre à votre demande.',
-    verify_title: 'Vérifiez vos courriels',
-    verify_body: 'Ce courriel est déjà associé à un compte Cethos. Nous avons envoyé un code à 6 chiffres à {email}.',
-    verify_code_label: 'Code de vérification',
-    verify_button: 'Continuer',
-    verify_resend: 'Renvoyer le code',
-    verify_resent: 'Un nouveau code est en route.',
-    verify_change_email: 'Utiliser un autre courriel',
-    welcome_message: 'Bonjour {name}! Comment pouvons-nous vous aider avec votre traduction?',
-    offline_note: 'Si nous sommes absents, nous vous répondrons par courriel à {email}.',
+    header_title: 'Clavardez avec Cethos',
+    status_online: 'Nous sommes en ligne · réponse en quelques minutes',
+    status_away: 'Nous sommes absents — laissez-nous un message',
+    welcome: 'Bonjour ! 👋 Comment pouvons-nous vous aider avec votre traduction ?',
     composer_placeholder: 'Écrivez votre message…',
     send_button: 'Envoyer',
+    attach_file: 'Joindre un fichier',
+    drop_files: 'Déposez les fichiers à envoyer',
+    uploading: 'Téléversement…',
     staff_label: 'Équipe Cethos',
-    you_label: 'Vous',
     sending: 'Envoi…',
-    error_generic: 'Une erreur s’est produite. Veuillez réessayer.',
+    typing: '{name} écrit…',
+    end_chat: 'Terminer',
+    mute: 'Couper le son',
+    unmute: 'Activer le son',
+    identify_title: 'Comment vous joindre si vous partez ?',
+    identify_body: 'Laissez votre courriel et nous y enverrons aussi notre réponse.',
+    field_name: 'Nom',
+    field_email: 'Courriel',
+    field_phone_optional: 'Téléphone (facultatif)',
+    field_message: 'Message',
+    identify_save: 'Enregistrer',
+    identify_skip: 'Plus tard',
+    identify_saved: 'Merci ! Nous répondrons ici, et par courriel si vous partez.',
+    offline_title: 'Laissez-nous un message',
+    offline_body: 'Personne n’est en ligne pour le moment. Laissez un message et nous vous répondrons par courriel, habituellement en un jour ouvrable.',
+    offline_send: 'Envoyer le message',
+    offline_sent_title: 'Message envoyé',
+    offline_sent_body: 'Merci ! Nous répondrons à {email} sous peu.',
+    chat_ended: 'Ce clavardage est terminé.',
+    rate_title: 'Comment s’est passé ce clavardage ?',
+    rate_good: 'Bien',
+    rate_bad: 'Pas bien',
+    rate_comment: 'Un commentaire ? (facultatif)',
+    rate_submit: 'Envoyer',
+    rate_thanks: 'Merci pour votre commentaire !',
+    transcript_title: 'M’envoyer la transcription',
+    transcript_send: 'Envoyer',
+    transcript_sent: 'Transcription envoyée à {email}.',
+    new_chat: 'Nouveau clavardage',
+    privacy_note: 'Nous utilisons vos coordonnées uniquement pour répondre à votre demande.',
+    greeting_close: 'Fermer',
+    error_generic: 'Une erreur est survenue. Veuillez réessayer.',
     error_invalid_name: 'Veuillez entrer votre nom.',
     error_invalid_email: 'Veuillez entrer une adresse courriel valide.',
     error_invalid_phone: 'Veuillez entrer un numéro de téléphone valide.',
-    error_wrong_code: 'Ce code est incorrect. Veuillez vérifier et réessayer.',
-    error_code_expired: 'Ce code a expiré. Demandez-en un nouveau.',
-    error_too_many: 'Trop de tentatives. Veuillez patienter quelques minutes.',
     error_slow_down: 'Vous envoyez des messages un peu trop vite. Veuillez patienter.',
-    error_session: 'Votre session de clavardage a pris fin. Veuillez en commencer une nouvelle.',
+    error_session: 'Votre session de clavardage a pris fin. Veuillez recharger la page.',
+    error_file_too_large: 'Ce fichier dépasse 10 Mo.',
+    error_file_type: 'Ce type de fichier n’est pas pris en charge. Essayez PDF, JPG, PNG, Word ou Excel.',
+    error_too_many: 'Trop de messages — veuillez réessayer plus tard.',
   },
 }
 
@@ -131,20 +185,15 @@ export function errorKey(code: string | undefined): WebchatKey {
       return 'error_invalid_email'
     case 'invalid_phone':
       return 'error_invalid_phone'
-    case 'wrong_code':
-    case 'invalid_code':
-      return 'error_wrong_code'
-    case 'code_expired':
-    case 'no_code_issued':
-      return 'error_code_expired'
-    case 'too_many_attempts':
-    case 'resend_cooldown':
-      return 'error_too_many'
     case 'slow_down':
       return 'error_slow_down'
+    case 'too_many':
+      return 'error_too_many'
+    case 'file_too_large':
+      return 'error_file_too_large'
+    case 'file_type_not_allowed':
+      return 'error_file_type'
     case 'invalid_session':
-    case 'session_expired':
-    case 'not_verified':
       return 'error_session'
     default:
       return 'error_generic'

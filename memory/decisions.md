@@ -2,6 +2,7 @@
 
 Architectural, product, and business decisions made in this project — with rationale, so future sessions don't relitigate settled questions.
 
+
 ## Format
 Append new entries at the top (newest first). For each:
 
@@ -17,6 +18,13 @@ Append new entries at the top (newest first). For each:
 If a decision is later reversed or refined, mark the old one **superseded** rather than deleting — the history matters.
 
 ## Decisions
+
+### 2026-11-24 — Website chat v2: Tawk.to-style bubble + Cethos Chat console (migration 019)
+- **Decision:** Raminder asked for the cethos.com chat to work like Tawk.to, admin panel included, and picked every feature offered. Visitors chat first; name/email are asked inside the chat and are optional. No customers row is created — an email that matches a customer links the chat for staff context only (unverified), so the v1 email code is gone. Model: webchat_visitors → webchat_chats → webchat_messages (+ page_views, agent_status, canned_replies, settings). Functions: `webchat-visitor` (bubble; replaces `webchat`) and `webchat-agent` (Cethos Chat sends, staff JWT). Typing indicators are client Broadcasts on `webchat:<topic>`.
+- **Rationale:** the 017 design forced a customers row (email NOT NULL/UNIQUE) and one thread per customer, which blocks anonymous chat-first visitors and Tawk.to-style tickets (status, assignee, rating, tags).
+- **Alternatives considered:** keep chats in customer_conversations with placeholder customers — rejected (pollutes customers, still one thread per customer).
+- **Status:** active — supersedes the 017 "website chats land in the portal inbox" decision.
+- **Affects:** components/webchat/*, app/api/webchat/geo, supabase/functions/webchat-visitor + webchat-agent + _shared/webchat-common.ts, migration 019, cookies page (`cethos_webchat_v2` storage row), portal /chat console. Visitors ping every 60 s while visible (Live visitors); visitors who never chat are purged after 30 days (cron webchat-visitors-purge-30d). Release order: migration → functions → portal (2026.11.70) → this bubble. Drop `webchat`, webchat_sessions and chat_list_webchat_threads later.
 
 ### 2026-11-24 — Website chats get their own staff app (Cethos Chat); portal app pushes portal events
 - **Decision:** migration `018_chat_app_push.sql` adds `staff_push_subscriptions.app` ('portal'|'chat'), `staff_has_webchat_access()`, the `chat_list_webchat_threads(p_limit, p_conversation_id)` RPC for the Chat app inbox, and AFTER INSERT push triggers on `orders`, `quotes` and inbound `comms.sms_messages` (`staff_push_on_insert` → `staff_push_dispatch` → pg_net `{kind,id}` → portal `send-web-push` v2). Website-chat messages push only to the Chat app at portal.cethos.com/chat; everything else pushes to the Portal app.

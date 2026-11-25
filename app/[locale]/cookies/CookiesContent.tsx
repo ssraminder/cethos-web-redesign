@@ -8,6 +8,8 @@ const essentialCookies = [
   { name: '__session', purposeKey: 'essential_session_purpose', durationKey: 'essential_session_duration' },
   { name: 'csrf_token', purposeKey: 'essential_csrf_purpose', durationKey: 'essential_csrf_duration' },
   { name: 'cookie_consent', purposeKey: 'essential_consent_purpose', durationKey: 'essential_consent_duration' },
+  // Website chat (components/webchat) — browser local storage, not a cookie.
+  { name: 'cethos_webchat_v2', purposeKey: 'essential_webchat_purpose', durationKey: 'essential_webchat_duration' },
 ]
 
 const analyticsCookies = [
