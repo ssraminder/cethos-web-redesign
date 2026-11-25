@@ -28,14 +28,14 @@ from (values
   ($q$end_chat$q$, $q$End chat$q$),
   ($q$mute$q$, $q$Mute sounds$q$),
   ($q$unmute$q$, $q$Turn sounds on$q$),
-  ($q$identify_title$q$, $q$How can we reach you if you step away?$q$),
-  ($q$identify_body$q$, $q$Leave your email and we’ll send our reply there too.$q$),
+  ($q$identify_title$q$, $q$How can we reach you?$q$),
+  ($q$identify_body$q$, $q$Please share your name, email and phone so our team can follow up — we’ll reply here, and by email if you step away.$q$),
   ($q$field_name$q$, $q$Name$q$),
   ($q$field_email$q$, $q$Email$q$),
-  ($q$field_phone_optional$q$, $q$Phone (optional)$q$),
+  ($q$field_phone$q$, $q$Phone$q$),
   ($q$field_message$q$, $q$Message$q$),
   ($q$identify_save$q$, $q$Save$q$),
-  ($q$identify_skip$q$, $q$Not now$q$),
+  ($q$details_needed$q$, $q$Add your name, email and phone above to keep chatting.$q$),
   ($q$identify_saved$q$, $q$Thanks! We’ll reply here, and by email if you step away.$q$),
   ($q$offline_title$q$, $q$Leave us a message$q$),
   ($q$offline_body$q$, $q$No one is online right now. Leave a message and we’ll reply by email, usually within one business day.$q$),
@@ -63,7 +63,8 @@ from (values
   ($q$error_session$q$, $q$Your chat session ended. Please reload the page.$q$),
   ($q$error_file_too_large$q$, $q$That file is over 10 MB.$q$),
   ($q$error_file_type$q$, $q$That file type isn’t supported. Try PDF, JPG, PNG, Word or Excel.$q$),
-  ($q$error_too_many$q$, $q$Too many messages — please try again later.$q$)
+  ($q$error_too_many$q$, $q$Too many messages — please try again later.$q$),
+  ($q$error_details_required$q$, $q$Please add your name, email and phone to continue the chat.$q$)
 ) as v(k, val)
 join cethosweb_i18n_namespaces n on n.name = 'webchat'
 on conflict (namespace_id, key, segment_index, locale)
@@ -89,14 +90,14 @@ from (values
   ($q$end_chat$q$, $q$Terminer$q$),
   ($q$mute$q$, $q$Couper le son$q$),
   ($q$unmute$q$, $q$Activer le son$q$),
-  ($q$identify_title$q$, $q$Comment vous joindre si vous partez ?$q$),
-  ($q$identify_body$q$, $q$Laissez votre courriel et nous y enverrons aussi notre réponse.$q$),
+  ($q$identify_title$q$, $q$Comment vous joindre ?$q$),
+  ($q$identify_body$q$, $q$Indiquez votre nom, votre courriel et votre téléphone pour que notre équipe puisse faire le suivi — nous répondrons ici, et par courriel si vous partez.$q$),
   ($q$field_name$q$, $q$Nom$q$),
   ($q$field_email$q$, $q$Courriel$q$),
-  ($q$field_phone_optional$q$, $q$Téléphone (facultatif)$q$),
+  ($q$field_phone$q$, $q$Téléphone$q$),
   ($q$field_message$q$, $q$Message$q$),
   ($q$identify_save$q$, $q$Enregistrer$q$),
-  ($q$identify_skip$q$, $q$Plus tard$q$),
+  ($q$details_needed$q$, $q$Ajoutez votre nom, votre courriel et votre téléphone ci-dessus pour continuer.$q$),
   ($q$identify_saved$q$, $q$Merci ! Nous répondrons ici, et par courriel si vous partez.$q$),
   ($q$offline_title$q$, $q$Laissez-nous un message$q$),
   ($q$offline_body$q$, $q$Personne n’est en ligne pour le moment. Laissez un message et nous vous répondrons par courriel, habituellement en un jour ouvrable.$q$),
@@ -124,7 +125,8 @@ from (values
   ($q$error_session$q$, $q$Votre session de clavardage a pris fin. Veuillez recharger la page.$q$),
   ($q$error_file_too_large$q$, $q$Ce fichier dépasse 10 Mo.$q$),
   ($q$error_file_type$q$, $q$Ce type de fichier n’est pas pris en charge. Essayez PDF, JPG, PNG, Word ou Excel.$q$),
-  ($q$error_too_many$q$, $q$Trop de messages — veuillez réessayer plus tard.$q$)
+  ($q$error_too_many$q$, $q$Trop de messages — veuillez réessayer plus tard.$q$),
+  ($q$error_details_required$q$, $q$Veuillez indiquer votre nom, votre courriel et votre téléphone pour continuer.$q$)
 ) as v(k, val)
 join cethosweb_i18n_namespaces n on n.name = 'webchat'
 on conflict (namespace_id, key, segment_index, locale)

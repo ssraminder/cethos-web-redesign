@@ -30,6 +30,8 @@ import type { Webchat } from './useWebchat'
 
 const URL_RE = /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g
 const EMAIL_RE = /^[^\s@*]+@[^\s@*]+\.[^\s@*]{2,}$/
+const phoneOk = (p: string) => /^[+()\-.\s\d]{7,25}$/.test(p.trim()) && p.replace(/\D/g, '').length >= 7
+
 const ACCEPT = '.pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.doc,.docx,.xls,.xlsx,.txt'
 
 interface Props {
@@ -78,7 +80,10 @@ export default function ChatPanel({ open, onClose, chat }: Props) {
   const closed = c?.status === 'closed'
   const showOffline = !c && !chat.team.online
   const visitorSent = chat.messages.some((m) => m.sender_type === 'visitor' && !m.pending)
-  const askIdentify = !!c && !closed && visitorSent && !chat.visitor.email && !chat.identifySkipped
+  // Name, email and phone are required after the first message (no skip):
+  // the composer stays locked until they're given.
+  const missingDetails = !chat.visitor.name || !chat.visitor.email || !chat.visitor.phone
+  const askIdentify = !!c && !closed && visitorSent && missingDetails
 
   // Keep the newest message in view.
   useEffect(() => {
@@ -120,7 +125,7 @@ export default function ChatPanel({ open, onClose, chat }: Props) {
   function onDrop(e: DragEvent) {
     e.preventDefault()
     setDragging(false)
-    if (closed || showOffline) return
+    if (closed || showOffline || askIdentify) return
     const files = Array.from(e.dataTransfer.files || [])
     if (files.length) void chat.uploadFiles(files)
   }
@@ -234,7 +239,13 @@ export default function ChatPanel({ open, onClose, chat }: Props) {
             </p>
           )}
 
-          {!closed && (
+          {!closed && askIdentify && (
+            <p className="border-t border-cethos-border bg-white px-4 py-3 text-center text-[13px] text-cethos-gray">
+              {copy('details_needed')}
+            </p>
+          )}
+
+          {!closed && !askIdentify && (
             <div className="flex items-end gap-1.5 border-t border-cethos-border bg-white p-3">
               <input
                 ref={fileRef}
@@ -384,15 +395,18 @@ function MessageRow({ m, time, copy }: { m: ChatMessage; time: string; copy: Cop
 function IdentifyCard({ chat }: { chat: Webchat }) {
   const copy = useWebchatCopy()
   const [name, setName] = useState(chat.visitor.name || '')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState(chat.visitor.email || '')
+  const [phone, setPhone] = useState(chat.visitor.phone || '')
   const [busy, setBusy] = useState(false)
 
   async function save(e: FormEvent) {
     e.preventDefault()
+    chat.setError(null)
+    if (name.trim().length < 2) return chat.setError('error_invalid_name')
     if (!EMAIL_RE.test(email.trim())) return chat.setError('error_invalid_email')
+    if (!phoneOk(phone)) return chat.setError('error_invalid_phone')
     setBusy(true)
-    await chat.identify({ name: name.trim() || undefined, email: email.trim(), phone: phone.trim() || undefined })
+    await chat.identify({ name: name.trim(), email: email.trim(), phone: phone.trim() })
     setBusy(false)
   }
 
@@ -400,18 +414,18 @@ function IdentifyCard({ chat }: { chat: Webchat }) {
     <form onSubmit={save} className="space-y-2 rounded-xl border border-teal-200 bg-white p-3.5 shadow-sm">
       <p className="text-[14px] font-semibold text-cethos-navy">{copy('identify_title')}</p>
       <p className="text-[12.5px] leading-snug text-cethos-gray">{copy('identify_body')}</p>
-      <input className={inputCls} placeholder={copy('field_name')} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" maxLength={120} />
+      <input className={inputCls} placeholder={copy('field_name')} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" maxLength={120} required />
       <input className={inputCls} placeholder={copy('field_email')} type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={200} required />
-      <input className={inputCls} placeholder={copy('field_phone_optional')} type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" maxLength={25} />
-      <div className="flex items-center gap-2 pt-1">
-        <button type="submit" disabled={busy} className={`${primaryBtn} flex-1`}>
-          {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-          {copy('identify_save')}
-        </button>
-        <button type="button" onClick={chat.skipIdentify} className="rounded-lg px-3 py-2.5 text-[13.5px] font-medium text-slate-500 hover:bg-slate-100">
-          {copy('identify_skip')}
-        </button>
-      </div>
+      <input className={inputCls} placeholder={copy('field_phone')} type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" maxLength={25} required />
+      {chat.error && (
+        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-700">
+          {copy(chat.error)}
+        </p>
+      )}
+      <button type="submit" disabled={busy} className={`${primaryBtn} w-full`}>
+        {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+        {copy('identify_save')}
+      </button>
       <p className="text-[11.5px] text-slate-400">{copy('privacy_note')}</p>
     </form>
   )
@@ -527,6 +541,7 @@ function OfflineForm({ chat }: { chat: Webchat }) {
     chat.setError(null)
     if (name.trim().length < 2) return chat.setError('error_invalid_name')
     if (!EMAIL_RE.test(email.trim())) return chat.setError('error_invalid_email')
+    if (!phoneOk(phone)) return chat.setError('error_invalid_phone')
     if (!message.trim()) return
     setBusy(true)
     const ok = await chat.leaveMessage({ name: name.trim(), email: email.trim(), phone: phone.trim(), message: message.trim() })
@@ -550,7 +565,7 @@ function OfflineForm({ chat }: { chat: Webchat }) {
       <p className="text-[13.5px] leading-relaxed text-cethos-gray">{copy('offline_body')}</p>
       <input className={inputCls} placeholder={copy('field_name')} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" maxLength={120} />
       <input className={inputCls} placeholder={copy('field_email')} type="email" inputMode="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" maxLength={200} />
-      <input className={inputCls} placeholder={copy('field_phone_optional')} type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" maxLength={25} />
+      <input className={inputCls} placeholder={copy('field_phone')} type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" maxLength={25} />
       <textarea className={`${inputCls} min-h-[110px] resize-y`} placeholder={copy('field_message')} value={message} onChange={(e) => setMessage(e.target.value)} maxLength={2000} />
       {chat.error && (
         <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-700">

@@ -33,7 +33,6 @@ const PING_MS = 60_000
 const FALLBACK_POLL_MS = 10_000
 const MAX_FILE_BYTES = 10 * 1024 * 1024
 const MUTE_KEY = 'cethos_webchat_muted'
-const SKIP_IDENTIFY_KEY = 'cethos_webchat_identify_skip'
 const GEO_KEY = 'cethos_webchat_geo'
 
 // window.dataLayer is declared globally in lib/tracking.ts.
@@ -97,7 +96,6 @@ export function useWebchat(open: boolean) {
   const [realtimeOk, setRealtimeOk] = useState(false)
   const [error, setError] = useState<WebchatKey | null>(null)
   const [muted, setMuted] = useState(false)
-  const [identifySkipped, setIdentifySkipped] = useState(false)
 
   const tokenRef = useRef<string | null>(null)
   const openRef = useRef(open)
@@ -173,7 +171,6 @@ export function useWebchat(open: boolean) {
   useEffect(() => {
     let cancelled = false
     setMuted(readFlag(MUTE_KEY) === '1')
-    setIdentifySkipped(readFlag(SKIP_IDENTIFY_KEY) === '1')
     ;(async () => {
       const geo = await getGeo()
       const run = (token: string | null) =>
@@ -444,11 +441,6 @@ export function useWebchat(open: boolean) {
     [fail],
   )
 
-  const skipIdentify = useCallback(() => {
-    writeFlag(SKIP_IDENTIFY_KEY, '1')
-    setIdentifySkipped(true)
-  }, [])
-
   const endChat = useCallback(async () => {
     const c = chatRef.current
     if (!tokenRef.current || !c) return
@@ -538,12 +530,10 @@ export function useWebchat(open: boolean) {
     error,
     setError,
     muted,
-    identifySkipped,
     send,
     sendTyping,
     uploadFiles,
     identify,
-    skipIdentify,
     endChat,
     rate,
     transcript,

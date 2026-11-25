@@ -5,7 +5,8 @@
 // Model (migration 019): visitor → chats → messages. A visitor is created on
 // first page load and identified by an opaque bearer token kept in the
 // browser (stored here as sha256). Visitors chat first and may share
-// name/email later; a matching email links the visitor to a customers row
+// name/email/phone after their first message (required before they can send
+// more — details_required); a matching email links the visitor to a customers row
 // for staff context only — the visitor only ever sees their own chats, so no
 // email code is needed.
 //
@@ -16,11 +17,11 @@
 //   send       { body }                    → { chat_id, message }
 //   upload     form: token, file, body?    → { chat_id, message }
 //   history    { chat_id, since?, mark_read? } → { chat, messages }
-//   identify   { name?, email?, phone? }   → { visitor }
+//   identify   { name, email, phone }      → { visitor }   (all required)
 //   end        { chat_id }                 → { ok }
 //   rate       { chat_id, rating, comment? } → { ok }
 //   transcript { chat_id, email? }         → { ok }
-//   offline    { name, email, phone?, message } → { chat_id }
+//   offline    { name, email, phone, message } → { chat_id }
 //
 // Staff replies reach the bubble via Broadcast on `webchat:<topic>` (trigger
 // webchat_v2_on_message). Typing indicators are client-to-client Broadcasts
@@ -230,6 +231,29 @@ async function checkRate(v: Visitor): Promise<void> {
   if ((count ?? 0) >= MAX_MESSAGES_PER_MINUTE) throw new HttpError(429, "slow_down");
 }
 
+/** Valid phone: allowed characters and at least 7 digits. */
+function validPhone(p: string): boolean {
+  return PHONE_RE.test(p) && p.replace(/\D/g, "").length >= 7;
+}
+
+/**
+ * Name, email and phone are required after the visitor's first message: the
+ * first question goes through, anything more needs the details (2026-11-25).
+ */
+async function requireDetailsAfterFirst(v: Visitor): Promise<void> {
+  if (v.name && v.email && v.phone) return;
+  const { data: chats } = await admin().from("webchat_chats").select("id").eq("visitor_id", v.id)
+    .neq("status", "closed");
+  const ids = (chats ?? []).map((c) => c.id);
+  if (!ids.length) return;
+  const { count } = await admin()
+    .from("webchat_messages")
+    .select("id", { count: "exact", head: true })
+    .in("chat_id", ids)
+    .eq("sender_type", "visitor");
+  if ((count ?? 0) > 0) throw new HttpError(403, "details_required");
+}
+
 function visitorLabel(v: Visitor): string {
   return v.name || v.email || `Visitor #${v.id.replace(/-/g, "").slice(0, 4).toUpperCase()}`;
 }
@@ -357,6 +381,7 @@ async function actionSend(body: Record<string, unknown>) {
   const v = await requireVisitor(body.token);
   const text = clean(body.body, MAX_MESSAGE_LEN);
   if (!text) throw new HttpError(400, "empty_message");
+  await requireDetailsAfterFirst(v);
   await checkRate(v);
   const chat = await openOrCreateChat(v);
   const { data, error } = await admin()
@@ -378,6 +403,7 @@ async function actionUpload(req: Request) {
   const v = await requireVisitor(form.get("token"));
   const file = form.get("file");
   if (!(file instanceof File)) throw new HttpError(400, "file_required");
+  await requireDetailsAfterFirst(v);
   await checkRate(v);
   const chat = await openOrCreateChat(v);
   const att = await storeAttachment(chat.id, file);
@@ -417,9 +443,10 @@ async function actionIdentify(body: Record<string, unknown>) {
   const name = clean(body.name, 120);
   const email = clean(body.email, 200).toLowerCase();
   const phone = clean(body.phone, 40);
-  if (email && !EMAIL_RE.test(email)) throw new HttpError(400, "invalid_email");
-  if (phone && (!PHONE_RE.test(phone) || phone.replace(/\D/g, "").length < 7)) throw new HttpError(400, "invalid_phone");
-  if (!name && !email && !phone) throw new HttpError(400, "nothing_to_save");
+  // All three are required (name, email, phone).
+  if (name.length < 2) throw new HttpError(400, "invalid_name");
+  if (!EMAIL_RE.test(email)) throw new HttpError(400, "invalid_email");
+  if (!validPhone(phone)) throw new HttpError(400, "invalid_phone");
 
   const patch: Record<string, unknown> = {};
   if (name) patch.name = name;
@@ -517,7 +544,7 @@ async function actionOffline(body: Record<string, unknown>) {
   const text = clean(body.message, MAX_MESSAGE_LEN);
   if (name.length < 2) throw new HttpError(400, "invalid_name");
   if (!EMAIL_RE.test(email)) throw new HttpError(400, "invalid_email");
-  if (phone && !PHONE_RE.test(phone)) throw new HttpError(400, "invalid_phone");
+  if (!validPhone(phone)) throw new HttpError(400, "invalid_phone");
   if (!text) throw new HttpError(400, "empty_message");
 
   const { count } = await admin()
