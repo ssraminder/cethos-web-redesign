@@ -1,21 +1,60 @@
-// Thin client for the `webchat` Supabase edge function.
-// Same call pattern as EmbeddedCertifiedQuoteForm: publishable/anon key as
-// bearer + apikey; the function does its own auth via the session token.
+// Thin client for the `webchat-visitor` Supabase edge function (website chat
+// v2, migration 019). Publishable/anon key as bearer + apikey; the function
+// identifies the visitor by an opaque token kept in localStorage.
+
+export interface ChatAttachment {
+  name: string
+  mime: string
+  size: number
+  url: string | null
+}
 
 export interface ChatMessage {
   id: string
-  sender_type: 'customer' | 'staff' | 'system'
+  chat_id: string
+  sender_type: 'visitor' | 'staff' | 'system'
   sender_name: string | null
-  message_type: string | null
-  message_text: string | null
+  sender_avatar: string | null
+  body: string
+  attachments: ChatAttachment[]
   created_at: string
   /** client-only: optimistic message not yet confirmed by the server */
   pending?: boolean
 }
 
-export type StartResult =
-  | { status: 'active'; token: string; topic: string; messages: ChatMessage[] }
-  | { status: 'verify'; token: string; email_hint: string }
+export interface Agent {
+  name: string | null
+  avatar: string | null
+}
+
+export interface ChatInfo {
+  id: string
+  status: 'open' | 'offline' | 'closed'
+  rating: 'up' | 'down' | null
+  agent: Agent | null
+}
+
+export interface Team {
+  online: boolean
+  agents: Agent[]
+}
+
+export interface VisitorInfo {
+  name: string | null
+  email: string | null
+  phone: string | null
+}
+
+export interface HelloResult {
+  banned?: boolean
+  token?: string
+  topic: string
+  visitor: VisitorInfo
+  team: Team
+  settings: { greeting_enabled: boolean; greeting_delay_s: number; greeting: string }
+  chat: ChatInfo | null
+  messages: ChatMessage[]
+}
 
 export class WebchatError extends Error {
   constructor(public code: string, public status: number) {
@@ -23,26 +62,14 @@ export class WebchatError extends Error {
   }
 }
 
-async function call<T>(action: string, payload: Record<string, unknown>): Promise<T> {
+function endpoint(): { url: string; key: string } {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !key) throw new WebchatError('not_configured', 0)
+  return { url: `${url}/functions/v1/webchat-visitor`, key }
+}
 
-  let res: Response
-  try {
-    res = await fetch(`${url}/functions/v1/webchat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-        apikey: key,
-      },
-      body: JSON.stringify({ action, ...payload }),
-    })
-  } catch {
-    throw new WebchatError('network', 0)
-  }
-
+async function parse<T>(res: Response): Promise<T> {
   let data: any = null
   try {
     data = await res.json()
@@ -53,46 +80,104 @@ async function call<T>(action: string, payload: Record<string, unknown>): Promis
   return data as T
 }
 
-export const webchatApi = {
-  start: (p: { name: string; email: string; phone: string; website: string; page_url: string; locale: string }) =>
-    call<StartResult>('start', p),
-  verify: (token: string, code: string) =>
-    call<{ status: 'active'; topic: string; messages: ChatMessage[] }>('verify', { token, code }),
-  resend: (token: string) => call<{ status: string }>('resend', { token }),
-  send: (token: string, message: string) => call<{ message: ChatMessage }>('send', { token, message }),
-  history: (token: string, since?: string) => call<{ messages: ChatMessage[] }>('history', { token, since }),
-}
-
-// ── local session persistence ──────────────────────────────────────────────
-
-const STORAGE_KEY = 'cethos_webchat_v1'
-
-export interface StoredSession {
-  token: string
-  status: 'verify' | 'active'
-  topic?: string
-  name: string
-  email: string
-  emailHint?: string
-}
-
-export function loadStoredSession(): StoredSession | null {
+async function call<T>(action: string, payload: Record<string, unknown>): Promise<T> {
+  const { url, key } = endpoint()
+  let res: Response
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const s = JSON.parse(raw) as StoredSession
-    return s && typeof s.token === 'string' ? s : null
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}`, apikey: key },
+      body: JSON.stringify({ action, ...payload }),
+      keepalive: action === 'ping',
+    })
+  } catch {
+    throw new WebchatError('network', 0)
+  }
+  return parse<T>(res)
+}
+
+async function upload(token: string, file: File, body: string) {
+  const { url, key } = endpoint()
+  const form = new FormData()
+  form.append('token', token)
+  form.append('file', file)
+  if (body) form.append('body', body)
+  let res: Response
+  try {
+    res = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${key}`, apikey: key }, body: form })
+  } catch {
+    throw new WebchatError('network', 0)
+  }
+  return parse<{ chat_id: string; message: ChatMessage }>(res)
+}
+
+export const webchatApi = {
+  hello: (p: {
+    token: string | null
+    url: string
+    title: string
+    referrer: string
+    locale: string
+    geo: Record<string, string> | null
+  }) => call<HelloResult>('hello', p),
+  ping: (token: string, url: string, title: string) =>
+    call<{ team: Team; chat_id: string | null; chat_status: ChatInfo['status'] | null; unread: number }>('ping', {
+      token,
+      url,
+      title,
+    }),
+  send: (token: string, body: string) => call<{ chat_id: string; message: ChatMessage }>('send', { token, body }),
+  upload,
+  history: (token: string, chat_id: string, since?: string, mark_read?: boolean) =>
+    call<{ chat: ChatInfo; messages: ChatMessage[] }>('history', { token, chat_id, since, mark_read }),
+  identify: (token: string, p: { name?: string; email?: string; phone?: string }) =>
+    call<{ visitor: VisitorInfo }>('identify', { token, ...p }),
+  end: (token: string, chat_id: string) => call<{ ok: true }>('end', { token, chat_id }),
+  rate: (token: string, chat_id: string, rating: 'up' | 'down', comment: string) =>
+    call<{ ok: true }>('rate', { token, chat_id, rating, comment }),
+  transcript: (token: string, chat_id: string, email: string) =>
+    call<{ ok: true }>('transcript', { token, chat_id, email }),
+  offline: (token: string, p: { name: string; email: string; phone: string; message: string }) =>
+    call<{ chat_id: string }>('offline', { token, ...p }),
+}
+
+// ── browser storage (all wrapped: private mode / blocked storage) ──────────
+
+const TOKEN_KEY = 'cethos_webchat_v2'
+
+export function loadToken(): string | null {
+  try {
+    window.localStorage.removeItem('cethos_webchat_v1') // v1 form-first widget
+    return window.localStorage.getItem(TOKEN_KEY)
   } catch {
     return null
   }
 }
 
-export function saveStoredSession(s: StoredSession | null): void {
+export function saveToken(token: string | null): void {
   try {
-    if (s) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s))
-    else window.localStorage.removeItem(STORAGE_KEY)
+    if (token) window.localStorage.setItem(TOKEN_KEY, token)
+    else window.localStorage.removeItem(TOKEN_KEY)
   } catch {
-    /* storage blocked (private mode) — session lives in memory only */
+    /* memory only */
+  }
+}
+
+export function readFlag(key: string, session = false): string | null {
+  try {
+    return (session ? window.sessionStorage : window.localStorage).getItem(key)
+  } catch {
+    return null
+  }
+}
+
+export function writeFlag(key: string, value: string | null, session = false): void {
+  try {
+    const s = session ? window.sessionStorage : window.localStorage
+    if (value === null) s.removeItem(key)
+    else s.setItem(key, value)
+  } catch {
+    /* ignore */
   }
 }
 
@@ -100,6 +185,37 @@ export function saveStoredSession(s: StoredSession | null): void {
 export function mergeMessages(current: ChatMessage[], incoming: ChatMessage[]): ChatMessage[] {
   if (!incoming.length) return current
   const byId = new Map(current.map((m) => [m.id, m]))
-  for (const m of incoming) byId.set(m.id, { ...m, pending: false })
+  for (const m of incoming) {
+    const prev = byId.get(m.id)
+    // Broadcast copies carry no signed file URLs — keep the URLs we already have.
+    const attachments =
+      prev && m.attachments.some((a) => !a.url) && prev.attachments.some((a) => a.url) ? prev.attachments : m.attachments
+    byId.set(m.id, { ...m, attachments, pending: false })
+  }
   return Array.from(byId.values()).sort((a, b) => a.created_at.localeCompare(b.created_at))
+}
+
+/** Short two-note chime (Web Audio — no sound file to load). */
+export function playDing(): void {
+  try {
+    const Ctx = window.AudioContext || (window as any).webkitAudioContext
+    if (!Ctx) return
+    const ctx: AudioContext = (playDing as any)._ctx || new Ctx()
+    ;(playDing as any)._ctx = ctx
+    const now = ctx.currentTime
+    ;[880, 1318.5].forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'sine'
+      osc.frequency.value = freq
+      gain.gain.setValueAtTime(0.0001, now + i * 0.12)
+      gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.12 + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.12 + 0.35)
+      osc.connect(gain).connect(ctx.destination)
+      osc.start(now + i * 0.12)
+      osc.stop(now + i * 0.12 + 0.4)
+    })
+  } catch {
+    /* sound is optional */
+  }
 }
